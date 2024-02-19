@@ -4,7 +4,8 @@ import { Configuration, PopupRequest } from "@azure/msal-browser";
 export const msalConfig: Configuration = {
     auth: {
         clientId: "39136cda-f02f-4305-9b08-45f132bab07e",
-        authority:  "https://login.microsoftonline.com/62835335-e5c4-4d22-98f2-9d5b65a06d9d", //For UGent auth: "https://login.microsoftonline.com/d7811cde-ecef-496c-8f91-a1786241b99c",
+        //For UGent auth: "https://login.microsoftonline.com/d7811cde-ecef-496c-8f91-a1786241b99c",
+        authority:  "https://login.microsoftonline.com/62835335-e5c4-4d22-98f2-9d5b65a06d9d", 
         redirectUri: "/dashboard",
         postLogoutRedirectUri: "/"
     },
