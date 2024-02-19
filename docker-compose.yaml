@@ -1,0 +1,29 @@
+services:
+  frontend:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+  backend:
+    build: backend
+    ports:
+      - 8080:8080
+    environment:
+      - 'POSTGRES_DB=pidegon_db'
+    networks:
+      - spring-postgres
+  postgres:
+    image: 'postgres:latest'
+    secrets:
+      - db-password
+    environment:
+      - 'POSTGRES_DB=pidgeon_db'
+      - 'POSTGRES_PASSWORD=secret' # this will obviously change and not be commited to github
+      - 'POSTGRES_USER=swamp'
+    ports:
+      - '5432'
+secrets:
+  db-password:
+    file: backend/db/password.txt
+networks:
+  spring-postgres:
