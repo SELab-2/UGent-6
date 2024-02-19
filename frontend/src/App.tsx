@@ -1,36 +1,43 @@
-import React from 'react';
-import { PublicClientApplication, AccountInfo } from "@azure/msal-browser";
-import { msalConfig } from "./auth/AuthConfig";
-const msalInstance = new PublicClientApplication(msalConfig);
-let promise = msalInstance.initialize()
+import AppRouter from "./router/AppRouter"
+import { IPublicClientApplication } from "@azure/msal-browser"
+import { MsalProvider } from "@azure/msal-react"
+import { useNavigate } from "react-router-dom"
+import CustomNavigation from "./auth/CustomNavigation"
+// const msalInstance = new PublicClientApplication(msalConfig);
+// let promise = msalInstance.initialize()
 
+type AppProps = {
+  pca: IPublicClientApplication
+}
 
-function App() {
+function App({ pca }: AppProps) {
 
-  const handleLogin = async () => {
-    try {
-      await promise;
-      await msalInstance.loginPopup(); // Initiate popup login
-      const account: AccountInfo | null = msalInstance.getActiveAccount();
+    const navigate = useNavigate();
+    const navigationClient = new CustomNavigation(navigate);
+    pca.setNavigationClient(navigationClient);
 
-      
-
-      console.log(account);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-
+  // const handleLogin = async () => {
+  //   try {
+  //     // await promise;
+  //     // await msalInstance.loginPopup(); // Initiate popup login
+  //     // const account: AccountInfo | null = msalInstance.getActiveAccount();
+  //     // console.log(account);
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }
 
   return (
     <div className="App">
       <header className="App-header">
-      <button onClick={handleLogin}>Sign in with Microsoft</button>
-
+        {/* <button onClick={handleLogin}>Sign in with Microsoft</button> */}
+       
+          <MsalProvider instance={pca}>
+            <AppRouter />
+          </MsalProvider>
       </header>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
