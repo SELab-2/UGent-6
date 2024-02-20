@@ -5,13 +5,13 @@ services:
       - 80:80
       - 443:443
   backend:
-    build: backend
+    build: backend/app/
     ports:
       - 8080:8080
     environment:
-      - 'POSTGRES_DB=pidegon_db'
+        - 'POSTGRES_DB=pidegon_db'
     networks:
-      - spring-postgres
+        - spring-postgres
   postgres:
     image: 'postgres:latest'
     secrets:
