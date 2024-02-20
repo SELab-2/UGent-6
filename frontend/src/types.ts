@@ -5,8 +5,8 @@
  * Routes used to make API calls
  */
 export enum ApiRoutes {
-   COURSES = "api/courses"  // example
-
+   COURSES = "api/courses",  // example
+    TEST = "api/test"
 }
 
 

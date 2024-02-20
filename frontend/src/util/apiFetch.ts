@@ -2,6 +2,10 @@ import { ApiRoutes, POST_Requests, PUT_Requests } from "../types";
 import axios from "axios";
 import {msalInstance} from "../index";
 import { AxiosRequestConfig } from "axios";
+
+
+const serverHost ="http://localhost:8080" // window.location.origin;
+
 /**
  * 
  * @param method 
@@ -13,7 +17,6 @@ import { AxiosRequestConfig } from "axios";
  * const newCourse = await apiFetch("POST", ApiRoutes.COURSES, { name: "New Course" });
  * 
  */
-
 async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "DELETE", route: T, body?: any): Promise<any> {
 
   const account = msalInstance.getActiveAccount();
@@ -23,7 +26,7 @@ async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "D
   }
 
   const response = await msalInstance.acquireTokenSilent({
-    scopes: ["User.Read"], // replace with your API's scopes
+    scopes: ["39136cda-f02f-4305-9b08-45f132bab07e/.default"], 
     account: account
   });
   const accessToken = response.accessToken;
@@ -33,22 +36,25 @@ async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "D
     'Content-Type': 'application/json'
   };
 
+  const url = new URL(route, serverHost);
+
   const config: AxiosRequestConfig = {
     method: method,
-    url: route.toString(),
+    url: url.toString(),
     headers: headers,
     data: body
   };
+  console.log(config);
 
   return axios(config);
 
 }
 
-const calls = {
+const apiCall = {
   get: async <T extends ApiRoutes>(route: T) => apiFetch("GET", route),
-  post: async <T extends ApiRoutes>(route: T, body: POST_Requests[T]) => apiFetch("POST", route, body),
-  put: async <T extends ApiRoutes>(route: T, body: PUT_Requests[T]) => apiFetch("PUT", route, body),
+  post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T]) => apiFetch("POST", route, body),
+  put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T]) => apiFetch("PUT", route, body),
   delete: async <T extends ApiRoutes>(route: T) => apiFetch("DELETE", route) 
 }
 
-export default calls;
+export default apiCall;

@@ -13,7 +13,7 @@ export const msalConfig: Configuration = {
         allowNativeBroker: false 
     },
     cache: {
-        cacheLocation: "sessionStorage",
+        cacheLocation: "localStorage",
     }
 }
 

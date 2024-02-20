@@ -1,3 +1,5 @@
+import { ApiRoutes } from "../../../types";
+import apiCall from "../../../util/apiFetch";
 
 export type GraphData = {
   displayName: string,
@@ -8,6 +10,14 @@ export type GraphData = {
 };
 
 export const ProfileData: React.FC<{graphData: GraphData}> = ({graphData}) => {
+    const handleApiRequest = async () => {
+        console.log("Making request...");
+        apiCall.get(ApiRoutes.TEST).then(async (response)=> {
+            console.log(response.body);
+        } )
+    }
+
+
   return (
       <ul className="profileData">
           <NameListItem name={graphData.displayName} />
@@ -15,6 +25,7 @@ export const ProfileData: React.FC<{graphData: GraphData}> = ({graphData}) => {
           <MailListItem mail={graphData.mail} />
           <PhoneListItem phone={graphData.businessPhones[0]} />
           <LocationListItem location={graphData.officeLocation} />
+          <button onClick={handleApiRequest}>api request test</button>
       </ul>
   );
 };
