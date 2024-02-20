@@ -18,8 +18,7 @@ services:
       - db-password
     environment:
       - 'POSTGRES_DB=pidgeon_db'
-      - 'POSTGRES_PASSWORD=secret' # this will obviously change and not be commited to github
-      - 'POSTGRES_USER=swamp'
+      - 'POSTGRES_USER=pidgeon'
     ports:
       - '5432'
 secrets:
