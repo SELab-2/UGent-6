@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client"
 import App from "./App"
 import { BrowserRouter } from "react-router-dom"
 
-import { msalConfig } from "./auth/authConfig"
+import { msalConfig } from "./auth/AuthConfig"
 import { PublicClientApplication, EventType, EventMessage, AuthenticationResult } from "@azure/msal-browser"
 
 export const msalInstance = new PublicClientApplication(msalConfig)
