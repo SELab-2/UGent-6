@@ -15,7 +15,7 @@ repositories {
 	mavenCentral()
 }
 
-<<<<<<< HEAD
+
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
