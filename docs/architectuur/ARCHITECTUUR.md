@@ -2,7 +2,7 @@
 
 ### Een korte beschrijving van de architectuur van het project
 
-@import "deployment_diagram.png" 
+![deployment diagram](./deployment_diagram.png "Deployment diagram van de applicatie")
 
 Onze webservice zal een client-server architectuur aanbieden aan haar gebruikers. Gebruikers kunnen via hun webbrowser en een frontend ondersteunend op React.js ons platform betreden. Op de server draait een Nginx webserver die de communicatie met de applicatie mogelijk maakt.
 
