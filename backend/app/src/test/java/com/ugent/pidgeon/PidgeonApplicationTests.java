@@ -1,10 +1,10 @@
-package com.ugent.selab2;
+package com.ugent.pidgeon;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Selab2ApplicationTests {
+class PidgeonApplicationTests {
 
 	@Test
 	void contextLoads() {
