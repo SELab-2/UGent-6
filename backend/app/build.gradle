@@ -8,7 +8,7 @@ group = 'com.ugent'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+	sourceCompatibility = '17'
 }
 
 repositories {
@@ -18,7 +18,9 @@ repositories {
 
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -31,7 +33,6 @@ dependencies {
 	implementation 'com.auth0:java-jwt:3.18.2'
 	implementation 'com.auth0:jwks-rsa:0.18.0'
 	implementation 'javax.servlet:javax.servlet-api:4.0.1'
-
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
