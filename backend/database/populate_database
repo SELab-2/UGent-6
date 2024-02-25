@@ -1,0 +1,67 @@
+-- Insert sample users with explicit IDs
+INSERT INTO users (user_id, name, surname, email, microsoft_token, role)
+VALUES
+    (1, 'John', 'Doe', 'john.doe@example.com', 'ms-token-1', 'student'),
+    (2, 'Jane', 'Smith', 'jane.smith@example.com', 'ms-token-2', 'student'),
+    (3, 'Admin', 'User', 'admin@example.com', 'ms-token-admin', 'admin'),
+    (4, 'Teacher', 'Instructor', 'teacher@example.com', 'ms-token-teacher', 'teacher');
+
+-- Insert sample courses with explicit IDs
+INSERT INTO courses (course_id, course_name, description)
+VALUES
+    (1, 'AD2', 'Advanced Databases 2'),
+    (2, 'Scriptingtalen', 'Scripting Languages'),
+    (3, 'Wetrek', 'Web Development with Trek');
+
+-- Insert sample course relations
+INSERT INTO course_users (course_id, user_id, course_relation)
+VALUES
+    (1, 1, 'enrolled'),
+    (1, 2, 'enrolled'),
+    (2, 1, 'course_admin'),
+    (2, 4, 'enrolled'),
+    (3, 3, 'creator'),
+    (3, 4, 'enrolled');
+
+-- Insert sample exercises with explicit IDs
+INSERT INTO exercises (exercise_id, course_id, exercise_name, description, max_group_size, test_id)
+VALUES
+    (1, 1, 'Database Design', 'Design a relational database schema for a bookstore', 4, 1),
+    (2, 2, 'Python Basics', 'Write a script to calculate Fibonacci sequence', 3, 2),
+    (3, 3, 'HTML & CSS Project', 'Create a webpage for an online store', 5, 3);
+
+-- Insert sample tests with explicit IDs
+INSERT INTO tests (test_id, docker_id, file_test_id)
+VALUES
+    (1, 'docker-test-1', 'file-test-1'),
+    (2, 'docker-test-2', 'file-test-2'),
+    (3, 'docker-test-3', 'file-test-3');
+
+-- Insert sample groups with explicit IDs
+INSERT INTO groups (group_id, group_name, course_id)
+VALUES
+    (1, 'Group A', 1),
+    (2, 'Group B', 3);
+
+-- Insert sample group relations
+INSERT INTO group_users (group_id, user_id)
+VALUES
+    (1, 1),
+    (1, 2),
+    (2, 3),
+    (2, 4);
+
+-- Insert sample files with explicit IDs
+INSERT INTO files (file_id, file_path, uploaded_by)
+VALUES
+    (1, '/path/to/file1.txt', 1),
+    (2, '/path/to/file2.txt', 2),
+    (3, '/path/to/file3.txt', 4);
+
+-- Insert sample solutions
+INSERT INTO solutions (solution_id, exercise_id, user_id, group_id, title, description, file_id)
+VALUES
+    (1, 1, 1, NULL, 'Database Design Solution', 'This is the solution for the database design exercise', 1),
+    (2, 2, 2, NULL, 'Python Script Solution', 'This is the solution for the Python basics exercise', 2),
+    (3, 3, NULL, 1, 'HTML & CSS Project Solution', 'This is the group solution for the HTML & CSS project', 3);
+

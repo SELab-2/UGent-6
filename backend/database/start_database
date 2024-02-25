@@ -1,0 +1,94 @@
+-- Define user roles
+CREATE TYPE user_role AS ENUM ('student', 'admin', 'teacher');
+
+-- Define course relations
+CREATE TYPE course_relation AS ENUM ('creator', 'course_admin', 'enrolled');
+
+-- Users table to store information about users
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    microsoft_token VARCHAR(255) NOT NULL,
+    role user_role NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Courses table to store information about courses
+CREATE TABLE courses (
+    course_id SERIAL PRIMARY KEY,
+    course_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Linking table to associate users with courses and define their role in the course
+CREATE TABLE course_users (
+    course_id INT REFERENCES courses(course_id),
+    user_id INT REFERENCES users(user_id),
+    course_relation course_relation NOT NULL,
+    PRIMARY KEY (course_id, user_id)
+);
+
+-- Exercises table to store information about exercises within a course
+-- test_id points to internal test, possibly a docker or a file structure test.
+
+CREATE TABLE exercises (
+    exercise_id SERIAL PRIMARY KEY,
+    course_id INT REFERENCES courses(course_id),
+    exercise_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    max_group_size INT NOT NULL,
+    test_id INT REFERENCES tests(test_id)
+);
+
+-- Group grades table to store grades for groups in exercises
+CREATE TABLE group_grades (
+    group_id INT REFERENCES groups(group_id),
+    exercise_id INT REFERENCES exercises(exercise_id),
+    grade FLOAT NOT NULL,
+    PRIMARY KEY (group_id, exercise_id)
+);
+
+-- A id for the docker test and an id for the file test id
+CREATE TABLE tests (
+    test_id SERIAL PRIMARY KEY,
+    docker_id VARCHAR(256),
+    file_test_id VARCHAR(256)
+);
+
+-- Solutions table to store student or group submissions for exercises
+CREATE TABLE solutions (
+    solution_id SERIAL PRIMARY KEY,
+    exercise_id INT REFERENCES exercises(exercise_id),
+    user_id INT REFERENCES users(user_id),
+    group_id INT REFERENCES groups(group_id),
+    title VARCHAR(100) NOT NULL,
+    description TEXT, 
+    file_id INT REFERENCES files(file_id),
+    submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Groups table to manage groups of students
+CREATE TABLE groups (
+    group_id SERIAL PRIMARY KEY,
+    group_name VARCHAR(100) NOT NULL,
+    course_id INT REFERENCES courses(course_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
+);
+
+-- Linking table to associate users with groups
+CREATE TABLE group_users (
+    group_id INT REFERENCES groups(group_id),
+    user_id INT REFERENCES users(user_id),
+    PRIMARY KEY (group_id, user_id)
+);
+
+-- Files table to store file information
+CREATE TABLE files (
+    file_id SERIAL PRIMARY KEY,
+    file_path VARCHAR(512) NOT NULL,
+    uploaded_by INT REFERENCES users(user_id)
+);
+
