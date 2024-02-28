@@ -1,4 +1,4 @@
-package com.ugent.selab2.model;
+package com.ugent.pidgeon.model;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

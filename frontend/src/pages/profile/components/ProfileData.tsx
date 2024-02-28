@@ -21,6 +21,8 @@ export const ProfileData: React.FC<{ graphData: GraphData }> = ({ graphData }) =
     })
   }
 
+  
+
   return (
     <ul className="profileData">
       <li>

@@ -1,4 +1,4 @@
-package com.ugent.selab2.config;
+package com.ugent.pidgeon.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
