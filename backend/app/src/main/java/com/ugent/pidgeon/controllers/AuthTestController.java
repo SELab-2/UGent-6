@@ -1,6 +1,6 @@
-package com.ugent.selab2.controllers;
-import com.ugent.selab2.model.Auth;
-import com.ugent.selab2.model.User;
+package com.ugent.pidgeon.controllers;
+import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +21,7 @@ public class AuthTestController {
 
     @GetMapping("/")
     public String index() {
-        return "Running...";
+        return "Running!!!...";
     }
 
 }

@@ -24,15 +24,20 @@ const ProfileContent = () => {
         if (!graphData && inProgress === InteractionStatus.None) {
             callMsGraph().then(response => setGraphData(response)).catch((e) => {
                 if (e instanceof InteractionRequiredAuthError) {
-                    instance.acquireTokenRedirect({
-                        ...loginRequest,
-                        account: instance.getActiveAccount() as AccountInfo
-                    });
+
+                    // instance.acquireTokenRedirect({
+                    //     ...loginRequest,
+                    //     account: instance.getActiveAccount() as AccountInfo
+                    // });
                 }
-            });
+            }).catch(err => {
+                console.log(err);
+            }) ;
         }
     }, [inProgress, graphData, instance]);
-  
+    
+    
+    console.log(graphData);
     return (
         <div>
             { graphData ? <ProfileData graphData={graphData} /> : null }
@@ -41,10 +46,12 @@ const ProfileContent = () => {
 };
 
 export function Profile() {
+
+
+
     const authRequest = {
         ...loginRequest
     };
-
     return (
         <MsalAuthenticationTemplate 
             interactionType={InteractionType.Redirect} 

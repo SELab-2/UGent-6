@@ -16,22 +16,10 @@ function App({ pca }: AppProps) {
     const navigationClient = new CustomNavigation(navigate);
     pca.setNavigationClient(navigationClient);
 
-  // const handleLogin = async () => {
-  //   try {
-  //     // await promise;
-  //     // await msalInstance.loginPopup(); // Initiate popup login
-  //     // const account: AccountInfo | null = msalInstance.getActiveAccount();
-  //     // console.log(account);
-  //   } catch (error) {
-  //     console.error(error)
-  //   }
-  // }
 
   return (
     <div className="App">
-      <header className="App-header">
-        {/* <button onClick={handleLogin}>Sign in with Microsoft</button> */}
-       
+      <header className="App-header">       
           <MsalProvider instance={pca}>
             <AppRouter />
           </MsalProvider>
