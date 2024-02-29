@@ -1,67 +1,98 @@
--- Insert sample users with explicit IDs
-INSERT INTO users (user_id, name, surname, email, microsoft_token, role)
-VALUES
-    (1, 'John', 'Doe', 'john.doe@example.com', 'ms-token-1', 'student'),
-    (2, 'Jane', 'Smith', 'jane.smith@example.com', 'ms-token-2', 'student'),
-    (3, 'Admin', 'User', 'admin@example.com', 'ms-token-admin', 'admin'),
-    (4, 'Teacher', 'Instructor', 'teacher@example.com', 'ms-token-teacher', 'teacher');
+-- The table creation statements you provided go here, unchanged.
+-- Skipping this part for brevity as you've already provided it above.
 
--- Insert sample courses with explicit IDs
-INSERT INTO courses (course_id, course_name, description)
-VALUES
-    (1, 'AD2', 'Advanced Databases 2'),
-    (2, 'Scriptingtalen', 'Scripting Languages'),
-    (3, 'Wetrek', 'Web Development with Trek');
+-- Inserting into `users`
+INSERT INTO users (name, surname, email, microsoft_token, role) VALUES
+('John', 'Doe', 'john.doe@example.com', 'token_1', 'student'),
+('Jane', 'Smith', 'jane.smith@example.com', 'token_2', 'teacher'),
+('Bob', 'Brown', 'bob.brown@example.com', 'token_3', 'admin'),
+('Alice', 'Johnson', 'alice.johnson@example.com', 'token_4', 'student'),
+('Charlie', 'Davis', 'charlie.davis@example.com', 'token_5', 'teacher');
 
--- Insert sample course relations
-INSERT INTO course_users (course_id, user_id, course_relation)
-VALUES
-    (1, 1, 'enrolled'),
-    (1, 2, 'enrolled'),
-    (2, 1, 'course_admin'),
-    (2, 4, 'enrolled'),
-    (3, 3, 'creator'),
-    (3, 4, 'enrolled');
+-- Inserting into `courses`
+INSERT INTO courses (course_name, description) VALUES
+('Math 101', 'Introduction to Mathematics'),
+('Science 101', 'Basics of Scientific Method'),
+('History 101', 'World History Overview'),
+('Computer Science 101', 'Introduction to Computing'),
+('English 101', 'English Literature');
 
--- Insert sample exercises with explicit IDs
-INSERT INTO exercises (exercise_id, course_id, exercise_name, description, max_group_size, test_id)
-VALUES
-    (1, 1, 'Database Design', 'Design a relational database schema for a bookstore', 4, 1),
-    (2, 2, 'Python Basics', 'Write a script to calculate Fibonacci sequence', 3, 2),
-    (3, 3, 'HTML & CSS Project', 'Create a webpage for an online store', 5, 3);
+-- Inserting into `course_users`
+-- Assume course_id and user_id start from 1 and match accordingly
+INSERT INTO course_users (course_id, user_id, course_relation) VALUES
+(1, 1, 'enrolled'),
+(2, 1, 'enrolled'),
+(3, 2, 'creator'),
+(4, 3, 'course_admin'),
+(5, 4, 'enrolled');
 
--- Insert sample tests with explicit IDs
-INSERT INTO tests (test_id, docker_id, file_test_id)
-VALUES
-    (1, 'docker-test-1', 'file-test-1'),
-    (2, 'docker-test-2', 'file-test-2'),
-    (3, 'docker-test-3', 'file-test-3');
+-- Assume tests are created before exercises for foreign key constraints
+-- Inserting into `tests`
+INSERT INTO tests (docker_image, file_test_id) VALUES
+('docker/image1', 'file1'),
+('docker/image2', 'file2'),
+('docker/image3', 'file3'),
+('docker/image4', 'file4'),
+('docker/image5', 'file5');
 
--- Insert sample groups with explicit IDs
-INSERT INTO groups (group_id, group_name, course_id)
-VALUES
-    (1, 'Group A', 1),
-    (2, 'Group B', 3);
+-- Inserting into `group_clusters`
+INSERT INTO group_clusters (course_id, max_size) VALUES
+(1, 4),
+(2, 3),
+(3, 5),
+(4, 2),
+(5, 3);
 
--- Insert sample group relations
-INSERT INTO group_users (group_id, user_id)
-VALUES
-    (1, 1),
-    (1, 2),
-    (2, 3),
-    (2, 4);
+-- Inserting into `groups`
+INSERT INTO groups (group_name, group_cluster) VALUES
+('Group A', 1),
+('Group B', 2),
+('Group C', 3),
+('Group D', 4),
+('Group E', 5);
 
--- Insert sample files with explicit IDs
-INSERT INTO files (file_id, file_path, uploaded_by)
-VALUES
-    (1, '/path/to/file1.txt', 1),
-    (2, '/path/to/file2.txt', 2),
-    (3, '/path/to/file3.txt', 4);
+-- Inserting into `group_users`
+-- Linking users to groups, assuming group_id and user_id start from 1
+INSERT INTO group_users (group_id, user_id) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
 
--- Insert sample solutions
-INSERT INTO solutions (solution_id, exercise_id, user_id, group_id, title, description, file_id)
-VALUES
-    (1, 1, 1, NULL, 'Database Design Solution', 'This is the solution for the database design exercise', 1),
-    (2, 2, 2, NULL, 'Python Script Solution', 'This is the solution for the Python basics exercise', 2),
-    (3, 3, NULL, 1, 'HTML & CSS Project Solution', 'This is the group solution for the HTML & CSS project', 3);
+-- Inserting into `exercises`
+-- Link exercises to courses and tests
+INSERT INTO exercises (course_id, exercise_name, description, group_cluster_id, test_id) VALUES
+(1, 'Math Exercise 1', 'Solve equations', 1, 1),
+(2, 'Science Lab 1', 'Conduct experiment', 2, 2),
+(3, 'History Essay 1', 'Discuss historical event', 3, 3),
+(4, 'Programming Assignment 1', 'Write code', 4, 4),
+(5, 'Literature Analysis', 'Analyze text', 5, 5);
+
+-- Inserting into `files`
+-- Assume files are uploaded by different users
+INSERT INTO files (file_path, file_name, uploaded_by) VALUES
+('/path/to/file1', 'file1.txt', 1),
+('/path/to/file2', 'file2.txt', 2),
+('/path/to/file3', 'file3.txt', 3),
+('/path/to/file4', 'file4.txt', 4),
+('/path/to/file5', 'file5.txt', 5);
+
+-- Inserting into `solutions`
+-- Linking solutions to exercises and groups
+INSERT INTO solutions (exercise_id, group_id, title, description, file_id, submission_time) VALUES
+(1, 1, 'Solution 1', 'Solution to Math Exercise 1', 1, CURRENT_TIMESTAMP),
+(2, 2, 'Solution 2', 'Solution to Science Lab 1', 2, CURRENT_TIMESTAMP),
+(3, 3, 'Solution 3', 'Solution to History Essay 1', 3, CURRENT_TIMESTAMP),
+(4, 4, 'Solution 4', 'Solution to Programming Assignment 1', 4, CURRENT_TIMESTAMP),
+(5, 5, 'Solution 5', 'Solution to Literature Analysis', 5, CURRENT_TIMESTAMP);
+
+-- Inserting into `group_grades`
+-- Assign grades to group solutions
+INSERT INTO group_grades (group_id, exercise_id, grade) VALUES
+(1, 1, 95.0),
+(2, 2, 88.5),
+(3, 3, 92.0),
+(4, 4, 89.0),
+(5, 5, 94.5);
 

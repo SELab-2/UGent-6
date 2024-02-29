@@ -39,7 +39,7 @@ CREATE TABLE exercises (
     course_id INT REFERENCES courses(course_id),
     exercise_name VARCHAR(100) NOT NULL,
     description TEXT,
-    max_group_size INT NOT NULL,
+    group_cluster_id INT REFERENCES group_clusters(group_cluster_id),
     test_id INT REFERENCES tests(test_id)
 );
 
@@ -54,15 +54,16 @@ CREATE TABLE group_grades (
 -- A id for the docker test and an id for the file test id
 CREATE TABLE tests (
     test_id SERIAL PRIMARY KEY,
-    docker_id VARCHAR(256),
+    docker_image VARCHAR(256),
     file_test_id VARCHAR(256)
 );
 
 -- Solutions table to store student or group submissions for exercises
+-- Solo projects are done with group clusters with 1 person. 
+
 CREATE TABLE solutions (
     solution_id SERIAL PRIMARY KEY,
     exercise_id INT REFERENCES exercises(exercise_id),
-    user_id INT REFERENCES users(user_id),
     group_id INT REFERENCES groups(group_id),
     title VARCHAR(100) NOT NULL,
     description TEXT, 
@@ -70,12 +71,18 @@ CREATE TABLE solutions (
     submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE group_clusters (
+    group_cluster_id SERIAL PRIMARY KEY,
+    course_id INT REFERENCES courses(course_id),
+    max_size INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
+);
+
 -- Groups table to manage groups of students
 CREATE TABLE groups (
     group_id SERIAL PRIMARY KEY,
     group_name VARCHAR(100) NOT NULL,
-    course_id INT REFERENCES courses(course_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
+    group_cluster INT REFERENCES group_clusters(group_cluster_id)
 );
 
 -- Linking table to associate users with groups
@@ -89,6 +96,7 @@ CREATE TABLE group_users (
 CREATE TABLE files (
     file_id SERIAL PRIMARY KEY,
     file_path VARCHAR(512) NOT NULL,
+    file_name VARCHAR(512) NOT NULL,
     uploaded_by INT REFERENCES users(user_id)
 );
 
