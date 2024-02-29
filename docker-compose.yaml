@@ -5,6 +5,10 @@ services:
     ports:
       - 80:80
       - 443:443
+    restart: always
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www/:/var/www/certbot/:ro
   backend:
     container_name: spring_container
     build: backend/app/
@@ -14,6 +18,7 @@ services:
         - 'POSTGRES_DB=pidegon_db'
     networks:
         - spring-postgres
+    restart: always
   postgres:
     container_name: pg_container
     image: 'postgres:latest'
@@ -37,7 +42,11 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: root
     restart: unless-stopped
-
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
 volumes:
   postgres-data:
 secrets:

@@ -3,8 +3,8 @@ import { IPublicClientApplication } from "@azure/msal-browser"
 import { MsalProvider } from "@azure/msal-react"
 import { useNavigate } from "react-router-dom"
 import CustomNavigation from "./auth/CustomNavigation"
-// const msalInstance = new PublicClientApplication(msalConfig);
-// let promise = msalInstance.initialize()
+import Nav from "./components/navigationBar/Nav"
+import './i18n/config';
 
 type AppProps = {
   pca: IPublicClientApplication
@@ -21,7 +21,9 @@ function App({ pca }: AppProps) {
     <div className="App">
       <header className="App-header">       
           <MsalProvider instance={pca}>
-            <AppRouter />
+            <Nav>
+              <AppRouter />
+            </Nav>
           </MsalProvider>
       </header>
     </div>

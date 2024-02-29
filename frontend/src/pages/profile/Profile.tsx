@@ -25,10 +25,10 @@ const ProfileContent = () => {
             callMsGraph().then(response => setGraphData(response)).catch((e) => {
                 if (e instanceof InteractionRequiredAuthError) {
 
-                    // instance.acquireTokenRedirect({
-                    //     ...loginRequest,
-                    //     account: instance.getActiveAccount() as AccountInfo
-                    // });
+                    instance.acquireTokenRedirect({
+                        ...loginRequest,
+                        account: instance.getActiveAccount() as AccountInfo
+                    });
                 }
             }).catch(err => {
                 console.log(err);

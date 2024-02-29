@@ -21,7 +21,7 @@ public class AuthTestController {
 
     @GetMapping("/")
     public String index() {
-        return "Running!!!...";
+        return "Running...";
     }
 
 }
