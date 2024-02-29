@@ -1,5 +1,6 @@
-import { Trans, useTranslation } from "react-i18next";
-import { msalInstance } from "../../index"
+import { useTranslation } from "react-i18next";
+import { msalInstance } from "../../../index"
+import { Button } from "antd";
 
 const UnauthNav = () => {
   const { t } = useTranslation();
@@ -12,9 +13,7 @@ const UnauthNav = () => {
   }
 
   return (
-    <div style={{float:"right"}}>
-      <button onClick={handleLogin}>{t("navBar.login")}</button>
-    </div>
+      <Button size="large" type="primary" onClick={handleLogin}>{t("nav.login")}</Button>
   )
 }
 

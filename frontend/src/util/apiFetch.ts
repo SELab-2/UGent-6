@@ -1,4 +1,4 @@
-import { ApiRoutes, POST_Requests, PUT_Requests } from "../@types/types";
+import { ApiRoutes, POST_Requests, PUT_Requests } from "../@types/requests";
 import axios, { AxiosResponse } from "axios";
 import {msalInstance} from "../index";
 import { AxiosRequestConfig } from "axios";

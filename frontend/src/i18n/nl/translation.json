@@ -1,5 +1,10 @@
 {
-  "navBar": {
-    "login": "Inloggen"
+  "nav": {
+    "login": "Aanmelden",
+    "logout": "Afmelden",
+    "accountSwitch": "Account wisselen",
+    "theme": "Stijl",
+    "dark": "Donker",
+    "light": "Licht"
   }
 }

@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/index/Home';
-import { AppRoutes } from '../@types/types';
 import Dashboard from '../pages/dashboard/Dashboard';
 import Profile from '../pages/profile/Profile';
+import { AppRoutes } from '../@types/routes';
 
 
 
