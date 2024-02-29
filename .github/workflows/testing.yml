@@ -1,5 +1,5 @@
 name: running test with github actions
-on: workflow_dispatch
+on: pull_request
 
 jobs:
   test:
