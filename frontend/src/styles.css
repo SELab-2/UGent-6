@@ -7,6 +7,11 @@ body, html {
   height: 100%;
 }
 
-.dodona-theme .ant-layout-header .ant-typography {
+.dodona-theme .ant-layout-header .ant-typography,.dodona-theme .ant-layout-header .ant-btn  {
   color: #00325a 
+}
+
+.dodona-theme .ant-layout-header .ant-btn:hover {
+  color: #00325a;
+  background-color: transparent;
 }

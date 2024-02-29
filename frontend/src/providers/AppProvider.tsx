@@ -1,5 +1,6 @@
 import { FC, PropsWithChildren, createContext, useEffect, useState } from "react"
 import { Language, Themes } from "../@types/types"
+import { useTranslation } from "react-i18next"
 
 export type AppContextT = {
   theme: Themes
@@ -11,6 +12,8 @@ export type AppContextT = {
 const AppContext = createContext<AppContextT>({} as AppContextT)
 
 const AppProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { i18n } = useTranslation()
+
   const [theme, setTheme] = useState<Themes>(Themes.DARK)
   const [language, setLanguage] = useState<Language>(Language.NL)
 
@@ -19,6 +22,7 @@ const AppProvider: FC<PropsWithChildren> = ({ children }) => {
     const localLanguage =( window.localStorage.getItem("i18n") as Language) ?? Language.NL
     setTheme(localTheme)
     setLanguage(localLanguage)
+    i18n.changeLanguage(localLanguage)
 
     document.body.classList.add(localTheme + "-theme")
 
@@ -34,6 +38,8 @@ const AppProvider: FC<PropsWithChildren> = ({ children }) => {
   const handleSetLanguage = (language: Language) => {
     setLanguage(language)
     window.localStorage.setItem("i18n", language)
+    i18n.changeLanguage(language)
+
   }
 
   return <AppContext.Provider value={{ theme, language, setTheme: handleSetTheme, setLanguage: handleSetLanguage }}>{children}</AppContext.Provider>

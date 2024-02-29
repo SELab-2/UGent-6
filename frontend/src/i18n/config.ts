@@ -4,7 +4,6 @@ import translation_en from "./en/translation.json"
 import translation_nl from "./nl/translation.json"
 
 i18next.use(initReactI18next).init({
- lng: 'nl', // if you're using a language detector, do not define the lng option
   debug: true,
   resources: {
     en: {

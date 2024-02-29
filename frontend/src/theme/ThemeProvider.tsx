@@ -3,8 +3,16 @@ import { FC, PropsWithChildren } from "react"
 import useApp from "../hooks/useApp"
 import {darkTheme} from "./themes/dark"
 import {lightTheme} from "./themes/light"
-import { Themes } from "../@types/types"
+import { Language, Themes } from "../@types/types"
 import { dodonaTheme } from "./themes/dodona"
+import nlNL from 'antd/locale/nl_NL';
+import enUS from 'antd/locale/en_US';
+
+
+const i18n_locale = {
+  [Language.NL]: nlNL,
+  [Language.EN]: enUS
+}
 
 const appThemes:Record<Themes,ThemeConfig> = {
   light: lightTheme,
@@ -13,11 +21,11 @@ const appThemes:Record<Themes,ThemeConfig> = {
 }
 
 const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
-  const {theme} = useApp()
+  const {theme,language} = useApp()
   const selectedTheme = appThemes[theme] ?? appThemes.dark
 
   
-  return <ConfigProvider theme={selectedTheme}>
+  return <ConfigProvider theme={selectedTheme} locale={i18n_locale[language]}>
     {children}
   </ConfigProvider>
 }
