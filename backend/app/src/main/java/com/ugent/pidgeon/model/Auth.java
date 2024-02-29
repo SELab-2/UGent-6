@@ -5,7 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
-
+import com.ugent.pidgeon.model.User;
 public class Auth extends AbstractAuthenticationToken {
     private static final long serialVersionUID = 620L;
 

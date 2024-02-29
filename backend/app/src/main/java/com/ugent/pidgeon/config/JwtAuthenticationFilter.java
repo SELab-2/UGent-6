@@ -67,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 //logger.info(jwt.getClaims());
 
 
-                User user = new User(displayName,firstName,lastName, email, groups, oid);
+                User user = new User(displayName, firstName,lastName, email, groups, oid);
 
                 Auth authUser = new Auth(user, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authUser);
