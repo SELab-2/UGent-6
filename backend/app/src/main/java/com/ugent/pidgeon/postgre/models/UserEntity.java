@@ -4,18 +4,22 @@ package com.ugent.pidgeon.postgre.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "users")
 public class UserEntity {
     private long id;
     private String name;
     private String surname;
     private String email;
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Column(name = "name", nullable=false)
