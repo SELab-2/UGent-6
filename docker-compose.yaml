@@ -11,28 +11,24 @@ services:
       - ./certbot/www/:/var/www/certbot/:ro
   backend:
     container_name: spring_container
-    image: 'docker-spring-boot-postgres:latest'
     build: backend/app/
     depends_on:
       - postgres
     ports:
       - 8080:8080
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pidgeon
-      - SPRING_DATASOURCE_USERNAME=pidgeon
-      - SPRING_DATASOURCE_PASSWORD=admin
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-    networks:
-        - spring-postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/admin
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=root
     restart: always
   postgres:
-    container_name: db
+    container_name: postgres
     image: 'postgres:latest'
     secrets:
       - db-password
     environment:
-      - 'POSTGRES_PASSWORD=admin'
-      - 'POSTGRES_USER=pidgeon'
+      - 'POSTGRES_PASSWORD=root'
+      - 'POSTGRES_USER=admin'
     ports:
       - '5432:5432'
     volumes:
@@ -58,5 +54,3 @@ volumes:
 secrets:
   db-password:
     file: backend/db/password.txt
-networks:
-  spring-postgres:
