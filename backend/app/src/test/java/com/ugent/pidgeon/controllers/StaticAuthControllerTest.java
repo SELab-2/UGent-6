@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Test de AuthTestController klasse direct door zijn methodes te laden
 @SpringBootTest
-public class AuthTest {
+public class StaticAuthControllerTest {
     private final List<String> groepLijst = List.of("Groep 1");
 
 
