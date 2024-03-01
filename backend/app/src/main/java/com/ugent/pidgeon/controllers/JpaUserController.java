@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class JpaUserController {
-    /*@Autowired
-    private UserRepository userRepository;*/
-
-    @GetMapping("/api/users")
-    public String getUsers() {
-        return "kaas+: ";
-    }
+//    @Autowired
+//    private UserRepository userRepository;
+//
+//    @GetMapping("/api/users")
+//    public String getUsers() {
+//        return "kaas+: ";
+//    }
 }
