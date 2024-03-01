@@ -3,6 +3,10 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
+
 @Entity
 @Table(name = "users")
 public class UserEntity {
@@ -10,6 +14,14 @@ public class UserEntity {
     private String name;
     private String surname;
     private String email;
+
+    @ManyToMany
+    @JoinTable(
+            name = "course_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private Set<CourseEntity> courses = new HashSet<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,5 +60,7 @@ public class UserEntity {
     public void setEmail(String email) {
         this.email = email;
     }
+
+
 }
 
