@@ -26,14 +26,23 @@ INSERT INTO course_users (course_id, user_id, course_relation) VALUES
 (4, 3, 'course_admin'),
 (5, 4, 'enrolled');
 
+-- Inserting into `files`
+-- Assume files are uploaded by different users
+INSERT INTO files (file_path, file_name, uploaded_by) VALUES
+('/path/to/file1', 'file1.txt', 1),
+('/path/to/file2', 'file2.txt', 2),
+('/path/to/file3', 'file3.txt', 3),
+('/path/to/file4', 'file4.txt', 4),
+('/path/to/file5', 'file5.txt', 5);
+
 -- Assume tests are created before exercises for foreign key constraints
 -- Inserting into `tests`
 INSERT INTO tests (docker_image, file_test_id) VALUES
-('docker/image1', 'file1'),
-('docker/image2', 'file2'),
-('docker/image3', 'file3'),
-('docker/image4', 'file4'),
-('docker/image5', 'file5');
+('docker/image1', 1),
+('docker/image2', 2),
+('docker/image3', 3),
+('docker/image4', 4),
+('docker/image5', 5);
 
 -- Inserting into `group_clusters`
 INSERT INTO group_clusters (course_id, cluster_name, max_size, group_amount) VALUES
@@ -69,23 +78,16 @@ INSERT INTO exercises (course_id, exercise_name, description, group_cluster_id, 
 (4, 'Programming Assignment 1', 'Write code', 4, 4),
 (5, 'Literature Analysis', 'Analyze text', 5, 5);
 
--- Inserting into `files`
--- Assume files are uploaded by different users
-INSERT INTO files (file_path, file_name, uploaded_by) VALUES
-('/path/to/file1', 'file1.txt', 1),
-('/path/to/file2', 'file2.txt', 2),
-('/path/to/file3', 'file3.txt', 3),
-('/path/to/file4', 'file4.txt', 4),
-('/path/to/file5', 'file5.txt', 5);
+
 
 -- Inserting into `solutions`
 -- Linking solutions to exercises and groups
-INSERT INTO solutions (exercise_id, group_id, title, description, file_id, submission_time) VALUES
-(1, 1, 'Solution 1', 'Solution to Math Exercise 1', 1, CURRENT_TIMESTAMP),
-(2, 2, 'Solution 2', 'Solution to Science Lab 1', 2, CURRENT_TIMESTAMP),
-(3, 3, 'Solution 3', 'Solution to History Essay 1', 3, CURRENT_TIMESTAMP),
-(4, 4, 'Solution 4', 'Solution to Programming Assignment 1', 4, CURRENT_TIMESTAMP),
-(5, 5, 'Solution 5', 'Solution to Literature Analysis', 5, CURRENT_TIMESTAMP);
+INSERT INTO submissions (exercise_id, group_id, file_id, accepted, submission_time) VALUES
+(1, 1, 1, true ,CURRENT_TIMESTAMP),
+(2, 2, 2, false,CURRENT_TIMESTAMP),
+(3, 3, 3, false,CURRENT_TIMESTAMP),
+(4, 4, 4, true,CURRENT_TIMESTAMP),
+(5, 5, 5, true,CURRENT_TIMESTAMP);
 
 -- Inserting into `group_grades`
 -- Assign grades to group solutions

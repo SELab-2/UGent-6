@@ -43,11 +43,19 @@ CREATE TABLE group_clusters (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Files table to store file information
+CREATE TABLE files (
+    file_id SERIAL PRIMARY KEY,
+    file_path VARCHAR(512) NOT NULL,
+    file_name VARCHAR(512) NOT NULL,
+    uploaded_by INT REFERENCES users(user_id)
+);
+
 -- A id for the docker test and an id for the file test id
 CREATE TABLE tests (
     test_id SERIAL PRIMARY KEY,
     docker_image VARCHAR(256),
-    file_test_id VARCHAR(256)
+    file_test_id INT REFERENCES files(file_id)
 );
 
 -- Exercises table to store information about exercises within a course
@@ -77,24 +85,17 @@ CREATE TABLE group_grades (
     PRIMARY KEY (group_id, exercise_id)
 );
 
--- Files table to store file information
-CREATE TABLE files (
-    file_id SERIAL PRIMARY KEY,
-    file_path VARCHAR(512) NOT NULL,
-    file_name VARCHAR(512) NOT NULL,
-    uploaded_by INT REFERENCES users(user_id)
-);
+
 
 -- Solutions table to store student or group submissions for exercises
 -- Solo projects are done with group clusters with 1 person.
 
-CREATE TABLE solutions (
+CREATE TABLE submissions (
     solution_id SERIAL PRIMARY KEY,
     exercise_id INT REFERENCES exercises(exercise_id),
     group_id INT REFERENCES groups(group_id),
-    title VARCHAR(100) NOT NULL,
-    description TEXT,
     file_id INT REFERENCES files(file_id),
+    accepted BOOLEAN NOT NULL,
     submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
