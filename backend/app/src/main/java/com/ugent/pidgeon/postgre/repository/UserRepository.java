@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    List<UserEntity> findById(long id);
+    UserEntity findById(long id);
 
     @Query(value = "SELECT c FROM CourseEntity c JOIN CourseUserEntity cu ON c.id = cu.course_id WHERE cu.user_id = ?1")
     List<CourseEntity> findCoursesByUserId(long id);

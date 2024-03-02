@@ -17,10 +17,6 @@ public class AuthTestController {
         return auth.getUser();
     }
 
-    @GetMapping("/api/users")
-    public String getUsers() {
-        return "kaas+: " /*+ userRepository.findAll().get(0).getName()*/;
-    }
 
     @GetMapping("/ping")
     public String ping() {
