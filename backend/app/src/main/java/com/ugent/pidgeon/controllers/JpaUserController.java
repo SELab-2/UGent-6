@@ -1,7 +1,6 @@
     package com.ugent.pidgeon.controllers;
 
-    import org.apache.commons.logging.LogFactory;
-    import org.apache.commons.logging.Log;
+    import com.ugent.pidgeon.postgre.models.UserEntity;
     import com.ugent.pidgeon.postgre.repository.UserRepository;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
@@ -17,8 +16,8 @@
         Logger logger = LoggerFactory.getLogger(JpaUserController.class);
         @GetMapping("/api/users2")
         public String getUsers() {
-            logger.info("coursessize: " + userRepository.findById(2).get(0).get);
-            userRepository.findAll().forEach(user -> user.courses.forEach(course -> logger.info(course.getName())));
-            return "kaas+: " + userRepository.findById(2).get(0).getName();
+            UserEntity user = userRepository.findById(2).get(0);
+            userRepository.findCoursesByUserId(user.getId()).forEach(course -> logger.info(course.getName()));
+            return "kaas+: " + user.getName();
         }
     }

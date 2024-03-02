@@ -13,9 +13,13 @@ public class CourseEntity {
     private String name;
     private String description;
 
-    @ManyToMany(mappedBy = "users")
-    private Set<UserEntity> users = new HashSet<>();
-
+    @OneToMany
+    @JoinTable(
+            name = "course_users",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<CourseUserEntity> courseusers = new HashSet<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

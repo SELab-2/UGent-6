@@ -1,9 +1,6 @@
 package com.ugent.pidgeon.postgre.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name="course_users")
@@ -16,6 +13,7 @@ public class CourseUserEntity {
     public long getCourse_id() {
         return course_id;
     }
+
 
     public void setCourse_id(long course_id) {
         this.course_id = course_id;
@@ -30,4 +28,5 @@ public class CourseUserEntity {
     public void setUser_id(long user_id) {
         this.user_id = user_id;
     }
+
 }
