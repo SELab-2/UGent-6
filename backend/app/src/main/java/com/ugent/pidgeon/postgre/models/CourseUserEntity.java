@@ -5,11 +5,20 @@ import jakarta.persistence.*;
 @Entity
 @Table(name="course_users")
 public class CourseUserEntity {
-    private long course_id;
-    private long user_id;
 
     @Id
     @Column(name="course_id", nullable=false)
+    private long course_id;
+
+    @Id
+    @Column(name="user_id", nullable=false)
+    private long user_id;
+
+    @Column(name = "course_relation")
+    @Enumerated(EnumType.STRING)
+    private CourseRelation relation;
+
+
     public long getCourse_id() {
         return course_id;
     }
@@ -19,8 +28,7 @@ public class CourseUserEntity {
         this.course_id = course_id;
     }
 
-    @Id
-    @Column(name="user_id", nullable=false)
+
     public long getUser_id() {
         return user_id;
     }

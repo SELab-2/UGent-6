@@ -8,8 +8,16 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
+
     CourseEntity findById(long id);
 
-    @Query(value = "SELECT u FROM UserEntity u JOIN CourseUserEntity cu ON u.id = cu.user_id WHERE cu.course_id = ?1")
-    List<UserEntity> findUsersByCourseId(long id);
+
+    public interface UserWithRelation {
+        UserEntity getUser();
+        String getRelation();
+    }
+
+    /* The 'as' is important here, as it is used to map the result to the CourseWithRelation interface */
+    @Query(value = "SELECT u as user, cu.relation as relation FROM UserEntity u JOIN CourseUserEntity cu ON u.id = cu.user_id WHERE cu.course_id = ?1")
+    List<UserWithRelation> findUsersByCourseId(long id);
 }

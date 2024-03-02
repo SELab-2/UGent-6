@@ -16,8 +16,10 @@ public class JpaCourseController {
         StringBuilder res = new StringBuilder();
         for (CourseEntity course : courseRepository.findAll()) {
             res.append(course.getName()).append(" with users: ");
-            for (UserEntity user : courseRepository.findUsersByCourseId(course.getId())) {
-                res.append(user.getName()).append(", ");
+            for (CourseRepository.UserWithRelation user : courseRepository.findUsersByCourseId(course.getId())) {
+                UserEntity userEntity = user.getUser();
+                String relation = user.getRelation();
+                res.append(userEntity.getName()).append("(").append(relation).append("), ");
             }
             res.append("\n");
         }
