@@ -1,8 +1,10 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.CourseRepository;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 public class JpaCourseController {
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private GroupClusterRepository groupClusterRepository;
 
     @GetMapping("/api/courses")
     public String getCourses() {
@@ -20,6 +25,10 @@ public class JpaCourseController {
                 UserEntity userEntity = user.getUser();
                 String relation = user.getRelation();
                 res.append(userEntity.getName()).append("(").append(relation).append("), ");
+            }
+            res.append(" with group cluster");
+            for (GroupClusterEntity groupcluster: groupClusterRepository.findByCourseId((int) course.getId())) {
+                res.append(groupcluster.getName()).append(" (").append(groupcluster.getGroupAmount()).append("), ");
             }
             res.append("\n");
         }

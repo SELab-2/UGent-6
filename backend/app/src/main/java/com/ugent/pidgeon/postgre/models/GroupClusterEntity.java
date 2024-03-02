@@ -13,16 +13,16 @@ public class GroupClusterEntity {
     private int id;
 
     @Column(name="course_id", nullable=false)
-    private int course_id;
+    private int courseId;
 
     @Column(name="max_size", nullable=false)
-    private int max_size;
+    private int maxSize;
 
     @Column(name="cluster_name", nullable=false)
-    private String cluster_name;
+    private String name;
 
     @Column(name="group_amount", nullable=false)
-    private int group_amount;
+    private int groupAmount;
 
     public int getId() {
         return id;
@@ -32,35 +32,35 @@ public class GroupClusterEntity {
         this.id = id;
     }
 
-    public int getCourse_id() {
-        return course_id;
+    public int getCourseId() {
+        return courseId;
     }
 
-    public void setCourse_id(int course_id) {
-        this.course_id = course_id;
+    public void setCourseId(int course_id) {
+        this.courseId = course_id;
     }
 
-    public int getMax_size() {
-        return max_size;
+    public int getMaxSize() {
+        return maxSize;
     }
 
-    public void setMax_size(int max_size) {
-        this.max_size = max_size;
+    public void setMaxSize(int max_size) {
+        this.maxSize = max_size;
     }
 
-    public String getCluster_name() {
-        return cluster_name;
+    public String getName() {
+        return name;
     }
 
-    public void setCluster_name(String cluster_name) {
-        this.cluster_name = cluster_name;
+    public void setName(String cluster_name) {
+        this.name = cluster_name;
     }
 
-    public int getGroup_amount() {
-        return group_amount;
+    public int getGroupAmount() {
+        return groupAmount;
     }
 
-    public void setGroup_amount(int group_amount) {
-        this.group_amount = group_amount;
+    public void setGroupAmount(int group_amount) {
+        this.groupAmount = group_amount;
     }
 }

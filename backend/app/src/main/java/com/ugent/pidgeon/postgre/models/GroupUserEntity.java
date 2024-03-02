@@ -10,25 +10,25 @@ import jakarta.persistence.Table;
 public class GroupUserEntity {
     @Id
     @Column(name="group_id", nullable=false)
-    private long group_id;
+    private long groupId;
 
     @Id
     @Column(name="user_id", nullable=false)
-    private long user_id;
+    private long userId;
 
-    public long getGroup_id() {
-        return group_id;
+    public long getGroupId() {
+        return groupId;
     }
 
-    public void setGroup_id(long group_id) {
-        this.group_id = group_id;
+    public void setGroupId(long group_id) {
+        this.groupId = group_id;
     }
 
-    public long getUser_id() {
-        return user_id;
+    public long getUserId() {
+        return userId;
     }
 
-    public void setUser_id(long user_id) {
-        this.user_id = user_id;
+    public void setUserId(long user_id) {
+        this.userId = user_id;
     }
 }
