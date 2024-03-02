@@ -36,20 +36,20 @@ INSERT INTO tests (docker_image, file_test_id) VALUES
 ('docker/image5', 'file5');
 
 -- Inserting into `group_clusters`
-INSERT INTO group_clusters (course_id, max_size) VALUES
-(1, 4),
-(2, 3),
-(3, 5),
-(4, 2),
-(5, 3);
+INSERT INTO group_clusters (course_id, cluster_name, max_size, group_amount) VALUES
+(1, 'Project: priemgetallen', 4, 20),
+(2, 'Analyse van alkanen', 3, 10),
+(3, 'Groepswerk industriële revolutie', 5, 13),
+(4, 'Linux practica', 2, 100),
+(5, 'Review: A shaskespeare story', 3, 30);
 
 -- Inserting into `groups`
 INSERT INTO groups (group_name, group_cluster) VALUES
-('Group A', 1),
-('Group B', 2),
-('Group C', 3),
-('Group D', 4),
-('Group E', 5);
+('Group 1', 1),
+('Group 2', 2),
+('Group 3', 3),
+('Group 4', 4),
+('Group 5', 5);
 
 -- Inserting into `group_users`
 -- Linking users to groups, assuming group_id and user_id start from 1
@@ -95,4 +95,3 @@ INSERT INTO group_grades (group_id, exercise_id, grade) VALUES
 (3, 3, 92.0),
 (4, 4, 89.0),
 (5, 5, 94.5);
-
