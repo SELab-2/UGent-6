@@ -19,7 +19,7 @@
         public String getUsers() {
             StringBuilder res = new StringBuilder();
             for (UserEntity user : userRepository.findAll()) {
-                res.append(user.getName()).append(" in courses: ");
+                res.append(user.getName()).append("(").append(user.getRole().toString()).append(") in courses: ");
                 for (CourseEntity course : userRepository.findCoursesByUserId(user.getId())) {
                     res.append(course.getName()).append(", ");
                 }

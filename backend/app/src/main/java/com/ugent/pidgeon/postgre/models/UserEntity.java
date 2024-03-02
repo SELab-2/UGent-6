@@ -9,16 +9,26 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class UserEntity {
-    private long id;
-    private String name;
-    private String surname;
-    private String email;
-
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
+    private long id;
+
+    @Column(name = "name", nullable=false)
+    private String name;
+
+    @Column(name = "surname", nullable=false)
+    private String surname;
+
+    @Column(name = "email", nullable=false)
+    private String email;
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+
     public long getId() {
         return id;
     }
@@ -27,7 +37,7 @@ public class UserEntity {
         this.id = id;
     }
 
-    @Column(name = "name", nullable=false)
+
     public String getName() {
         return name;
     }
@@ -36,7 +46,7 @@ public class UserEntity {
         this.name = name;
     }
 
-    @Column(name = "surname", nullable=false)
+
     public String getSurname() {
         return surname;
     }
@@ -45,13 +55,17 @@ public class UserEntity {
         this.surname = surname;
     }
 
-    @Column(name = "email", nullable=false)
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public UserRole getRole() {
+        return role;
     }
 }
 
