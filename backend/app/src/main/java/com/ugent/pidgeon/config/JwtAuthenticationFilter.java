@@ -1,4 +1,4 @@
-package com.ugent.selab2.config;
+package com.ugent.pidgeon.config;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
@@ -8,8 +8,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.ugent.selab2.model.Auth;
-import com.ugent.selab2.model.User;
+import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -30,6 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(String tenantId)
     {
         try {
+            logger.info("tenantId: " + tenantId);
             provider = new UrlJwkProvider(new URL("https://login.microsoftonline.com/"+tenantId+"/discovery/v2.0/keys"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -55,11 +56,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 algorithm.verify(jwt);// if the token signature is invalid, the method will throw SignatureVerificationException
 
                 // get the data from the token
-                String name = jwt.getClaim("name").asString();
-                String email = jwt.getClaim("email").asString();
+                String displayName = jwt.getClaim("name").asString();
+                String firstName = jwt.getClaim("given_name").asString();
+                String lastName = jwt.getClaim("family_name").asString();
+                String email = jwt.getClaim("unique_name").asString();
                 List<String> groups = jwt.getClaim("groups").asList(String.class);
                 String oid = jwt.getClaim("oid").asString();
-                User user = new User(name, email, groups, oid);
+
+                // print full object
+                //logger.info(jwt.getClaims());
+
+
+                User user = new User(displayName, firstName,lastName, email, groups, oid);
 
                 Auth authUser = new Auth(user, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authUser);
@@ -73,8 +81,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 response.setStatus(HttpStatus.UNAUTHORIZED.value()); // Forbidden
             }
-            logger.info("Token: " + token);
-
         } else {
             logger.warn("No token found!");
             response.setStatus(HttpStatus.UNAUTHORIZED.value()); // Unauthorized
