@@ -35,7 +35,7 @@ INSERT INTO files (file_path, file_name, uploaded_by) VALUES
 ('/path/to/file4', 'file4.txt', 4),
 ('/path/to/file5', 'file5.txt', 5);
 
--- Assume tests are created before exercises for foreign key constraints
+-- Assume tests are created before projects for foreign key constraints
 -- Inserting into `tests`
 INSERT INTO tests (docker_image, file_test_id) VALUES
 ('docker/image1', 1),
@@ -69,20 +69,27 @@ INSERT INTO group_users (group_id, user_id) VALUES
 (4, 4),
 (5, 5);
 
--- Inserting into `exercises`
--- Link exercises to courses and tests
-INSERT INTO exercises (course_id, exercise_name, description, group_cluster_id, test_id) VALUES
-(1, 'Math Exercise 1', 'Solve equations', 1, 1),
-(2, 'Science Lab 1', 'Conduct experiment', 2, 2),
-(3, 'History Essay 1', 'Discuss historical event', 3, 3),
-(4, 'Programming Assignment 1', 'Write code', 4, 4),
-(5, 'Literature Analysis', 'Analyze text', 5, 5);
+INSERT INTO projects (course_id, test_id, project_name, description, group_cluster_id, max_score)
+VALUES
+(1, 1, 'Math project 1', 'Solve equations', 1, 20),
+(2, 2, 'Science Lab 1', 'Conduct experiment', 2, 20),
+(3, 3, 'History Essay 1', 'Discuss historical event', 3, NULL),
+(4, 4, 'Programming Assignment 1', 'Write code', 4, 4),
+(5, 5, 'Literature Analysis', 'Analyze text', 5, 10);
 
 
+INSERT INTO deadlines (project_id, deadline)
+VALUES
+(1, '2024-03-10'),
+(2, '2024-03-15'),
+(3, '2024-03-20'),
+(4, '2024-03-25'),
+(5, '2024-03-30'),
+(1, '2024-04-10');
 
 -- Inserting into `solutions`
--- Linking solutions to exercises and groups
-INSERT INTO submissions (exercise_id, group_id, file_id, accepted, submission_time) VALUES
+-- Linking solutions to projects and groups
+INSERT INTO submissions (project_id, group_id, file_id, accepted, submission_time) VALUES
 (1, 1, 1, true ,CURRENT_TIMESTAMP),
 (2, 2, 2, false,CURRENT_TIMESTAMP),
 (3, 3, 3, false,CURRENT_TIMESTAMP),
@@ -91,9 +98,9 @@ INSERT INTO submissions (exercise_id, group_id, file_id, accepted, submission_ti
 
 -- Inserting into `group_grades`
 -- Assign grades to group solutions
-INSERT INTO group_grades (group_id, exercise_id, grade) VALUES
-(1, 1, 95.0),
-(2, 2, 88.5),
-(3, 3, 92.0),
-(4, 4, 89.0),
-(5, 5, 94.5);
+INSERT INTO group_feedback(group_id, project_id, grade, feedback) VALUES
+(1, 1, 95.0, ''),
+(2, 2, 88.5, ''),
+(3, 3, NULL, ''),
+(4, 4, 89.0, ''),
+(5, 5, 94.5, '');

@@ -58,16 +58,27 @@ CREATE TABLE tests (
     file_test_id INT REFERENCES files(file_id)
 );
 
--- Exercises table to store information about exercises within a course
+
+
+-- projects table to store information about projects within a course
 -- test_id points to internal test, possibly a docker or a file structure test.
 
-CREATE TABLE exercises (
-    exercise_id SERIAL PRIMARY KEY,
+CREATE TABLE projects (
+    project_id SERIAL PRIMARY KEY,
     course_id INT REFERENCES courses(course_id),
-    exercise_name VARCHAR(100) NOT NULL,
+    project_name VARCHAR(100) NOT NULL,
     description TEXT,
     group_cluster_id INT REFERENCES group_clusters(group_cluster_id),
-    test_id INT REFERENCES tests(test_id)
+    test_id INT REFERENCES tests(test_id),
+    visible BOOLEAN DEFAULT false NOT NULL,
+    max_score INT
+);
+
+CREATE TABLE deadlines (
+    deadline_id SERIAL PRIMARY KEY,
+    project_id BIGINT,
+    deadline TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects (project_id)
 );
 
 -- Groups table to manage groups of students
@@ -77,22 +88,23 @@ CREATE TABLE groups (
     group_cluster INT REFERENCES group_clusters(group_cluster_id)
 );
 
--- Group grades table to store grades for groups in exercises
-CREATE TABLE group_grades (
+-- Group grades table to store grades for groups in projects
+CREATE TABLE group_feedback (
     group_id INT REFERENCES groups(group_id),
-    exercise_id INT REFERENCES exercises(exercise_id),
-    grade FLOAT NOT NULL,
-    PRIMARY KEY (group_id, exercise_id)
+    project_id INT REFERENCES projects(project_id),
+    grade FLOAT,
+    feedback TEXT,
+    PRIMARY KEY (group_id, project_id)
 );
 
 
 
--- Solutions table to store student or group submissions for exercises
+-- Solutions table to store student or group submissions for projects
 -- Solo projects are done with group clusters with 1 person.
 
 CREATE TABLE submissions (
-    solution_id SERIAL PRIMARY KEY,
-    exercise_id INT REFERENCES exercises(exercise_id),
+    submission_id SERIAL PRIMARY KEY,
+    project_id INT REFERENCES projects(project_id),
     group_id INT REFERENCES groups(group_id),
     file_id INT REFERENCES files(file_id),
     accepted BOOLEAN NOT NULL,
