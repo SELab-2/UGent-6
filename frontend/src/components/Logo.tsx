@@ -10,7 +10,7 @@ const Logo:FC<TitleProps> = (props) => {
 
 
   return <Typography.Title {...props} level={3}>
-    <Link to="/" style={{color:"inherit"}}>Pidgeon</Link>
+    <Link to="/" style={{color:"inherit"}}>Pidgeonhole</Link>
 </Typography.Title>
 }
 
