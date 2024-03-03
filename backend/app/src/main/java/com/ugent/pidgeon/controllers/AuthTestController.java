@@ -3,6 +3,7 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -13,6 +14,10 @@ public class AuthTestController {
         return auth.getUser();
     }
 
+    @PostMapping("/api/test2")
+    public String postTest(){
+        return "Post test succeeded!";
+    }
 
     @GetMapping("/ping")
     public String ping() {

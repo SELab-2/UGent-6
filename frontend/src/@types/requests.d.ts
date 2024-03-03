@@ -20,6 +20,16 @@ export type POST_Requests = {
   }
 }
 
+
+/**
+ * The response you get from the POST request
+ */
+export type POST_Responses = {
+  [ApiRoutes.COURSES]: {
+      id: string
+  }
+}
+
 /**
  * the body of the PUT requests
  */
@@ -29,3 +39,19 @@ export type PUT_Requests = {
   }
 }
 
+/**
+ * The response you get from the GET request
+ */
+export type GET_Responses = {
+  [ApiRoutes.COURSES]: {
+      id: string
+      name: string
+  },
+  [ApiRoutes.TEST]: {
+    name: string
+    firstName: string
+    lastName: string
+    email: string
+    oid: string
+  }
+}
