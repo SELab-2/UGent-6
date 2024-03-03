@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.controllers;
 
+import com.ugent.pidgeon.postgre.models.DeadlineEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
@@ -27,7 +28,10 @@ public class JpaProjectController {
             StringBuilder projectString = new StringBuilder(project.getName());
             Optional<TestEntity> test = testRepository.findById(project.getId());
             test.ifPresent(testEntity -> projectString.append(" with test: ").append(testEntity.getId()));
-
+            projectString.append(" with deadlines: ");
+            for (DeadlineEntity deadline : project.getDeadlines()) {
+                projectString.append(deadline.getDeadline());
+            }
             res.add(projectString.toString());
         }
         return res;

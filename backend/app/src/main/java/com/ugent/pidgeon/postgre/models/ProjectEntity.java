@@ -2,6 +2,7 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 
 
 @Entity
@@ -31,8 +32,8 @@ public class ProjectEntity {
         @Column(name="visible", nullable = false)
         private Boolean projectType;
 
-        @Column(name="deadline", nullable = false)
-        private Timestamp deadline;
+        @OneToMany(mappedBy = "project")
+        private List<DeadlineEntity> deadlines;
 
         @Column(name="max_score")
         private Integer maxScore;
@@ -94,14 +95,9 @@ public class ProjectEntity {
                 this.projectType = projectType;
         }
 
-        public Timestamp getDeadline() {
-                return deadline;
+        public List<DeadlineEntity> getDeadlines() {
+                return deadlines;
         }
-
-        public void setDeadline(Timestamp deadline) {
-                this.deadline = deadline;
-        }
-
         public Integer getMaxScore() {
                 return maxScore;
         }
