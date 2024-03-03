@@ -34,6 +34,17 @@ public class UserEntity {
     @Column(name = "created_at")
     private Timestamp createdAt;
 
+    public UserEntity(String name, String surname, String email, UserRole role, String microsoftToken) {
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.role = role;
+        this.microsoftToken = microsoftToken;
+    }
+
+    public UserEntity() {
+
+    }
 
     public long getId() {
         return id;

@@ -16,6 +16,14 @@ public class GroupUserEntity {
     @Column(name="user_id", nullable=false)
     private long userId;
 
+    public GroupUserEntity() {
+    }
+
+    public GroupUserEntity(long group_id, long user_id) {
+        this.groupId = group_id;
+        this.userId = user_id;
+    }
+
     public long getGroupId() {
         return groupId;
     }

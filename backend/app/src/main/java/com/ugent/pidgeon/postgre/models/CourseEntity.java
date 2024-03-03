@@ -23,7 +23,14 @@ public class CourseEntity {
     @Column(name = "created_at")
     private Timestamp createdAt;
 
+    public CourseEntity(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 
+    public CourseEntity() {
+
+    }
 
     public long getId() {
         return id;

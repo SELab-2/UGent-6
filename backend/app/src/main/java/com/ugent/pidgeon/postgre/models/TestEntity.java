@@ -18,6 +18,14 @@ public class TestEntity {
     @Column(name = "file_test_id")
     private long fileTestId;
 
+    public TestEntity() {
+    }
+
+    public TestEntity(String dockerImage, long fileTestId) {
+        this.dockerImage = dockerImage;
+        this.fileTestId = fileTestId;
+    }
+
 
     public void setId(Long id) {
         this.id = id;

@@ -23,6 +23,16 @@ public class GroupFeedbackEntity {
     @Column(name = "feedback")
     private String feedback;
 
+    public GroupFeedbackEntity() {
+    }
+
+    public GroupFeedbackEntity(long groupId, long projectId, Float grade, String feedback) {
+        this.groupId = groupId;
+        this.projectId = projectId;
+        this.grade = grade;
+        this.feedback = feedback;
+    }
+
     public long getGroupId() {
         return groupId;
     }

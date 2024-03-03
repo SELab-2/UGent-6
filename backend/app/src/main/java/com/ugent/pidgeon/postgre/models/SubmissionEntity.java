@@ -28,6 +28,17 @@ public class SubmissionEntity {
     @Column(name="accepted", nullable=false)
     private Boolean accepted;
 
+    public SubmissionEntity() {
+    }
+
+    public SubmissionEntity(long projectId, long groupId, long fileId, Timestamp submissionTime, Boolean accepted) {
+        this.projectId = projectId;
+        this.groupId = groupId;
+        this.fileId = fileId;
+        this.submissionTime = submissionTime;
+        this.accepted = accepted;
+    }
+
     public long getGroupId() {
         return groupId;
     }
@@ -55,6 +66,7 @@ public class SubmissionEntity {
     public void setAccepted(Boolean accepted) {
         this.accepted = accepted;
     }
+
 
     public long getProjectId() {
         return projectId;

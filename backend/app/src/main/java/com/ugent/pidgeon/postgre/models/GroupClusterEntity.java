@@ -29,6 +29,17 @@ public class GroupClusterEntity {
     @Column(name = "created_at")
     private Timestamp createdAt;
 
+    public GroupClusterEntity(long courseId, int maxSize, String name, int groupAmount) {
+        this.courseId = courseId;
+        this.maxSize = maxSize;
+        this.name = name;
+        this.groupAmount = groupAmount;
+    }
+
+    public GroupClusterEntity() {
+
+    }
+
     public long getId() {
         return id;
     }

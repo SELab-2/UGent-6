@@ -20,6 +20,15 @@ public class FileEntity {
     @Column(name = "uploaded_by", nullable = false)
     private long uploadedBy;
 
+    public FileEntity() {
+    }
+
+    public FileEntity(String name, String path, long uploadedBy) {
+        this.name = name;
+        this.path = path;
+        this.uploadedBy = uploadedBy;
+    }
+
     public long getId() {
         return id;
     }

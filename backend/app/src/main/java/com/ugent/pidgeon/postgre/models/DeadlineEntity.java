@@ -19,6 +19,14 @@ public class DeadlineEntity {
     @Column(name = "deadline")
     private Timestamp deadline;
 
+    public DeadlineEntity() {
+    }
+
+    public DeadlineEntity(ProjectEntity project, Timestamp deadline) {
+        this.project = project;
+        this.deadline = deadline;
+    }
+
     public Long getDeadlineId() {
         return deadlineId;
     }

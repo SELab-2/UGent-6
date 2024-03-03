@@ -38,6 +38,19 @@ public class ProjectEntity {
         @Column(name="max_score")
         private Integer maxScore;
 
+        public ProjectEntity(long courseId, String name, String description, long groupClusterId, long testId, Boolean projectType, Integer maxScore) {
+                this.courseId = courseId;
+                this.name = name;
+                this.description = description;
+                this.groupClusterId = groupClusterId;
+                this.testId = testId;
+                this.projectType = projectType;
+                this.maxScore = maxScore;
+        }
+
+        public ProjectEntity() {
+        }
+
 
         public long getId() {
                 return id;

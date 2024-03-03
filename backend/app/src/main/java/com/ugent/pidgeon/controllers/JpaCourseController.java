@@ -45,13 +45,11 @@ public class JpaCourseController {
         return res.toString();
     }
 
-    @GetMapping("/api/course")
-    public String addCourse(String name, String description) {
-        CourseEntity course = new CourseEntity();
-        course.setId(1);
-        course.setName("Test");
-        course.setDescription("Added for testing update purposes");
-        courseRepository.save(course);
-        return "Course added";
-    }
+//    @GetMapping("/api/course")
+//    public String addCourse(String name, String description) {
+//        CourseEntity course = new CourseEntity("test", "added to test creating with contstructing");
+//        course.setId(1);
+//        courseRepository.save(course);
+//        return "Course added";
+//    }
 }

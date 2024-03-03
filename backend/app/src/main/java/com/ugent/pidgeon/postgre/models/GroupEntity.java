@@ -17,6 +17,15 @@ public class GroupEntity {
     @Column(name="group_cluster", nullable = false)
     private long clusterId;
 
+    public GroupEntity(String name, long clusterId) {
+        this.name = name;
+        this.clusterId = clusterId;
+    }
+
+    public GroupEntity() {
+
+    }
+
     public long getId() {
         return id;
     }

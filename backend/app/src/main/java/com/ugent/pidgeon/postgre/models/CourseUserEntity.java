@@ -22,6 +22,15 @@ public class CourseUserEntity {
     @Enumerated(EnumType.STRING)
     private CourseRelation relation;
 
+    public CourseUserEntity() {
+    }
+
+    public CourseUserEntity(long courseId, long userId, CourseRelation relation) {
+        this.courseId = courseId;
+        this.userId = userId;
+        this.relation = relation;
+    }
+
 
     public long getCourseId() {
         return courseId;
@@ -46,6 +55,8 @@ public class CourseUserEntity {
     public void setRelation(CourseRelation relation) {
         this.relation = relation;
     }
+
+
 }
 
 class CourseUserId implements Serializable {
