@@ -16,9 +16,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
 
-    UserEntity findById(long id);
-
-
     public interface CourseWithRelation {
         CourseEntity getCourse();
         CourseRelation getRelation();

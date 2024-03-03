@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class JpaProjectController {
@@ -24,8 +25,8 @@ public class JpaProjectController {
         List<String> res = new ArrayList<>();
         for (ProjectEntity project : projectRepository.findAll()) {
             StringBuilder projectString = new StringBuilder(project.getName());
-            TestEntity test = testRepository.findById(project.getId());
-            projectString.append(" with test: ").append(test.getId());
+            Optional<TestEntity> test = testRepository.findById(project.getId());
+            test.ifPresent(testEntity -> projectString.append(" with test: ").append(testEntity.getId()));
 
             res.add(projectString.toString());
         }
