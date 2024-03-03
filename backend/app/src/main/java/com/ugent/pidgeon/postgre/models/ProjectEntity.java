@@ -101,4 +101,12 @@ public class ProjectEntity {
         public void setDeadline(Timestamp deadline) {
                 this.deadline = deadline;
         }
+
+        public Integer getMaxScore() {
+                return maxScore;
+        }
+
+        public void setMaxScore(Integer maxScore) {
+                this.maxScore = maxScore;
+        }
 }

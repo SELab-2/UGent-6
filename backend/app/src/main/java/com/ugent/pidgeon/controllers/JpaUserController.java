@@ -1,13 +1,12 @@
     package com.ugent.pidgeon.controllers;
 
     import com.ugent.pidgeon.postgre.models.CourseEntity;
-    import com.ugent.pidgeon.postgre.models.CourseRelation;
+    import com.ugent.pidgeon.postgre.models.types.CourseRelation;
     import com.ugent.pidgeon.postgre.models.UserEntity;
     import com.ugent.pidgeon.postgre.repository.UserRepository;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
     import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.data.util.Pair;
     import org.springframework.web.bind.annotation.GetMapping;
     import org.springframework.web.bind.annotation.RestController;
 

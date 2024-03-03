@@ -1,4 +1,4 @@
-package com.ugent.pidgeon.postgre.models;
+package com.ugent.pidgeon.postgre.models.types;
 
 public enum UserRole {
     student,

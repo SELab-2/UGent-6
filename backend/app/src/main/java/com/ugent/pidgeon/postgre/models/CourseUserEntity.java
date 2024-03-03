@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.postgre.models;
 
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -36,6 +37,14 @@ public class CourseUserEntity {
 
     public void setUserId(long userId) {
         this.userId = userId;
+    }
+
+    public CourseRelation getRelation() {
+        return relation;
+    }
+
+    public void setRelation(CourseRelation relation) {
+        this.relation = relation;
     }
 }
 

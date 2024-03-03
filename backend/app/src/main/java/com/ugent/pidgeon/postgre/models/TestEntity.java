@@ -34,4 +34,12 @@ public class TestEntity {
     public void setDockerImage(String dockerImage) {
         this.dockerImage = dockerImage;
     }
+
+    public long getFileTestId() {
+        return fileTestId;
+    }
+
+    public void setFileTestId(long fileTestId) {
+        this.fileTestId = fileTestId;
+    }
 }

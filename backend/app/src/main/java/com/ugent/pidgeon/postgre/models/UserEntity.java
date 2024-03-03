@@ -1,10 +1,10 @@
 package com.ugent.pidgeon.postgre.models;
 
 
+import com.ugent.pidgeon.postgre.models.types.UserRole;
 import jakarta.persistence.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "users")
@@ -27,6 +27,12 @@ public class UserEntity {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @Column(name = "microsoft_token")
+    private String microsoftToken;
+
+    @Column(name = "created_at")
+    private Timestamp createdAt;
 
 
     public long getId() {
@@ -66,6 +72,22 @@ public class UserEntity {
 
     public UserRole getRole() {
         return role;
+    }
+
+    public String getMicrosoftToken() {
+        return microsoftToken;
+    }
+
+    public void setMicrosoftToken(String microsoftToken) {
+        this.microsoftToken = microsoftToken;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }
 

@@ -55,4 +55,20 @@ public class SubmissionEntity {
     public void setAccepted(Boolean accepted) {
         this.accepted = accepted;
     }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

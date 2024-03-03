@@ -2,6 +2,8 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name="group_clusters")
 public class GroupClusterEntity {
@@ -23,6 +25,9 @@ public class GroupClusterEntity {
 
     @Column(name="group_amount", nullable=false)
     private int groupAmount;
+
+    @Column(name = "created_at")
+    private Timestamp createdAt;
 
     public long getId() {
         return id;
@@ -62,5 +67,13 @@ public class GroupClusterEntity {
 
     public void setGroupAmount(int group_amount) {
         this.groupAmount = group_amount;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }
