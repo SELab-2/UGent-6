@@ -40,6 +40,11 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
-tasks.named('test') {
+tasks.named('test',Test) {
 	useJUnitPlatform()
+      maxHeapSize = '1G'
+
+    testLogging {
+        events "passed"
+    }
 }
