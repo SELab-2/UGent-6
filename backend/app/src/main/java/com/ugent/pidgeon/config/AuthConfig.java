@@ -22,7 +22,7 @@ public class AuthConfig {
 
         FilterRegistrationBean<JwtAuthenticationFilter> filter = new FilterRegistrationBean<>();
         filter.setFilter(new JwtAuthenticationFilter(tenantId));
-        filter.addUrlPatterns("/api/*");
+        filter.addUrlPatterns("/api/ietswatiknietwiltesten");
         return filter;
     }
 
