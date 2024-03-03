@@ -2,9 +2,11 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.CourseRepository;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,9 @@ public class JpaCourseController {
     @Autowired
     private GroupClusterRepository groupClusterRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
     @GetMapping("/api/courses")
     public String getCourses() {
         StringBuilder res = new StringBuilder();
@@ -26,11 +31,15 @@ public class JpaCourseController {
                 String relation = user.getRelation();
                 res.append(userEntity.getName()).append("(").append(relation).append("), ");
             }
-            res.append(" with group cluster");
-            for (GroupClusterEntity groupcluster: groupClusterRepository.findByCourseId((int) course.getId())) {
+            res.append("-  with group clusters:");
+            for (GroupClusterEntity groupcluster: groupClusterRepository.findByCourseId(course.getId())) {
                 res.append(groupcluster.getName()).append(" (").append(groupcluster.getGroupAmount()).append("), ");
             }
-            res.append("\n");
+            res.append("- with projects:");
+            for (ProjectEntity project: projectRepository.findByCourseId(course.getId())) {
+                res.append(project.getName()).append(", ");
+            }
+            res.append("|\n");
         }
 
         return res.toString();

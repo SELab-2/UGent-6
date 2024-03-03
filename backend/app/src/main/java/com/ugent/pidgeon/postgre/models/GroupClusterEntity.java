@@ -10,10 +10,10 @@ public class GroupClusterEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="group_cluster_id", nullable=false)
-    private int id;
+    private long id;
 
     @Column(name="course_id", nullable=false)
-    private int courseId;
+    private long courseId;
 
     @Column(name="max_size", nullable=false)
     private int maxSize;
@@ -24,19 +24,19 @@ public class GroupClusterEntity {
     @Column(name="group_amount", nullable=false)
     private int groupAmount;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public int getCourseId() {
+    public long getCourseId() {
         return courseId;
     }
 
-    public void setCourseId(int course_id) {
+    public void setCourseId(long course_id) {
         this.courseId = course_id;
     }
 

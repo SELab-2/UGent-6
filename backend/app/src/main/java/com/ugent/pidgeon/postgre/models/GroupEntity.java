@@ -15,7 +15,7 @@ public class GroupEntity {
     private String name;
 
     @Column(name="group_cluster", nullable = false)
-    private int cluster;
+    private long clusterId;
 
     public long getId() {
         return id;
@@ -33,11 +33,11 @@ public class GroupEntity {
         this.name = name;
     }
 
-    public int getCluster() {
-        return cluster;
+    public long getClusterId() {
+        return clusterId;
     }
 
-    public void setCluster(int cluster) {
-        this.cluster = cluster;
+    public void setClusterId(int cluster) {
+        this.clusterId = cluster;
     }
 }
