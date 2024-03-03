@@ -1,11 +1,11 @@
 package com.ugent.pidgeon.postgre.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.io.Serializable;
 
 @Entity
+@IdClass(GroupUserId.class)
 @Table(name="group_users")
 public class GroupUserEntity {
     @Id
@@ -31,4 +31,9 @@ public class GroupUserEntity {
     public void setUserId(long user_id) {
         this.userId = user_id;
     }
+}
+
+class GroupUserId implements Serializable {
+    private long groupId;
+    private long userId;
 }

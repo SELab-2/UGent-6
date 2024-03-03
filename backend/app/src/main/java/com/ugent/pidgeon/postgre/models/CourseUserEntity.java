@@ -2,7 +2,10 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
+@IdClass(CourseUserId.class)
 @Table(name="course_users")
 public class CourseUserEntity {
 
@@ -34,4 +37,9 @@ public class CourseUserEntity {
     public void setUserId(long userId) {
         this.userId = userId;
     }
+}
+
+class CourseUserId implements Serializable {
+    private long courseId;
+    private long userId;
 }
