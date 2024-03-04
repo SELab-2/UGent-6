@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@SpringBootApplication(scanBasePackages={"com.ugent.pidgeon","com.ugent.selab2"})
+@SpringBootApplication
 public class PidgeonApplication {
 
 	@RequestMapping("/")
