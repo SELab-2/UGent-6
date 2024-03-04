@@ -12,7 +12,7 @@ public class AuthTestController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/api/test")
+    @GetMapping("/api/temp/test")
     public User testApi(HttpServletRequest request, Auth auth) {
         return auth.getUser();
     }

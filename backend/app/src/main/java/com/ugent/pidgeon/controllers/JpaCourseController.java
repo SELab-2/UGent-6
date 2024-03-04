@@ -21,7 +21,7 @@ public class JpaCourseController {
     @Autowired
     private ProjectRepository projectRepository;
 
-    @GetMapping("/api/courses")
+    @GetMapping("/api/temp/courses")
     public String getCourses() {
         StringBuilder res = new StringBuilder();
         for (CourseEntity course : courseRepository.findAll()) {
