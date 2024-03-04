@@ -60,14 +60,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String firstName = jwt.getClaim("given_name").asString();
                 String lastName = jwt.getClaim("family_name").asString();
                 String email = jwt.getClaim("unique_name").asString();
-                List<String> groups = jwt.getClaim("groups").asList(String.class);
                 String oid = jwt.getClaim("oid").asString();
 
                 // print full object
-                logger.info(jwt.getClaims());
+                // logger.info(jwt.getClaims());
 
 
-                User user = new User(displayName, firstName,lastName, email, groups, oid);
+                User user = new User(displayName, firstName,lastName, email, oid);
 
                 Auth authUser = new Auth(user, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authUser);

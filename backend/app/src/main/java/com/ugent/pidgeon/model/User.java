@@ -8,13 +8,11 @@ public class User {
     public String firstName;
     public String lastName;
     public String email;
-    public List<String> groups; // TODO: remove this
     public String oid;
 
-    public User (String name, String firstName, String lastName, String email, List<String> groups, String oid) {
+    public User (String name, String firstName, String lastName, String email, String oid) {
         this.name = name;
         this.email = email;
-        this.groups = groups;
         this.oid = oid;
         this.firstName = firstName;
         this.lastName = lastName;
