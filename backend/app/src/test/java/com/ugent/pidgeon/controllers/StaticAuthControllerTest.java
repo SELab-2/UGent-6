@@ -18,7 +18,7 @@ public class StaticAuthControllerTest {
     private final List<String> groepLijst = List.of("Groep 1");
 
 
-    private final User user = new User("Tester De Test",
+    private final User user = new User("Tester De Test", "Tester", "De Test",
             "test.testing@gtest.test", groepLijst, "123456");
     private final List<SimpleGrantedAuthority> authLijst = List.of(new SimpleGrantedAuthority("READ_AUTHORITY"));
     private final Auth auth = new Auth(user, authLijst);
