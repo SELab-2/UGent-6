@@ -1,4 +1,4 @@
-package com.ugent.selab2.config;
+package com.ugent.pidgeon.config;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
@@ -8,8 +8,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.ugent.selab2.model.Auth;
-import com.ugent.selab2.model.User;
+import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;

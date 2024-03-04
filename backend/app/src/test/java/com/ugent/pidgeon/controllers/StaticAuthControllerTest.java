@@ -1,8 +1,7 @@
 package com.ugent.pidgeon.controllers;
 
-import com.ugent.selab2.model.User;
-import com.ugent.selab2.model.Auth;
-import com.ugent.selab2.controllers.AuthTestController;
+import com.ugent.pidgeon.model.User;
+import com.ugent.pidgeon.model.Auth;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

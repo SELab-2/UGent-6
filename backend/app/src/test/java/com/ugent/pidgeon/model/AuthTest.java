@@ -1,7 +1,5 @@
 package com.ugent.pidgeon.model;
 
-import com.ugent.selab2.model.Auth;
-import com.ugent.selab2.model.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
