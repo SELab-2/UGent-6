@@ -40,7 +40,7 @@ public class StaticAuthControllerTest {
 //    @Test
 //    void indexTest() throws Exception {
 //        assertEquals(authTestController.index(), "Running...");
-    }
+//    }
 
 //    Werkt voorlopig nog niet
 //    @Test
