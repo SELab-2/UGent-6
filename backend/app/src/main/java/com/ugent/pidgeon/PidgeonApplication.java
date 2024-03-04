@@ -10,11 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 public class PidgeonApplication {
 
-	@RequestMapping("/")
-	public String home(){
-		return "hello world form spring!";
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(PidgeonApplication.class, args);
 	}

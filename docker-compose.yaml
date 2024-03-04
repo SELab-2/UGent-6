@@ -12,19 +12,22 @@ services:
   backend:
     container_name: spring_container
     build: backend/app/
+    depends_on:
+      - db
     ports:
       - 8080:8080
     environment:
-        - 'POSTGRES_DB=pidegon_db'
-    networks:
-        - spring-postgres
-  postgres:
-    container_name: pg_container
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=root
+    restart: always
+  db:
+    container_name: db
     image: 'postgres:latest'
     secrets:
       - db-password
     environment:
-      - 'POSTGRES_DB=pidgeon_db'
+      - 'POSTGRES_PASSWORD=root'
       - 'POSTGRES_USER=admin'
     ports:
       - '5432:5432'
@@ -34,7 +37,7 @@ services:
     container_name: container-pgadmin
     image: dpage/pgadmin4
     depends_on:
-      - postgres
+      - db
     ports:
       - "5050:80"
     environment:
@@ -51,5 +54,3 @@ volumes:
 secrets:
   db-password:
     file: backend/db/password.txt
-networks:
-  spring-postgres:

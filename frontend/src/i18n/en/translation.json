@@ -1,0 +1,10 @@
+{
+  "nav": {
+    "login": "Login",
+    "logout": "Logout",
+    "accountSwitch": "Switch Account",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light"
+  }
+}

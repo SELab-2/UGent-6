@@ -6,6 +6,7 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.List;
+import com.ugent.pidgeon.model.User;
 
 public class Auth extends AbstractAuthenticationToken {
     private static final long serialVersionUID = 620L;
@@ -52,7 +53,10 @@ public class Auth extends AbstractAuthenticationToken {
         return user;
     }
 
-    public List<String> getGroups() {return user.groups;}
+
+    public List<String> getGroups() {
+        return user.groups;
+    }
 
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
         Assert.isTrue(!isAuthenticated, "Cannot set this token to trusted - use constructor which takes a GrantedAuthority list instead");

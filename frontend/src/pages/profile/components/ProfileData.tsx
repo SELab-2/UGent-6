@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ApiRoutes } from "../../../types"
+import { ApiRoutes } from "../../../@types/requests.d"
 import apiCall from "../../../util/apiFetch"
 
 export type GraphData = {
@@ -20,6 +20,8 @@ export const ProfileData: React.FC<{ graphData: GraphData }> = ({ graphData }) =
       setApiResponse(response.data)
     })
   }
+
+  
 
   return (
     <ul className="profileData">

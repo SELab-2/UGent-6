@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 
-// Msal imports
 import { MsalAuthenticationTemplate, useMsal,MsalAuthenticationResult } from "@azure/msal-react";
 import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
 import { loginRequest } from "../../auth/AuthConfig";
-
-// Sample app imports
 import { ProfileData, GraphData } from "./components/ProfileData";
 import { callMsGraph } from "../../auth/MsGraphApiCall";
 
@@ -24,15 +21,20 @@ const ProfileContent = () => {
         if (!graphData && inProgress === InteractionStatus.None) {
             callMsGraph().then(response => setGraphData(response)).catch((e) => {
                 if (e instanceof InteractionRequiredAuthError) {
+
                     instance.acquireTokenRedirect({
                         ...loginRequest,
                         account: instance.getActiveAccount() as AccountInfo
                     });
                 }
-            });
+            }).catch(err => {
+                console.log(err);
+            }) ;
         }
     }, [inProgress, graphData, instance]);
-  
+    
+    
+    console.log(graphData);
     return (
         <div>
             { graphData ? <ProfileData graphData={graphData} /> : null }
@@ -41,10 +43,12 @@ const ProfileContent = () => {
 };
 
 export function Profile() {
+
+
+
     const authRequest = {
         ...loginRequest
     };
-
     return (
         <MsalAuthenticationTemplate 
             interactionType={InteractionType.Redirect} 
