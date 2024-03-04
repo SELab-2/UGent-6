@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ApiRoutes } from "../../../types"
+import { ApiRoutes } from "../../../@types/requests.d"
 import apiCall from "../../../util/apiFetch"
 
 export type GraphData = {

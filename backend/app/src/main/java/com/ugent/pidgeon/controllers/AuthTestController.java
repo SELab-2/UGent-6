@@ -5,6 +5,7 @@ import com.ugent.pidgeon.postgre.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,6 +18,10 @@ public class AuthTestController {
         return auth.getUser();
     }
 
+    @PostMapping("/api/test2")
+    public String postTest(){
+        return "Post test succeeded!";
+    }
 
     @GetMapping("/ping")
     public String ping() {
@@ -25,7 +30,7 @@ public class AuthTestController {
 
     @GetMapping("/")
     public String index() {
-        return "Running!!!...";
+        return "Running...";
     }
 
 }
