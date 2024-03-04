@@ -2,7 +2,7 @@
 -- Skipping this part for brevity as you've already provided it above.
 
 -- Inserting into `users`
-INSERT INTO users (name, surname, email, microsoft_token, role) VALUES
+INSERT INTO users (name, surname, email, azure_id, role) VALUES
 ('John', 'Doe', 'john.doe@example.com', 'token_1', 'student'),
 ('Jane', 'Smith', 'jane.smith@example.com', 'token_2', 'teacher'),
 ('Bob', 'Brown', 'bob.brown@example.com', 'token_3', 'admin'),

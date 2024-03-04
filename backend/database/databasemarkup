@@ -17,7 +17,7 @@ Table users {
   name Varchar(50)
   surname Varchar(50)
   email Varchar(100) [unique]
-  microsoft_token Varchar(255)
+  azure_id Varchar(255)
   role user_role
   created_at Timestamp [default: `CURRENT_TIMESTAMP`]
 }
