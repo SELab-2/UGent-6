@@ -1,6 +1,8 @@
 package com.ugent.pidgeon.controllers;
+import com.ugent.pidgeon.config.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.User;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ public class AuthTestController {
     private UserRepository userRepository;
 
     @GetMapping("/api/test")
+    @Roles({UserRole.student})
     public User testApi(HttpServletRequest request, Auth auth) {
         return auth.getUser();
     }
