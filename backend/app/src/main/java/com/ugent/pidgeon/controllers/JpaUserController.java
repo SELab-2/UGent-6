@@ -16,7 +16,7 @@
         private UserRepository userRepository;
 
         Logger logger = LoggerFactory.getLogger(JpaUserController.class);
-        @GetMapping("/api/users")
+        @GetMapping("/api/temp/users")
         public String getUsers() {
             StringBuilder res = new StringBuilder();
             for (UserEntity user : userRepository.findAll()) {

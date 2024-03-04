@@ -20,7 +20,7 @@ public class JpaSubmissionController {
     @Autowired
     private FileRepository fileRepository;
 
-    @GetMapping("/api/submissions")
+    @GetMapping("/api/temp/submissions")
     public List<String> getSubmissions() {
         List<String> res = new ArrayList<>();
         for (SubmissionEntity submission : submissionRepository.findAll()) {

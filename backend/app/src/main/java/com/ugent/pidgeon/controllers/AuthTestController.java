@@ -15,6 +15,7 @@ public class AuthTestController {
     @Autowired
     private UserRepository userRepository;
 
+
     @GetMapping("/api/test")
     @Roles({UserRole.student})
     public User testApi(HttpServletRequest request, Auth auth) {
