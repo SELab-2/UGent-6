@@ -1,6 +1,8 @@
 package com.ugent.pidgeon.util;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -32,7 +34,6 @@ public class Filehandler {
             // Create directory
             File uploadDirectory = new File(directory.toString());
             if (!uploadDirectory.exists()) {
-                Logger.getLogger("Filehandler").info("Creating directory: " + uploadDirectory);
                 if(!uploadDirectory.mkdirs()) {
                     throw new IOException("Error while creating directory");
                 }
@@ -72,14 +73,7 @@ public class Filehandler {
         }
     }
 
-    public static ZipFile getSubmission(long submissionid) {
-        Path directory = getSubmissionPath(1, 1, submissionid);
-        Path filePath = directory.resolve("files.zip");
-        try {
-            return new ZipFile(filePath.toFile());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static Resource getSubmissionAsResource(Path path) throws IOException {
+        return new InputStreamResource(new FileInputStream(path.toFile()));
     }
 }

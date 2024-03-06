@@ -13,6 +13,14 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
     @Query(value= "SELECT u FROM UserEntity u JOIN GroupUserEntity gu ON u.id = gu.userId WHERE gu.groupId = ?1")
     List<UserEntity> findCourseUsersByGroupId(long id);
 
+    @Query(value = """
+            SELECT CASE WHEN EXISTS (
+                SELECT gu
+                FROM GroupUserEntity gu
+                WHERE gu.userId = ?2 and gu.groupId = ?1
+            ) THEN true ELSE false END""")
+    Boolean userInGroup(long groupId, long userId);
+
 
     @Query(value = """
             SELECT p.id FROM ProjectEntity p
