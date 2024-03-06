@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.util;
 
+import org.apache.tika.Tika;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -48,7 +49,7 @@ public class Filehandler {
 
             return filePath.getFileName().toString();
         } catch (IOException e) {
-            throw new IOException("Error while saving file" + e.getMessage());
+            throw new IOException(e.getMessage());
         }
     }
 
@@ -56,21 +57,17 @@ public class Filehandler {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
-    static boolean isZipFile(File file) throws IOException {
-        try (InputStream inputStream = new FileInputStream(file);
-             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
+    public static boolean isZipFile(File file) throws IOException {
+        // Create a Tika instance
+        Tika tika = new Tika();
 
-            byte[] signature = new byte[4];
-            bufferedInputStream.mark(4);
-            int bytesRead = bufferedInputStream.read(signature);
+        // Detect the file type
+        String fileType = tika.detect(file);
 
-            if (bytesRead != 4) {
-                throw new IOException("Error while reading file");
-            }
+        // Check if the detected file type is a ZIP file
+        Logger.getGlobal().info("File type: " + fileType);
+        return fileType.equals("application/zip") || fileType.equals("application/x-zip-compressed");
 
-            // Check if the file signature matches the ZIP format
-            return (signature[0] == 0x50 && signature[1] == 0x4b && signature[2] == 0x03 && signature[3] == 0x04);
-        }
     }
 
     public static Resource getSubmissionAsResource(Path path) throws IOException {
