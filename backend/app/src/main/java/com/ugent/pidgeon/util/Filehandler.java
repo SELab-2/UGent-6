@@ -3,7 +3,11 @@ package com.ugent.pidgeon.util;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.logging.Logger;
+import java.util.zip.ZipFile;
 
 public class Filehandler {
 
@@ -23,26 +27,28 @@ public class Filehandler {
                 throw new IOException("File is not a ZIP file");
             }
             // Create directory
-            Path directory = getPath(projectid, groupid, submissionid);
+            Path directory = getSubmissionPath(projectid, groupid, submissionid);
             File uploadDirectory = new File(directory.toString());
             if (!uploadDirectory.exists()) {
-                if(!uploadDirectory.mkdir()) {
+                Logger.getLogger("Filehandler").info("Creating directory: " + uploadDirectory);
+                if(!uploadDirectory.mkdirs()) {
                     throw new IOException("Error while creating directory");
                 }
             }
 
             // Save the file to the server
             Path filePath = directory.resolve("files.zip");
-            BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(filePath.toString()));
-            stream.write(file.getBytes());
-            stream.close();
+
+            try(InputStream stream = new FileInputStream(tempFile)) {
+                Files.copy(stream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            }
 
         } catch (IOException e) {
             throw new IOException("Error while saving file" + e.getMessage());
         }
     }
 
-    public Path getPath(long projectid, long groupid, long submissionid) {
+    public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
         return Path.of("projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
@@ -60,6 +66,17 @@ public class Filehandler {
 
             // Check if the file signature matches the ZIP format
             return (signature[0] == 0x50 && signature[1] == 0x4b && signature[2] == 0x03 && signature[3] == 0x04);
+        }
+    }
+
+    public ZipFile getSubmission(long submissionid) {
+        Path directory = getSubmissionPath(1, 1, submissionid);
+        Path filePath = directory.resolve("files.zip");
+        try {
+            return new ZipFile(filePath.toFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
