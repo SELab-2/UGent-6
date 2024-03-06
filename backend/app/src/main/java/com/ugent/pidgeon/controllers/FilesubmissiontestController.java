@@ -4,6 +4,7 @@ import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import com.ugent.pidgeon.util.Filehandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +32,17 @@ public class FilesubmissiontestController {
     private FileRepository fileRepository;
     @Autowired
     private SubmissionRepository submissionRepository;
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @PostMapping("/project/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
     public ResponseEntity<String> submitFile(@RequestParam("file") MultipartFile file, @RequestParam("submissionTime") Timestamp time, @PathVariable("projectid") long projectid) {
         long userId = 1L; //TODO: replace with id of current user
         Long groupId = groupRepository.groupIdByProjectAndUser(projectid, userId);
 
+        if (!projectRepository.userPartOfProject(projectid, userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        }
         //TODO: executes the tests onces these are implemented
         try {
             //Save the file entry in the database to get the id
