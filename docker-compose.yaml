@@ -21,6 +21,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=root
     restart: always
+    volumes:
+      - ./backend/app/data:/data:rw 
   db:
     container_name: db
     image: 'postgres:latest'

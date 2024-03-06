@@ -11,6 +11,8 @@ import java.util.zip.ZipFile;
 
 public class Filehandler {
 
+    static String BASEPATH = "data";
+
     public void saveSubmission(long projectid, long groupid, long submissionid, MultipartFile file) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
@@ -49,7 +51,7 @@ public class Filehandler {
     }
 
     public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
-        return Path.of("projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
+        return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
     private boolean isZipFile(File file) throws IOException {
