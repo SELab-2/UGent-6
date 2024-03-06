@@ -1,6 +1,6 @@
 import { Configuration, PopupRequest } from "@azure/msal-browser"
 
-const hostedOnServer = window.location.hostname === "sel2-6.ugent.be" // For now, gotta change this when ugent auth is fixed
+const hostedOnServer = false && window.location.hostname === "sel2-6.ugent.be" // For now, gotta change this when ugent auth is fixed
 
 // Config object to be passed to Msal on creation
 export const msalConfig: Configuration = {
@@ -11,6 +11,7 @@ export const msalConfig: Configuration = {
     authority: "https://login.microsoftonline.com/d7811cde-ecef-496c-8f91-a1786241b99c", //  "https://login.microsoftonline.com/62835335-e5c4-4d22-98f2-9d5b65a06d9d",
     redirectUri: "/",
     postLogoutRedirectUri: "/",
+    
   },
   system: {
     allowNativeBroker: false,

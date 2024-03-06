@@ -17,7 +17,7 @@ public class AuthTestController {
 
 
     @GetMapping("/api/test")
-    @Roles({UserRole.student}) // <-- Only students can access this endpoint
+    @Roles({UserRole.student, UserRole.teacher})
     public User testApi(HttpServletRequest request, Auth auth) {
         return auth.getUser();
     }

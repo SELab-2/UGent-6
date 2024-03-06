@@ -6,7 +6,11 @@ const UnauthNav = () => {
   const { t } = useTranslation();
   const handleLogin = async () => {
     try {
-      await msalInstance.loginPopup();
+      await msalInstance.loginPopup({
+        scopes: ['openid', 'profile', 'User.Read'],
+      });
+     console.log(msalInstance); 
+      
     } catch (error) {
       console.error(error)
     }
