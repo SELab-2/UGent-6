@@ -20,4 +20,13 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
             JOIN GroupEntity g ON g.clusterId = gc.id
             WHERE g.id = ?1""")
     List<Long> findProjectsByGroupId(long id);
+
+
+    @Query(value = """
+            SELECT g.id FROM GroupEntity g
+            JOIN GroupUserEntity gu ON g.id = gu.groupId
+            JOIN GroupClusterEntity gc ON g.clusterId = gc.id
+            JOIN ProjectEntity p ON p.groupClusterId = gc.id
+            WHERE p.id = ?1 AND gu.userId = ?2""")
+    Long groupIdByProjectAndUser(long projectId, long userId);
 }

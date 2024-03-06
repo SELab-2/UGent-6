@@ -12,8 +12,9 @@ import java.util.zip.ZipFile;
 public class Filehandler {
 
     static String BASEPATH = "data";
+    static String SUBMISSION_FILENAME = "files.zip";
 
-    public void saveSubmission(long projectid, long groupid, long submissionid, MultipartFile file) throws IOException {
+    public static String saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
             throw new IOException("File is empty");
@@ -29,7 +30,6 @@ public class Filehandler {
                 throw new IOException("File is not a ZIP file");
             }
             // Create directory
-            Path directory = getSubmissionPath(projectid, groupid, submissionid);
             File uploadDirectory = new File(directory.toString());
             if (!uploadDirectory.exists()) {
                 Logger.getLogger("Filehandler").info("Creating directory: " + uploadDirectory);
@@ -39,22 +39,23 @@ public class Filehandler {
             }
 
             // Save the file to the server
-            Path filePath = directory.resolve("files.zip");
+            Path filePath = directory.resolve(SUBMISSION_FILENAME);
 
             try(InputStream stream = new FileInputStream(tempFile)) {
                 Files.copy(stream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
+            return filePath.getFileName().toString();
         } catch (IOException e) {
             throw new IOException("Error while saving file" + e.getMessage());
         }
     }
 
-    public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
+    static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
-    private boolean isZipFile(File file) throws IOException {
+    static boolean isZipFile(File file) throws IOException {
         try (InputStream inputStream = new FileInputStream(file);
              BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
 
@@ -71,7 +72,7 @@ public class Filehandler {
         }
     }
 
-    public ZipFile getSubmission(long submissionid) {
+    public static ZipFile getSubmission(long submissionid) {
         Path directory = getSubmissionPath(1, 1, submissionid);
         Path filePath = directory.resolve("files.zip");
         try {
