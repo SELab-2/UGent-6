@@ -1,5 +1,5 @@
 package com.ugent.pidgeon.controllers;
-import com.ugent.pidgeon.config.Roles;
+import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.User;
 import com.ugent.pidgeon.postgre.models.types.UserRole;

@@ -1,4 +1,4 @@
-package com.ugent.pidgeon.config;
+package com.ugent.pidgeon.auth;
 
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 

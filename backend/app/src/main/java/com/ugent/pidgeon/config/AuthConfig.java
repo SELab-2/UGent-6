@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.config;
 
+import com.ugent.pidgeon.auth.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

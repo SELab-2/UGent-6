@@ -1,4 +1,4 @@
-package com.ugent.pidgeon.config;
+package com.ugent.pidgeon.auth;
 
 
 import com.ugent.pidgeon.model.Auth;
@@ -39,9 +39,10 @@ public class RolesInterceptor implements HandlerInterceptor {
                 UserEntity userEntity = userRepository.findUserByAzureId(auth.getOid());
 
                 if(userEntity == null) {
-                    // TODO: Create new user object if user does not exist and add to database
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN,"User not found");
-                    return false;
+                    // TODO: Check if user is a teacher or student (derived from auth object)
+                    System.out.println("User does not exist, creating new one");
+                    userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.student, auth.getOid());
+                    userRepository.save(userEntity);
                 }
 
                 if (!requiredRoles.contains(userEntity.getRole())) {

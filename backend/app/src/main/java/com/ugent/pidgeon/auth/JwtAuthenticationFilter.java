@@ -1,4 +1,4 @@
-package com.ugent.pidgeon.config;
+package com.ugent.pidgeon.auth;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
