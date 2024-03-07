@@ -14,9 +14,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 public class JpaProjectTestController {
@@ -30,49 +34,62 @@ public class JpaProjectTestController {
 
     @PutMapping("/project/{projectid}/tests")
     public ResponseEntity<String> updateTests(
-            @RequestParam("dockerfile") MultipartFile dockerfile,
-            @RequestParam("structurefile") MultipartFile structurefile,
+            @RequestParam("dockerimage") MultipartFile dockerImage,
+            @RequestParam("dockertest") MultipartFile dockerTest,
+            @RequestParam("structuretest") MultipartFile structureTest,
             @PathVariable("projectid") long projectId) {
+        ProjectEntity projectEntity = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
 
-//        // Delete existing test files linked to the current project
-//        deleteExistingTestFiles(projectId);
-//
-//        // Save new test files
-//        FileEntity dockerFileEntity = saveFile(dockerfile);
-//        FileEntity structureFileEntity = saveFile(structurefile);
-//
-//        // Create a new test entity
-//        TestEntity testEntity = new TestEntity();
-//        testEntity.setDockerFile(dockerFileEntity);
-//        testEntity.setStructureFile(structureFileEntity);
-//        testRepository.save(testEntity);
-//
-//        // Update project-test relationship
-//        ProjectEntity projectEntity = projectRepository.findById(projectId)
-//                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
-//        projectEntity.setTests(List.of(testEntity));
-//        projectRepository.save(projectEntity);
+        long userId = 1L; //TODO: replace with id of current user
+        if(!projectRepository.userPartOfProject(projectId, userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        }
+
+        // Assuming the project entity contains a reference to the associated test entity
+        Long testId = projectEntity.getTestId();
+
+        // Update the test entity with the new files
+        TestEntity testEntity = testRepository.findById(testId)
+                .orElseThrow(() -> new IllegalArgumentException("Test not found with id: " + testId));
+        try {
+            // Update the test entity with the new files and upload them to the server.
+            testEntity.setDockerImage(saveTest(dockerImage, projectId, userId));
+            testEntity.setDockerTest(saveTest(dockerTest, projectId, userId));
+            testEntity.setStructureTestId(saveTest(structureTest, projectId, userId));
+
+            // Save the updated test entity
+            testRepository.save(testEntity);
+
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
+        }
 
         return ResponseEntity.ok("Tests updated successfully.");
     }
 
-//    private void deleteExistingTestFiles(long projectId) {
-//        // Retrieve the project entity
-//        ProjectEntity projectEntity = projectRepository.findById(projectId)
-//                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
-//
-//        // Delete existing test files linked to the project
-//        testRepository.deleteAll(existingTests);
-//    }
-//
-//    private FileEntity saveFile(MultipartFile multipartFile) throws IOException {
-//        // Save the file to the database and return the corresponding file entity
-//        // Implement this method according to your file storage mechanism
-//        // For simplicity, let's assume the file is saved directly to the database
-//        FileEntity fileEntity = new FileEntity();
-//        fileEntity.setFileName(multipartFile.getOriginalFilename());
-//        fileEntity.setFileData(multipartFile.getBytes());
-//        return fileRepository.save(fileEntity);
-//    }
+
+    // Hulpfunctie om de testen over te zetten naar de server en de database op de correcte plaats
+    private long saveTest(MultipartFile file, long projectId, long userId) throws IOException {
+        // Check if the file is empty
+        if (file.isEmpty()) {
+            throw new IOException("File is empty");
+        }
+
+        // Create directory if it doesn't exist
+        Path projectDirectory = Paths.get("/data/projects/" + projectId + "/tests/");
+        if (!Files.exists(projectDirectory)) {
+            Files.createDirectories(projectDirectory);
+        }
+
+        // Save the file to the server
+        Path filePath = projectDirectory.resolve(Objects.requireNonNull(file.getOriginalFilename()));
+        Files.write(filePath, file.getBytes());
+
+        // Save the file entity to the database and return its ID
+        FileEntity fileEntity = new FileEntity(file.getOriginalFilename(), filePath.toString(), userId);
+        FileEntity savedFileEntity = fileRepository.save(fileEntity);
+        return savedFileEntity.getId();
+    }
 }
 
