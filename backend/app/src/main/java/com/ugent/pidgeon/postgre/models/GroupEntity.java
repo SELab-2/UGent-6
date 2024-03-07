@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class GroupEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="group_id", nullable=false)
     private long id;
 

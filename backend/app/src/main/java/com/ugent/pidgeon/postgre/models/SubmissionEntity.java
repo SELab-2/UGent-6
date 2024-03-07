@@ -1,15 +1,14 @@
 package com.ugent.pidgeon.postgre.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.sql.Timestamp;
 
 @Entity
 @Table(name="submissions")
 public class SubmissionEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="submission_id", nullable=false)
     private long id;
 
