@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,6 +41,8 @@ public class RolesInterceptor implements HandlerInterceptor {
                 if(userEntity == null) {
                     System.out.println("User does not exist, creating new one");
                     userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.student, auth.getOid());
+                    Timestamp now = new Timestamp(System.currentTimeMillis());
+                    userEntity.setCreatedAt(now);
                     userRepository.save(userEntity);
                 }
                 auth.setUserEntity(userEntity);
