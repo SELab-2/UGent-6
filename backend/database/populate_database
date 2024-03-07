@@ -33,16 +33,26 @@ INSERT INTO files (file_path, file_name, uploaded_by) VALUES
 ('/path/to/file2', 'file2.txt', 2),
 ('/path/to/file3', 'file3.txt', 3),
 ('/path/to/file4', 'file4.txt', 4),
-('/path/to/file5', 'file5.txt', 5);
+('/path/to/file5', 'file5.txt', 1),
+('/path/to/file6', 'file6.txt', 2),
+('/path/to/file7', 'file7.txt', 3),
+('/path/to/file8', 'file8.txt', 4),
+('/path/to/file9', 'file9.txt', 1),
+('/path/to/file10', 'file10.txt', 2),
+('/path/to/file11', 'file11.txt', 3),
+('/path/to/file12', 'file12.txt', 4),
+('/path/to/file13', 'file13.txt', 5),
+('/path/to/file14', 'file14.txt', 4),
+('/path/to/file15', 'file15.txt', 5);
 
 -- Assume tests are created before projects for foreign key constraints
 -- Inserting into `tests`
-INSERT INTO tests (docker_image, file_test_id) VALUES
-('docker/image1', 1),
-('docker/image2', 2),
-('docker/image3', 3),
-('docker/image4', 4),
-('docker/image5', 5);
+INSERT INTO tests (docker_image, docker_test, structure_test_id) VALUES
+(1, 2, 3),
+(4, 5, 6),
+(7, 8, 9),
+(11, 12, 13),
+(10, 14, 15);
 
 -- Inserting into `group_clusters`
 INSERT INTO group_clusters (course_id, cluster_name, max_size, group_amount) VALUES

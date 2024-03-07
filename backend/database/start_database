@@ -54,8 +54,9 @@ CREATE TABLE files (
 -- A id for the docker test and an id for the file test id
 CREATE TABLE tests (
     test_id SERIAL PRIMARY KEY,
-    docker_image VARCHAR(256),
-    file_test_id INT REFERENCES files(file_id)
+    docker_image INT REFERENCES files(file_id),
+    docker_test INT REFERENCES files(file_id),
+    structure_test_id INT REFERENCES files(file_id)
 );
 
 
@@ -121,6 +122,3 @@ CREATE TABLE group_users (
     user_id INT REFERENCES users(user_id),
     PRIMARY KEY (group_id, user_id)
 );
-
-
-
