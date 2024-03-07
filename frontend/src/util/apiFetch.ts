@@ -2,6 +2,7 @@ import { ApiRoutes, GET_Responses, POST_Requests, POST_Responses, PUT_Requests }
 import axios, { AxiosResponse } from "axios";
 import {msalInstance} from "../index";
 import { AxiosRequestConfig } from "axios";
+import { msalConfig } from "../auth/AuthConfig";
 
 
 const serverHost ="http://localhost:8080" // window.location.origin;
@@ -32,7 +33,7 @@ async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "D
 
   if (!accessToken || !tokenExpiry || now >= tokenExpiry) {
     const response = await msalInstance.acquireTokenSilent({
-      scopes: ["39136cda-f02f-4305-9b08-45f132bab07e/.default"], 
+      scopes:  [msalConfig.auth.clientId + "/.default"], 
       account: account
     });
 

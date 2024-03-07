@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.config;
 
+import com.ugent.pidgeon.auth.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +23,7 @@ public class AuthConfig {
 
         FilterRegistrationBean<JwtAuthenticationFilter> filter = new FilterRegistrationBean<>();
         filter.setFilter(new JwtAuthenticationFilter(tenantId));
-        filter.addUrlPatterns("/api/ietswatiknietwiltesten");
+        filter.addUrlPatterns("/api/*");
         return filter;
     }
 

@@ -28,18 +28,18 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @Column(name = "microsoft_token")
-    private String microsoftToken;
+    @Column(name = "azure_id")
+    private String azureId;
 
     @Column(name = "created_at")
     private Timestamp createdAt;
 
-    public UserEntity(String name, String surname, String email, UserRole role, String microsoftToken) {
+    public UserEntity(String name, String surname, String email, UserRole role, String azureId) {
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.role = role;
-        this.microsoftToken = microsoftToken;
+        this.azureId = azureId;
     }
 
     public UserEntity() {
@@ -86,11 +86,11 @@ public class UserEntity {
     }
 
     public String getMicrosoftToken() {
-        return microsoftToken;
+        return azureId;
     }
 
     public void setMicrosoftToken(String microsoftToken) {
-        this.microsoftToken = microsoftToken;
+        this.azureId = microsoftToken;
     }
 
     public Timestamp getCreatedAt() {
