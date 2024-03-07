@@ -1,6 +1,8 @@
 package com.ugent.pidgeon.model;
 
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
@@ -10,6 +12,7 @@ public class Auth extends AbstractAuthenticationToken {
     private static final long serialVersionUID = 620L;
 
     private final User user;
+    private UserEntity userEntity;
 
 
 
@@ -31,12 +34,20 @@ public class Auth extends AbstractAuthenticationToken {
         return user.oid;
     }
 
-    public static org.springframework.security.authentication.UsernamePasswordAuthenticationToken unauthenticated(Object principal, Object credentials) {
-        return new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(principal, credentials);
+    public void setUserEntity(UserEntity user){
+        userEntity = user;
     }
 
-    public static org.springframework.security.authentication.UsernamePasswordAuthenticationToken authenticated(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
-        return new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(principal, credentials, authorities);
+    public UserEntity getUserEntity(){
+        return userEntity;
+    }
+
+    public static UsernamePasswordAuthenticationToken unauthenticated(Object principal, Object credentials) {
+        return new UsernamePasswordAuthenticationToken(principal, credentials);
+    }
+
+    public static UsernamePasswordAuthenticationToken authenticated(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
+        return new UsernamePasswordAuthenticationToken(principal, credentials, authorities);
     }
 
     public Object getCredentials() {

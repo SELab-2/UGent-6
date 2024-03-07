@@ -47,8 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = bearerToken.substring(7);
 
             DecodedJWT jwt = JWT.decode(token);
-            Jwk jwk =null;
-            Algorithm algorithm=null;
+            Jwk jwk;
+            Algorithm algorithm;
 
             try {
                 jwk = provider.get(jwt.getKeyId());

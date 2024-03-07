@@ -35,15 +35,14 @@ public class RolesInterceptor implements HandlerInterceptor {
             if (rolesAnnotation != null) {
                 List<UserRole> requiredRoles = Arrays.asList(rolesAnnotation.value());
                 Auth auth = (Auth) SecurityContextHolder.getContext().getAuthentication();
-                System.out.println(auth.getOid());
                 UserEntity userEntity = userRepository.findUserByAzureId(auth.getOid());
 
                 if(userEntity == null) {
-                    // TODO: Check if user is a teacher or student (derived from auth object)
                     System.out.println("User does not exist, creating new one");
                     userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.student, auth.getOid());
                     userRepository.save(userEntity);
                 }
+                auth.setUserEntity(userEntity);
 
                 if (!requiredRoles.contains(userEntity.getRole()) || userEntity.getRole() == UserRole.admin) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "User does not have required role");

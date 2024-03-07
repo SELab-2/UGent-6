@@ -1,7 +1,10 @@
 package com.ugent.pidgeon.controllers;
 
+import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.CourseWithRelationJson;
 import com.ugent.pidgeon.model.json.UserJson;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +20,7 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping(ApiRoutes.USER_BASE_PATH + "{userid}")
+    @Roles({UserRole.student, UserRole.teacher})
     public UserJson getUserById(@PathVariable("userid") Long userid) {
         UserJson res = userRepository.findById(userid).map(UserJson::new).orElse(null);
         if (res == null) {
