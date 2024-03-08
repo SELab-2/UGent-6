@@ -38,7 +38,7 @@ public class JpaProjectTestController {
     private TestRepository testRepository;
 
     @PutMapping("/project/{projectid}/tests")
-    //@Roles({UserRole.teacher})
+    @Roles({UserRole.teacher})
     public ResponseEntity<String> updateTests(
             @RequestParam("dockerimage") String dockerImage,
             @RequestParam("dockertest") MultipartFile dockerTest,
@@ -49,7 +49,7 @@ public class JpaProjectTestController {
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
 
-        long userId = 1;//auth.getUserEntity().getId();
+        long userId = auth.getUserEntity().getId();
         if(!projectRepository.userPartOfProject(projectId, userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
