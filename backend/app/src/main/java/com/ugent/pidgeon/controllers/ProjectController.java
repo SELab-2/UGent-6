@@ -1,19 +1,21 @@
 package com.ugent.pidgeon.controllers;
 
+import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.postgre.models.DeadlineEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @RestController
@@ -24,38 +26,36 @@ public class ProjectController {
     @Autowired
     private TestRepository testRepository;
 
-    @GetMapping("/api/projects/{projectId}")
-    public ResponseEntity<ProjectEntity> getProjectById(@PathVariable Long projectId) {
-        return projectRepository.findById(projectId)
-                .map(project -> ResponseEntity.ok().body(project)) // Return the project as JSON
-                .orElseGet(() -> ResponseEntity.notFound().build()); // Or return 404 if not found
-    }
-
-    @GetMapping("/api/projects/{courseId}")
-    public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(@PathVariable Long courseId) {
-        List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
-        if (projects.isEmpty()) {
-            return ResponseEntity.notFound().build(); // Or return an empty list, based on your preference
-        }
-        return ResponseEntity.ok(projects);
-    }
-
-
-
     @GetMapping("/api/projects")
-    public List<String> getProjects() {
-        List<String> res = new ArrayList<>();
-        for (ProjectEntity project : projectRepository.findAll()) {
-            StringBuilder projectString = new StringBuilder(project.getName());
-            Optional<TestEntity> test = testRepository.findById(project.getId());
-            test.ifPresent(testEntity -> projectString.append(" with test: ").append(testEntity.getId()));
-            projectString.append(" with deadlines: ");
-            for (DeadlineEntity deadline : project.getDeadlines()) {
-                projectString.append(deadline.getDeadline());
-            }
-            res.add(projectString.toString());
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getProjects() {
+        List<ProjectEntity> allProjects = projectRepository.findAll();
+        List<Map<String, String>> projectsWithUrls = new ArrayList<>();
+
+        for (ProjectEntity project : allProjects) {
+            Map<String, String> projectInfo = new HashMap<>();
+            projectInfo.put("name", project.getName());
+            projectInfo.put("url", "/api/projects/" + project.getId());
+            projectsWithUrls.add(projectInfo);
         }
-        return res;
+
+        return ResponseEntity.ok().body(projectsWithUrls);
     }
+
+    @GetMapping("/api/projects/{projectId}")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
+        return projectRepository.findById(projectId)
+                .map(project -> {
+                    long userId = auth.getUserEntity().getId();
+                    if (!projectRepository.userPartOfProject(projectId, userId)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                    } else {
+                        return ResponseEntity.ok().body(project);
+                    }
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
 }
