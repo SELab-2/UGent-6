@@ -1,32 +1,52 @@
-
-
-
 /**
  * Routes used to make API calls
  */
 export enum ApiRoutes {
-  COURSES = "api/courses",  // example
-   TEST = "api/test"
+  COURSES = "api/courses",
+  COURSE = "api/courses/:id",
+  COURSE_MEMBERS = "api/courses/:id/users",
+  COURSE_MEMBER = "api/courses/:id/users/:userId",
+  COURSE_PROJECTS = "api/courses/:id/projects",
+  COURSE_CLUSTERS = "api/courses/:id/clusters",
+
+  PROJECT = "api/projects/:id",
+  PROJECT_TESTS = "api/projects/:id/tests",
+  PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
+  PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",
+  PROJECT_GROUP = "api/projects/:id/groups/:groupId",
+
+  SUBMISSION = "api/submissions/:id",
+  SUBMISSION_FILE = "api/submissions/:id/file",
+
+  CLUSTER = "api/cluster/:id",
+  CLUSTER_GROUPS = "api/cluster/:id/groups",
+
+  GROUP = "api/groups/:id",
+  GROUP_MEMBERS = "api/groups/:id/users", // <-- /members in apidog, maybe change to /users for consistency
+  GROUP_MEMBER = "api/groups/:id/users/:userId", // <-- /members in apidog, maybe change to /users for consistency
+
+  TEST = "api/test",
+  USER = "api/users/:id",
 }
 
 
+export type Timestamp = number
 
 /**
  *  the body of the POST requests
  */
 export type POST_Requests = {
   [ApiRoutes.COURSES]: {
-      name: string
+    name: string
   }
 }
-
 
 /**
  * The response you get from the POST request
  */
 export type POST_Responses = {
   [ApiRoutes.COURSES]: {
-      id: string
+    id: string
   }
 }
 
@@ -35,23 +55,100 @@ export type POST_Responses = {
  */
 export type PUT_Requests = {
   [ApiRoutes.COURSES]: {
-      name: string
+    name: string
   }
 }
+
+type Teacher = {
+  name: string;
+  surname: string;
+  url: string;
+}
+
+type  Course = {
+  course_url: string;
+  name: string;
+}
+
 
 /**
  * The response you get from the GET request
  */
 export type GET_Responses = {
   [ApiRoutes.COURSES]: {
-      id: string
-      name: string
-  },
+    id: number;
+    name: string;
+    url: string;
+  }[],
   [ApiRoutes.TEST]: {
     name: string
     firstName: string
     lastName: string
     email: string
     oid: string
+  }
+  [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][],
+  [ApiRoutes.SUBMISSION]: {
+    description: string
+    id: string
+    project_url: string
+    submitted_file_url: string
+    submitted_time: Timestamp
+    title: string
+  }
+  [ApiRoutes.SUBMISSION_FILE]: FormData
+  [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][],
+  [ApiRoutes.PROJECT]: {
+    course: string
+    deadline: Timestamp
+    description: string
+    id: string
+    name: string
+    submission_url: string
+    tests_url: string
+  },
+  [ApiRoutes.PROJECT_TESTS]: {} // ?? 
+  [ApiRoutes.GROUP]: {
+    capacity: number;
+    id: string;
+    members_amount: number;
+    members_url: string;
+    name: string;
+  }
+  [ApiRoutes.CLUSTER_GROUPS]: {
+    course_url: string;
+    groups: Group[];
+    id: string;
+    name: string;
+  }[],
+  [ApiRoutes.PROJECT_SCORE]: {
+    score: number
+  },
+
+  [ApiRoutes.GROUP_MEMBER]: {
+    id: string;
+    name: string;
+    surname: string;
+    url: string;
+  }
+  [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][],
+  [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][],
+
+  [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][],
+  [ApiRoutes.CLUSTER]: GET_Responses[ApiRoutes.CLUSTER_GROUPS],
+  [ApiRoutes.COURSE]: {
+    description: string;
+    id: string;
+    members_url: string;
+    name: string;
+    teachers: Teacher[]; // Changed this 
+  },
+  [ApiRoutes.COURSE_MEMBERS]:  GET_Responses[ApiRoutes.GROUP_MEMBER],
+  [ApiRoutes.USER]: {
+    courses: Course[];
+    email: string;
+    id: string;
+    name: string;
+    surname: string;
   }
 }
