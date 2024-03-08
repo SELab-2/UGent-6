@@ -50,9 +50,9 @@ INSERT INTO files (file_path, file_name, uploaded_by) VALUES
 INSERT INTO tests (docker_image, docker_test, structure_test_id) VALUES
 ('docker/image1', 2, 3),
 ('docker/image2', 5, 6),
-('docker/image3', 7, 8, 9),
-('docker/image4', 11, 12, 13),
-('docker/image5', 10, 14, 15);
+('docker/image3', 8, 9),
+('docker/image4', 12, 13),
+('docker/image5', 14, 15);
 
 -- Inserting into `group_clusters`
 INSERT INTO group_clusters (course_id, cluster_name, max_size, group_amount) VALUES
