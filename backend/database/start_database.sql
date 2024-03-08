@@ -54,7 +54,7 @@ CREATE TABLE files (
 -- A id for the docker test and an id for the file test id
 CREATE TABLE tests (
     test_id SERIAL PRIMARY KEY,
-    docker_image INT REFERENCES files(file_id),
+    docker_image VARCHAR(256),
     docker_test INT REFERENCES files(file_id),
     structure_test_id INT REFERENCES files(file_id)
 );
