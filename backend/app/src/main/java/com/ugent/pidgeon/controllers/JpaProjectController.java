@@ -21,7 +21,7 @@ public class JpaProjectController {
     @Autowired
     private TestRepository testRepository;
 
-    @GetMapping("/api/projects")
+    @GetMapping("/api/temp/projects")
     public List<String> getProjects() {
         List<String> res = new ArrayList<>();
         for (ProjectEntity project : projectRepository.findAll()) {
