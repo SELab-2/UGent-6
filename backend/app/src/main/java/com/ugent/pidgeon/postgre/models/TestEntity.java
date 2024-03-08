@@ -13,7 +13,7 @@ public class TestEntity {
     private long id;
 
     @Column(name = "docker_image")
-    private long dockerImage;
+    private String dockerImage;
 
     @Column(name = "docker_test")
     private long dockerTest;
@@ -24,7 +24,7 @@ public class TestEntity {
     public TestEntity() {
     }
 
-    public TestEntity(long dockerImage, long dockerTest, long structureTestId) {
+    public TestEntity(String dockerImage, long dockerTest, long structureTestId) {
         this.dockerImage = dockerImage;
         this.dockerTest = dockerTest;
         this.structureTestId = structureTestId;
@@ -39,11 +39,11 @@ public class TestEntity {
         return id;
     }
 
-    public long getDockerImage() {
+    public String getDockerImage() {
         return dockerImage;
     }
 
-    public void setDockerImage(long dockerImage) {
+    public void setDockerImage(String dockerImage) {
         this.dockerImage = dockerImage;
     }
 

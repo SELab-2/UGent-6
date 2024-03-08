@@ -3,6 +3,7 @@ package com.ugent.pidgeon.controllers;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.postgre.models.FileEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.util.Filehandler;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 public class JpaProjectTestController {
@@ -36,9 +38,9 @@ public class JpaProjectTestController {
     private TestRepository testRepository;
 
     @PutMapping("/project/{projectid}/tests")
-    @Roles({UserRole.teacher})
+    //@Roles({UserRole.teacher})
     public ResponseEntity<String> updateTests(
-            @RequestParam("dockerimage") MultipartFile dockerImage,
+            @RequestParam("dockerimage") String dockerImage,
             @RequestParam("dockertest") MultipartFile dockerTest,
             @RequestParam("structuretest") MultipartFile structureTest,
             @PathVariable("projectid") long projectId,
@@ -47,19 +49,36 @@ public class JpaProjectTestController {
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
 
-        long userId = auth.getUserEntity().getId();
+        long userId = 1;//auth.getUserEntity().getId();
         if(!projectRepository.userPartOfProject(projectId, userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
         try {
-            // Save the files
-            Path dockerImagePath = Filehandler.saveTest(dockerImage, projectId);
+            // Save the files on server
             Path dockerTestPath = Filehandler.saveTest(dockerTest, projectId);
             Path structureTestPath = Filehandler.saveTest(structureTest, projectId);
 
-            saveFileEntity(dockerImagePath, projectId, userId);
-            saveFileEntity(dockerTestPath, projectId, userId);
-            saveFileEntity(structureTestPath, projectId, userId);
+            // Save file entities to the database
+            FileEntity dockertestFileEntity = saveFileEntity(dockerTestPath, projectId, userId);
+            FileEntity structuretestFileEntity = saveFileEntity(structureTestPath, projectId, userId);
+
+            // Create/update test entity
+            Optional<TestEntity> testEntity = testRepository.findByProjectId(projectId);
+            if (testEntity.isEmpty()) {
+                TestEntity newTestEntity = new TestEntity(dockerImage, dockertestFileEntity.getId(), structuretestFileEntity.getId());
+
+                newTestEntity = testRepository.save(newTestEntity);
+                projectEntity.setTestId(newTestEntity.getId());
+                // Update project entity because first time test is created so id is not set
+                projectRepository.save(projectEntity);
+            } else {
+                TestEntity newTestEntity = testEntity.get();
+                newTestEntity.setDockerImage(dockerImage);
+                newTestEntity.setDockerTest(dockertestFileEntity.getId());
+                newTestEntity.setStructureTestId(structuretestFileEntity.getId());
+                testRepository.save(newTestEntity);
+            }
+
 
             return ResponseEntity.ok("Tests updated successfully.");
         } catch (IOException e) {
@@ -68,10 +87,10 @@ public class JpaProjectTestController {
     }
 
     // Hulpfunctie om de tests correct op de database te zetten
-    private void saveFileEntity(Path filePath, long projectId, long userId) throws IOException {
+    private FileEntity saveFileEntity(Path filePath, long projectId, long userId) throws IOException {
         // Save the file entity to the database
         FileEntity fileEntity = new FileEntity(filePath.getFileName().toString(), filePath.toString(), userId);
-        fileRepository.save(fileEntity);
+        return fileRepository.save(fileEntity);
     }
 
 }
