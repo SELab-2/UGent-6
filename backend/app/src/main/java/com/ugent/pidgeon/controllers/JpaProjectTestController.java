@@ -1,8 +1,11 @@
 package com.ugent.pidgeon.controllers;
 
+import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.postgre.models.FileEntity;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
+import com.ugent.pidgeon.util.Filehandler;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
-import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
@@ -33,63 +36,43 @@ public class JpaProjectTestController {
     private TestRepository testRepository;
 
     @PutMapping("/project/{projectid}/tests")
+    @Roles({UserRole.teacher})
     public ResponseEntity<String> updateTests(
             @RequestParam("dockerimage") MultipartFile dockerImage,
             @RequestParam("dockertest") MultipartFile dockerTest,
             @RequestParam("structuretest") MultipartFile structureTest,
-            @PathVariable("projectid") long projectId) {
+            @PathVariable("projectid") long projectId,
+            Auth auth) {
+
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
 
-        long userId = 1L; //TODO: replace with id of current user
+        long userId = auth.getUserEntity().getId();
         if(!projectRepository.userPartOfProject(projectId, userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
-
-        // Assuming the project entity contains a reference to the associated test entity
-        Long testId = projectEntity.getTestId();
-
-        // Update the test entity with the new files
-        TestEntity testEntity = testRepository.findById(testId)
-                .orElseThrow(() -> new IllegalArgumentException("Test not found with id: " + testId));
         try {
-            // Update the test entity with the new files and upload them to the server.
-            testEntity.setDockerImage(saveTest(dockerImage, projectId, userId));
-            testEntity.setDockerTest(saveTest(dockerTest, projectId, userId));
-            testEntity.setStructureTestId(saveTest(structureTest, projectId, userId));
+            // Save the files
+            Path dockerImagePath = Filehandler.saveTest(dockerImage, projectId);
+            Path dockerTestPath = Filehandler.saveTest(dockerTest, projectId);
+            Path structureTestPath = Filehandler.saveTest(structureTest, projectId);
 
-            // Save the updated test entity
-            testRepository.save(testEntity);
+            saveFileEntity(dockerImagePath, projectId, userId);
+            saveFileEntity(dockerTestPath, projectId, userId);
+            saveFileEntity(structureTestPath, projectId, userId);
 
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
+            return ResponseEntity.ok("Tests updated successfully.");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving files: " + e.getMessage());
         }
-
-        return ResponseEntity.ok("Tests updated successfully.");
     }
 
-
-    // Hulpfunctie om de testen over te zetten naar de server en de database op de correcte plaats
-    private long saveTest(MultipartFile file, long projectId, long userId) throws IOException {
-        // Check if the file is empty
-        if (file.isEmpty()) {
-            throw new IOException("File is empty");
-        }
-
-        // Create directory if it doesn't exist
-        Path projectDirectory = Paths.get("/data/projects/" + projectId + "/tests/");
-        if (!Files.exists(projectDirectory)) {
-            Files.createDirectories(projectDirectory);
-        }
-
-        // Save the file to the server
-        Path filePath = projectDirectory.resolve(Objects.requireNonNull(file.getOriginalFilename()));
-        Files.write(filePath, file.getBytes());
-
-        // Save the file entity to the database and return its ID
-        FileEntity fileEntity = new FileEntity(file.getOriginalFilename(), filePath.toString(), userId);
-        FileEntity savedFileEntity = fileRepository.save(fileEntity);
-        return savedFileEntity.getId();
+    // Hulpfunctie om de tests correct op de database te zetten
+    private void saveFileEntity(Path filePath, long projectId, long userId) throws IOException {
+        // Save the file entity to the database
+        FileEntity fileEntity = new FileEntity(filePath.getFileName().toString(), filePath.toString(), userId);
+        fileRepository.save(fileEntity);
     }
+
 }
 
