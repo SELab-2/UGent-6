@@ -10,6 +10,10 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.User;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -22,13 +26,20 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class extends OncePerRequestFilter to provide a filter that decodes and verifies JWT tokens.
+ * It uses JwkProvider to fetch the public key for verification.
+ */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    // JwkProvider instance to fetch the public key for JWT verification
     private JwkProvider provider;
 
-
-
-    public JwtAuthenticationFilter(String tenantId)
-    {
+    /**
+     * Constructor for JwtAuthenticationFilter.
+     * It initializes the JwkProvider with the URL of the public key.
+     * @param tenantId the tenantId used to construct the URL of the public key
+     */
+    public JwtAuthenticationFilter(String tenantId) {
         try {
             logger.info("tenantId: " + tenantId);
             provider = new UrlJwkProvider(new URL("https://login.microsoftonline.com/"+tenantId+"/discovery/v2.0/keys"));
@@ -38,8 +49,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
+    /**
+     * This method is called for every request to filter requests based on JWT token.
+     * It decodes the JWT token from the Authorization header, verifies it, and sets the authentication in the SecurityContext.
+     * If the JWT token is not present or invalid, it sets the response status to UNAUTHORIZED.
+     * @param request HttpServletRequest that is being processed
+     * @param response HttpServletResponse that is being created
+     * @param filterChain FilterChain for calling the next filter
+     * @throws jakarta.servlet.ServletException in case of errors
+     * @throws IOException in case of I/O errors
+     */
     @Override
-    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, jakarta.servlet.FilterChain filterChain) throws jakarta.servlet.ServletException, IOException {
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         logger.info(request.getRequestURL().toString());
 
         String bearerToken = request.getHeader("Authorization");

@@ -33,6 +33,7 @@ public class UserController {
                         ApiRoutes.COURSE_BASE_PATH + c.getCourseId(),
                             c.getRelation()
                 )).toList());
+        System.out.println(res);
         return res;
     }
 
