@@ -61,6 +61,10 @@ public class Filehandler {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
+    static public Path getTestPath(long projectid) {
+        return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
+    }
+
     public static boolean isZipFile(File file) throws IOException {
         // Create a Tika instance
         Tika tika = new Tika();
@@ -86,7 +90,7 @@ public class Filehandler {
         }
 
         // Create directory if it doesn't exist
-        Path projectDirectory = Paths.get("/data/projects/" + projectId + "/tests/");
+        Path projectDirectory = getTestPath(projectId);
         if (!Files.exists(projectDirectory)) {
             Files.createDirectories(projectDirectory);
         }
