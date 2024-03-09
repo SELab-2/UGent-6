@@ -1,5 +1,7 @@
 package com.ugent.pidgeon.util;
 
+import com.ugent.pidgeon.postgre.models.FileEntity;
+import com.ugent.pidgeon.postgre.repository.FileRepository;
 import org.apache.tika.Tika;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,7 +10,9 @@ import org.springframework.core.io.Resource;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.zip.ZipFile;
 
@@ -57,6 +61,10 @@ public class Filehandler {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
+    static public Path getTestPath(long projectid) {
+        return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
+    }
+
     public static boolean isZipFile(File file) throws IOException {
         // Create a Tika instance
         Tika tika = new Tika();
@@ -72,5 +80,25 @@ public class Filehandler {
 
     public static Resource getSubmissionAsResource(Path path) throws IOException {
         return new InputStreamResource(new FileInputStream(path.toFile()));
+    }
+
+    // Hulpfunctie om de testbestanden over te zetten naar de server
+    public static Path saveTest(MultipartFile file, long projectId) throws IOException {
+        // Check if the file is empty
+        if (file.isEmpty()) {
+            throw new IOException("File is empty");
+        }
+
+        // Create directory if it doesn't exist
+        Path projectDirectory = getTestPath(projectId);
+        if (!Files.exists(projectDirectory)) {
+            Files.createDirectories(projectDirectory);
+        }
+
+        // Save the file to the server
+        Path filePath = projectDirectory.resolve(Objects.requireNonNull(file.getOriginalFilename()));
+        Files.write(filePath, file.getBytes());
+
+        return filePath;
     }
 }
