@@ -19,7 +19,7 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping(ApiRoutes.USER_BASE_PATH + "{userid}")
+    @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
     @Roles({UserRole.student, UserRole.teacher})
     public UserJson getUserById(@PathVariable("userid") Long userid) {
         UserJson res = userRepository.findById(userid).map(UserJson::new).orElse(null);

@@ -10,6 +10,13 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     List<ProjectEntity> findByCourseId(long courseId);
 
     @Query(value = """
+          SELECT p FROM ProjectEntity p
+            JOIN GroupClusterEntity gc ON p.groupClusterId = gc.id
+            JOIN GroupEntity g on gc.id = g.clusterId
+            JOIN GroupUserEntity gu on gu.groupId = g.id
+            WHERE gu.userId = ?1""")
+    List<ProjectEntity> findProjectsByUserId(long userId);
+    @Query(value = """
             SELECT CASE WHEN EXISTS (
                 SELECT gu
                 FROM GroupUserEntity gu

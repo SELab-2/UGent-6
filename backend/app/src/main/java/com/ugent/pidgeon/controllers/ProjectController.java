@@ -28,8 +28,9 @@ public class ProjectController {
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getProjects() {
-        List<ProjectEntity> allProjects = projectRepository.findAll();
+    public ResponseEntity<?> getProjects(Auth auth) {
+        long userid = auth.getUserEntity().getId();
+        List<ProjectEntity> allProjects = projectRepository.findProjectsByUserId(userid);
         List<Map<String, String>> projectsWithUrls = new ArrayList<>();
 
         for (ProjectEntity project : allProjects) {
@@ -42,7 +43,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(projectsWithUrls);
     }
 
-    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "{projectId}")
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
         return projectRepository.findById(projectId)
