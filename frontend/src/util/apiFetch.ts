@@ -20,7 +20,7 @@ let tokenExpiry: Date | null = null;
  * const newCourse = await apiFetch("POST", ApiRoutes.COURSES, { name: "New Course" });
  * 
  */
-async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "DELETE", route: T, body?: any): Promise<AxiosResponse<any, any>>  {
+async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", route: T, body?: any): Promise<AxiosResponse<any, any>>  {
 
   const account = msalInstance.getActiveAccount();
 
@@ -67,7 +67,8 @@ const apiCall = {
   get: async <T extends keyof GET_Responses>(route: T) => apiFetch("GET", route) as Promise<AxiosResponse<GET_Responses[T]>>,
   post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T]) => apiFetch("POST", route, body) as  Promise<AxiosResponse<POST_Responses[T]>>,
   put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T]) => apiFetch("PUT", route, body),
-  delete: async <T extends ApiRoutes>(route: T) => apiFetch("DELETE", route) 
+  delete: async <T extends ApiRoutes>(route: T) => apiFetch("DELETE", route),
+  patch : async <T extends keyof PUT_Requests>(route: T, body: Partial<PUT_Requests[T]>) => apiFetch("PATCH", route)
 }
 
 export default apiCall;

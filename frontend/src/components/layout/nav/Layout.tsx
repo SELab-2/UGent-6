@@ -45,8 +45,8 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
       <AntLayout style={{ height: "calc(100vh - 48px)", overflow: "auto" }}>
         <AntLayout.Content>{children}</AntLayout.Content>
 
-        <AntLayout.Footer></AntLayout.Footer>
       </AntLayout>
+        <AntLayout.Footer style={{background:"red",position:"relative"}}>.</AntLayout.Footer>
     </div>
   )
 }

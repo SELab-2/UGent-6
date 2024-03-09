@@ -85,6 +85,10 @@ public class UserEntity {
         return role;
     }
 
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
     public String getMicrosoftToken() {
         return azureId;
     }
