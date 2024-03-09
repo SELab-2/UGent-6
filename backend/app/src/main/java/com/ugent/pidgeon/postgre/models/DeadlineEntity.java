@@ -12,9 +12,8 @@ public class DeadlineEntity {
     @Column(name = "deadline_id")
     private Long deadlineId;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private ProjectEntity project;
+    @Column(name = "project_id")
+    private long projectId;
 
     @Column(name = "deadline")
     private Timestamp deadline;
@@ -22,8 +21,8 @@ public class DeadlineEntity {
     public DeadlineEntity() {
     }
 
-    public DeadlineEntity(ProjectEntity project, Timestamp deadline) {
-        this.project = project;
+    public DeadlineEntity(long projectId, Timestamp deadline) {
+        this.projectId = projectId;
         this.deadline = deadline;
     }
 
@@ -35,12 +34,12 @@ public class DeadlineEntity {
         this.deadlineId = deadlineId;
     }
 
-    public ProjectEntity getProject() {
-        return project;
+    public long getProjectId() {
+        return projectId;
     }
 
-    public void setProject(ProjectEntity project) {
-        this.project = project;
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
     }
 
     public Timestamp getDeadline() {

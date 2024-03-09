@@ -26,7 +26,7 @@ public class JpaGroupController {
     @Autowired
     SubmissionRepository submissionRepository;
 
-    @GetMapping("/api/groups")
+    @GetMapping("/api/temp/groups")
     public List<String> getGroups() {
         List<String> res = new ArrayList<>();
         for (GroupEntity group : groupRepository.findAll()) {
