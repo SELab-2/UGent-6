@@ -22,7 +22,7 @@ public class CourseController {
     @Autowired
     private TestRepository testRepository;
 
-    @GetMapping("/api/courses/{courseId}")
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(@PathVariable Long courseId) {
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);

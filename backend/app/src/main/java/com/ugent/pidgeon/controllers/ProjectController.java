@@ -26,7 +26,7 @@ public class ProjectController {
     @Autowired
     private TestRepository testRepository;
 
-    @GetMapping("/api/projects")
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjects() {
         List<ProjectEntity> allProjects = projectRepository.findAll();
@@ -42,7 +42,7 @@ public class ProjectController {
         return ResponseEntity.ok().body(projectsWithUrls);
     }
 
-    @GetMapping("/api/projects/{projectId}")
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "{projectId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
         return projectRepository.findById(projectId)
