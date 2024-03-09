@@ -75,7 +75,7 @@ public class UserControllerTest {
 
 
         long userId = 1L;
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USER_BASE_PATH + userId))
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USER_BASE_PATH + "/" + userId))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(Matchers.not(Matchers.emptyString()))) // If body is empty, it means it returned null
                 .andReturn();

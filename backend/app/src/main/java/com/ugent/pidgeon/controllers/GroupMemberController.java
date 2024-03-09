@@ -7,6 +7,7 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupMemberRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,9 @@ public class GroupMemberController {
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
 
     @DeleteMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH+"/{memberid}")
     @Roles({UserRole.teacher, UserRole.student})
@@ -36,12 +40,12 @@ public class GroupMemberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not in the group");
         }
 
-        groupMemberRepository.removeMemberFromGroup(groupId, memberid);
+        if(groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0) return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body("Something went wrong");
         return null;
     }
 
 
-    @PostMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH+"/{memberid}")
+    @PostMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> addMemberToGroup(@PathVariable("groupid") long groupId, @PathVariable("memberid") long memberid, Auth auth){
         UserEntity user = auth.getUserEntity();
@@ -50,6 +54,10 @@ public class GroupMemberController {
         }
         if(!groupRepository.userInGroup(groupId, memberid)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not in the group");
+        }
+
+        if(userRepository.findUserById(memberid) == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
         }
 
         groupMemberRepository.addMemberToGroup(groupId, memberid);

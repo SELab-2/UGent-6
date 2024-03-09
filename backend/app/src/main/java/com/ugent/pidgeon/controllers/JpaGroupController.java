@@ -38,7 +38,7 @@ public class JpaGroupController {
             List<Long> projectIds = groupRepository.findProjectsByGroupId(group.getId());
             groupString.append("-with grades: ");
             for (long projectId : projectIds) {
-                GroupFeedbackEntity feedback = groupFeedbackRepository.findByGroupIdAndProjectId(group.getId(), projectId);
+                GroupFeedbackEntity feedback = groupFeedbackRepository.getGroupFeedback(group.getId(), projectId);
                 groupString.append(feedback.getGrade()).append(", ");
             }
             groupString.append("-with submissions: ");
