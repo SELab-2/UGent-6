@@ -53,7 +53,7 @@ public class SubmissionTemplateModel {
                 // All files of the folder have been processed
                 folderStack = folderStack.subList(0, tabAmount);
             }
-            FileEntry fe = new FileEntry(String.join("", folderStack) + fileName);
+            FileEntry fe = new FileEntry((String.join("", folderStack) + fileName).strip());
             if (fileName.lastIndexOf('/') == fileName.length() - 1) {
                 folderStack.add(fileName);
             }
