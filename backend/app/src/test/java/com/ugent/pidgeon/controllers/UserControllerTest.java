@@ -55,8 +55,6 @@ public class UserControllerTest {
      */
     @BeforeEach
     public void setUp() {
-
-        // Create a User and Auth object and set it in the SecurityContextHolder
         User user = new User("displayName", "firstName", "lastName", "email", "test");
         Auth authUser = new Auth(user, new ArrayList<>());
         SecurityContextHolder.getContext().setAuthentication(authUser);
