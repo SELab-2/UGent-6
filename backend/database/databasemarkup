@@ -1,0 +1,96 @@
+// Define Enums
+Enum user_role {
+  student
+  admin
+  teacher
+}
+
+Enum course_relation {
+  creator
+  course_admin
+  enrolled
+}
+
+// Define Tables
+Table users {
+  user_id Int [pk, increment]
+  name Varchar(50)
+  surname Varchar(50)
+  email Varchar(100) [unique]
+  azure_id Varchar(255)
+  role user_role
+  created_at Timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table courses {
+  course_id Int [pk, increment]
+  course_name Varchar(100)
+  description Text
+  created_at Timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table course_users {
+  course_id Int [ref: > courses.course_id]
+  user_id Int [ref: > users.user_id]
+  course_relation course_relation
+  PrimaryKey (course_id, user_id)
+}
+
+Table exercises {
+  exercise_id Int [pk, increment]
+  course_id Int [ref: > courses.course_id]
+  exercise_name Varchar(100)
+  description Text
+  group_cluster_id Int [ref: > group_clusters.group_cluster_id]
+  test_id Int [ref: > tests.test_id]
+}
+
+Table group_grades {
+  group_id Int [ref: > groups.group_id]
+  exercise_id Int [ref: > exercises.exercise_id]
+  grade Float
+  PrimaryKey (group_id, exercise_id)
+}
+
+Table tests {
+  test_id Int [pk, increment]
+  docker_image Varchar(256)
+  file_test_id Varchar(256)
+}
+
+Table solutions {
+  solution_id Int [pk, increment]
+  exercise_id Int [ref: > exercises.exercise_id]
+  group_id Int [ref: > groups.group_id]
+  title Varchar(100)
+  description Text
+  file_id Int [ref: > files.file_id]
+  submission_time Timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table group_clusters {
+  group_cluster_id Int [pk, increment]
+  course_id Int [ref: > courses.course_id]
+  max_size Int
+  created_at Timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table groups {
+  group_id Int [pk, increment]
+  group_name Varchar(100)
+  group_cluster Int [ref: > group_clusters.group_cluster_id]
+}
+
+Table group_users {
+  group_id Int [ref: > groups.group_id]
+  user_id Int [ref: > users.user_id]
+  PrimaryKey (group_id, user_id)
+}
+
+Table files {
+  file_id Int [pk, increment]
+  file_path Varchar(512)
+  file_name Varchar(512)
+  uploaded_by Int [ref: > users.user_id]
+}
+
