@@ -83,7 +83,7 @@ public class UserControllerTest {
 
         String responseBody = result.getResponse().getContentAsString();
         System.out.println("Response body: " + responseBody);
-
+        // Maybe add more tests here for the response body
     }
 
 }
