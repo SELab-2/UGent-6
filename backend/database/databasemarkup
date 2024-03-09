@@ -36,35 +36,38 @@ Table course_users {
   PrimaryKey (course_id, user_id)
 }
 
-Table exercises {
-  exercise_id Int [pk, increment]
+Table projects {
+  project_id Int [pk, increment]
   course_id Int [ref: > courses.course_id]
-  exercise_name Varchar(100)
+  project_name Varchar(100)
   description Text
   group_cluster_id Int [ref: > group_clusters.group_cluster_id]
   test_id Int [ref: > tests.test_id]
+  visible Boolean
+  max_score Int
 }
 
-Table group_grades {
+Table group_feedback {
   group_id Int [ref: > groups.group_id]
-  exercise_id Int [ref: > exercises.exercise_id]
+  project_id Int [ref: > projects.project_id]
   grade Float
+  feedback Text
   PrimaryKey (group_id, exercise_id)
 }
 
 Table tests {
   test_id Int [pk, increment]
   docker_image Varchar(256)
-  file_test_id Varchar(256)
+  docker_test Int
+  structure_test_id Int [ref: > files.file_id]
 }
 
-Table solutions {
-  solution_id Int [pk, increment]
-  exercise_id Int [ref: > exercises.exercise_id]
+Table submissions {
+  submission_id Int [pk, increment]
+  project_id Int [ref: > projects.project_id]
   group_id Int [ref: > groups.group_id]
-  title Varchar(100)
-  description Text
   file_id Int [ref: > files.file_id]
+  accepted Boolean
   submission_time Timestamp [default: `CURRENT_TIMESTAMP`]
 }
 
@@ -72,6 +75,8 @@ Table group_clusters {
   group_cluster_id Int [pk, increment]
   course_id Int [ref: > courses.course_id]
   max_size Int
+  cluster_name Varchar(100)
+  group_amount Int
   created_at Timestamp [default: `CURRENT_TIMESTAMP`]
 }
 
