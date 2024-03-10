@@ -2,13 +2,12 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.FileRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
-import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
+import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.Filehandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -19,8 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
+import java.util.zip.ZipFile;
 
 @RestController
 public class SubmissionController {
@@ -33,8 +35,25 @@ public class SubmissionController {
     private SubmissionRepository submissionRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private TestRepository testRepository;
 
-    @PostMapping("/project/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
+    public Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
+        // Get the test file from the server
+        FileEntity testfileEntity = fileRepository.findById(testEntity.getStructureTestId()).orElse(null);
+        if (testfileEntity == null) {
+            return null;
+        }
+        String testfile = Filehandler.getStructureTestString(Path.of(testfileEntity.getPath(), testfileEntity.getName()));
+
+        // Parse the file
+        SubmissionTemplateModel model = new SubmissionTemplateModel();
+        model.parseSubmissionTemplate(testfile);
+
+        return model.checkSubmission(file);
+    }
+
+    @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> submitFile(@RequestParam("file") MultipartFile file, @RequestParam("submissionTime") Timestamp time, @PathVariable("projectid") long projectid,Auth auth) {
         long userId = auth.getUserEntity().getId();
@@ -43,24 +62,41 @@ public class SubmissionController {
         if (!projectRepository.userPartOfProject(projectid, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
-        //TODO: executes the tests onces these are implemented
+
+        //TODO: execute the docker tests onces these are implemented
         try {
             //Save the file entry in the database to get the id
             FileEntity fileEntity = new FileEntity("", "", userId);
             long fileid = fileRepository.save(fileEntity).getId();
 
-            //Save the submission in the database TODO: update the accepted parameter
+
             SubmissionEntity submissionEntity = new SubmissionEntity(projectid, groupId, fileid, time, false);
+
+            //Save the submission in the database TODO: update the accepted parameter
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
 
             //Save the file on the server
             Path path = Filehandler.getSubmissionPath(projectid, groupId, submission.getId());
-            String filename = Filehandler.saveSubmission(path, file);
+            File savedFile = Filehandler.saveSubmission(path, file);
+            String filename = savedFile.getName();
 
             //Update name and path for the file entry
             fileEntity.setName(filename);
             fileEntity.setPath(path.toString());
             fileRepository.save(fileEntity);
+
+            // Run structure tests
+            TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
+            if (testEntity == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No tests found for this project");
+            }
+            Boolean testresult = runStructureTest(new ZipFile(savedFile), testEntity);
+            if (testresult == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
+            }
+
+            submissionEntity.setAccepted(testresult);
+            submissionRepository.save(submissionEntity);
 
             return ResponseEntity.ok("File saved");
         } catch (Exception e) {

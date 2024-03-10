@@ -21,7 +21,7 @@ public class Filehandler {
     static String BASEPATH = "data";
     static String SUBMISSION_FILENAME = "files.zip";
 
-    public static String saveSubmission(Path directory, MultipartFile file) throws IOException {
+    public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
             throw new IOException("File is empty");
@@ -51,7 +51,7 @@ public class Filehandler {
                 Files.copy(stream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            return filePath.getFileName().toString();
+            return tempFile;
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
@@ -63,6 +63,10 @@ public class Filehandler {
 
     static public Path getTestPath(long projectid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
+    }
+
+    public static File getFile(Path path) {
+        return path.toFile();
     }
 
     public static boolean isZipFile(File file) throws IOException {
@@ -100,5 +104,13 @@ public class Filehandler {
         Files.write(filePath, file.getBytes());
 
         return filePath;
+    }
+
+    public static String getStructureTestString(Path path) throws IOException {
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new IOException("Error while reading testfile: " + e.getMessage());
+        }
     }
 }

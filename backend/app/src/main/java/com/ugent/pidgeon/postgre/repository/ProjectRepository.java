@@ -9,6 +9,8 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     List<ProjectEntity> findByCourseId(long courseId);
 
+
+
     @Query(value = """
           SELECT p FROM ProjectEntity p
             JOIN GroupClusterEntity gc ON p.groupClusterId = gc.id
