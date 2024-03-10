@@ -7,7 +7,7 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
-import com.ugent.selab2.util.DockerClientInstance;
+import com.ugent.pidgeon.util.DockerClientInstance;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
