@@ -97,8 +97,9 @@ public class UserEntity {
         return azureId;
     }
 
-    public void setAzureId(String microsoftToken) {
-        this.azureId = microsoftToken;
+
+    public void setAzureId(String azureId) {
+        this.azureId = azureId;
     }
 
     public Timestamp getCreatedAt() {
