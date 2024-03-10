@@ -1,6 +1,5 @@
-import { useAccount } from "@azure/msal-react"
-import { useRef, useState } from "react"
-import apiCall from "../../util/apiFetch"
+import { useEffect, useRef, useState } from "react"
+import apiCall,{accessToken, apiCallInit} from "../../util/apiFetch"
 import { Button, Input, InputRef, Result, Select, Space, Typography } from "antd"
 
 const { Option } = Select
@@ -11,8 +10,12 @@ const ApiTest = () => {
   const routeRef = useRef<InputRef>(null)
   const bodyRef = useRef<InputRef>(null)
   const [error, setError] = useState<[string, number] | null>(null)
+  const [apiToken, setApiToken] = useState<string | null>(null)
 
-  const auth = useAccount()
+
+  useEffect(() => {
+    apiCallInit().then(setApiToken)
+  }, [])
 
   const makeApiCall = async () => {
     const route = routeRef.current?.input?.value
@@ -60,14 +63,14 @@ const ApiTest = () => {
           code
           style={{ maxHeight: "100%" }}
         >
-          {JSON.stringify(
+          {apiToken ? JSON.stringify(
             {
-              Authorization: `Bearer ${auth?.idToken}`,
+              Authorization: `Bearer ${accessToken}`,
               "Content-Type": "application/json",
             },
             null,
             2
-          )}
+          ): "Loading token..."}
         </Typography.Text>
 
         <Typography.Title level={4}>Test:</Typography.Title>
