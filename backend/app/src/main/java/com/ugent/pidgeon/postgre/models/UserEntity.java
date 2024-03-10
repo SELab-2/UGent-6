@@ -26,14 +26,8 @@ public class UserEntity {
     @Column(name = "email", nullable=false)
     private String email;
 
-<<<<<<< Updated upstream
     @Column(name = "role")
     private String role;
-=======
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", columnDefinition = "user_role")
-    private UserRole role;
->>>>>>> Stashed changes
 
     @Column(name = "azure_id")
     private String azureId;
