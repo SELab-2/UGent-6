@@ -11,6 +11,7 @@ const ApiTest = () => {
   const bodyRef = useRef<InputRef>(null)
   const [error, setError] = useState<[string, number] | null>(null)
   const [apiToken, setApiToken] = useState<string | null>(null)
+  const [requestBody, setRequestBody] = useState<string>("{}")
 
 
   useEffect(() => {
@@ -20,10 +21,11 @@ const ApiTest = () => {
   const makeApiCall = async () => {
     const route = routeRef.current?.input?.value
     if (!route) return
-    console.log("=>", route)
+
     setError(null)
     try {
-      const body = bodyRef.current?.input?.value
+      const body = requestBody
+
       if (method !== "get" && body) {
         //@ts-ignore
         const response = await apiCall[method](route, JSON.parse(body))
@@ -91,7 +93,7 @@ const ApiTest = () => {
           </Button>
         </Space.Compact>
 
-       {method !== "get" && <Input.TextArea ref={bodyRef} placeholder="body" defaultValue="{}" style={{ marginTop: "1rem" }} rows={7} />}
+       {method !== "get" && <Input.TextArea onChange={(e) => setRequestBody(e.currentTarget.value)} value={requestBody} placeholder="body" style={{ marginTop: "1rem" }} rows={7} />}
 
         <Typography.Title level={4}>Result:</Typography.Title>
 
