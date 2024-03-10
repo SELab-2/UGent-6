@@ -28,6 +28,9 @@ public class FileStructureTest {
     void doesntHaveFile(){
         assertFalse(runTest("doesntHaveFile"));
     }
+
+    @Test
+    void inFolderHasFiles() { assertTrue(runTest("inFolderHasFiles")); }
     @Test
     void doesntHaveRequiredFile(){
         assertFalse(runTest("hasWrongFile"));
