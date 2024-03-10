@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.sql.Timestamp;
 
 @RestController
-public class FilesubmissiontestController {
+public class SubmissionController {
 
     @Autowired
     private GroupRepository groupRepository;
