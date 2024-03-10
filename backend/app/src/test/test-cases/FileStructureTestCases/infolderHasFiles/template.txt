@@ -1,4 +1,0 @@
-text1.txt
-folder1/
-    text1.txt
-text2.txt

@@ -6,16 +6,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class SubmissionTemplateModel {
-    private List<FileEntry> requiredFiles = new ArrayList<>();
-    private List<FileEntry> deniedFiles = new ArrayList<>();
+    private final List<FileEntry> requiredFiles = new ArrayList<>();
+    private final List<FileEntry> deniedFiles = new ArrayList<>();
 
-    private class FileEntry {
+    private static class FileEntry {
         public String name;
         Pattern pattern;
 
         public FileEntry(String name) {
             this.name = name;
-            pattern = Pattern.compile(name);
+            pattern = Pattern.compile("^" + name +  "$"); // hat for defining start of the string, $ defines the end
         }
 
         public boolean matches(String fileName) {
@@ -36,19 +36,36 @@ public class SubmissionTemplateModel {
 
          */
 
+
+        templateString = templateString.replaceAll("\\r", ""); // remove windows \r
         String[] lines = templateString.split("\n");
+
+        int mostSpaces = 0;
+        HashMap<Integer, Integer> tabsPerSpaces = new HashMap<>(); // hashmap for tracking max spaces amount
+        tabsPerSpaces.put(0,0); // will make a normal file with tabs work normally
+        for(int i = 0; i < lines.length; i++){
+            String line = lines[i];
+            int spaceAmount = line.lastIndexOf(' ') + 1;
+            if(spaceAmount > mostSpaces){
+                tabsPerSpaces.put(spaceAmount, tabsPerSpaces.get(mostSpaces) + 1);
+                mostSpaces = spaceAmount;
+            }
+            lines[i] = "\t".repeat(tabsPerSpaces.get(spaceAmount)) + line.replaceAll(" ","");;
+        }
 
         // Create folder stack for keeping track of all the folders while exploring the insides
         List<String> folderStack = new ArrayList<>();
 
         for (String line : lines) {
-            if (line == "" || line.charAt(line.lastIndexOf("\t") + 1) == '#') {
+            if (line.isEmpty() || line.charAt(line.lastIndexOf("\t") + 1) == '#') {
                 continue; // parse empty lines or comment lines
             }
             int tabAmount = line.lastIndexOf('\t') + 1;
             String fileName = line.substring(tabAmount);
             boolean nonAllowMode = fileName.charAt(0) == '-';
-
+            if(nonAllowMode) {
+                fileName = fileName.substring(1);
+            }
             if (tabAmount < folderStack.size()) {
                 // All files of the folder have been processed
                 folderStack = folderStack.subList(0, tabAmount);
@@ -56,11 +73,12 @@ public class SubmissionTemplateModel {
             FileEntry fe = new FileEntry((String.join("", folderStack) + fileName).strip());
             if (fileName.lastIndexOf('/') == fileName.length() - 1) {
                 folderStack.add(fileName);
-            }
-            if (nonAllowMode) {
-                deniedFiles.add(fe);
-            } else {
-                requiredFiles.add(fe);
+            }else{
+                if (nonAllowMode) {
+                    deniedFiles.add(fe);
+                } else {
+                    requiredFiles.add(fe);
+                }
             }
         }
     }
@@ -82,7 +100,7 @@ public class SubmissionTemplateModel {
 
 
             Iterator<String> fileIterator = folderItems.iterator();
-            while (fileIterator.hasNext()) {
+                  while (fileIterator.hasNext()) {
                 boolean inTemplate = false;
                 String currFile = fileIterator.next();
                 // check if all files are required

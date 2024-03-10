@@ -39,6 +39,10 @@ public class FileStructureTest {
     void isEmpty(){
         assertTrue(runTest("isEmpty"));
     }
+    @Test
+    void denyFileExtension(){
+        assertFalse(runTest("noClassExtensions"));
+    }
     private boolean runTest(String testpath){
         SubmissionTemplateModel model = new SubmissionTemplateModel();
         if(testpath.lastIndexOf('/') != testpath.length() - 1){
