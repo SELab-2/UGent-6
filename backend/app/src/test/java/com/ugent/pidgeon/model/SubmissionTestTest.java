@@ -1,8 +1,6 @@
 package com.ugent.pidgeon.model;
 
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTestModel;
-import com.ugent.selab2.model.AddDockerModel;
-import com.ugent.selab2.model.SubmissionTestModel;
 import org.junit.jupiter.api.Test;
 
 public class SubmissionTestTest {
