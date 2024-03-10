@@ -8,10 +8,9 @@ import com.ugent.pidgeon.postgre.repository.CourseRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +46,31 @@ public class CourseController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(projects);
+    }
+
+
+    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<String> createProject(
+            @PathVariable long courseId,
+            @RequestParam String name,
+            @RequestParam String description,
+            @RequestParam long groupClusterId,
+            @RequestParam long testId,
+            @RequestParam boolean projectType,
+            @RequestParam Integer maxScore) {
+        try {
+            // Create a new ProjectEntity instance
+            ProjectEntity project = new ProjectEntity(courseId, name, description, groupClusterId, testId, projectType, maxScore);
+
+            // Save the project entity
+            ProjectEntity savedProject = projectRepository.save(project);
+
+            // Return success response with project ID
+            return ResponseEntity.ok("Project created with ID: " + savedProject.getId());
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
+        }
     }
 
 }
