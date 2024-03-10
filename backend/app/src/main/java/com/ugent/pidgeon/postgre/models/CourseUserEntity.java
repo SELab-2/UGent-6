@@ -19,8 +19,7 @@ public class CourseUserEntity {
     private long userId;
 
     @Column(name = "course_relation")
-    @Enumerated(EnumType.STRING)
-    private CourseRelation relation;
+    private String relation;
 
     public CourseUserEntity() {
     }
@@ -28,7 +27,7 @@ public class CourseUserEntity {
     public CourseUserEntity(long courseId, long userId, CourseRelation relation) {
         this.courseId = courseId;
         this.userId = userId;
-        this.relation = relation;
+        this.relation = relation.toString();
     }
 
 
@@ -49,11 +48,16 @@ public class CourseUserEntity {
     }
 
     public CourseRelation getRelation() {
-        return relation;
+        return switch (relation) {
+            case "creator" -> CourseRelation.creator;
+            case "course_admin" -> CourseRelation.course_admin;
+            case "enrolled" -> CourseRelation.enrolled;
+            default -> null;
+        };
     }
 
     public void setRelation(CourseRelation relation) {
-        this.relation = relation;
+        this.relation = relation.toString();
     }
 
 
