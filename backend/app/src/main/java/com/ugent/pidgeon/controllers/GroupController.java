@@ -85,4 +85,31 @@ public class GroupController {
         return ResponseEntity.ok(groupJson);
     }
 
+    @DeleteMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<Void> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
+        // Get userId
+        long userId = auth.getUserEntity().getId();
+
+        // Get the group, return 404 if it does not exist
+        GroupEntity group = groupRepository.findById(groupid).orElse(null);
+        if (group == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Return 403 if the user does not have access to the group
+        if(!groupRepository.userAccesToGroup(userId, groupid)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // Delete the group
+        groupRepository.deleteGroupUsersByGroupId(groupid);
+        groupRepository.deleteSubmissionsByGroupId(groupid);
+        groupRepository.deleteGroupFeedbacksByGroupId(groupid);
+        groupRepository.deleteById(groupid);
+
+        // Return 204
+        return ResponseEntity.noContent().build();
+    }
+
 }
