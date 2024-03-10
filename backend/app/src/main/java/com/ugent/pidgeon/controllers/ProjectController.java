@@ -27,6 +27,9 @@ public class ProjectController {
     private DeadlineRepository deadlineRepository;
 
     @Autowired
+    private DeadlineController deadlineController;
+
+    @Autowired
     private TestRepository testRepository;
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
@@ -81,5 +84,30 @@ public class ProjectController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+
+    @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId")
+    @Roles({UserRole.teacher, UserRole.admin})
+    public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth){
+        Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
+
+        if (projectOptional.isPresent()){
+            ProjectEntity projectEntity = projectOptional.get();
+            //TODO: also remove submissions
+
+            // delete all the deadlines associated with the project
+            for(DeadlineEntity deadlineEntity: projectEntity.getDeadlines()){
+                deadlineController.deleteDeadlineById(deadlineEntity.getDeadlineId(), auth);
+            }
+            // delete the project after all its dependant children are deleted
+            projectRepository.delete(projectEntity);
+            return ResponseEntity.ok(projectEntity);
+
+        }else {
+            return ResponseEntity.notFound().build();
+        }
+
+
     }
 }
