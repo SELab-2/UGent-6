@@ -19,7 +19,7 @@ import java.util.zip.ZipFile;
 public class Filehandler {
 
     static String BASEPATH = "data";
-    static String SUBMISSION_FILENAME = "files.zip";
+    public static String SUBMISSION_FILENAME = "files.zip";
 
     public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty

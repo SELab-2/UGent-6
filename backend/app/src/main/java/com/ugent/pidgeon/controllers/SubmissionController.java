@@ -44,7 +44,7 @@ public class SubmissionController {
         if (testfileEntity == null) {
             return null;
         }
-        String testfile = Filehandler.getStructureTestString(Path.of(testfileEntity.getPath(), testfileEntity.getName()));
+        String testfile = Filehandler.getStructureTestString(Path.of(testfileEntity.getPath()));
 
         // Parse the file
         SubmissionTemplateModel model = new SubmissionTemplateModel();
@@ -52,6 +52,8 @@ public class SubmissionController {
 
         return model.checkSubmission(file);
     }
+
+
 
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
@@ -76,13 +78,14 @@ public class SubmissionController {
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
 
             //Save the file on the server
+            String filename = file.getOriginalFilename();
             Path path = Filehandler.getSubmissionPath(projectid, groupId, submission.getId());
             File savedFile = Filehandler.saveSubmission(path, file);
-            String filename = savedFile.getName();
+            String pathname = path + "/" + Filehandler.SUBMISSION_FILENAME;
 
             //Update name and path for the file entry
             fileEntity.setName(filename);
-            fileEntity.setPath(path.toString());
+            fileEntity.setPath(pathname);
             fileRepository.save(fileEntity);
 
             // Run structure tests
