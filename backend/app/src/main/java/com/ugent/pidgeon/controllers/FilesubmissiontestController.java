@@ -33,6 +33,9 @@ public class FilesubmissiontestController {
     private SubmissionRepository submissionRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private FileController fileController;
+
 
     @PostMapping("/project/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
@@ -121,7 +124,7 @@ public class FilesubmissiontestController {
         if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
+        fileController.deleteFileById(submission.getFileId(),auth);
         submissionRepository.delete(submission);
         return  ResponseEntity.ok(submission);
     }
