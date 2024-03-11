@@ -1,17 +1,12 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.controllers.requestBodies.TestController;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
-import com.ugent.pidgeon.postgre.models.DeadlineEntity;
-import com.ugent.pidgeon.postgre.models.ProjectEntity;
-import com.ugent.pidgeon.postgre.models.SubmissionEntity;
-import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.DeadlineRepository;
-import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
-import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +17,7 @@ import java.util.*;
 
 @RestController
 public class ProjectController {
+
     //repos
     @Autowired
     private ProjectRepository projectRepository;
@@ -30,13 +26,15 @@ public class ProjectController {
     @Autowired
     private SubmissionRepository submissionRepository;
     @Autowired
-    private TestRepository testRepository;
+    private GroupFeedbackRepository groupFeedbackRepository;
 
     //controllers
     @Autowired
     private DeadlineController deadlineController;
     @Autowired
     private FilesubmissiontestController filesubmissiontestController;
+    @Autowired
+    private TestController testController;
 
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
@@ -96,23 +94,26 @@ public class ProjectController {
 
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId")
     @Roles({UserRole.teacher, UserRole.admin})
-    public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth){
+    public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth) {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
 
-        if (projectOptional.isPresent()){
+        if (projectOptional.isPresent()) {
+
             ProjectEntity projectEntity = projectOptional.get();
-            for(SubmissionEntity submissionEntity:  submissionRepository.findByProjectId(projectId) ){
-                filesubmissiontestController.deleteSubmissionById(submissionEntity.getId(),auth);
+            testController.deleteTestById(projectEntity.getTestId(),auth);
+            groupFeedbackRepository.deleteAll(groupFeedbackRepository.findByProjectId(projectId));
+            for (SubmissionEntity submissionEntity : submissionRepository.findByProjectId(projectId)) {
+                filesubmissiontestController.deleteSubmissionById(submissionEntity.getId(), auth);
             }
             // delete all the deadlines associated with the project
-            for(DeadlineEntity deadlineEntity: projectEntity.getDeadlines()){
+            for (DeadlineEntity deadlineEntity : projectEntity.getDeadlines()) {
                 deadlineController.deleteDeadlineById(deadlineEntity.getDeadlineId(), auth);
             }
             // delete the project after all its dependant children are deleted
             projectRepository.delete(projectEntity);
             return ResponseEntity.ok(projectEntity);
 
-        }else {
+        } else {
             return ResponseEntity.notFound().build();
         }
 
