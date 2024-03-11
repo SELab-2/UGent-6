@@ -2,6 +2,7 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
@@ -38,7 +39,7 @@ public class SubmissionController {
     @Autowired
     private TestRepository testRepository;
 
-    public Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
+    private Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
         // Get the test file from the server
         FileEntity testfileEntity = fileRepository.findById(testEntity.getStructureTestId()).orElse(null);
         if (testfileEntity == null) {
@@ -53,7 +54,35 @@ public class SubmissionController {
         return model.checkSubmission(file);
     }
 
-    /*@GetMapping(ApiRoutes.SUBMISSION_BASE_PATH) */
+    private SubmissionJson getSubmissionJson(SubmissionEntity submission) {
+        return new SubmissionJson(
+                submission.getId(),
+                ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
+                ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
+                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
+                submission.getAccepted(),
+                submission.getSubmissionTime());
+    }
+
+    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}") //Route to get a submission
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<SubmissionJson> getSubmission(@PathVariable("submissionid") long submissionid, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        // Get the submission entry from the database
+        SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
+        if (submission == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        SubmissionJson submissionJson = getSubmissionJson(submission);
+
+        return ResponseEntity.ok(submissionJson);
+    }
+
 
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
@@ -110,7 +139,7 @@ public class SubmissionController {
 
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/file") //Route to get a submission
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getSubmission(@PathVariable("submissionid") long submissionid, Auth auth) {
+    public ResponseEntity<?> getSubmissionFile(@PathVariable("submissionid") long submissionid, Auth auth) {
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
