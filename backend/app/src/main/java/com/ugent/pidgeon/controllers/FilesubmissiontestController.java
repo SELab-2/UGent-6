@@ -121,11 +121,6 @@ public class FilesubmissiontestController {
         if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-        // Get the file entry from the database
-        FileEntity file = fileRepository.findById(submission.getFileId()).orElse(null);
-        if (file == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
 
         submissionRepository.delete(submission);
         return  ResponseEntity.ok(submission);
