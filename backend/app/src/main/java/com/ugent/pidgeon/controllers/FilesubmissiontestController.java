@@ -106,4 +106,28 @@ public class FilesubmissiontestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
+    @DeleteMapping("submissions/{submissionid}")
+    @Roles({UserRole.admin, UserRole.teacher})
+    public ResponseEntity<?> deleteSubmission(@PathVariable("submissionid") long submissionid, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        // Get the submission entry from the database
+        SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
+        if (submission == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        // Get the file entry from the database
+        FileEntity file = fileRepository.findById(submission.getFileId()).orElse(null);
+        if (file == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        submissionRepository.delete(submission);
+        return  ResponseEntity.ok(submission);
+    }
 }
