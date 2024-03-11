@@ -36,4 +36,5 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             JOIN ProjectEntity p ON p.groupClusterId = gc.id
             WHERE p.id = ?1""")
     List<Long> findGroupIdsByProjectId(long projectId);
+
 }

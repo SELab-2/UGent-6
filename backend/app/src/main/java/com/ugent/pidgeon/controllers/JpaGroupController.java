@@ -32,13 +32,13 @@ public class JpaGroupController {
         for (GroupEntity group : groupRepository.findAll()) {
             StringBuilder groupString = new StringBuilder();
             groupString.append(group.getName()).append("-with users: ");
-            for (UserEntity user : groupRepository.findCourseUsersByGroupId(group.getId())) {
+            for (UserEntity user : groupRepository.findGroupUsersByGroupId(group.getId())) {
                 groupString.append(user.getName()).append(", ");
             }
             List<Long> projectIds = groupRepository.findProjectsByGroupId(group.getId());
             groupString.append("-with grades: ");
             for (long projectId : projectIds) {
-                GroupFeedbackEntity feedback = groupFeedbackRepository.findByGroupIdAndProjectId(group.getId(), projectId);
+                GroupFeedbackEntity feedback = groupFeedbackRepository.getGroupFeedback(group.getId(), projectId);
                 groupString.append(feedback.getGrade()).append(", ");
             }
             groupString.append("-with submissions: ");

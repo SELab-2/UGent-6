@@ -35,4 +35,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query(value = "SELECT * FROM users WHERE azure_id = ?1", nativeQuery = true)
     public UserEntity findUserByAzureId(String id);
 
+
 }
