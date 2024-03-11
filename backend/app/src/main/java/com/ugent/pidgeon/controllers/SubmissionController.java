@@ -86,7 +86,7 @@ public class SubmissionController {
 
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<String> submitFile(@RequestParam("file") MultipartFile file, @RequestParam("submissionTime") Timestamp time, @PathVariable("projectid") long projectid,Auth auth) {
+    public ResponseEntity<?> submitFile(@RequestParam("file") MultipartFile file, @RequestParam("submissionTime") Timestamp time, @PathVariable("projectid") long projectid,Auth auth) {
         long userId = auth.getUserEntity().getId();
         Long groupId = groupRepository.groupIdByProjectAndUser(projectid, userId);
 
@@ -130,7 +130,7 @@ public class SubmissionController {
             submissionEntity.setAccepted(testresult);
             submissionRepository.save(submissionEntity);
 
-            return ResponseEntity.ok("File saved");
+            return ResponseEntity.ok(getSubmissionJson(submissionEntity));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
         }
