@@ -19,4 +19,5 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
     /* The 'as' is important here, as it is used to map the result to the CourseWithRelation interface */
     @Query(value = "SELECT u as user, cu.relation as relation FROM UserEntity u JOIN CourseUserEntity cu ON u.id = cu.userId WHERE cu.courseId = ?1")
     List<UserWithRelation> findUsersByCourseId(long id);
+
 }

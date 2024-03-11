@@ -1,4 +1,4 @@
-package com.ugent.pidgeon.controllers;
+package com.ugent.pidgeon.controllers.requestBodies;
 
 public class UpdateGroupScoreRequest {
     private float score;
