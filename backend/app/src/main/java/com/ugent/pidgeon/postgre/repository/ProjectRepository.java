@@ -26,4 +26,5 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
                 WHERE gu.userId = ?1 and p.id = ?2
             ) THEN true ELSE false END""")
     Boolean userPartOfProject(long projectId, long userId);
+
 }
