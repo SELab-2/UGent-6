@@ -2,21 +2,20 @@ package com.ugent.pidgeon.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.CourseRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.postgre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class CourseController {
@@ -29,6 +28,38 @@ public class CourseController {
 
     @Autowired
     private TestRepository testRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH)
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<String> getUserCourses(Auth auth){
+        long userID = auth.getUserEntity().getId();
+        try {
+            List<UserRepository.CourseIdWithRelation> userCourses = userRepository.findCourseIdsByUserId(userID);
+
+            // Retrieve course entities based on user courses
+            List<CourseJSONObject> courseJSONObjects = userCourses.stream()
+                    .map(courseWithRelation -> courseRepository.findById(courseWithRelation.getCourseId())
+                            .orElse(null))
+                    .filter(Objects::nonNull)
+                    .map(entity -> new CourseJSONObject(entity.getId(), entity.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + entity.getId()))
+                    .toList();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonResponse = objectMapper.writeValueAsString(courseJSONObjects);
+
+
+            // Return the JSON string in ResponseEntity
+            return ResponseEntity.ok(jsonResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve courses");
+        }
+    }
+
+    // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
+    private record CourseJSONObject(long id, String name, String url){}
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
@@ -52,6 +83,7 @@ public class CourseController {
     }
 
 
+    /* Function to add a new project to an existing course */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher})
     public ResponseEntity<String> createProject(
@@ -82,6 +114,7 @@ public class CourseController {
         }
     }
 
+    /* Help function to create a JSON response when creating a new project */
     private static Map<String, Object> createJSONPostResponse(ProjectEntity savedProject) {
         Map<String, Object> response = new HashMap<>();
         response.put("id", savedProject.getId());
