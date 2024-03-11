@@ -111,6 +111,58 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating course: " + e.getMessage());
         }
     }
+
+    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<String> updateCourse(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam("assistantIds") List<Long> assistantIds, @PathVariable("courseId") long courseId, Auth auth){
+        try {
+            UserEntity user = auth.getUserEntity();
+            long userId = auth.getUserEntity().getId();
+
+            // het vak selecteren
+            CourseEntity courseEntity = courseRepository.findById(courseId).orElseThrow();
+            // Set teacher details
+            SimplePersonJSONObject leerkracht = new SimplePersonJSONObject(user.getName(), user.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + userId);
+            // Set assistant details
+            List<SimplePersonJSONObject> assistenten = assistantIds.stream().map(id -> userRepository.findById(id).orElse(null))
+                    .filter(Objects::nonNull).map(entity -> new SimplePersonJSONObject(
+                            entity.getName(), entity.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + entity.getId()))
+                    .toList();
+
+            //update velden
+            courseEntity.setName(name);
+            courseEntity.setDescription(description);
+            courseRepository.save(courseEntity);
+
+            // assistenten toevoegen aan vak
+//            for(long id: assistantIds){
+//                Optional<UserEntity> assistentOpt = userRepository.findById(id);
+//                if(assistentOpt.isPresent()){
+//                    // Assistent toevoegen aan vak
+//                }
+//            }
+
+
+            // Construct the response JSON string
+            StringBuilder assistantsBuilder = new StringBuilder();
+            for (SimplePersonJSONObject assistant : assistenten) {
+                assistantsBuilder.append("{\"name\":\"").append(assistant.name()).append("\",\"surname\":\"").append(assistant.surname()).append("\",\"url\":\"").append(assistant.url()).append("\"},");
+            }
+            if (!assistantsBuilder.isEmpty()) {
+                assistantsBuilder.setLength(assistantsBuilder.length() - 1); // Remove the trailing comma
+            }
+
+            StringBuilder jsonResponseBuilder = new StringBuilder();
+            jsonResponseBuilder.append("{\"id\":\"").append(courseEntity.getId()).append("\",\"name\":\"").append(name).append("\",\"description\":\"").append(description)
+                    .append("\",\"teacher\":{\"name\":\"").append(leerkracht.name()).append("\",\"surname\":\"").append(leerkracht.surname()).append("\",\"url\":\"").append(leerkracht.url()).append("\"},\"assistants\":[")
+                    .append(assistantsBuilder).append("],\"members_url\":\"your_members_url\"}");
+
+            String jsonResponse = jsonResponseBuilder.toString();
+            return ResponseEntity.ok(jsonResponse);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating course: " + e.getMessage());
+        }
+    }
     private record SimplePersonJSONObject(String name, String surname, String url){}
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
