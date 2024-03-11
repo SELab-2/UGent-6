@@ -101,7 +101,6 @@ public class ProjectController {
 
         if (projectOptional.isPresent()){
             ProjectEntity projectEntity = projectOptional.get();
-            //TODO: also remove submissions
             for(SubmissionEntity submissionEntity:  submissionRepository.findByProjectId(projectId) ){
                 filesubmissiontestController.deleteSubmissionById(submissionEntity.getId(),auth);
             }
