@@ -22,7 +22,7 @@ public class FileController {
 
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{fileId}")
     @Roles({UserRole.admin,UserRole.teacher})
-    public ResponseEntity<?> deleteFile(@PathVariable("fileId") long fileId, Auth auth) {
+    public ResponseEntity<?> deleteFileById(@PathVariable("fileId") long fileId, Auth auth) {
         // Get the submission entry from the database
         FileEntity fileEntity = fileRepository.findById(fileId).orElse(null);
         if (fileEntity == null) {
