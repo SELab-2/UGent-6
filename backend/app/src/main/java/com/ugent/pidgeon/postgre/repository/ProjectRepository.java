@@ -28,4 +28,12 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
                 WHERE gu.userId = ?1 and p.id = ?2
             ) THEN true ELSE false END""")
     Boolean userPartOfProject(long projectId, long userId);
+
+    @Query(value = """
+            SELECT g.id
+            FROM GroupEntity g
+            JOIN GroupClusterEntity gc ON g.clusterId = gc.id
+            JOIN ProjectEntity p ON p.groupClusterId = gc.id
+            WHERE p.id = ?1""")
+    List<Long> findGroupIdsByProjectId(long projectId);
 }

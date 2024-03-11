@@ -2,6 +2,7 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.FileEntity;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.zip.ZipFile;
 
 @RestController
@@ -81,6 +83,30 @@ public class SubmissionController {
         SubmissionJson submissionJson = getSubmissionJson(submission);
 
         return ResponseEntity.ok(submissionJson);
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions") //Route to get all submissions for a project
+    @Roles({UserRole.teacher})
+    public ResponseEntity<?> getSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        if (!projectRepository.userPartOfProject(projectid, userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        }
+
+        List<Long> projectGroupIds = projectRepository.findGroupIdsByProjectId(projectid);
+        List<LastGroupSubmissionJson> res = projectGroupIds.stream().map(groupId -> {
+            Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId);
+            if (submissionId == null) {
+                return new LastGroupSubmissionJson(
+                    ApiRoutes.GROUP_BASE_PATH + "/" + groupId, null
+                );
+            }
+            return new LastGroupSubmissionJson(
+                    ApiRoutes.GROUP_BASE_PATH + "/" + groupId,
+                    ApiRoutes.SUBMISSION_BASE_PATH + "/" + submissionId
+            );
+        }).toList();
+        return ResponseEntity.ok(res);
     }
 
 
