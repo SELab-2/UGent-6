@@ -4,8 +4,10 @@ import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,7 +35,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query(value = "SELECT * FROM users WHERE azure_id = ?1", nativeQuery = true)
     public UserEntity findUserByAzureId(String id);
 
+
     @Query(value = "SELECT * FROM users WHERE id = ?1", nativeQuery = true)
     public UserEntity findUserById(long id);
+
 
 }

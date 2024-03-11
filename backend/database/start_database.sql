@@ -1,12 +1,6 @@
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
--- Define user roles
-CREATE TYPE user_role AS ENUM ('student', 'admin', 'teacher');
-
--- Define course relations
-CREATE TYPE course_relation AS ENUM ('creator', 'course_admin', 'enrolled');
-
 -- Users table to store information about users
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
@@ -14,7 +8,7 @@ CREATE TABLE users (
     surname VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     azure_id VARCHAR(255) NOT NULL,
-    role user_role NOT NULL,
+    role VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -30,7 +24,7 @@ CREATE TABLE courses (
 CREATE TABLE course_users (
     course_id INT REFERENCES courses(course_id),
     user_id INT REFERENCES users(user_id),
-    course_relation course_relation NOT NULL,
+    course_relation VARCHAR(50) NOT NULL,
     PRIMARY KEY (course_id, user_id)
 );
 

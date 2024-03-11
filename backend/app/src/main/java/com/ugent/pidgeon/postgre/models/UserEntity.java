@@ -3,8 +3,10 @@ package com.ugent.pidgeon.postgre.models;
 
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 
 import java.sql.Timestamp;
+
 
 @Entity
 @Table(name = "users")
@@ -25,8 +27,7 @@ public class UserEntity {
     private String email;
 
     @Column(name = "role")
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private String role;
 
     @Column(name = "azure_id")
     private String azureId;
@@ -38,7 +39,7 @@ public class UserEntity {
         this.name = name;
         this.surname = surname;
         this.email = email;
-        this.role = role;
+        this.role = role.toString();
         this.azureId = azureId;
     }
 
@@ -82,19 +83,25 @@ public class UserEntity {
     }
 
     public UserRole getRole() {
-        return role;
+        return switch (role) {
+            case "student" -> UserRole.student;
+            case "teacher" -> UserRole.teacher;
+            case "admin" -> UserRole.admin;
+            default -> throw new IllegalStateException("Unexpected value: " + role);
+        };
     }
 
     public void setRole(UserRole role) {
-        this.role = role;
+        this.role = role.toString();
     }
 
-    public String getMicrosoftToken() {
+    public String getAzureId() {
         return azureId;
     }
 
-    public void setMicrosoftToken(String microsoftToken) {
-        this.azureId = microsoftToken;
+
+    public void setAzureId(String azureId) {
+        this.azureId = azureId;
     }
 
     public Timestamp getCreatedAt() {
