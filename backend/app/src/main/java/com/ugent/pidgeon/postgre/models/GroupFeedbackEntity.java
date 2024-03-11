@@ -61,6 +61,15 @@ public class GroupFeedbackEntity {
         return feedback;
     }
 
+
+    public float getScore() {
+        return grade;
+    }
+
+    public void setScore(float score) {
+        this.grade = score;
+    }
+
     public void setFeedback(String feedback) {
         this.feedback = feedback;
     }

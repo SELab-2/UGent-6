@@ -7,7 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.List;
 
-@SpringBootTest
+
 public class AuthTest {
 
 //    private final List<String> groeplijst = List.of("testgroep1", "testgroep2");

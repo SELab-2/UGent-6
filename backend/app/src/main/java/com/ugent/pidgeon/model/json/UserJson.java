@@ -1,5 +1,7 @@
 package com.ugent.pidgeon.model.json;
 
+import com.ugent.pidgeon.controllers.ApiRoutes;
+
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 
@@ -98,5 +100,9 @@ public class UserJson {
 
     public void setCourses(List<CourseWithRelationJson> courses) {
         this.courses = courses;
+    }
+
+    public String getUrl() {
+        return ApiRoutes.USER_BASE_PATH + "/" + id;
     }
 }
