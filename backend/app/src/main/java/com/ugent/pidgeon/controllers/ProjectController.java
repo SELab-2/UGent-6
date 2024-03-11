@@ -5,10 +5,12 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
 import com.ugent.pidgeon.postgre.models.DeadlineEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.DeadlineRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,17 +22,22 @@ import java.util.*;
 
 @RestController
 public class ProjectController {
+    //repos
     @Autowired
     private ProjectRepository projectRepository;
-
     @Autowired
     private DeadlineRepository deadlineRepository;
-
     @Autowired
-    private DeadlineController deadlineController;
-
+    private SubmissionRepository submissionRepository;
     @Autowired
     private TestRepository testRepository;
+
+    //controllers
+    @Autowired
+    private DeadlineController deadlineController;
+    @Autowired
+    private FilesubmissiontestController filesubmissiontestController;
+
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
@@ -95,7 +102,9 @@ public class ProjectController {
         if (projectOptional.isPresent()){
             ProjectEntity projectEntity = projectOptional.get();
             //TODO: also remove submissions
-
+            for(SubmissionEntity submissionEntity:  submissionRepository.findByProjectId(projectId) ){
+                filesubmissiontestController.deleteSubmissionById(submissionEntity.getId(),auth);
+            }
             // delete all the deadlines associated with the project
             for(DeadlineEntity deadlineEntity: projectEntity.getDeadlines()){
                 deadlineController.deleteDeadlineById(deadlineEntity.getDeadlineId(), auth);

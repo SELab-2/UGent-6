@@ -113,7 +113,7 @@ public class FilesubmissiontestController {
 
     @DeleteMapping("submissions/{submissionid}")
     @Roles({UserRole.admin, UserRole.teacher})
-    public ResponseEntity<?> deleteSubmission(@PathVariable("submissionid") long submissionid, Auth auth) {
+    public ResponseEntity<?> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
