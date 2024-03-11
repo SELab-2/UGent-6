@@ -6,4 +6,6 @@ public final class ApiRoutes {
     public static final String COURSE_BASE_PATH = "/api/courses";
 
     public static final String PROJECT_BASE_PATH = "/api/projects";
+
+    public static final String SUBMISSION_BASE_PATH = "/api/submissions";
 }

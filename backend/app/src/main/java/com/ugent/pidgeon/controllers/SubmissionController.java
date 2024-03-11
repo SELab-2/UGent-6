@@ -53,7 +53,7 @@ public class SubmissionController {
         return model.checkSubmission(file);
     }
 
-
+    /*@GetMapping(ApiRoutes.SUBMISSION_BASE_PATH) */
 
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit") //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
@@ -108,9 +108,9 @@ public class SubmissionController {
 
     }
 
-    @GetMapping("submissions/{submissionid}")
+    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/file") //Route to get a submission
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Resource> getSubmission(@PathVariable("submissionid") long submissionid, Auth auth) {
+    public ResponseEntity<?> getSubmission(@PathVariable("submissionid") long submissionid, Auth auth) {
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
@@ -130,7 +130,7 @@ public class SubmissionController {
 
         // Get the file from the server
         try {
-            Resource zipFile = Filehandler.getSubmissionAsResource(Path.of(file.getPath(), file.getName()));
+            Resource zipFile = Filehandler.getSubmissionAsResource(Path.of(file.getPath()));
 
             // Set headers for the response
             HttpHeaders headers = new HttpHeaders();
@@ -142,7 +142,7 @@ public class SubmissionController {
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(zipFile);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }
