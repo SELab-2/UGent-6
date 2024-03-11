@@ -19,9 +19,7 @@ public class UserJson {
 
     private Timestamp createdAt;
 
-    private String oid;
-
-    private List<CourseWithRelationJson> courses;
+//    private List<CourseWithRelationJson> courses;
 
     public UserJson() {
     }
@@ -33,8 +31,7 @@ public class UserJson {
         this.email = entity.getEmail();
         this.role = entity.getRole();
         this.createdAt = entity.getCreatedAt();
-        this.oid = entity.getAzureId();
-        this.courses = new ArrayList<>();
+//        this.courses = new ArrayList<>();
     }
 
     public long getId() {
@@ -85,24 +82,25 @@ public class UserJson {
         this.createdAt = createdAt;
     }
 
-    public String getOid() {
-        return oid;
-    }
 
-    public void setOid(String oid) {
-        this.oid = oid;
-    }
-
-
-    public List<CourseWithRelationJson> getCourses() {
-        return courses;
-    }
-
-    public void setCourses(List<CourseWithRelationJson> courses) {
-        this.courses = courses;
-    }
+//    public List<CourseWithRelationJson> getCourses() {
+//        return courses;
+//    }
+//
+//    public void setCourses(List<CourseWithRelationJson> courses) {
+//        this.courses = courses;
+//    }
 
     public String getUrl() {
         return ApiRoutes.USER_BASE_PATH + "/" + id;
     }
+
+    public String getCourseUrl() {
+        return ApiRoutes.USER_BASE_PATH + "/" + id+"/courses";
+    }
+
+    public String getProjectUrl() {
+        return ApiRoutes.PROJECT_BASE_PATH;
+    }
+
 }
