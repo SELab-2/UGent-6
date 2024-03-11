@@ -111,7 +111,7 @@ public class FilesubmissiontestController {
     }
 
 
-    @DeleteMapping("submissions/{submissionid}")
+    @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
     @Roles({UserRole.admin, UserRole.teacher})
     public ResponseEntity<?> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
         long userId = auth.getUserEntity().getId();
