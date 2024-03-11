@@ -23,6 +23,7 @@ const ApiTest = () => {
     if (!route) return
 
     setError(null)
+    setResult(null)
     try {
       const body = requestBody
 
@@ -39,7 +40,7 @@ const ApiTest = () => {
       setResult(JSON.stringify(response.data, null, 2))
     } catch (err:any ) {
       console.log(err);
-      setError([err.message, err.status])
+      setError([err.message + ".\n " + (err?.response?.data?.message??err.response?.data??""), err.status])
     }
   }
 
