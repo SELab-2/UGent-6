@@ -93,7 +93,7 @@ public class ProjectController {
 
 
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId")
-    @Roles({UserRole.teacher, UserRole.admin})
+    @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth) {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
 

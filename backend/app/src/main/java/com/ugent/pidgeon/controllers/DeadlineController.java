@@ -23,7 +23,7 @@ public class DeadlineController {
     private DeadlineRepository deadlineRepository;
 
     @DeleteMapping(ApiRoutes.DEADLINE_BASE_PATH  + "/{deadlineId}")
-    @Roles({UserRole.admin, UserRole.teacher})
+    @Roles({ UserRole.teacher})
     public ResponseEntity<?> deleteDeadlineById(@PathVariable Long deadlineId, Auth auth){
         //TODO:in future versions check if user is allowed to delete deadline
         Optional<DeadlineEntity> deadlineOptional = deadlineRepository.findById(deadlineId);

@@ -22,7 +22,7 @@ public class TestController {
 
 
     @DeleteMapping(ApiRoutes.TEST_BASE_PATH + "/{testId}")
-    @Roles({UserRole.admin,UserRole.teacher})
+    @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteTestById(@PathVariable("testId") long testId, Auth auth) {
         // Get the submission entry from the database
         TestEntity testEntity = testRepository.findById(testId).orElse(null);
