@@ -114,7 +114,7 @@ public class CourseController {
 
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher})
-    public ResponseEntity<String> updateCourse(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam("assistantIds") List<Long> assistantIds, @PathVariable("courseId") long courseId, Auth auth){
+    public ResponseEntity<String> updateCourse(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam("assistantIds") List<Long> assistantIds, @PathVariable long courseId, Auth auth){
         try {
             UserEntity user = auth.getUserEntity();
             long userId = auth.getUserEntity().getId();
@@ -174,6 +174,13 @@ public class CourseController {
         }
         CourseEntity course = courseopt.get();
         return ResponseEntity.ok(course);
+    }
+
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<String> deleteCourse(@PathVariable long courseId){
+        courseRepository.deleteById(courseId);
+        return ResponseEntity.ok("Vak verwijderd");
     }
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
