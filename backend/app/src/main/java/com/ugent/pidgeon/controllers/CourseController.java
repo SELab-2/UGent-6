@@ -3,14 +3,10 @@ package com.ugent.pidgeon.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.postgre.models.CourseEntity;
-import com.ugent.pidgeon.postgre.models.ProjectEntity;
-import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.CourseRepository;
-import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.postgre.repository.TestRepository;
-import com.ugent.pidgeon.postgre.repository.UserRepository;
+import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.Filehandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +28,27 @@ public class CourseController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FileRepository fileRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+    @Autowired
+    private SubmissionRepository submissionRepository;
+
+    @Autowired
+    private GroupFeedbackRepository groupFeedbackRepository;
+
+    @Autowired
+    private GroupMemberRepository groupMemberRepository;
+
+    @Autowired
+    private GroupClusterRepository groupClusterRepository;
+
+    @Autowired
+    private DeadlineRepository deadlineRepository;
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
@@ -179,8 +196,57 @@ public class CourseController {
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<String> deleteCourse(@PathVariable long courseId){
-        courseRepository.deleteById(courseId);
-        return ResponseEntity.ok("Vak verwijderd");
+        try {
+            CourseEntity courseEntity = courseRepository.findById(courseId).orElseThrow();
+
+            //voor elk project
+            for(ProjectEntity project : courseRepository.findAllProjectsByCourseId(courseId)){
+                //voor elke test van project test verwjideren en bestanden verwijderen
+                long testId = project.getTestId();
+                TestEntity test = testRepository.findById(testId).orElseThrow();
+                FileEntity dockertestFileEntity = fileRepository.findById(test.getDockerTest()).orElseThrow();
+                FileEntity structuretestFileEntity = fileRepository.findById(test.getStructureTestId()).orElseThrow();
+                Filehandler.deleteFile(dockertestFileEntity.getPath());
+                Filehandler.deleteFile(structuretestFileEntity.getPath());
+                fileRepository.delete(dockertestFileEntity);
+                fileRepository.delete(structuretestFileEntity);
+                //elke deadline verwijderen
+                List<DeadlineEntity> deadlines = project.getDeadlines();
+                deadlineRepository.deleteAll(deadlines);
+                //elke submission verwijderen
+                List<SubmissionEntity> submissions = submissionRepository.findAllByProjectId(project.getId());
+                for(SubmissionEntity submission : submissions){
+                    FileEntity file = fileRepository.findById(submission.getFileId()).orElseThrow();
+                    Filehandler.deleteFile(file.getPath());
+                    fileRepository.delete(file);
+                }
+                submissionRepository.deleteAll(submissions);
+                // project verwijderen
+                projectRepository.delete(project);
+            }
+
+            //voor elke groepcluster
+            for(GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)){
+                //voor elke groep
+                for(GroupEntity group: groupRepository.findAllByClusterId(groupCluster.getId())){
+                    //elke groepmember verwijderen
+                    for(GroupRepository.UserReference userReference : groupRepository.findGroupUsersReferencesByGroupId(group.getId())){
+                        groupMemberRepository.removeMemberFromGroup(group.getId(), userReference.getUserId());
+                    }
+                    //elke groepfeedback verwijderen
+                    groupFeedbackRepository.deleteAll(groupFeedbackRepository.findGroupFeedbackEntitiesByGroupId(group.getId()));
+                    //groep verwijderen
+                    groupRepository.delete(group);
+                }
+                //groepcluster verwijderen
+                groupClusterRepository.delete(groupCluster);
+            }
+            //vak verwijderen
+            courseRepository.delete(courseEntity);
+            return ResponseEntity.ok("Vak verwijderd");
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Probleem bij vak verwijderen: " + e.getMessage());
+        }
     }
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")

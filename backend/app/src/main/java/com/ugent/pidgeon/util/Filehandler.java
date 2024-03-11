@@ -101,4 +101,18 @@ public class Filehandler {
 
         return filePath;
     }
+
+    // Hulpfunctie om bestanden te verwijderen
+    public static void deleteFile(String path) throws Exception{
+        try {
+            // Resolve the path
+            Path filePath = Paths.get(path);
+
+            // Delete the file
+            Files.delete(filePath);
+        } catch (Exception e) {
+            // Handle the exception
+            throw new Exception("Error deleting file: " + e.getMessage());
+        }
+    }
 }

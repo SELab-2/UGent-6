@@ -1,15 +1,21 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface GroupFeedbackRepository extends JpaRepository<GroupFeedbackEntity, Long> {
 
     @Query(value = "SELECT * FROM group_feedback WHERE group_id = ?1 AND project_id = ?2", nativeQuery = true)
     GroupFeedbackEntity getGroupFeedback(long groupId, long projectId);
+
+    @Query(value= "SELECT gfb FROM GroupFeedbackEntity gfb WHERE gfb.groupId = ?1")
+    List<GroupFeedbackEntity> findGroupFeedbackEntitiesByGroupId(long id);
 
     @Modifying
     @Transactional
