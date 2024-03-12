@@ -153,10 +153,13 @@ public class SubmissionController {
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
+            Boolean testresult;
             if (testEntity == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No tests found for this project");
+                Logger.getLogger("SubmissionController").info("no test");
+                testresult = true;
+            } else {
+                testresult = runStructureTest(new ZipFile(savedFile), testEntity);
             }
-            Boolean testresult = runStructureTest(new ZipFile(savedFile), testEntity);
             if (testresult == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
