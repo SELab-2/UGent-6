@@ -1,7 +1,7 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
-import com.ugent.pidgeon.controllers.requestBodies.UpdateGroupScoreRequest;
+import com.ugent.pidgeon.model.json.UpdateGroupScoreRequest;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;

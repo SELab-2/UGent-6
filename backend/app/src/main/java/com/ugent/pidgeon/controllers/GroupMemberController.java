@@ -1,7 +1,7 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
-import com.ugent.pidgeon.controllers.requestBodies.MemberIdRequest;
+import com.ugent.pidgeon.model.json.MemberIdRequest;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.UserJson;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
