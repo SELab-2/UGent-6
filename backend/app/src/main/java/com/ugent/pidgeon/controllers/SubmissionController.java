@@ -94,10 +94,10 @@ public class SubmissionController {
     }
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions") //Route to get all submissions for a project
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
         long userId = auth.getUserEntity().getId();
-        if (!projectRepository.userPartOfProject(projectid, userId)) {
+        if (!projectRepository.adminOfProject(projectid, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
 
