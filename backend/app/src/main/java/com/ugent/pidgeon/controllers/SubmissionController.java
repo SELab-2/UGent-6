@@ -8,6 +8,7 @@ import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.Filehandler;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.zip.ZipFile;
 
 @RestController
@@ -66,6 +68,12 @@ public class SubmissionController {
                 submission.getSubmissionTime());
     }
 
+    public boolean accesToSubmission(SubmissionEntity submission, UserEntity user) {
+        boolean inGroup = groupRepository.userInGroup(submission.getGroupId(), user.getId());
+        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(submission.getProjectId(), user.getId()));
+        return inGroup || isAdmin;
+    }
+
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}") //Route to get a submission
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<SubmissionJson> getSubmission(@PathVariable("submissionid") long submissionid, Auth auth) {
@@ -76,7 +84,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
+        if (!accesToSubmission(submission, auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
@@ -129,7 +137,7 @@ public class SubmissionController {
 
             SubmissionEntity submissionEntity = new SubmissionEntity(projectid, groupId, fileid, time, false);
 
-            //Save the submission in the database TODO: update the accepted parameter
+            //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
 
             //Save the file on the server
@@ -173,7 +181,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
+        if (!accesToSubmission(submission, auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         // Get the file entry from the database
