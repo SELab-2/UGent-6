@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.model.submissionTesting;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -83,11 +84,9 @@ public class SubmissionTemplateModel {
         }
     }
 
-    public boolean checkSubmission(String file) {
-
+    public boolean checkSubmission(ZipFile file) throws IOException {
         try {
-            ZipFile zipFile = new ZipFile(file);
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            Enumeration<? extends ZipEntry> entries = file.entries();
             List<String> folderItems = new LinkedList<>(); // linked list since there will be a lot of addition and removing
             List<Boolean> requiredItemsContained = new ArrayList<>(Collections.nCopies(requiredFiles.size(), false));
             while (entries.hasMoreElements()) {
@@ -98,9 +97,8 @@ public class SubmissionTemplateModel {
             // check if all required items are in the list, and check if all items in the list are required.
             // then check for all items in the list if they are on the disallow list.
 
-
             Iterator<String> fileIterator = folderItems.iterator();
-                  while (fileIterator.hasNext()) {
+            while (fileIterator.hasNext()) {
                 boolean inTemplate = false;
                 String currFile = fileIterator.next();
                 // check if all files are required
@@ -128,9 +126,12 @@ public class SubmissionTemplateModel {
             // return true if all items in template are in the zip
             return !requiredItemsContained.contains(false);
         } catch (Exception e) {
-            e.printStackTrace();
-            return false; // Return false in case of an exception
+            throw new IOException(e.getMessage());
         }
+    }
+
+    public boolean checkSubmission(String file) throws IOException {
+        return checkSubmission(new ZipFile(file));
     }
 
 }
