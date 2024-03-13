@@ -49,7 +49,7 @@ public class GroupMemberController {
 
 
         if(groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0) return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body("Something went wrong");
-        return null;
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User removed from group");
     }
 
 

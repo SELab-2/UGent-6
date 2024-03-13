@@ -47,7 +47,6 @@ public class GroupMembersControllerTest extends ControllerTest {
 
     @Test
     public void removeMemberFromGroupReturnsNoContentWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupMemberRepository.removeMemberFromGroup(anyLong(), anyLong())).thenReturn(1);
 
@@ -57,7 +56,6 @@ public class GroupMembersControllerTest extends ControllerTest {
 
     @Test
     public void addMemberToGroupReturnsOkWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
         when(userRepository.existsById(anyLong())).thenReturn(true);
         when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(false);
 
