@@ -17,18 +17,38 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
+
+/**
+ * This class is a Spring component that implements the HandlerInterceptor interface.
+ * It is used to intercept HTTP requests and perform role-based access control.
+ */
 @Component
 public class RolesInterceptor implements HandlerInterceptor {
 
-
+    // UserRepository instance for interacting with the user data in the database
     private final UserRepository userRepository;
 
+    /**
+     * Constructor for RolesInterceptor.
+     * @param userRepository UserRepository instance for interacting with the user data in the database
+     */
     @Autowired
     public RolesInterceptor(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-
+    /**
+     * This method is called before the actual handler is executed.
+     * It checks if the handler is a HandlerMethod and if it has a Roles annotation.
+     * If the Roles annotation is present, it checks if the authenticated user has the required role.
+     * If the user does not exist, it creates a new user with the role of 'student'.
+     * If the user does not have the required role, it sends an HTTP 403 error and returns false.
+     * @param request HttpServletRequest that is being processed
+     * @param response HttpServletResponse that is being created
+     * @param handler chosen handler to execute, for type and/or instance evaluation
+     * @return true if the execution chain should proceed with the next interceptor or the handler itself
+     * @throws Exception in case of errors
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (handler instanceof HandlerMethod handlerMethod) {
@@ -39,11 +59,13 @@ public class RolesInterceptor implements HandlerInterceptor {
                 UserEntity userEntity = userRepository.findUserByAzureId(auth.getOid());
 
                 if(userEntity == null) {
-                    System.out.println("User does not exist, creating new one");
+                    System.out.println("User does not exist, creating new one. user_id: " + auth.getOid());
                     userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.student, auth.getOid());
                     Timestamp now = new Timestamp(System.currentTimeMillis());
                     userEntity.setCreatedAt(now);
                     userRepository.save(userEntity);
+                    System.out.println("User created with id: " + userEntity.getId());
+
                 }
                 auth.setUserEntity(userEntity);
 
