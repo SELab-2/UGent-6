@@ -3,16 +3,16 @@ package com.ugent.pidgeon.model.json;
 public class TestJson {
     private String projectUrl;
     private String dockerImage;
-    private String dokcerTestUrl;
+    private String dockerTestUrl;
     private String structureTestUrl;
 
     public TestJson() {
     }
 
-    public TestJson(String projectUrl, String dockerImage, String dokcerTestUrl, String structureTestUrl) {
+    public TestJson(String projectUrl, String dockerImage, String dockerTestUrl, String structureTestUrl) {
         this.projectUrl = projectUrl;
         this.dockerImage = dockerImage;
-        this.dokcerTestUrl = dokcerTestUrl;
+        this.dockerTestUrl = dockerTestUrl;
         this.structureTestUrl = structureTestUrl;
     }
 
@@ -32,12 +32,12 @@ public class TestJson {
         this.dockerImage = dockerImage;
     }
 
-    public String getDokcerTestUrl() {
-        return dokcerTestUrl;
+    public String getDockerTestUrl() {
+        return dockerTestUrl;
     }
 
-    public void setDokcerTestUrl(String dokcerTestUrl) {
-        this.dokcerTestUrl = dokcerTestUrl;
+    public void setDockerTestUrl(String dockerTestUrl) {
+        this.dockerTestUrl = dockerTestUrl;
     }
 
     public String getStructureTestUrl() {
