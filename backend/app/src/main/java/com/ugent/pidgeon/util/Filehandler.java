@@ -3,6 +3,7 @@ package com.ugent.pidgeon.util;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
 import org.apache.tika.Tika;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -67,6 +68,11 @@ public class Filehandler {
 
     public static File getFile(Path path) {
         return path.toFile();
+    }
+
+    public static Resource getFileAsResource(Path path) {
+        File file =  path.toFile();
+        return new FileSystemResource(file);
     }
 
     public static boolean isZipFile(File file) throws IOException {
