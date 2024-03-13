@@ -8,7 +8,6 @@ const ApiTest = () => {
   const [result, setResult] = useState<string | null>(null)
   const [method, setMethod] = useState<string>("get")
   const routeRef = useRef<InputRef>(null)
-  const bodyRef = useRef<InputRef>(null)
   const [error, setError] = useState<[string, number] | null>(null)
   const [apiToken, setApiToken] = useState<string | null>(null)
   const [requestBody, setRequestBody] = useState<string>("{}")
