@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.CourseUserEntity;
@@ -16,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -88,4 +91,55 @@ public class CourseController {
         List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
         return ResponseEntity.ok(members); // Successfully retrieved members
     }
+
+    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<String> createProject(
+            @PathVariable long courseId,
+            @RequestParam String name,
+            @RequestParam String description,
+            @RequestParam long groupClusterId,
+            @RequestParam long testId,
+            @RequestParam boolean projectType,
+            @RequestParam Integer maxScore) {
+        try {
+            // Create a new ProjectEntity instance
+            ProjectEntity project = new ProjectEntity(courseId, name, description, groupClusterId, testId, projectType, maxScore);
+
+            // Save the project entity
+            ProjectEntity savedProject = projectRepository.save(project);
+
+
+
+            // Prepare response JSON
+            Map<String, Object> response = createJSONPostResponse(savedProject);
+
+            // Convert response map to JSON string
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            String jsonResponse = objectMapper.writeValueAsString(response);
+            // Return success response with JSON string
+            return ResponseEntity.ok(jsonResponse);
+        } catch (Exception e){
+            System.out.println("Error while creating project: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
+        }
+    }
+
+    private static Map<String, Object> createJSONPostResponse(ProjectEntity savedProject) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", savedProject.getId());
+        response.put("name", savedProject.getName());
+        response.put("description", savedProject.getDescription());
+        response.put("course", String.valueOf(savedProject.getCourseId()));
+        response.put("deadline", 0); // Placeholder for deadline
+            /* Optional timestamp
+            if (savedProject.getTimestamp() != null) {
+                response.put("timestamp", savedProject.getTimestamp().toString());
+            }*/
+        response.put("tests_url", ApiRoutes.PROJECT_BASE_PATH + "/" + savedProject.getId() + "/tests");
+        response.put("submission_url", ApiRoutes.PROJECT_BASE_PATH + "/" + savedProject.getId() + "/sumbmissions");
+        return response;
+    }
+
 }

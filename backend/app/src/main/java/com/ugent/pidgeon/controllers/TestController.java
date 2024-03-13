@@ -19,16 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @RestController
-public class JpaProjectTestController {
+public class TestController {
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -37,7 +34,7 @@ public class JpaProjectTestController {
     @Autowired
     private TestRepository testRepository;
 
-    @PutMapping("/project/{projectid}/tests")
+    @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher})
     public ResponseEntity<String> updateTests(
             @RequestParam("dockerimage") String dockerImage,
@@ -89,6 +86,8 @@ public class JpaProjectTestController {
     // Hulpfunctie om de tests correct op de database te zetten
     private FileEntity saveFileEntity(Path filePath, long projectId, long userId) throws IOException {
         // Save the file entity to the database
+        Logger.getGlobal().info("file path: " + filePath.toString());
+        Logger.getGlobal().info("file name: " + filePath.getFileName().toString());
         FileEntity fileEntity = new FileEntity(filePath.getFileName().toString(), filePath.toString(), userId);
         return fileRepository.save(fileEntity);
     }

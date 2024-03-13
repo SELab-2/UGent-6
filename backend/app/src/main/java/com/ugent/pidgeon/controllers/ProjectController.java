@@ -2,18 +2,18 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
 import com.ugent.pidgeon.postgre.models.DeadlineEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
+import com.ugent.pidgeon.postgre.repository.DeadlineRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -22,6 +22,9 @@ import java.util.*;
 public class ProjectController {
     @Autowired
     private ProjectRepository projectRepository;
+
+    @Autowired
+    private DeadlineRepository deadlineRepository;
 
     @Autowired
     private TestRepository testRepository;
@@ -59,4 +62,24 @@ public class ProjectController {
     }
 
 
+    @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<?> putProjectById(@PathVariable Long projectId, @RequestBody ProjectUpdateDTO updateDTO, Auth auth) {
+        Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
+        if (projectOptional.isPresent()) {
+            ProjectEntity project = projectOptional.get();
+            if (updateDTO.getName() != null) project.setName(updateDTO.getName());
+            if (updateDTO.getDescription() != null) project.setDescription(updateDTO.getDescription());
+
+            if (updateDTO.getDeadline() != null) {
+                DeadlineEntity deadlineEntity = new DeadlineEntity(projectId, updateDTO.getDeadline());
+                deadlineRepository.save(deadlineEntity);
+            }
+            System.out.println(project.getName());
+            projectRepository.save(project);
+            return ResponseEntity.ok(project);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

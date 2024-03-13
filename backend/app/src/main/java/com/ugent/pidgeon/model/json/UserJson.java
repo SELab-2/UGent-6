@@ -1,12 +1,10 @@
 package com.ugent.pidgeon.model.json;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ugent.pidgeon.controllers.ApiRoutes;
+
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.UserRepository;
-import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +19,7 @@ public class UserJson {
 
     private Timestamp createdAt;
 
-    private String oid;
-
-    private List<CourseWithRelationJson> courses;
+//    private List<CourseWithRelationJson> courses;
 
     public UserJson() {
     }
@@ -35,8 +31,7 @@ public class UserJson {
         this.email = entity.getEmail();
         this.role = entity.getRole();
         this.createdAt = entity.getCreatedAt();
-        this.oid = entity.getMicrosoftToken();
-        this.courses = new ArrayList<>();
+//        this.courses = new ArrayList<>();
     }
 
     public long getId() {
@@ -87,20 +82,25 @@ public class UserJson {
         this.createdAt = createdAt;
     }
 
-    public String getOid() {
-        return oid;
+
+//    public List<CourseWithRelationJson> getCourses() {
+//        return courses;
+//    }
+//
+//    public void setCourses(List<CourseWithRelationJson> courses) {
+//        this.courses = courses;
+//    }
+
+    public String getUrl() {
+        return ApiRoutes.USER_BASE_PATH + "/" + id;
     }
 
-    public void setOid(String oid) {
-        this.oid = oid;
+    public String getCourseUrl() {
+        return ApiRoutes.USER_BASE_PATH + "/" + id+"/courses";
     }
 
-
-    public List<CourseWithRelationJson> getCourses() {
-        return courses;
+    public String getProjectUrl() {
+        return ApiRoutes.PROJECT_BASE_PATH;
     }
 
-    public void setCourses(List<CourseWithRelationJson> courses) {
-        this.courses = courses;
-    }
 }

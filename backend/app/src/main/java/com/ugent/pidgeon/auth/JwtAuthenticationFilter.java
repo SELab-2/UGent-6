@@ -84,7 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String oid = jwt.getClaim("oid").asString();
 
                 // print full object
-                // logger.info(jwt.getClaims());
+                //logger.info(jwt.getClaims());
+
 
 
                 User user = new User(displayName, firstName,lastName, email, oid);
