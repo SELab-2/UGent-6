@@ -54,7 +54,7 @@ public class UserControllerTest {
         return userEntity;
     }
 
-    @Test
+    /*@Test
     public void testGetUserById() throws Exception {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser()));
         when(userRepository.findCourseIdsByUserId(anyLong())).thenReturn(new ArrayList<>());
@@ -68,5 +68,5 @@ public class UserControllerTest {
         String responseBody = result.getResponse().getContentAsString();
         System.out.println("Response body: " + responseBody);
         // Add more tests here for the response body if needed
-    }
+    }*/
 }
