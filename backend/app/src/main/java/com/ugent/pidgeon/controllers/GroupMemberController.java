@@ -48,7 +48,7 @@ public class GroupMemberController {
         }
 
 
-        if(groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0) return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body("Something went wrong");
+        if(groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add member to group");
         return null;
     }
 

@@ -24,7 +24,12 @@ public class UserController {
 
     @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
     @Roles({UserRole.student, UserRole.teacher})
-    public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid) {
+    public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
+        UserEntity user = auth.getUserEntity();
+        if (user.getId() != userid && user.getRole() != UserRole.teacher) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You does not have access to this user");
+        }
+
         UserJson res = userRepository.findById(userid).map(UserJson::new).orElse(null);
         if (res == null) {
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -46,9 +51,10 @@ public class UserController {
 
         List<CourseWithRelationJson> userCourses = courses.stream().map(
                 c -> new CourseWithRelationJson(
-                        ApiRoutes.COURSE_BASE_PATH + c.getCourseId(),
+                        ApiRoutes.COURSE_BASE_PATH+"/" + c.getCourseId(),
                             c.getRelation(),
-                            c.getName()
+                            c.getName(),
+                            c.getCourseId()
 
                 )).toList();
 

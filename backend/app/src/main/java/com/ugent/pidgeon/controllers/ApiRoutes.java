@@ -12,6 +12,6 @@ public final class ApiRoutes {
     public static final String CLUSTER_BASE_PATH = "/api/clusters";
 
     public static final String GROUP_SCORE_PATH = GROUP_BASE_PATH + "/{groupid}/score";
-    public static final String USER_COURSES_BASE_PATH = "/api/users/{userid}/courses";
+    public static final String USER_COURSES_BASE_PATH = USER_BASE_PATH+"/{userid}/courses";
 
 }
