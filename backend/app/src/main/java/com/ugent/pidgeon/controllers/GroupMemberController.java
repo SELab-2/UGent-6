@@ -63,7 +63,7 @@ public class GroupMemberController {
         if(user.getRole() == UserRole.student && req.getMemberId() != user.getId()){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can't add other students to the group");
         }
-    System.out.println("User id: " + req.getMemberId() + " mem id: " + req.getMemberId() + " group id: " + groupId);
+
         if(!userRepository.existsById(req.getMemberId())){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
       /*  } else if(user.getRole() == UserRole.teacher && !groupRepository.userAccessToGroup(user.getId(),groupId) && req.getMemberId() != user.getId()) {
