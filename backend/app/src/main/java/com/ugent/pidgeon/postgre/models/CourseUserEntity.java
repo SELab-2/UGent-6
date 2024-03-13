@@ -3,8 +3,6 @@ package com.ugent.pidgeon.postgre.models;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import jakarta.persistence.*;
 
-import java.io.Serializable;
-
 @Entity
 @IdClass(CourseUserId.class)
 @Table(name="course_users")
@@ -56,10 +54,16 @@ public class CourseUserEntity {
         this.relation = relation;
     }
 
+    public static CourseRelation stringToRelation(String relation){
+        if(relation.equalsIgnoreCase("enrolled")){
+            return CourseRelation.enrolled;
+        }else if(relation.equalsIgnoreCase("creator")){
+            return CourseRelation.creator;
+        }else if(relation.equalsIgnoreCase("course_admin")){
+            return CourseRelation.course_admin;
+        }
+        return null;
+    }
 
 }
 
-class CourseUserId implements Serializable {
-    private long courseId;
-    private long userId;
-}
