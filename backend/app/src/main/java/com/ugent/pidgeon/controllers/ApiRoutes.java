@@ -15,4 +15,7 @@ public final class ApiRoutes {
     public static final String GROUP_FEEDBACK_PATH = PROJECT_BASE_PATH + "/{projectid}/groups/{groupid}/score";
     public static final String CLUSTER_BASE_PATH = "/api/clusters";
 
+
+    public static final String USER_AUTH_PATH = "/api/auth";
+
 }

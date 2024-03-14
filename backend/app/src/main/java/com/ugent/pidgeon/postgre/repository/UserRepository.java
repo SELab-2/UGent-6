@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
@@ -33,7 +34,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<CourseWithRelation> findCoursesByUserId(long id);
 
     @Query(value = "SELECT * FROM users WHERE azure_id = ?1", nativeQuery = true)
-    public UserEntity findUserByAzureId(String id);
+    public Optional<UserEntity> findUserByAzureId(String id);
 
 
 }
