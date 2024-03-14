@@ -27,6 +27,7 @@ export enum ApiRoutes {
 
   TEST = "api/test",
   USER = "api/users/:id",
+  USER_AUTH = "api/auth/:azureId"
 }
 
 
@@ -145,10 +146,14 @@ export type GET_Responses = {
   },
   [ApiRoutes.COURSE_MEMBERS]:  GET_Responses[ApiRoutes.GROUP_MEMBER],
   [ApiRoutes.USER]: {
-    courses: Course[];
+    course_url: string;
+    projects_url: string;
+    url: string;
+    role: "teacher" | "student" | "admin";
     email: string;
     id: string;
     name: string;
     surname: string;
-  }
+  },
+  [ApiRoutes.USER_AUTH]: GET_Responses[ApiRoutes.USER]
 }

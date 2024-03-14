@@ -6,5 +6,8 @@
     "theme": "Theme",
     "dark": "Dark",
     "light": "Light"
+  },
+  "home": {
+    "yourCourses": "Your Courses"
   }
 }

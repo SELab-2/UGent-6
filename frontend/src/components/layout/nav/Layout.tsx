@@ -6,7 +6,7 @@ import { Layout as AntLayout, Button, Dropdown, MenuProps, Typography } from "an
 import Logo from "../../Logo"
 import { GlobalOutlined } from "@ant-design/icons"
 import useApp from "../../../hooks/useApp"
-import { Language } from "../../../@types/types"
+import { Language } from "../../../@types/appTypes"
 
 const items: MenuProps["items"] = [
   {

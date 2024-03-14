@@ -53,7 +53,6 @@ async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "D
     data: body,
   }
   
-  console.log(config)
 
   return axios(config)
 }

@@ -2,6 +2,7 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -11,17 +12,18 @@ import com.ugent.pidgeon.postgre.repository.FileRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.Path;
 
 import java.util.Optional;
+import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 @RestController
@@ -36,7 +38,7 @@ public class TestController {
 
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher})
-    public ResponseEntity<String> updateTests(
+    public ResponseEntity<Object> updateTests(
             @RequestParam("dockerimage") String dockerImage,
             @RequestParam("dockertest") MultipartFile dockerTest,
             @RequestParam("structuretest") MultipartFile structureTest,
@@ -61,11 +63,12 @@ public class TestController {
 
             // Create/update test entity
             Optional<TestEntity> testEntity = testRepository.findByProjectId(projectId);
+            TestEntity test;
             if (testEntity.isEmpty()) {
                 TestEntity newTestEntity = new TestEntity(dockerImage, dockertestFileEntity.getId(), structuretestFileEntity.getId());
 
-                newTestEntity = testRepository.save(newTestEntity);
-                projectEntity.setTestId(newTestEntity.getId());
+                test = testRepository.save(newTestEntity);
+                projectEntity.setTestId(test.getId());
                 // Update project entity because first time test is created so id is not set
                 projectRepository.save(projectEntity);
             } else {
@@ -73,11 +76,12 @@ public class TestController {
                 newTestEntity.setDockerImage(dockerImage);
                 newTestEntity.setDockerTest(dockertestFileEntity.getId());
                 newTestEntity.setStructureTestId(structuretestFileEntity.getId());
-                testRepository.save(newTestEntity);
+                test = testRepository.save(newTestEntity);
             }
 
 
-            return ResponseEntity.ok("Tests updated successfully.");
+
+            return ResponseEntity.ok(entityToTestJson(test, projectId));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving files: " + e.getMessage());
         }
@@ -90,6 +94,78 @@ public class TestController {
         Logger.getGlobal().info("file name: " + filePath.getFileName().toString());
         FileEntity fileEntity = new FileEntity(filePath.getFileName().toString(), filePath.toString(), userId);
         return fileRepository.save(fileEntity);
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<Object> getTests(@PathVariable("projectid") long projectId, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        if (!projectRepository.adminOfProject(projectId, userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        }
+        Optional<TestEntity> testEntity = testRepository.findByProjectId(projectId);
+        if (testEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        TestEntity test = testEntity.get();
+        TestJson res  = entityToTestJson(test, projectId);
+        return ResponseEntity.ok(res);
+    }
+
+
+    public TestJson entityToTestJson(TestEntity testEntity, long projectId) {
+        return new TestJson(
+                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId,
+                testEntity.getDockerImage(),
+                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/dockertest",
+                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/structuretest"
+        );
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/structuretest")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<Object> getStructureTestFile(@PathVariable("projectid") long testId, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        if (!projectRepository.adminOfProject(testId, userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        }
+        Optional<TestEntity> testEntity = testRepository.findById(testId);
+        if (testEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        long structuretestid = testEntity.get().getStructureTestId();
+        Optional<FileEntity> fileEntity = fileRepository.findById(structuretestid);
+        if (fileEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Resource file = Filehandler.getFileAsResource(Path.of(fileEntity.get().getPath()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileEntity.get().getName());
+        headers.add(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.TEXT_PLAIN));
+        return ResponseEntity.ok().headers(headers).body(file);
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertest")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<Object> getDockerTestFile(@PathVariable("projectid") long testId, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        if (!projectRepository.adminOfProject(testId, userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        }
+        Optional<TestEntity> testEntity = testRepository.findById(testId);
+        if (testEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        long dockertestid = testEntity.get().getDockerTest();
+        Optional<FileEntity> fileEntity = fileRepository.findById(dockertestid);
+        if (fileEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Resource file = Filehandler.getFileAsResource(Path.of(fileEntity.get().getPath()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileEntity.get().getName());
+        headers.add(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.TEXT_PLAIN));
+        return ResponseEntity.ok().headers(headers).body(file);
     }
 
 }

@@ -3,7 +3,7 @@ import { Dropdown, MenuProps, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import { BgColorsOutlined, DownOutlined, LogoutOutlined } from "@ant-design/icons"
 import { msalInstance } from "../../../index"
-import { Themes } from "../../../@types/types"
+import { Themes } from "../../../@types/appTypes"
 import useApp from "../../../hooks/useApp"
 
 const AuthNav = () => {

@@ -1,4 +1,4 @@
-package com.ugent.pidgeon.controllers.requestBodies;
+package com.ugent.pidgeon.model.json;
 
 public class MemberIdRequest {
     private Long memberId;

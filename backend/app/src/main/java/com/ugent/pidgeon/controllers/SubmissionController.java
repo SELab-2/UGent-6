@@ -205,7 +205,6 @@ public class SubmissionController {
 
             return ResponseEntity.ok()
                     .headers(headers)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(zipFile);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
