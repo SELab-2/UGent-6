@@ -32,7 +32,7 @@ public class ProjectEntity {
         @Column(name="visible", nullable = false)
         private Boolean projectType;
 
-        @OneToMany(mappedBy = "project")
+        @OneToMany(mappedBy = "projectId")
         private List<DeadlineEntity> deadlines;
 
         @Column(name="max_score")

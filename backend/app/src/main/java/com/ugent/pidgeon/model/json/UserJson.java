@@ -1,12 +1,10 @@
 package com.ugent.pidgeon.model.json;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ugent.pidgeon.controllers.ApiRoutes;
+
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.UserRepository;
-import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +33,7 @@ public class UserJson {
         this.email = entity.getEmail();
         this.role = entity.getRole();
         this.createdAt = entity.getCreatedAt();
-        this.oid = entity.getMicrosoftToken();
+        this.oid = entity.getAzureId();
         this.courses = new ArrayList<>();
     }
 
@@ -102,5 +100,9 @@ public class UserJson {
 
     public void setCourses(List<CourseWithRelationJson> courses) {
         this.courses = courses;
+    }
+
+    public String getUrl() {
+        return ApiRoutes.USER_BASE_PATH + "/" + id;
     }
 }
