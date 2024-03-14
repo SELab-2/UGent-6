@@ -31,7 +31,7 @@ export enum ApiRoutes {
 }
 
 
-export type Timestamp = number
+export type Timestamp = string
 
 /**
  *  the body of the POST requests
@@ -103,7 +103,7 @@ export type GET_Responses = {
     course: string
     deadline: Timestamp
     description: string
-    id: string
+    id: number
     name: string
     submission_url: string
     tests_url: string
@@ -139,7 +139,7 @@ export type GET_Responses = {
   [ApiRoutes.CLUSTER]: GET_Responses[ApiRoutes.CLUSTER_GROUPS],
   [ApiRoutes.COURSE]: {
     description: string;
-    id: string;
+    id: number;
     members_url: string;
     name: string;
     teachers: Teacher[]; // Changed this 

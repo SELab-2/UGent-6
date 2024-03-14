@@ -8,6 +8,25 @@
     "light": "Light"
   },
   "home": {
-    "yourCourses": "Your Courses"
-  }
+    "yourCourses": "Your courses",
+    "createCourse": "Create course",
+    "courseName": "Course name",
+    "courseDescription": "Description",
+    "yourProjects": "Your projects",
+    
+    "projects": {
+      "noProjects": "No projects",
+      "name": "Name",
+      "description": "Description",
+      "course": "Course",
+      "status": "Status",
+      "deadline": "Deadline",
+      "showMore": "Show more",
+      "statusDone": "Completed",
+      "statusNotDone": "Not completed",
+      "submit": "Submit"
+    }
+  },
+  "cancel": "Cancel",
+  "ok": "OK"
 }

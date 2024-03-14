@@ -8,6 +8,24 @@
     "light": "Licht"
   },
   "home": {
-    "yourCourses": "Cursussen"
-  }
+    "yourCourses": "Vakken",
+    "createCourse": "Vak aanmaken",
+    "courseName": "Vak naam",
+    "courseDescription": "Beschrijving",
+    "yourProjects": "Projecten",
+    "projects": {
+      "noProjects": "Geen projecten",
+      "name": "Naam",
+      "description": "Beschrijving",
+      "course": "Vak",
+      "status": "Status",
+      "deadline": "Deadline",
+      "showMore": "Toon meer",
+      "statusDone": "Klaar",
+      "statusNotDone": "Niet klaar",
+      "submit": "Inleveren"
+    }
+  },
+  "cancel": "Annuleren",
+  "ok": "Ok"
 }
