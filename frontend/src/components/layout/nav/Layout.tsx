@@ -43,10 +43,12 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
         </Dropdown>
       </AntLayout.Header>
       <AntLayout style={{ height: "calc(100vh - 48px)", overflow: "auto" }}>
-        <AntLayout.Content>{children}</AntLayout.Content>
+        <AntLayout.Content>{children}
+        
+        <AntLayout.Footer style={{height:"2rem",width:"100%",bottom:0}}></AntLayout.Footer>
+        </AntLayout.Content>
 
       </AntLayout>
-        <AntLayout.Footer style={{background:"red",position:"relative"}}>.</AntLayout.Footer>
     </div>
   )
 }

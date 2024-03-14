@@ -95,12 +95,16 @@ public class UserJson {
         return ApiRoutes.USER_BASE_PATH + "/" + id;
     }
 
+    public void setUrl(String s){}
+
     public String getCourseUrl() {
         return ApiRoutes.USER_BASE_PATH + "/" + id+"/courses";
     }
+    public void setCourseUrl(String s){}
 
     public String getProjectUrl() {
         return ApiRoutes.PROJECT_BASE_PATH;
     }
+    public void setProjectUrl(String s){}
 
 }

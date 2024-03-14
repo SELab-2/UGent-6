@@ -12,10 +12,10 @@ const Home = () => {
   const [open, setOpen] = useState(false)
 
   return (<div>
-   <div style={{
+   <div >
+      <Typography.Title level={3} style={{
     paddingLeft:"2rem"
    }}>
-      <Typography.Title level={3}>
         {t("home.yourCourses")}
         {/* <TeacherView> */}{" "}
         <Button
@@ -26,8 +26,8 @@ const Home = () => {
         {/* </TeacherView> */}
       </Typography.Title>
 
-      <Space className="hide-scrollbar" style={{maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap"}}>
-       {Array(20).fill(1).map((_,i)=> <Course key={i}
+      <Space className="small-scroll-bar" style={{maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap",padding:"10px 2rem"}}>
+       {Array(10).fill(1).map((_,i)=> <Course key={i}
           course={{
             members_url: "/api/courses/1/members",
             name: "Computationele biologie",

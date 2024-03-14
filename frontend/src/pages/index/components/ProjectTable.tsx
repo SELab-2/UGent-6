@@ -72,7 +72,7 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
          {!isTeacher && <Button type="link">{t("home.projects.submit")}</Button>}
         </Space>
       ),
-    },
+    }
   ],[t, modal,isTeacher])
 
   return (

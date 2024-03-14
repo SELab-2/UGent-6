@@ -36,6 +36,12 @@
       "userCourseCount": "{{count}} gebruikers in dit vak"
     }
   },
+  "course": {
+    "projects": "Projecten",
+    "groups": "Groepen",
+    "info": "Informatie",
+    "grades": "Punten"
+  },
   "cancel": "Annuleren",
   "ok": "Ok"
 }

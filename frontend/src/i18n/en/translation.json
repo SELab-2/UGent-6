@@ -36,6 +36,13 @@
       
     }
   },
+
+  "course": {
+    "projects": "Projects",
+    "groups": "Groups",
+    "info": "Info",
+    "grades": "Grades"
+  },
   "cancel": "Cancel",
   "ok": "OK"
 }
