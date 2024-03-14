@@ -8,6 +8,7 @@ import "./i18n/config"
 import ThemeProvider from "./theme/ThemeProvider"
 import { AppProvider } from "./providers/AppProvider"
 import { UserProvider } from "./providers/UserProvider"
+import AppApiProvider from "./providers/AppApiProvider"
 
 type AppProps = {
   pca: IPublicClientApplication
@@ -22,13 +23,15 @@ function App({ pca }: AppProps) {
     <div className="App">
       <AppProvider>
         <ThemeProvider>
-          <MsalProvider instance={pca}>
-            <UserProvider>
-              <Layout>
-                <AppRouter />
-              </Layout>
-            </UserProvider>
-          </MsalProvider>
+          <AppApiProvider>
+            <MsalProvider instance={pca}>
+              <UserProvider>
+                <Layout>
+                  <AppRouter />
+                </Layout>
+              </UserProvider>
+            </MsalProvider>
+          </AppApiProvider>
         </ThemeProvider>
       </AppProvider>
     </div>

@@ -19,12 +19,21 @@
       "name": "Name",
       "description": "Description",
       "course": "Course",
-      "status": "Status",
       "deadline": "Deadline",
       "showMore": "Show more",
-      "statusDone": "Completed",
-      "statusNotDone": "Not completed",
-      "submit": "Submit"
+      "submit": "Submit",
+      "projectStatus": "Status",
+      "status": {
+        "completed": "Completed",
+        "processing": "Processing",
+        "notStarted": "Not started"
+      },
+      "groupProgress": "Group progress",
+      "completeProgress": "{{count}} / {{total}} completed",
+      "activeProjects": "{{count}} active project",
+      "activeProjects_plural": "{{count}} active projects",
+      "userCourseCount": "{{count}} users are in this course"
+      
     }
   },
   "cancel": "Cancel",

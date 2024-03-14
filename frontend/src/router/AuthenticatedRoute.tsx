@@ -1,6 +1,6 @@
 import { FC, useEffect } from "react"
 import useApp from "../hooks/useApp"
-import { useIsAuthenticated } from "@azure/msal-react"
+import { useAccount, useIsAuthenticated } from "@azure/msal-react"
 import { Outlet, useNavigate } from "react-router-dom"
 import { AppRoutes } from "../@types/routes"
 
@@ -9,13 +9,17 @@ import { AppRoutes } from "../@types/routes"
 
 const AuthenticatedRoute:FC = () => {
   const auth = useIsAuthenticated()
+  const s = useAccount()
   const navigate = useNavigate()
   
   useEffect(()=>{
+    console.log(s);
       if(!auth) {
-        navigate(AppRoutes.HOME)
+        console.log(auth);
+        console.log("Not authenticated!");
+       // navigate(AppRoutes.HOME)
       }
-  },[auth])
+  },[auth,s])
 
   if(auth){
     return <Outlet/>

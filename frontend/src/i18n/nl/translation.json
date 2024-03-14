@@ -18,12 +18,22 @@
       "name": "Naam",
       "description": "Beschrijving",
       "course": "Vak",
-      "status": "Status",
       "deadline": "Deadline",
       "showMore": "Toon meer",
-      "statusDone": "Klaar",
-      "statusNotDone": "Niet klaar",
-      "submit": "Inleveren"
+
+      "projectStatus": "Status",
+      "status": {
+        "completed": "Voltooid",
+        "processing": "Bezig",
+        "notStarted": "Niet begonnen"
+      },
+      "groupProgress": "Groeps voortgang",
+      "completeProgress": "{{count}} / {{total}} voltooid",
+
+      "activeProjects": "{{count}} actief project",
+      "activeProjects_plural": "{{count}} actieve projecten",
+      "submit": "Inleveren",
+      "userCourseCount": "{{count}} gebruikers in dit vak"
     }
   },
   "cancel": "Annuleren",
