@@ -10,7 +10,6 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     List<SubmissionEntity> findByGroupIdAndProjectId(long groupId, long projectId);
 
 
-    //TODO: Once  deadlines are properly implemented, this query should be updated to take into account the deadline
     @Query(value = """
     SELECT s.id
     FROM SubmissionEntity s

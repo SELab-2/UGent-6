@@ -64,17 +64,13 @@ CREATE TABLE projects (
     project_name VARCHAR(100) NOT NULL,
     description TEXT,
     group_cluster_id INT REFERENCES group_clusters(group_cluster_id),
+    deadline TIMESTAMP NOT NULL,
     test_id INT REFERENCES tests(test_id),
     visible BOOLEAN DEFAULT false NOT NULL,
     max_score INT
 );
 
-CREATE TABLE deadlines (
-    deadline_id SERIAL PRIMARY KEY,
-    project_id BIGINT,
-    deadline TIMESTAMP,
-    FOREIGN KEY (project_id) REFERENCES projects (project_id)
-);
+
 
 -- Groups table to manage groups of students
 CREATE TABLE groups (

@@ -18,6 +18,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             JOIN GroupUserEntity gu on gu.groupId = g.id
             WHERE gu.userId = ?1""")
     List<ProjectEntity> findProjectsByUserId(long userId);
+
+    //TODO: this should check with course_user instead of group_users
     @Query(value = """
             SELECT CASE WHEN EXISTS (
                 SELECT gu

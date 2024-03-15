@@ -79,23 +79,17 @@ INSERT INTO group_users (group_id, user_id) VALUES
 (4, 4),
 (5, 5);
 
-INSERT INTO projects (course_id, test_id, project_name, description, group_cluster_id, max_score)
+INSERT INTO projects (course_id, test_id, project_name, description, group_cluster_id, max_score, deadline)
 VALUES
-(1, 1, 'Math project 1', 'Solve equations', 1, 20),
-(2, 2, 'Science Lab 1', 'Conduct experiment', 2, 20),
-(3, 3, 'History Essay 1', 'Discuss historical event', 3, NULL),
-(4, 4, 'Programming Assignment 1', 'Write code', 4, 4),
-(5, 5, 'Literature Analysis', 'Analyze text', 5, 10);
+    (1, 1, 'Math project 1', 'Solve equations', 1, 20, '2024-03-20 09:00'),
+    (2, 2, 'Science Lab 1', 'Conduct experiment', 2, 20, '2024-03-21 15:30'),
+    (3, 3, 'History Essay 1', 'Discuss historical event', 3, NULL, '2024-03-22 12:00'),
+    (4, 4, 'Programming Assignment 1', 'Write code', 4, 4, '2024-03-23 14:45'),
+    (5, 5, 'Literature Analysis', 'Analyze text', 5, 10, '2024-03-24 10:00');
 
 
-INSERT INTO deadlines (project_id, deadline)
-VALUES
-(1, '2024-03-10'),
-(2, '2024-03-15'),
-(3, '2024-03-20'),
-(4, '2024-03-25'),
-(5, '2024-03-30'),
-(1, '2024-04-10');
+
+
 
 -- Inserting into `solutions`
 -- Linking solutions to projects and groups

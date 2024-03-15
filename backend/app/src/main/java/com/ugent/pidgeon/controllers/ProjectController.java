@@ -3,11 +3,8 @@ package com.ugent.pidgeon.controllers;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
-import com.ugent.pidgeon.postgre.models.DeadlineEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
-import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.DeadlineRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +19,6 @@ import java.util.*;
 public class ProjectController {
     @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
-    private DeadlineRepository deadlineRepository;
 
     @Autowired
     private TestRepository testRepository;
@@ -72,8 +66,7 @@ public class ProjectController {
             if (updateDTO.getDescription() != null) project.setDescription(updateDTO.getDescription());
 
             if (updateDTO.getDeadline() != null) {
-                DeadlineEntity deadlineEntity = new DeadlineEntity(projectId, updateDTO.getDeadline());
-                deadlineRepository.save(deadlineEntity);
+                project.setDeadline(updateDTO.getDeadline());
             }
             System.out.println(project.getName());
             projectRepository.save(project);
