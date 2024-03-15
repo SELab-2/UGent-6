@@ -58,16 +58,5 @@ public class CourseUserEntity {
         this.relation = relation.toString();
     }
 
-    public static CourseRelation stringToRelation(String relation){
-        if(relation.equalsIgnoreCase("enrolled")){
-            return CourseRelation.enrolled;
-        }else if(relation.equalsIgnoreCase("creator")){
-            return CourseRelation.creator;
-        }else if(relation.equalsIgnoreCase("course_admin")){
-            return CourseRelation.course_admin;
-        }
-        return null;
-    }
-
 }
 
