@@ -20,7 +20,7 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
         FROM SubmissionEntity s2
         WHERE s2.groupId = :groupId
         AND s2.projectId = :projectId
-    )
+    ) ORDER BY s.id DESC LIMIT 1
     """)
     Long findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
 }
