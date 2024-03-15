@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,8 +63,9 @@ public class SubmissionController {
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
                 ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
-                submission.getAccepted(),
-                submission.getSubmissionTime());
+                submission.getStructureAccepted(),
+                submission.getSubmissionTime(),
+                submission.getDockerAccepted());
     }
 
     public boolean accesToSubmission(SubmissionEntity submission, UserEntity user) {
@@ -135,7 +135,14 @@ public class SubmissionController {
             long fileid = fileRepository.save(fileEntity).getId();
 
 
-            SubmissionEntity submissionEntity = new SubmissionEntity(projectid, groupId, fileid, time, false);
+            SubmissionEntity submissionEntity = new SubmissionEntity(
+                    projectid,
+                    groupId,
+                    fileid,
+                    time,
+                    false,
+                    false
+            );
 
             //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
@@ -164,7 +171,7 @@ public class SubmissionController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
 
-            submissionEntity.setAccepted(testresult);
+            submissionEntity.setStructureAccepted(testresult);
             submissionRepository.save(submissionEntity);
 
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));

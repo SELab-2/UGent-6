@@ -43,7 +43,14 @@ INSERT INTO files (file_path, file_name, uploaded_by) VALUES
 ('/path/to/file12', 'file12.txt', 4),
 ('/path/to/file13', 'file13.txt', 5),
 ('/path/to/file14', 'file14.txt', 4),
-('/path/to/file15', 'file15.txt', 5);
+('/path/to/file15', 'file15.txt', 5),
+('/path/to/file16', 'file16.txt', 1),
+('/path/to/file17', 'file17.txt', 2),
+('/path/to/file18', 'file18.txt', 3),
+('/path/to/file19', 'file19.txt', 4),
+('/path/to/file20', 'file20.txt', 1),
+('/path/to/file21', 'file21.txt', 2),
+('/path/to/file22', 'file22.txt', 3);
 
 -- Assume tests are created before projects for foreign key constraints
 -- Inserting into `tests`
@@ -93,12 +100,13 @@ VALUES
 
 -- Inserting into `solutions`
 -- Linking solutions to projects and groups
-INSERT INTO submissions (project_id, group_id, file_id, accepted, submission_time) VALUES
-(1, 1, 1, true ,CURRENT_TIMESTAMP),
-(2, 2, 2, false,CURRENT_TIMESTAMP),
-(3, 3, 3, false,CURRENT_TIMESTAMP),
-(4, 4, 4, true,CURRENT_TIMESTAMP),
-(5, 5, 5, true,CURRENT_TIMESTAMP);
+INSERT INTO submissions (project_id, group_id, file_id, structure_accepted, docker_accepted, structure_feedback_fileid, docker_feedback_fileid, submission_time)
+VALUES
+    (1, 1, 16, true, true, 17, 18, CURRENT_TIMESTAMP),
+    (2, 2, 17, false, false, 18, 19, CURRENT_TIMESTAMP),
+    (3, 3, 18, false, false, 19, 20, CURRENT_TIMESTAMP),
+    (4, 4, 19, true, true, 20, 21, CURRENT_TIMESTAMP),
+    (5, 5, 20, true, true, 21, 22, CURRENT_TIMESTAMP);
 
 -- Inserting into `group_grades`
 -- Assign grades to group solutions

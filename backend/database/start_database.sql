@@ -98,7 +98,10 @@ CREATE TABLE submissions (
     project_id INT REFERENCES projects(project_id),
     group_id INT REFERENCES groups(group_id),
     file_id INT REFERENCES files(file_id),
-    accepted BOOLEAN NOT NULL,
+    structure_accepted BOOLEAN NOT NULL,
+    docker_accepted BOOLEAN NOT NULL,
+    structure_feedback_fileid INT REFERENCES files(file_id),
+    docker_feedback_fileid INT REFERENCES files(file_id),
     submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

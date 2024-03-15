@@ -36,3 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 backend/app/data/*
+backend/data/*
+backend/data/projects/1/1/6/files.zip
