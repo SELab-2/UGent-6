@@ -4,6 +4,7 @@ import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
@@ -40,13 +41,17 @@ public class ProjectController {
         return ResponseEntity.ok().body(projectsWithUrls);
     }
 
+    public boolean accesToProject(long projectId, UserEntity user) {
+        boolean studentof = projectRepository.userPartOfProject(projectId, user.getId());
+        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
+    }
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
         return projectRepository.findById(projectId)
                 .map(project -> {
                     long userId = auth.getUserEntity().getId();
-                    if (!projectRepository.userPartOfProject(projectId, userId)) {
+                    if (!accesToProject(projectId, auth.getUserEntity())) {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                     } else {
                         return ResponseEntity.ok().body(project);

@@ -49,7 +49,7 @@ public class TestController {
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
 
         long userId = auth.getUserEntity().getId();
-        if(!projectRepository.userPartOfProject(projectId, userId)){
+        if(!projectRepository.adminOfProject(projectId, userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
         try {
