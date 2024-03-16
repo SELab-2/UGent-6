@@ -21,6 +21,8 @@ public class Filehandler {
 
     static String BASEPATH = "data";
     public static String SUBMISSION_FILENAME = "files.zip";
+    public static String STRUCTURE_FEEDBACK_FILENAME = "structure_feedback.txt";
+    public static String DOCKER_FEEDBACK_FILENAME = "docker_feedback.txt";
 
     public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty
@@ -57,6 +59,7 @@ public class Filehandler {
             throw new IOException(e.getMessage());
         }
     }
+
 
     static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));

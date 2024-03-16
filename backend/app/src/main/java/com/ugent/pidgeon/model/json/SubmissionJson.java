@@ -14,10 +14,24 @@ public class SubmissionJson {
 
     private Timestamp submissionTime;
 
+    private String structureFeedbackUrl;
+
+    public String getDockerFeedbackUrl() {
+        return dockerFeedbackUrl;
+    }
+
+    public void setDockerFeedbackUrl(String dockerFeedbackUrl) {
+        this.dockerFeedbackUrl = dockerFeedbackUrl;
+    }
+
+    private String dockerFeedbackUrl;
+
     public SubmissionJson() {
     }
 
-    public SubmissionJson(long id, String projectUrl, String groupUrl, String fileUrl, Boolean structureAccepted, Timestamp submissionTime, Boolean dockerAccepted) {
+    public SubmissionJson(
+            long id, String projectUrl, String groupUrl, String fileUrl,
+            Boolean structureAccepted, Timestamp submissionTime, Boolean dockerAccepted, String structureFeedbackUrl, String dockerFeedbackUrl) {
         this.id = id;
         this.projectUrl = projectUrl;
         this.groupUrl = groupUrl;
@@ -25,6 +39,8 @@ public class SubmissionJson {
         this.structureAccepted = structureAccepted;
         this.submissionTime = submissionTime;
         this.dockerAccepted = dockerAccepted;
+        this.structureFeedbackUrl = structureFeedbackUrl;
+        this.dockerFeedbackUrl = dockerFeedbackUrl;
     }
 
     public long getId() {
@@ -81,5 +97,13 @@ public class SubmissionJson {
 
     public void setDockerAccepted(Boolean dockerAccepted) {
         this.dockerAccepted = dockerAccepted;
+    }
+
+    public String getStructureFeedbackUrl() {
+        return structureFeedbackUrl;
+    }
+
+    public void setStructureFeedbackUrl(String structureFeedbackUrl) {
+        this.structureFeedbackUrl = structureFeedbackUrl;
     }
 }

@@ -20,7 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -65,7 +67,11 @@ public class SubmissionController {
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
                 submission.getStructureAccepted(),
                 submission.getSubmissionTime(),
-                submission.getDockerAccepted());
+                submission.getDockerAccepted(),
+                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/structurefeedback",
+                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/dockerfeedback"
+        );
+
     }
 
     public boolean accesToSubmission(SubmissionEntity submission, UserEntity user) {
@@ -151,12 +157,26 @@ public class SubmissionController {
             String filename = file.getOriginalFilename();
             Path path = Filehandler.getSubmissionPath(projectid, groupId, submission.getId());
             File savedFile = Filehandler.saveSubmission(path, file);
-            String pathname = path + "/" + Filehandler.SUBMISSION_FILENAME;
+            String pathname = path.resolve(Filehandler.SUBMISSION_FILENAME).toString();
 
             //Update name and path for the file entry
             fileEntity.setName(filename);
             fileEntity.setPath(pathname);
             fileRepository.save(fileEntity);
+
+            // Create file for structureFeedback
+            Path structureFeedbackPath = Filehandler.getSubmissionPath(projectid, groupId, submission.getId()).resolve(Filehandler.STRUCTURE_FEEDBACK_FILENAME);
+            // TODO: remove this once the structure feedback writes to and creates this file
+            File file1 = new File(structureFeedbackPath.toString());
+            if (file1.createNewFile()) {
+                // Write content to the file
+                FileWriter fileWriter = new FileWriter(file1);
+                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write("TEMPORARY STRUCTURETESTFEEDBACK");
+                bufferedWriter.close();
+            }
+            FileEntity structureFeedbackFile = new FileEntity(Filehandler.STRUCTURE_FEEDBACK_FILENAME, structureFeedbackPath.toString(), userId);
+            fileRepository.save(structureFeedbackFile);
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
@@ -171,8 +191,21 @@ public class SubmissionController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
 
+            // Update the submission with the test result
             submissionEntity.setStructureAccepted(testresult);
             submissionRepository.save(submissionEntity);
+
+            // Save temporare dockerfeedbackfile
+            Path dockerFeedbackPath = Filehandler.getSubmissionPath(projectid, groupId, submission.getId()).resolve(Filehandler.DOCKER_FEEDBACK_FILENAME);
+            // TODO: remove this once the docker feedback writes to and creates this file
+            File file2 = new File(dockerFeedbackPath.toString());
+            if (file2.createNewFile()) {
+                // Write content to the file
+                FileWriter fileWriter = new FileWriter(file2);
+                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write("TEMPORARY DOCKERTESTFEEDBACK");
+                bufferedWriter.close();
+            }
 
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
         } catch (Exception e) {

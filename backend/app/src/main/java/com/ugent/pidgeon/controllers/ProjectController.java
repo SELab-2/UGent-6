@@ -44,6 +44,7 @@ public class ProjectController {
     public boolean accesToProject(long projectId, UserEntity user) {
         boolean studentof = projectRepository.userPartOfProject(projectId, user.getId());
         boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
+        return  studentof || isAdmin;
     }
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher, UserRole.student})

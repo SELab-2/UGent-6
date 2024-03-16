@@ -30,6 +30,12 @@ public class SubmissionEntity {
     @Column(name="docker_accepted", nullable = false)
     private Boolean dockerAccepted;
 
+    @Column(name="structure_feedback_fileid")
+    private Long structureFeedbackFileId;
+
+    @Column(name="docker_feedback_fileid")
+    private Long dockerFeedbackFileId;
+
     public SubmissionEntity() {
     }
 
@@ -93,5 +99,21 @@ public class SubmissionEntity {
 
     public void setDockerAccepted(Boolean dockerAccepted) {
         this.dockerAccepted = dockerAccepted;
+    }
+
+    public Long getStructureFeedbackFileId() {
+        return structureFeedbackFileId;
+    }
+
+    public void setStructureFeedbackFileId(Long structureFeedbackFileId) {
+        this.structureFeedbackFileId = structureFeedbackFileId;
+    }
+
+    public Long getDockerFeedbackFileId() {
+        return dockerFeedbackFileId;
+    }
+
+    public void setDockerFeedbackFileId(Long dockerFeedbackFileId) {
+        this.dockerFeedbackFileId = dockerFeedbackFileId;
     }
 }
