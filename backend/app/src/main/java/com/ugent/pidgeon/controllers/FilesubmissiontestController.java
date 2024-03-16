@@ -126,11 +126,6 @@ public class FilesubmissiontestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         fileController.deleteFileById(submission.getFileId(),auth);
-        try {
-            Filehandler.deleteSubmission(submission.getProjectId(), submission.getGroupId(), submission.getId());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         submissionRepository.delete(submission);
         return  ResponseEntity.ok(submission);
     }

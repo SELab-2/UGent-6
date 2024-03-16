@@ -58,7 +58,11 @@ public class Filehandler {
     }
 
 
-    public static String deleteSubmission(Path directory) throws IOException {
+    public static void deleteSubmission(Path directory) throws IOException {
+        deleteLocation(directory);
+    }
+
+    public static void deleteLocation(Path directory) throws IOException {
         try {
             // Create directory
             File uploadDirectory = new File(directory.toString());
@@ -67,14 +71,13 @@ public class Filehandler {
                     throw new IOException("Error while deleting directory");
                 }
             }
-            return "Deleted";
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
     }
 
-    public static String deleteSubmission(long projectid, long groupid, long submissionid) throws IOException {
-            return deleteSubmission(getSubmissionPath(projectid, groupid, submissionid));
+    public static void deleteSubmission(long projectid, long groupid, long submissionid) throws IOException {
+        deleteSubmission(getSubmissionPath(projectid, groupid, submissionid));
     }
 
 

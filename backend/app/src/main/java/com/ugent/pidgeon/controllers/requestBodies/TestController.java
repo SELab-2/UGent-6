@@ -2,6 +2,7 @@ package com.ugent.pidgeon.controllers.requestBodies;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.controllers.ApiRoutes;
+import com.ugent.pidgeon.controllers.FileController;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
@@ -19,17 +20,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
     @Autowired
     private TestRepository testRepository;
-
+    @Autowired
+    private FileController fileController;
 
     @DeleteMapping(ApiRoutes.TEST_BASE_PATH + "/{testId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteTestById(@PathVariable("testId") long testId, Auth auth) {
         // Get the submission entry from the database
         TestEntity testEntity = testRepository.findById(testId).orElse(null);
+
         if (testEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
+        fileController.deleteFileById(testEntity.getStructureTestId(), auth);
+        fileController.deleteFileById(testEntity.getDockerTest(), auth);
         testRepository.delete(testEntity);
         return  ResponseEntity.ok(testEntity);
     }
