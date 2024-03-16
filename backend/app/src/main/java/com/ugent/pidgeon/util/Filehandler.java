@@ -57,6 +57,28 @@ public class Filehandler {
         }
     }
 
+
+    public static String deleteSubmission(Path directory) throws IOException {
+        try {
+            // Create directory
+            File uploadDirectory = new File(directory.toString());
+            if (uploadDirectory.exists()) {
+                if(!uploadDirectory.delete()) {
+                    throw new IOException("Error while deleting directory");
+                }
+            }
+            return "Deleted";
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
+    public static String deleteSubmission(long projectid, long groupid, long submissionid) throws IOException {
+            return deleteSubmission(getSubmissionPath(projectid, groupid, submissionid));
+    }
+
+
+
     static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }

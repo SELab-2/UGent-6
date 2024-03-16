@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 
@@ -125,6 +126,11 @@ public class FilesubmissiontestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         fileController.deleteFileById(submission.getFileId(),auth);
+        try {
+            Filehandler.deleteSubmission(submission.getProjectId(), submission.getGroupId(), submission.getId());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         submissionRepository.delete(submission);
         return  ResponseEntity.ok(submission);
     }
