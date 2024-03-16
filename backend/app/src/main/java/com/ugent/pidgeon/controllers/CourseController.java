@@ -2,10 +2,10 @@ package com.ugent.pidgeon.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
-import com.ugent.pidgeon.postgre.models.CourseEntity;
-import com.ugent.pidgeon.postgre.models.CourseUserEntity;
-import com.ugent.pidgeon.postgre.models.CourseUserId;
-import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.CourseMemberRequestJson;
+import com.ugent.pidgeon.model.json.UserIdJson;
+import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.CourseRepository;
@@ -57,40 +57,70 @@ public class CourseController {
         }
         return ResponseEntity.ok(projects);
     }
-
-    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/")
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> removeCourseMember(@PathVariable Long courseId, @RequestParam Long studentId) {
-        courseUserRepository.deleteById(new CourseUserId(courseId, studentId));
-        return ResponseEntity.ok().build(); // Successfully removed
+    Boolean hasCourseRights(long courseId, UserEntity user){
+        if(user.getRole() == UserRole.admin){
+            return true;
+        }else{
+            return courseUserRepository.isCourseAdmin(courseId, user.getId());
+        }
+    }
+    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
+    public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
+        if(courseRepository.existsById(courseId)){
+            courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
+            return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
+        }else{
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
+        }
+    }
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
+    @Roles({UserRole.teacher, UserRole.admin})
+    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody UserIdJson userId) {
+        if(hasCourseRights(courseId, auth.getUserEntity())){
+            courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
+            return ResponseEntity.ok().build(); // Successfully removed
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> addCourseMember(@PathVariable Long courseId, @RequestParam Long userId, @RequestParam CourseRelation relation) {
-        courseUserRepository.save(new CourseUserEntity(courseId, userId, relation));
-        return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
+    @Roles({UserRole.teacher, UserRole.admin})
+    public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
+        // Only teacher and admin can add different users to a course.
+        if(hasCourseRights(courseId, auth.getUserEntity())){
+            courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelation()));
+            return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
+        }else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
+
     @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> updateCourseMember(@PathVariable Long courseId, @RequestParam Long userId, @RequestParam CourseRelation relation) {
-        Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, userId));
-        if(ce.isPresent()){
-            ce.get().setRelation(relation);
-            courseUserRepository.save(ce.get());
-            return ResponseEntity.ok().build();
+    @Roles({UserRole.teacher, UserRole.admin})
+    public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
+        if(hasCourseRights(courseId, auth.getUserEntity())){
+            Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, request.getUserId()));
+            if (ce.isPresent()) {
+                ce.get().setRelation(request.getRelation());
+                courseUserRepository.save(ce.get());
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build(); //  User is not allowed to do the action, teachers cant remove students of other users course
+            }
         }else{
-            return ResponseEntity.notFound().build(); // Relation not found
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.student})
+    @Roles({UserRole.teacher, UserRole.admin, UserRole.student}) // student is allowed to see people in its class
     public ResponseEntity<List<CourseUserEntity>> getCourseMembers(@PathVariable Long courseId) {
         List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
         return ResponseEntity.ok(members); // Successfully retrieved members
     }
+
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher})
@@ -110,7 +140,6 @@ public class CourseController {
             ProjectEntity savedProject = projectRepository.save(project);
 
 
-
             // Prepare response JSON
             Map<String, Object> response = createJSONPostResponse(savedProject);
 
@@ -120,7 +149,7 @@ public class CourseController {
             String jsonResponse = objectMapper.writeValueAsString(response);
             // Return success response with JSON string
             return ResponseEntity.ok(jsonResponse);
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Error while creating project: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
         }
