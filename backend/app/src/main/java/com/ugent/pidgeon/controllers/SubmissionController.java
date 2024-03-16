@@ -261,7 +261,7 @@ public class SubmissionController {
     }
 
 
-    ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, Long> feedbackFileIdGetter) {
+    public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, Long> feedbackFileIdGetter) {
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
