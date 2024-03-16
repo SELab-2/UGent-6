@@ -124,11 +124,16 @@ public class TestController {
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/structuretest")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> getStructureTestFile(@PathVariable("projectid") long testId, Auth auth) {
+    public ResponseEntity<Object> getStructureTestFile(@PathVariable("projectid") long projectId, Auth auth) {
         long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(testId, userId)) {
+        if (!projectRepository.adminOfProject(projectId, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
+        Optional<ProjectEntity> projectEntity = projectRepository.findById(projectId);
+        if (projectEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        long testId = projectEntity.get().getTestId();
         Optional<TestEntity> testEntity = testRepository.findById(testId);
         if (testEntity.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -147,11 +152,16 @@ public class TestController {
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertest")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> getDockerTestFile(@PathVariable("projectid") long testId, Auth auth) {
+    public ResponseEntity<Object> getDockerTestFile(@PathVariable("projectid") long projectId, Auth auth) {
         long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(testId, userId)) {
+        if (!projectRepository.adminOfProject(projectId, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
+        Optional<ProjectEntity> projectEntity = projectRepository.findById(projectId);
+        if (projectEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        long testId = projectEntity.get().getTestId();
         Optional<TestEntity> testEntity = testRepository.findById(testId);
         if (testEntity.isEmpty()) {
             return ResponseEntity.notFound().build();
