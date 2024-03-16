@@ -59,6 +59,17 @@ export type PUT_Requests = {
   }
 }
 
+/**
+ * the body of the DELETE requests
+ */
+
+export type DELETE_Requests = {
+  [ApiRoutes.COURSES]: {
+    id: string
+  }
+}
+
+
 type Teacher = {
   name: string
   surname: string
