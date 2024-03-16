@@ -87,6 +87,19 @@ public class Filehandler {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
     }
 
+    static public void deleteTest(long projectid) throws IOException {
+        try {
+            File uploadDirectory = new File(getTestPath(projectid).toString());
+            if (uploadDirectory.exists()) {
+                if(!uploadDirectory.delete()) {
+                    throw new IOException("Error while deleting directory");
+                }
+            }
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
     public static boolean isZipFile(File file) throws IOException {
         // Create a Tika instance
         Tika tika = new Tika();
@@ -104,7 +117,7 @@ public class Filehandler {
         return new InputStreamResource(new FileInputStream(path.toFile()));
     }
 
-    // Hulpfunctie om de testbestanden over te zetten naar de server
+    // helper function to save a file to the server
     public static Path saveTest(MultipartFile file, long projectId) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
