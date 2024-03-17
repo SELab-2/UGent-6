@@ -65,6 +65,7 @@ public class CourseController {
         }
     }
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
+    @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
         if(courseRepository.existsById(courseId)){
             courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
