@@ -5,7 +5,7 @@ import GroupList from "./GroupList"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
-const GroupsCard: FC<{ courseId: string }> = ({ courseId }) => {
+const GroupsCard: FC<{ courseId: number }> = ({ courseId }) => {
   const [groups, setGroups] = useState<ClusterType[] | null>(null)
 
   useEffect(() => {
@@ -96,8 +96,7 @@ const GroupsCard: FC<{ courseId: string }> = ({ courseId }) => {
         },
       }}
     >
-      <Collapse items={items}
-        expandIconPosition="right" />
+      <Collapse items={items} />
     </Card>
   )
 }

@@ -60,12 +60,9 @@ public class UserController {
 
         return ResponseEntity.ok().body(userCourses);
     }
-    @GetMapping(ApiRoutes.USER_AUTH_PATH + "/{azureid}")
-    public ResponseEntity<Object> getUserByAzureId(@PathVariable("azureid") String azureid) {
-        UserEntity res = userRepository.findUserByAzureId(azureid).orElse(null);
-        if (res == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+    @GetMapping(ApiRoutes.USER_AUTH_PATH)
+    public ResponseEntity<Object> getUserByAzureId(@PathVariable("azureid") String azureid, Auth auth) {
+        UserEntity res = auth.getUserEntity();
         UserJson userJson = new UserJson(res);
         return ResponseEntity.ok().body(userJson);
     }

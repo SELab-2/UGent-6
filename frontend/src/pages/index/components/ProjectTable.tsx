@@ -1,8 +1,7 @@
-import { Button, List, Modal, Space, Table, TableProps, Tag } from "antd"
+import { Button,  Space, Table, TableProps } from "antd"
 import { FC, useMemo } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 import { useTranslation } from "react-i18next"
-import Typography from "antd/es/typography/Typography"
 import useApiApp from "../../../hooks/useApiApp"
 import ProjectInfo from "./ProjectInfo"
 import ProjectStatusTag from "./ProjectStatusTag"
@@ -80,7 +79,7 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
       locale={{
         emptyText: t("home.projects.noProjects"),
       }}
-      dataSource={projects}
+      dataSource={projects.map((p) => ({ ...p, key: p.id }))}
       columns={columns}
     />
   )

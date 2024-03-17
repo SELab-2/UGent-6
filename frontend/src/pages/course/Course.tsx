@@ -1,18 +1,18 @@
-import { FC, useEffect, useMemo, useState } from "react"
+import { FC, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
 import { ApiRoutes, GET_Responses } from "../../@types/requests"
-import { Card, Spin, Tabs, Typography, theme } from "antd"
+import { Tabs, Typography } from "antd"
 import { TabsProps } from "antd/lib"
 import ProjectCard from "../index/components/ProjectCard"
 import GroupsCard from "./components/GroupsCard"
+import useCourse from "../../hooks/useCourse"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
 const Course: FC = () => {
   const { t } = useTranslation()
-  const params = useParams<{ id: string }>()
-  const [course, setCourse] = useState<CourseType | null>(null)
+  const {course} = useCourse()
+
 
   const items: TabsProps["items"] = useMemo(() =>[
     {
@@ -23,7 +23,7 @@ const Course: FC = () => {
     {
       key: "2",
       label: t("course.groups"),
-      children: <GroupsCard courseId={params.id!} />,
+      children: <GroupsCard courseId={course.id!} />,
     },
     {
       key: "4",
@@ -36,31 +36,6 @@ const Course: FC = () => {
       children: "Content of Tab Pane 3",
     },
   ],[t])
-
-  useEffect(() => {
-    // TODO: fetch course data
-
-    setTimeout(() => {
-      setCourse({
-        members_url: "/api/courses/1/members",
-        name: "Computationele biologie",
-        description: "Een cursus over computationele biologie",
-        id: 1,
-        teachers: [],
-      })
-    }, 250)
-  }, [params.id])
-
-  if (course === null) {
-    return (
-      <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Spin
-          tip="Loading..."
-          size="large"
-        />
-      </div>
-    )
-  }
 
   return (
     <div style={{ marginTop: "3rem" }}>
