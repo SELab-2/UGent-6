@@ -1,5 +1,6 @@
 {
   "nav": {
+    "profile": "Profile",
     "login": "Login",
     "logout": "Logout",
     "accountSwitch": "Switch Account",
@@ -35,6 +36,11 @@
       "userCourseCount": "{{count}} users are in this course"
       
     }
+  },
+  "profile": {
+    "student": "Student at Ghent University",
+    "teacher": "Teacher at Ghent University",
+    "admin": "Admin at Ghent University"
   },
 
   "course": {

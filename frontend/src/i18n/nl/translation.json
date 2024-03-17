@@ -1,5 +1,6 @@
 {
   "nav": {
+    "profile": "Profiel",
     "login": "Aanmelden",
     "logout": "Afmelden",
     "accountSwitch": "Account wisselen",
@@ -36,6 +37,12 @@
       "userCourseCount": "{{count}} gebruikers in dit vak"
     }
   },
+  "profile": {
+    "student": "Student aan Universiteit Gent",
+    "teacher": "Professor aan Universiteit Gent",
+    "admin": "Admin aan Universiteit Gent"
+  },
+
   "course": {
     "projects": "Projecten",
     "groups": "Groepen",
