@@ -1,4 +1,4 @@
-import { ApiRoutes, GET_Responses, POST_Requests, POST_Responses, PUT_Requests } from "../@types/requests"
+import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Responses, PUT_Requests } from "../@types/requests"
 import axios, { AxiosResponse } from "axios"
 import { msalInstance } from "../index"
 import { AxiosRequestConfig } from "axios"
@@ -8,6 +8,8 @@ const serverHost = "http://localhost:8080" // window.location.origin;
 let accessToken: string | null = null
 let tokenExpiry: Date | null = null
 
+
+type ApiCallPathValues = {[param: string]: string | number}
 /**
  *
  * @param method
@@ -19,11 +21,17 @@ let tokenExpiry: Date | null = null
  * const newCourse = await apiFetch("POST", ApiRoutes.COURSES, { name: "New Course" });
  *
  */
-async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", route: T, body?: any): Promise<AxiosResponse<any, any>> {
+async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", route: string, body?: any, pathValues?:ApiCallPathValues): Promise<AxiosResponse<any, any>> {
   const account = msalInstance.getActiveAccount()
 
   if (!account) {
     throw Error("No active account found")
+  }
+
+  if(pathValues) {
+    Object.entries(pathValues).forEach(([key, value]) => {
+      route = route.replace(":"+key, value.toString())
+    })
   }
 
   // check if we have access token
@@ -58,11 +66,11 @@ async function apiFetch<T extends ApiRoutes>(method: "GET" | "POST" | "PUT" | "D
 }
 
 const apiCall = {
-  get: async <T extends keyof GET_Responses>(route: T) => apiFetch("GET", route) as Promise<AxiosResponse<GET_Responses[T]>>,
-  post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T]) => apiFetch("POST", route, body) as Promise<AxiosResponse<POST_Responses[T]>>,
-  put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T]) => apiFetch("PUT", route, body),
-  delete: async <T extends ApiRoutes>(route: T) => apiFetch("DELETE", route),
-  patch: async <T extends keyof PUT_Requests>(route: T, body: Partial<PUT_Requests[T]>) => apiFetch("PATCH", route, body),
+  get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues)                                  => apiFetch("GET", route,undefined,pathValues) as Promise<AxiosResponse<GET_Responses[T]>>,
+  post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T], pathValues?:ApiCallPathValues)         => apiFetch("POST", route, body,pathValues) as Promise<AxiosResponse<POST_Responses[T]>>,
+  put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T], pathValues?:ApiCallPathValues)            => apiFetch("PUT", route, body,pathValues),
+  delete: async <T extends keyof DELETE_Requests>(route: T, body: DELETE_Requests[T], pathValues?:ApiCallPathValues)   => apiFetch("DELETE", route, body,pathValues),
+  patch: async <T extends keyof PUT_Requests>(route: T, body: Partial<PUT_Requests[T]>, pathValues?:ApiCallPathValues) => apiFetch("PATCH", route, body,pathValues),
 }
 
 const apiCallInit = async () => {

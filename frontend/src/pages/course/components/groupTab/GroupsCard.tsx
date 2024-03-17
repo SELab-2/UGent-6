@@ -1,11 +1,11 @@
 import { Card, Collapse, CollapseProps } from "antd"
 import { FC, useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
 import GroupList from "./GroupList"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
-const GroupsCard: FC<{ courseId: string }> = ({ courseId }) => {
+const GroupsCard: FC<{ courseId: number }> = ({ courseId }) => {
   const [groups, setGroups] = useState<ClusterType[] | null>(null)
 
   useEffect(() => {
@@ -96,8 +96,7 @@ const GroupsCard: FC<{ courseId: string }> = ({ courseId }) => {
         },
       }}
     >
-      <Collapse items={items}
-        expandIconPosition="right" />
+      <Collapse items={items} />
     </Card>
   )
 }

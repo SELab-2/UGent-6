@@ -1,15 +1,14 @@
 import { ContainerOutlined, TeamOutlined } from "@ant-design/icons"
 import { Card, List, Statistic, Tooltip, theme } from "antd"
 import { FC } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 import ProjectStatusTag, { ProjectStatus } from "./ProjectStatusTag"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
+import { UserCourseType } from "../../../providers/UserProvider"
 
-type CourseType = GET_Responses[ApiRoutes.COURSE]
 
-const Course: FC<{ course: CourseType }> = ({ course }) => {
+const Course: FC<{ course: UserCourseType }> = ({ course }) => {
   const { t } = useTranslation()
   const { token } = theme.useToken()
   const navigate = useNavigate()
@@ -26,7 +25,7 @@ const Course: FC<{ course: CourseType }> = ({ course }) => {
       }}
       bordered={false}
       hoverable
-      onClick={() => navigate(AppRoutes.COURSE.replace(":id", course.id.toString()))}
+      onClick={() => navigate(AppRoutes.COURSE.replace(":id", course.courseId.toString()))}
       type="inner"
       title={course.name}
       style={{ width: 300 }}

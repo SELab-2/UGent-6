@@ -6,7 +6,10 @@ import { useIsAuthenticated } from "@azure/msal-react"
 type UserContextProps = {
   user: User | null
   updateUser: () => void
+  courses: UserCourseType[]
 }
+
+export type UserCourseType = GET_Responses[ApiRoutes.USER_COURSES][number]
 
 const UserContext = createContext<UserContextProps>({} as UserContextProps)
 export type User = GET_Responses[ApiRoutes.USER]
@@ -14,6 +17,7 @@ export type User = GET_Responses[ApiRoutes.USER]
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
   const [user, setUser] = useState<User | null>(null)
+  const [courses, setCourses] = useState<UserCourseType[]>([])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -26,6 +30,20 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       .get(ApiRoutes.USER_AUTH)
       .then((data) => {
         setUser(data.data)
+
+        apiCall
+          .get(ApiRoutes.USER_COURSES, { 
+            id: data.data.id 
+          })
+          .then((data) => {
+            setCourses(data.data)
+          })
+          .catch((error) => {
+            console.error(error)
+            // TODO: handle error
+          })
+
+
       })
       .catch((error) => {
         // TODO: handle error
@@ -33,7 +51,7 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       })
   }
 
-  return <UserContext.Provider value={{ updateUser, user }}>{ children}</UserContext.Provider>
+  return <UserContext.Provider value={{ updateUser, user, courses }}>{children}</UserContext.Provider>
 }
 
 export { UserProvider, UserContext }

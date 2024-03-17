@@ -47,7 +47,18 @@
     "projects": "Projecten",
     "groups": "Groepen",
     "info": "Informatie",
-    "grades": "Punten"
+    "grades": "Punten",
+    "members":  "Leden",
+    "settings": "Instellingen",
+    "leaveGroup": "Groep verlaten",
+    "joinGroup": "Groepslid worden",
+    "removeFromCourse": "Verwijder {{name}} van dit vak",
+    "removeUserConfirmTitle": "Gebruiker verwijderen",
+    "removeUserConfirm": "Bent u zeker dat u {{name}} van dit vak wilt verwijderen?",
+    "yes": "Ja",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "courseSaved": "Aanpassingen opgeslagen"
   },
   "cancel": "Annuleren",
   "ok": "Ok"

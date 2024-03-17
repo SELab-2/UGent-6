@@ -54,3 +54,15 @@ body, html {
 ::-webkit-scrollbar-thumb:hover {
   background: #555; /* color of the scroll thumb when hovering */
 }
+
+
+
+.show-actions-on-hover .ant-list-item-action{
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.show-actions-on-hover:hover .ant-list-item-action{
+  opacity: 1;
+  
+} 

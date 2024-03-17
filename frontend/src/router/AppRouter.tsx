@@ -6,16 +6,18 @@ import { AppRoutes } from "../@types/routes"
 import ApiTest from "../pages/apiTest/ApiTest"
 import AuthenticatedRoute from "./AuthenticatedRoute"
 import Course from "../pages/course/Course"
+import CourseRoutes from "./CourseRoutes"
+import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 
 const AppRouter = () => {
   return (
     <Routes>
       <Route
         path={AppRoutes.HOME}
-        element={<Home />}
+        element={<HomeAuthCheck />}
       />
 
-      <Route element={<AuthenticatedRoute />}>
+      <Route path="/" element={<AuthenticatedRoute />}>
         <Route
           path={AppRoutes.DASHBOARD}
           element={<Dashboard />}
@@ -24,7 +26,15 @@ const AppRouter = () => {
           path={AppRoutes.PROFILE}
           element={<Profile />}
         />
-        <Route path={AppRoutes.COURSE} element={<Course />} />
+        <Route
+          path={AppRoutes.COURSE}
+          element={<CourseRoutes />}
+        >
+          <Route
+            path=""
+            element={<Course />}
+          />
+        </Route>
         <Route
           path="/api-test"
           element={<ApiTest />}

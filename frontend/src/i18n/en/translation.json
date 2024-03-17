@@ -47,7 +47,18 @@
     "projects": "Projects",
     "groups": "Groups",
     "info": "Info",
-    "grades": "Grades"
+    "grades": "Grades",
+    "members": "Members",
+    "settings": "Settings",
+    "leaveGroup": "Leave group",
+    "joinGroup": "Join group",
+    "removeFromCourse": "Remove {{name}} form this course",
+    "removeUserConfirmTitle": "Remove user",
+    "removeUserConfirm": "Are you sure you want to remove {{name}} from this course?",
+    "yes": "Yes",
+    "cancel": "Cancel",
+    "save": "Save",
+    "changesSaved": "Changes saved"
   },
   "cancel": "Cancel",
   "ok": "OK"

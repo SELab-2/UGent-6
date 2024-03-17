@@ -1,9 +1,8 @@
-import { Button, List, Modal, Space, Table, TableProps, Tag } from "antd"
+import { Button,  Space, Table, TableProps } from "antd"
 import { FC, useMemo } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 import { useTranslation } from "react-i18next"
-import Typography from "antd/es/typography/Typography"
-import useApiApp from "../../../hooks/useApiApp"
+import useAppApi from "../../../hooks/useAppApi"
 import ProjectInfo from "./ProjectInfo"
 import ProjectStatusTag from "./ProjectStatusTag"
 import useIsTeacher from "../../../hooks/useIsTeacher"
@@ -13,7 +12,7 @@ export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 
 const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
   const { t } = useTranslation()
-  const {modal} = useApiApp()
+  const {modal} = useAppApi()
   const isTeacher=  useIsTeacher()
 
   const columns: TableProps<ProjectType>["columns"] = useMemo(() => [
@@ -69,7 +68,7 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
             content: <ProjectInfo project={e} />
           })} type="link">{t("home.projects.showMore")}</Button>
 
-         {!isTeacher && <Button type="link">{t("home.projects.submit")}</Button>}
+         {/* {!isTeacher && <Button type="link">{t("home.projects.submit")}</Button>} */}
         </Space>
       ),
     }
@@ -80,7 +79,7 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
       locale={{
         emptyText: t("home.projects.noProjects"),
       }}
-      dataSource={projects}
+      dataSource={projects.map((p) => ({ ...p, key: p.id }))}
       columns={columns}
     />
   )

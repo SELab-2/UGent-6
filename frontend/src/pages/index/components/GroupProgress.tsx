@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 const GroupProgress:FC<{usersCompleted: number, userCount:number}> = ({ usersCompleted,userCount }) => {
   const {t} = useTranslation()
-  console.log(usersCompleted, userCount);
+
   return (
     <Tooltip title={t('home.projects.completeProgress', { count: usersCompleted, total: userCount })}>
       <span>

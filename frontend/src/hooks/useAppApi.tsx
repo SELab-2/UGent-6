@@ -3,9 +3,9 @@ import { AppApiContext } from "../providers/AppApiProvider"
 
 
 
-const useApiApp = () => {
+const useAppApi = () => {
   const app = useContext(AppApiContext)
   return app
 }
 
-export default useApiApp
+export default useAppApi

@@ -82,15 +82,6 @@ public class UserJson {
         this.createdAt = createdAt;
     }
 
-
-//    public List<CourseWithRelationJson> getCourses() {
-//        return courses;
-//    }
-//
-//    public void setCourses(List<CourseWithRelationJson> courses) {
-//        this.courses = courses;
-//    }
-
     public String getUrl() {
         return ApiRoutes.USER_BASE_PATH + "/" + id;
     }

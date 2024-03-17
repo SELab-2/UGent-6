@@ -42,6 +42,8 @@ public class SubmissionController {
     private ProjectRepository projectRepository;
     @Autowired
     private TestRepository testRepository;
+    @Autowired
+    private FileController fileController;
 
     private Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
         // Get the test file from the server
@@ -209,5 +211,23 @@ public class SubmissionController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<Void> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        // Get the submission entry from the database
+        SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
+        if (submission == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        submissionRepository.delete(submission);
+        fileController.deleteFileById(submission.getFileId());
+        return  ResponseEntity.ok().build();
     }
 }
