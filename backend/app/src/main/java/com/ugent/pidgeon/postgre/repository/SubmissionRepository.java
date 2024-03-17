@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Long> {
     List<SubmissionEntity> findByGroupIdAndProjectId(long groupId, long projectId);
+    List<SubmissionEntity> findByProjectId(long projectId);
 
 
     //TODO: Once  deadlines are properly implemented, this query should be updated to take into account the deadline

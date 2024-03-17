@@ -1,10 +1,13 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
+import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface GroupFeedbackRepository extends JpaRepository<GroupFeedbackEntity, Long> {
 
@@ -19,4 +22,6 @@ public interface GroupFeedbackRepository extends JpaRepository<GroupFeedbackEnti
     @Transactional
     @Query(value = "INSERT INTO group_feedback (grade, group_id, project_id,feedback) VALUES (?1, ?2, ?3, ?4)", nativeQuery = true)
     int addGroupScore(float grade, long groupId, long projectId, String feedback);
+
+    List<GroupFeedbackEntity> findByProjectId(long projectId);
 }

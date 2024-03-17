@@ -1,4 +1,4 @@
-import { ApiRoutes, GET_Responses, POST_Requests, POST_Responses, PUT_Requests } from "../@types/requests"
+import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Responses, PUT_Requests } from "../@types/requests"
 import axios, { AxiosResponse } from "axios"
 import { msalInstance } from "../index"
 import { AxiosRequestConfig } from "axios"
@@ -61,7 +61,7 @@ const apiCall = {
   get: async <T extends keyof GET_Responses>(route: T) => apiFetch("GET", route) as Promise<AxiosResponse<GET_Responses[T]>>,
   post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T]) => apiFetch("POST", route, body) as Promise<AxiosResponse<POST_Responses[T]>>,
   put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T]) => apiFetch("PUT", route, body),
-  delete: async <T extends ApiRoutes>(route: T) => apiFetch("DELETE", route),
+  delete: async <T extends keyof DELETE_Requests>(route: T, body: DELETE_Requests[T]) => apiFetch("DELETE", route, body),
   patch: async <T extends keyof PUT_Requests>(route: T, body: Partial<PUT_Requests[T]>) => apiFetch("PATCH", route, body),
 }
 
