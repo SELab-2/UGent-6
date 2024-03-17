@@ -8,13 +8,15 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.Filehandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.logging.Logger;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @RestController
 public class CourseController {
@@ -98,34 +100,44 @@ public class CourseController {
 
             // nieuw vak aanmaken
             CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription());
-
+            // Get current time and convert to SQL Timestamp
+            Timestamp currentTimestamp = Timestamp.valueOf(LocalDateTime.now());
+            courseEntity.setCreatedAt(currentTimestamp);
             // vak opslaan
             courseRepository.save(courseEntity);
 
             // leerkracht course relation opslaan
-            CourseUserEntity courseUserEntity = new CourseUserEntity(courseEntity.getId(), userId, CourseRelation.course_admin);
+            CourseUserEntity courseUserEntity = new CourseUserEntity(courseEntity.getId(), userId, CourseRelation.creator);
             courseUserRepository.save(courseUserEntity);
 
             return ResponseEntity.ok(courseEntity);
         } catch (Exception e){
+            Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<CourseEntity> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth){
+    public ResponseEntity<?> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth){
         try {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
 
             // het vak selecteren
-            CourseEntity courseEntity = courseRepository.findById(courseId).orElseThrow();
+            CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
+            if (courseEntity == null) {
+                return ResponseEntity.notFound().build();
+            }
 
             // check of de user admin of lesgever is van het vak
-            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).orElseThrow();
+            Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, userId));
+            if (courseUserEntityOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
+            }
+            CourseUserEntity courseUserEntity = courseUserEntityOptional.get();
             if(courseUserEntity.getRelation() == CourseRelation.enrolled){
-                throw new IllegalAccessException("Alleen maker of administrator van vak mogen het vak updaten");
+               return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to update the course");
             }
 
             //update velden
@@ -160,12 +172,18 @@ public class CourseController {
             long userId = user.getId();
 
             // het vak selecteren
-            CourseEntity courseEntity = courseRepository.findById(courseId).orElseThrow();
+            CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
+            if (courseEntity == null) {
+                return ResponseEntity.notFound().build();
+            }
 
             // check of de user admin of lesgever is van het vak
-            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).orElseThrow();
-            if(courseUserEntity.getRelation() == CourseRelation.enrolled){
-                throw new IllegalAccessException("Alleen maker of administrator van vak mogen het vak verwijderen");
+            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).orElse(null);
+            if (courseUserEntity == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
+            }
+            if(courseUserEntity.getRelation() != CourseRelation.creator){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to delete the course");
             }
 
             //voor elk project

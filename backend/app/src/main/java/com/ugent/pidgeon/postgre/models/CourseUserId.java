@@ -12,6 +12,9 @@ public class CourseUserId implements Serializable {
         this.userId = userId;
     }
 
+    public CourseUserId() {
+    }
+
     public long getCourseId() {
         return courseId;
     }
