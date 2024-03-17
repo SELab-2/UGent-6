@@ -277,6 +277,9 @@ public class CourseController {
 
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);
+
+
+
             // Prepare response JSON
             Map<String, Object> response = createJSONPostResponse(savedProject);
 
@@ -287,6 +290,7 @@ public class CourseController {
             // Return success response with JSON string
             return ResponseEntity.ok(jsonResponse);
         } catch (Exception e){
+            System.out.println("Error while creating project: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
         }
     }

@@ -1,7 +1,7 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
-import com.ugent.pidgeon.controllers.requestBodies.MemberIdRequest;
+import com.ugent.pidgeon.model.json.MemberIdRequest;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.UserJson;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
@@ -48,8 +48,9 @@ public class GroupMemberController {
         }
 
 
-        if(groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0) return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body("Something went wrong");
-        return null;
+        if(groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove member to group");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User removed from group");
+
     }
 
 
@@ -63,7 +64,7 @@ public class GroupMemberController {
         if(user.getRole() == UserRole.student && req.getMemberId() != user.getId()){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can't add other students to the group");
         }
-    System.out.println("User id: " + req.getMemberId() + " mem id: " + req.getMemberId() + " group id: " + groupId);
+
         if(!userRepository.existsById(req.getMemberId())){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
       /*  } else if(user.getRole() == UserRole.teacher && !groupRepository.userAccessToGroup(user.getId(),groupId) && req.getMemberId() != user.getId()) {

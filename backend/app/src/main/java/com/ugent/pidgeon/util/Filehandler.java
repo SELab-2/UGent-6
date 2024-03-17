@@ -3,6 +3,7 @@ package com.ugent.pidgeon.util;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
 import org.apache.tika.Tika;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -19,9 +20,9 @@ import java.util.zip.ZipFile;
 public class Filehandler {
 
     static String BASEPATH = "data";
-    static String SUBMISSION_FILENAME = "files.zip";
+    public static String SUBMISSION_FILENAME = "files.zip";
 
-    public static String saveSubmission(Path directory, MultipartFile file) throws IOException {
+    public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
             throw new IOException("File is empty");
@@ -51,11 +52,47 @@ public class Filehandler {
                 Files.copy(stream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            return filePath.getFileName().toString();
+            return tempFile;
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
     }
+
+
+    public static void deleteSubmission(Path directory) throws IOException {
+        deleteLocation(directory);
+    }
+
+    public static void deleteLocation(Path directory) throws IOException {
+        try {
+            File uploadDirectory = new File(directory.toString());
+            if (uploadDirectory.exists()) {
+                if(!uploadDirectory.delete()) {
+                    throw new IOException("Error while deleting directory");
+                }
+                deleteEmptyParentDirectories(uploadDirectory.getParentFile());
+            }
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
+    private static void deleteEmptyParentDirectories(File directory) {
+        if (directory != null && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null && files.length == 0) {
+                if (!directory.delete()) {
+                    System.err.println("Error while deleting empty directory: " + directory.getAbsolutePath());
+                } else {
+                    deleteEmptyParentDirectories(directory.getParentFile());
+                }
+            }
+        }
+    }
+
+
+
+
 
     static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
@@ -63,6 +100,28 @@ public class Filehandler {
 
     static public Path getTestPath(long projectid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
+    }
+
+    static public void deleteTest(long projectid) throws IOException {
+        try {
+            File uploadDirectory = new File(getTestPath(projectid).toString());
+            if (uploadDirectory.exists()) {
+                if(!uploadDirectory.delete()) {
+                    throw new IOException("Error while deleting directory");
+                }
+            }
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
+    public static File getFile(Path path) {
+        return path.toFile();
+    }
+
+    public static Resource getFileAsResource(Path path) {
+        File file =  path.toFile();
+        return new FileSystemResource(file);
     }
 
     public static boolean isZipFile(File file) throws IOException {
@@ -82,7 +141,7 @@ public class Filehandler {
         return new InputStreamResource(new FileInputStream(path.toFile()));
     }
 
-    // Hulpfunctie om de testbestanden over te zetten naar de server
+    // helper function to save a file to the server
     public static Path saveTest(MultipartFile file, long projectId) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
@@ -102,17 +161,11 @@ public class Filehandler {
         return filePath;
     }
 
-    // Hulpfunctie om bestanden te verwijderen
-    public static void deleteFile(String path) throws Exception{
+    public static String getStructureTestString(Path path) throws IOException {
         try {
-            // Resolve the path
-            Path filePath = Paths.get(path);
-
-            // Delete the file
-            Files.delete(filePath);
-        } catch (Exception e) {
-            // Handle the exception
-            throw new Exception("Error deleting file: " + e.getMessage());
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new IOException("Error while reading testfile: " + e.getMessage());
         }
     }
 }
