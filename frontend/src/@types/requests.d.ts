@@ -169,7 +169,7 @@ export type GET_Responses = {
     url: string
     role: "teacher" | "student" | "admin"
     email: string
-    id: number
+    id: int
     name: string
     surname: string
   },

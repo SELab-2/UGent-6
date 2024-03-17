@@ -55,7 +55,7 @@ const ProfileContent = () => {
                 url: "",
                 role: "student",
                 email: "test@ugent.be",
-                id: "1",
+                id: 1,
                 name: "John",
                 surname: "Doe"
             })
