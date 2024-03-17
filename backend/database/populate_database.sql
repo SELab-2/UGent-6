@@ -43,12 +43,14 @@ INSERT INTO files (file_path, file_name, uploaded_by) VALUES
 ('/path/to/file12', 'file12.txt', 4),
 ('/path/to/file13', 'file13.txt', 5),
 ('/path/to/file14', 'file14.txt', 4),
-('/path/to/file15', 'file15.txt', 5);
+('/path/to/file15', 'file15.txt', 5),
+('/path/to/file16', 'file14.txt', 4),
+('/path/to/file17', 'file15.txt', 5);
 
 -- Assume tests are created before projects for foreign key constraints
 -- Inserting into `tests`
 INSERT INTO tests (docker_image, docker_test, structure_test_id) VALUES
-('docker/image1', 2, 3),
+('docker/image1', 16, 17),
 ('docker/image2', 5, 6),
 ('docker/image3', 8, 9),
 ('docker/image4', 12, 13),

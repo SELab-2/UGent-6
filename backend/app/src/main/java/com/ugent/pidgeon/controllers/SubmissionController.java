@@ -223,7 +223,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!groupRepository.userInGroup(submission.getGroupId(), userId)) {
+        if (!groupRepository.userInGroup(submission.getGroupId(), userId) && !projectRepository.adminOfProject(submission.getProjectId(), userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         submissionRepository.delete(submission);

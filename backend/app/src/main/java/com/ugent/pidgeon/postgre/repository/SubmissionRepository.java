@@ -8,6 +8,11 @@ import java.util.List;
 
 public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Long> {
     List<SubmissionEntity> findByGroupIdAndProjectId(long groupId, long projectId);
+
+
+    @Query("SELECT s FROM SubmissionEntity s WHERE s.projectId = :projectId")
+    List<SubmissionEntity> findAllByProjectId(long projectId);
+
     List<SubmissionEntity> findByProjectId(long projectId);
 
 
@@ -24,4 +29,5 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     )
     """)
     Long findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
+
 }
