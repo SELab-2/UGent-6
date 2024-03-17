@@ -1,4 +1,4 @@
-import { Form, Input, Modal } from "antd"
+import { Form, Modal } from "antd"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
 import CourseForm from "../../../components/forms/CourseForm"

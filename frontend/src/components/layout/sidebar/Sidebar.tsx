@@ -1,5 +1,5 @@
-import { MenuOutlined } from "@ant-design/icons"
-import { Button, Drawer, List, Menu, MenuProps, Typography } from "antd"
+import { MenuOutlined, UserOutlined } from "@ant-design/icons"
+import { Button, Drawer, Menu, MenuProps } from "antd"
 import { FC, useMemo, useState } from "react"
 import useUser from "../../../hooks/useUser"
 import { useTranslation } from "react-i18next"
@@ -13,9 +13,9 @@ const Sidebar: FC = () => {
   const navigate = useNavigate()
 
   const onClick: MenuProps["onClick"] = (menu) => {
-    console.log(menu);
+    console.log(menu)
 
-    navigate(AppRoutes.COURSE.replace(":id",menu.key as string))
+    navigate(AppRoutes.COURSE.replace(":id", menu.key as string))
     setOpen(false)
   }
 
@@ -28,12 +28,16 @@ const Sidebar: FC = () => {
         children: courses.map((c) => ({
           key: c.courseId,
           label: c.name,
-          
         })),
       },
     ],
-    [courses,t]
+    [courses, t]
   )
+
+  const openProfile = () => {
+    navigate(AppRoutes.PROFILE)
+    setOpen(false)
+  }
 
   return (
     <>
@@ -42,7 +46,7 @@ const Sidebar: FC = () => {
         type="text"
         onClick={() => setOpen(true)}
         size="large"
-        style={{width:"100px",background:"100px"}}
+        style={{ width: "100px", background: "100px" }}
       />
       <Drawer
         getContainer={false}
@@ -52,15 +56,28 @@ const Sidebar: FC = () => {
         onClose={() => setOpen(false)}
         open={open}
         styles={{
-          body:{
+          body: {
             padding: 0,
-          }
+          },
         }}
+        footer={
+          <>
+            <Button
+              type="text"
+              style={{ width: "100%" }}
+              icon={<UserOutlined />}
+              size="large"
+              onClick={openProfile}
+            >
+              Profile
+            </Button>
+          </>
+        }
       >
         <Menu
-        style={{
-          background:"transparent",
-        }}
+          style={{
+            background: "transparent",
+          }}
           onClick={onClick}
           defaultOpenKeys={["courses"]}
           selectedKeys={[]}

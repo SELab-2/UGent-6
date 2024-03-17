@@ -7,13 +7,14 @@ import ApiTest from "../pages/apiTest/ApiTest"
 import AuthenticatedRoute from "./AuthenticatedRoute"
 import Course from "../pages/course/Course"
 import CourseRoutes from "./CourseRoutes"
+import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 
 const AppRouter = () => {
   return (
     <Routes>
       <Route
         path={AppRoutes.HOME}
-        element={<Home />}
+        element={<HomeAuthCheck />}
       />
 
       <Route path="/" element={<AuthenticatedRoute />}>

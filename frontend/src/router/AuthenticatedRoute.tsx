@@ -11,12 +11,13 @@ const AuthenticatedRoute: FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
+    console.log(inProgress, isAuthenticated);
     if (inProgress === InteractionStatus.None && !isAuthenticated) {
       // instance.loginRedirect(loginRequest);
       console.log("NOT AUTHENTICATED");
       navigate(AppRoutes.HOME)
     } 
-  }, [isAuthenticated])
+  }, [isAuthenticated,inProgress])
 
   // useEffect(()=>{
   //   console.log(s);

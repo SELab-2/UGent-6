@@ -2,7 +2,6 @@ import { Button, Space, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import Course from "./components/Course"
 import { PlusOutlined } from "@ant-design/icons"
-import TeacherView from "../../hooks/TeacherView"
 import CreateCourseModal from "./components/CreateCourseModal"
 import { useState } from "react"
 import ProjectCard from "./components/ProjectCard"
@@ -13,7 +12,6 @@ const Home = () => {
   const [open, setOpen] = useState(false)
   const {courses} = useUser()
   
-  console.log(courses);
   return (
     <div >
       <div>

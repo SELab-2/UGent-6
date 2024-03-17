@@ -29,7 +29,7 @@ const CourseRoutes: FC = () => {
     const member = courses.find((c) => c.courseId === parseInt(params.id ?? "0"))
     if (!member) return // TODO: handle error
     setMember(member)
-  }, [courses])
+  }, [courses, params.id])
 
   useEffect(() => {
     // TODO: fetch course data: /api/courses/1

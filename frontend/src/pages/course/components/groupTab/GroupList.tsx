@@ -53,7 +53,6 @@ const GroupList: FC<{ groupUrl: string }> = ({ groupUrl }) => {
     }, 250)
   }, [groupUrl])
 
-  console.log(user);
 
   const Group = ({ group }: { group: GroupMembers }) => {
     return (
