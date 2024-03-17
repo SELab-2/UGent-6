@@ -3,7 +3,9 @@ package com.ugent.pidgeon.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.CourseJson;
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.Filehandler;
@@ -19,6 +21,8 @@ public class CourseController {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired ProjectController projectController;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -46,6 +50,12 @@ public class CourseController {
 
     @Autowired
     private GroupClusterRepository groupClusterRepository;
+
+    @Autowired
+    private GroupClusterController groupClusterController;
+
+    @Autowired
+    private CourseUserRepository courseUserRepository;
 
     @Autowired
     private DeadlineRepository deadlineRepository;
@@ -81,106 +91,54 @@ public class CourseController {
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})
-    public ResponseEntity<String> createCourse(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam("assistantIds") List<Long> assistantIds , Auth auth){
+    public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseJson courseJson, Auth auth){
         try {
             UserEntity user = auth.getUserEntity();
-            long userId = auth.getUserEntity().getId();
+            long userId = user.getId();
 
             // nieuw vak aanmaken
-            CourseEntity courseEntity = new CourseEntity(name, description);
-            // Set teacher details
-            SimplePersonJSONObject leerkracht = new SimplePersonJSONObject(user.getName(), user.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + userId);
-            // Set assistant details
-            List<SimplePersonJSONObject> assistenten = assistantIds.stream().map(id -> userRepository.findById(id).orElse(null))
-                    .filter(Objects::nonNull).map(entity -> new SimplePersonJSONObject(
-                            entity.getName(), entity.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + entity.getId()))
-                                .toList();
+            CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription());
 
-            // Save the course entity
-            CourseEntity savedCourse = courseRepository.save(courseEntity);
+            // vak opslaan
+            courseRepository.save(courseEntity);
 
-            // assistenten toevoegen aan vak
-//            for(long id: assistantIds){
-//                Optional<UserEntity> assistentOpt = userRepository.findById(id);
-//                if(assistentOpt.isPresent()){
-//                    // Assistent toevoegen aan vak
-//                }
-//            }
+            // leerkracht course relation opslaan
+            CourseUserEntity courseUserEntity = new CourseUserEntity(courseEntity.getId(), userId, CourseRelation.course_admin);
+            courseUserRepository.save(courseUserEntity);
 
-
-            // Construct the response JSON string
-            StringBuilder assistantsBuilder = new StringBuilder();
-            for (SimplePersonJSONObject assistant : assistenten) {
-                assistantsBuilder.append("{\"name\":\"").append(assistant.name()).append("\",\"surname\":\"").append(assistant.surname()).append("\",\"url\":\"").append(assistant.url()).append("\"},");
-            }
-            if (!assistantsBuilder.isEmpty()) {
-                assistantsBuilder.setLength(assistantsBuilder.length() - 1); // Remove the trailing comma
-            }
-
-            StringBuilder jsonResponseBuilder = new StringBuilder();
-            jsonResponseBuilder.append("{\"id\":\"").append(savedCourse.getId()).append("\",\"name\":\"").append(name).append("\",\"description\":\"").append(description)
-                    .append("\",\"teacher\":{\"name\":\"").append(leerkracht.name()).append("\",\"surname\":\"").append(leerkracht.surname()).append("\",\"url\":\"").append(leerkracht.url()).append("\"},\"assistants\":[")
-                    .append(assistantsBuilder).append("],\"members_url\":\"your_members_url\"}");
-
-            String jsonResponse = jsonResponseBuilder.toString();
-            return ResponseEntity.ok(jsonResponse);
+            return ResponseEntity.ok(courseEntity);
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating course: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
-    @Roles({UserRole.teacher})
-    public ResponseEntity<String> updateCourse(@RequestParam("name") String name, @RequestParam("description") String description, @RequestParam("assistantIds") List<Long> assistantIds, @PathVariable long courseId, Auth auth){
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<CourseEntity> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth){
         try {
             UserEntity user = auth.getUserEntity();
-            long userId = auth.getUserEntity().getId();
+            long userId = user.getId();
 
             // het vak selecteren
             CourseEntity courseEntity = courseRepository.findById(courseId).orElseThrow();
-            // Set teacher details
-            SimplePersonJSONObject leerkracht = new SimplePersonJSONObject(user.getName(), user.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + userId);
-            // Set assistant details
-            List<SimplePersonJSONObject> assistenten = assistantIds.stream().map(id -> userRepository.findById(id).orElse(null))
-                    .filter(Objects::nonNull).map(entity -> new SimplePersonJSONObject(
-                            entity.getName(), entity.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + entity.getId()))
-                    .toList();
+
+            // check of de user admin of lesgever is van het vak
+            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).orElseThrow();
+            if(courseUserEntity.getRelation() == CourseRelation.enrolled){
+                throw new IllegalAccessException("Alleen maker of administrator van vak mogen het vak updaten");
+            }
 
             //update velden
-            courseEntity.setName(name);
-            courseEntity.setDescription(description);
+            courseEntity.setName(courseJson.getName());
+            courseEntity.setDescription(courseJson.getDescription());
             courseRepository.save(courseEntity);
 
-            // assistenten toevoegen aan vak
-//            for(long id: assistantIds){
-//                Optional<UserEntity> assistentOpt = userRepository.findById(id);
-//                if(assistentOpt.isPresent()){
-//                    // Assistent toevoegen aan vak
-//                }
-//            }
-
-
-            // Construct the response JSON string
-            StringBuilder assistantsBuilder = new StringBuilder();
-            for (SimplePersonJSONObject assistant : assistenten) {
-                assistantsBuilder.append("{\"name\":\"").append(assistant.name()).append("\",\"surname\":\"").append(assistant.surname()).append("\",\"url\":\"").append(assistant.url()).append("\"},");
-            }
-            if (!assistantsBuilder.isEmpty()) {
-                assistantsBuilder.setLength(assistantsBuilder.length() - 1); // Remove the trailing comma
-            }
-
-            StringBuilder jsonResponseBuilder = new StringBuilder();
-            jsonResponseBuilder.append("{\"id\":\"").append(courseEntity.getId()).append("\",\"name\":\"").append(name).append("\",\"description\":\"").append(description)
-                    .append("\",\"teacher\":{\"name\":\"").append(leerkracht.name()).append("\",\"surname\":\"").append(leerkracht.surname()).append("\",\"url\":\"").append(leerkracht.url()).append("\"},\"assistants\":[")
-                    .append(assistantsBuilder).append("],\"members_url\":\"your_members_url\"}");
-
-            String jsonResponse = jsonResponseBuilder.toString();
-            return ResponseEntity.ok(jsonResponse);
+            // Response verzenden
+            return ResponseEntity.ok(courseEntity);
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating course: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    private record SimplePersonJSONObject(String name, String surname, String url){}
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
@@ -194,53 +152,36 @@ public class CourseController {
     }
 
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
-    @Roles({UserRole.teacher})
-    public ResponseEntity<String> deleteCourse(@PathVariable long courseId){
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<String> deleteCourse(@PathVariable long courseId, Auth auth){
         try {
+            // Check of de user een admin of creator is van het vak
+            UserEntity user = auth.getUserEntity();
+            long userId = user.getId();
+
+            // het vak selecteren
             CourseEntity courseEntity = courseRepository.findById(courseId).orElseThrow();
+
+            // check of de user admin of lesgever is van het vak
+            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).orElseThrow();
+            if(courseUserEntity.getRelation() == CourseRelation.enrolled){
+                throw new IllegalAccessException("Alleen maker of administrator van vak mogen het vak verwijderen");
+            }
 
             //voor elk project
             for(ProjectEntity project : courseRepository.findAllProjectsByCourseId(courseId)){
-                //voor elke test van project test verwjideren en bestanden verwijderen
-                long testId = project.getTestId();
-                TestEntity test = testRepository.findById(testId).orElseThrow();
-                FileEntity dockertestFileEntity = fileRepository.findById(test.getDockerTest()).orElseThrow();
-                FileEntity structuretestFileEntity = fileRepository.findById(test.getStructureTestId()).orElseThrow();
-                Filehandler.deleteFile(dockertestFileEntity.getPath());
-                Filehandler.deleteFile(structuretestFileEntity.getPath());
-                fileRepository.delete(dockertestFileEntity);
-                fileRepository.delete(structuretestFileEntity);
-                //elke deadline verwijderen
-                List<DeadlineEntity> deadlines = project.getDeadlines();
-                deadlineRepository.deleteAll(deadlines);
-                //elke submission verwijderen
-                List<SubmissionEntity> submissions = submissionRepository.findAllByProjectId(project.getId());
-                for(SubmissionEntity submission : submissions){
-                    FileEntity file = fileRepository.findById(submission.getFileId()).orElseThrow();
-                    Filehandler.deleteFile(file.getPath());
-                    fileRepository.delete(file);
-                }
-                submissionRepository.deleteAll(submissions);
-                // project verwijderen
-                projectRepository.delete(project);
+                projectController.deleteProjectById(project.getId(), auth);
             }
 
             //voor elke groepcluster
             for(GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)){
-                //voor elke groep
-                for(GroupEntity group: groupRepository.findAllByClusterId(groupCluster.getId())){
-                    //elke groepmember verwijderen
-                    for(GroupRepository.UserReference userReference : groupRepository.findGroupUsersReferencesByGroupId(group.getId())){
-                        groupMemberRepository.removeMemberFromGroup(group.getId(), userReference.getUserId());
-                    }
-                    //elke groepfeedback verwijderen
-                    groupFeedbackRepository.deleteAll(groupFeedbackRepository.findGroupFeedbackEntitiesByGroupId(group.getId()));
-                    //groep verwijderen
-                    groupRepository.delete(group);
-                }
-                //groepcluster verwijderen
-                groupClusterRepository.delete(groupCluster);
+                // We verwijderen de groepfeedback niet omdat die al verwijderd werd wanneer het project verwijderd werd
+                groupClusterController.deleteGroupCluster(groupCluster.getId(), auth, false);
             }
+
+            // Alle CourseUsers verwijderen
+            courseUserRepository.deleteAll(courseUserRepository.findAllUsersByCourseId(courseId));
+
             //vak verwijderen
             courseRepository.delete(courseEntity);
             return ResponseEntity.ok("Vak verwijderd");

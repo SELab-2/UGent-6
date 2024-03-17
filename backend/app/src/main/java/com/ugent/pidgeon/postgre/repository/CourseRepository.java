@@ -5,9 +5,11 @@ import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
 
     @Query("SELECT p FROM ProjectEntity p WHERE p.courseId = :courseId")
