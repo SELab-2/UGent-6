@@ -1,4 +1,4 @@
-import { Button, Card, Form } from "antd"
+import { Button, Card, Form, Switch } from "antd"
 import { FC, useEffect, useState } from "react"
 import CourseForm from "../../../../components/forms/CourseForm"
 import { useTranslation } from "react-i18next"
@@ -32,9 +32,14 @@ const SettingsCard: FC = () => {
   }
 
   return (
-    <Card title={t("course.settings")}>
-      <CourseForm form={form} />
-      <div>
+    <Card title={t("course.settings")} styles={{body:{display:"flex",justifyContent:"center"}}}>
+      <div style={{maxWidth:"600px",width:"100%"}}>
+      <CourseForm form={form} >
+        <Form.Item  name="archived" label={t("course.archived")} valuePropName="checked">
+          <Switch />
+        </Form.Item>
+      </CourseForm>
+      <div style={{width:"100%",textAlign:"center"}}>
         <Button
           loading={loading}
           type="primary"
@@ -43,6 +48,7 @@ const SettingsCard: FC = () => {
         >
           {t("course.save")}
         </Button>
+      </div>
       </div>
     </Card>
   )
