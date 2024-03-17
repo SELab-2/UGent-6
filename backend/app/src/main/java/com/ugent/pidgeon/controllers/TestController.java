@@ -180,10 +180,10 @@ public class TestController {
         if (testEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+        testRepository.delete(testEntity);
         fileController.deleteFileById(testEntity.getStructureTestId());
         fileController.deleteFileById(testEntity.getDockerTest());
-        testRepository.delete(testEntity);
-        return  ResponseEntity.ok(testEntity);
+        return  ResponseEntity.ok().build();
     }
 }
 

@@ -99,19 +99,26 @@ public class ProjectController {
 
         if (projectOptional.isPresent()) {
 
+
             ProjectEntity projectEntity = projectOptional.get();
-            testController.deleteTestById(projectEntity.getTestId(),auth);
-            groupFeedbackRepository.deleteAll(groupFeedbackRepository.findByProjectId(projectId));
-            for (SubmissionEntity submissionEntity : submissionRepository.findByProjectId(projectId)) {
-                filesubmissiontestController.deleteSubmissionById(submissionEntity.getId(), auth);
-            }
             // delete all the deadlines associated with the project
             for (DeadlineEntity deadlineEntity : projectEntity.getDeadlines()) {
                 deadlineController.deleteDeadlineById(deadlineEntity.getDeadlineId(), auth);
             }
-            // delete the project after all its dependant children are deleted
+
+            groupFeedbackRepository.deleteAll(groupFeedbackRepository.findByProjectId(projectId));
+
+            for (SubmissionEntity submissionEntity : submissionRepository.findByProjectId(projectId)) {
+                filesubmissiontestController.deleteSubmissionById(submissionEntity.getId(), auth);
+            }
+
             projectRepository.delete(projectEntity);
-            return ResponseEntity.ok(projectEntity);
+
+            testController.deleteTestById(projectEntity.getTestId(),auth);
+
+
+
+            return ResponseEntity.ok().build();
 
         } else {
             return ResponseEntity.notFound().build();
