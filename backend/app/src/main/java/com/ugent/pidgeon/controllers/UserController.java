@@ -61,7 +61,8 @@ public class UserController {
         return ResponseEntity.ok().body(userCourses);
     }
     @GetMapping(ApiRoutes.USER_AUTH_PATH)
-    public ResponseEntity<Object> getUserByAzureId(@PathVariable("azureid") String azureid, Auth auth) {
+    @Roles({UserRole.student, UserRole.teacher})
+    public ResponseEntity<Object> getUserByAzureId(Auth auth) {
         UserEntity res = auth.getUserEntity();
         UserJson userJson = new UserJson(res);
         return ResponseEntity.ok().body(userJson);

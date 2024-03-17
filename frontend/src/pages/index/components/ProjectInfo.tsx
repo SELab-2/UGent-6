@@ -15,7 +15,7 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     {
       label: t("home.projects.name"),
       children: project.course,
-      span: 10
+      span: 12
     },
     {
       label:t("home.projects.deadline"),
@@ -31,7 +31,7 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     {
       label: t("home.projects.description"),
       children: project.description,
-      span: 20
+      span: 12
     },
     {
       label: t("home.projects.projectStatus"),

@@ -1,9 +1,11 @@
 import { Form, Input, Modal } from "antd"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
+import CourseForm from "../../../components/forms/CourseForm"
 
 const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ open,setOpen }) => {
   const { t } = useTranslation()
+  const [form] = Form.useForm()
 
 
   const onFinish = (values: any) => {
@@ -21,24 +23,7 @@ const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ op
       cancelText={t("cancel")}
       
     >
-      <Form layout={"vertical"}>
-        <Form.Item
-          label={t("home.courseName")}
-          name="name"
-        >
-          <Input
-            maxLength={100}
-            placeholder={t("home.courseName")}
-          />
-        </Form.Item>
-
-        <Form.Item label={t("home.courseDescription")} name="description">
-          <Input.TextArea
-            maxLength={500}
-            placeholder={t("home.courseDescription")}
-          />
-        </Form.Item>
-      </Form>
+     <CourseForm form={form} />
     </Modal>
   )
 }

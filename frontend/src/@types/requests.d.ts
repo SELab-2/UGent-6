@@ -27,7 +27,8 @@ export enum ApiRoutes {
 
   TEST = "api/test",
   USER = "api/users/:id",
-  USER_AUTH = "api/auth/:azureId",
+  USER_AUTH = "api/auth",
+  USER_COURSES = "api/users/:id/courses",
 }
 
 export type Timestamp = string
@@ -66,16 +67,6 @@ export type DELETE_Requests = {
 export type PUT_Requests = {
   [ApiRoutes.COURSES]: {
     name: string
-  }
-}
-
-/**
- * the body of the DELETE requests
- */
-
-export type DELETE_Requests = {
-  [ApiRoutes.COURSES]: {
-    id: string
   }
 }
 
@@ -181,6 +172,12 @@ export type GET_Responses = {
     id: number
     name: string
     surname: string
-  }
-  [ApiRoutes.USER_AUTH]: GET_Responses[ApiRoutes.USER]
+  },
+  [ApiRoutes.USER_AUTH]: GET_Responses[ApiRoutes.USER],
+  [ApiRoutes.USER_COURSES]: {
+    courseId:number, 
+    name:string, 
+    relation: "enrolled" | "course_admin" | "creator",
+    url:string
+  }[]
 }

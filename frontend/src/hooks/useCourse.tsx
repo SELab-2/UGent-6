@@ -5,7 +5,7 @@ import { CourseContext } from "../router/CourseRoutes"
 
 
 const useCourse = () => {
-  const course = useContext(CourseContext)
+  const {course} = useContext(CourseContext)
   return course
 }
 

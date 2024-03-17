@@ -1,6 +1,6 @@
 import { Card, Collapse, CollapseProps } from "antd"
 import { FC, useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
 import GroupList from "./GroupList"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
