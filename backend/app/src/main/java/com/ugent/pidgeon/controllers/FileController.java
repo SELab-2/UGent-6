@@ -24,7 +24,7 @@ public class FileController {
     private FileRepository fileRepository;
 
 
-    public ResponseEntity<?> deleteFileById( long fileId, Auth auth) {
+    public ResponseEntity<?> deleteFileById( long fileId) {
         // Get the submission entry from the database
         FileEntity fileEntity = fileRepository.findById(fileId).orElse(null);
         if (fileEntity == null) {

@@ -65,21 +65,32 @@ public class Filehandler {
 
     public static void deleteLocation(Path directory) throws IOException {
         try {
-            // Create directory
             File uploadDirectory = new File(directory.toString());
             if (uploadDirectory.exists()) {
                 if(!uploadDirectory.delete()) {
                     throw new IOException("Error while deleting directory");
                 }
+                deleteEmptyParentDirectories(uploadDirectory.getParentFile());
             }
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
     }
 
-    public static void deleteSubmission(long projectid, long groupid, long submissionid) throws IOException {
-        deleteSubmission(getSubmissionPath(projectid, groupid, submissionid));
+    private static void deleteEmptyParentDirectories(File directory) {
+        if (directory != null && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null && files.length == 0) {
+                if (!directory.delete()) {
+                    System.err.println("Error while deleting empty directory: " + directory.getAbsolutePath());
+                } else {
+                    deleteEmptyParentDirectories(directory.getParentFile());
+                }
+            }
+        }
     }
+
+
 
 
 

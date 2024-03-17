@@ -1,7 +1,7 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
-import com.ugent.pidgeon.controllers.requestBodies.TestController;
+import com.ugent.pidgeon.controllers.TestController;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
 import com.ugent.pidgeon.postgre.models.*;
@@ -32,7 +32,7 @@ public class ProjectController {
     @Autowired
     private DeadlineController deadlineController;
     @Autowired
-    private FilesubmissiontestController filesubmissiontestController;
+    private SubmissionController filesubmissiontestController;
     @Autowired
     private TestController testController;
 
@@ -92,7 +92,7 @@ public class ProjectController {
     }
 
 
-    @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId")
+    @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth) {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);

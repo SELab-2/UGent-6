@@ -35,6 +35,8 @@ public class TestController {
     private FileRepository fileRepository;
     @Autowired
     private TestRepository testRepository;
+    @Autowired
+    private FileController fileController;
 
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher})
@@ -168,5 +170,20 @@ public class TestController {
         return ResponseEntity.ok().headers(headers).body(file);
     }
 
+
+    @DeleteMapping(ApiRoutes.TEST_BASE_PATH + "/{testId}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<?> deleteTestById(@PathVariable("testId") long testId, Auth auth) {
+        // Get the submission entry from the database
+        TestEntity testEntity = testRepository.findById(testId).orElse(null);
+
+        if (testEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        fileController.deleteFileById(testEntity.getStructureTestId());
+        fileController.deleteFileById(testEntity.getDockerTest());
+        testRepository.delete(testEntity);
+        return  ResponseEntity.ok(testEntity);
+    }
 }
 
