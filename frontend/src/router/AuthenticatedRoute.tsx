@@ -6,7 +6,7 @@ import { InteractionStatus } from "@azure/msal-browser"
 
 const AuthenticatedRoute: FC = () => {
   const isAuthenticated = useIsAuthenticated()
-  const { instance, inProgress } = useMsal()
+  const { inProgress } = useMsal()
 
   const navigate = useNavigate()
 

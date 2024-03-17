@@ -78,6 +78,7 @@ const Sidebar: FC = () => {
           style={{
             background: "transparent",
           }}
+          theme="light"
           onClick={onClick}
           defaultOpenKeys={["courses"]}
           selectedKeys={[]}
