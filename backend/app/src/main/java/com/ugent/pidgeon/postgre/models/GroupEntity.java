@@ -46,7 +46,7 @@ public class GroupEntity {
         return clusterId;
     }
 
-    public void setClusterId(int cluster) {
+    public void setClusterId(long cluster) {
         this.clusterId = cluster;
     }
 }

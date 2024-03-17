@@ -3,6 +3,7 @@ package com.ugent.pidgeon.util;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
 import org.apache.tika.Tika;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -19,9 +20,9 @@ import java.util.zip.ZipFile;
 public class Filehandler {
 
     static String BASEPATH = "data";
-    static String SUBMISSION_FILENAME = "files.zip";
+    public static String SUBMISSION_FILENAME = "files.zip";
 
-    public static String saveSubmission(Path directory, MultipartFile file) throws IOException {
+    public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
             throw new IOException("File is empty");
@@ -51,7 +52,7 @@ public class Filehandler {
                 Files.copy(stream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            return filePath.getFileName().toString();
+            return tempFile;
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
@@ -102,6 +103,15 @@ public class Filehandler {
             throw new IOException(e.getMessage());
         }
     }
+    
+    public static File getFile(Path path) {
+        return path.toFile();
+    }
+
+    public static Resource getFileAsResource(Path path) {
+        File file =  path.toFile();
+        return new FileSystemResource(file);
+    }
 
     public static boolean isZipFile(File file) throws IOException {
         // Create a Tika instance
@@ -138,5 +148,13 @@ public class Filehandler {
         Files.write(filePath, file.getBytes());
 
         return filePath;
+    }
+
+    public static String getStructureTestString(Path path) throws IOException {
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new IOException("Error while reading testfile: " + e.getMessage());
+        }
     }
 }

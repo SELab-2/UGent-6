@@ -37,11 +37,14 @@ public class GroupController {
     @GetMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<GroupJson> getGroupById(@PathVariable("groupid") Long groupid, Auth auth) {
+
+
         // Get userId
         long userId = auth.getUserEntity().getId();
 
         // Get the group, return 404 if it does not exist
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
+
         if (group == null) {
             return ResponseEntity.notFound().build();
         }
