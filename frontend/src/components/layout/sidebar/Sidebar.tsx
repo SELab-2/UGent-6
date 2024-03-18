@@ -15,7 +15,7 @@ const Sidebar: FC = () => {
   const onClick: MenuProps["onClick"] = (menu) => {
     console.log(menu)
 
-    navigate(AppRoutes.COURSE.replace(":id", menu.key as string))
+    navigate(AppRoutes.COURSE.replace(":courseId", menu.key as string))
     setOpen(false)
   }
 
@@ -78,6 +78,7 @@ const Sidebar: FC = () => {
           style={{
             background: "transparent",
           }}
+          theme="light"
           onClick={onClick}
           defaultOpenKeys={["courses"]}
           selectedKeys={[]}

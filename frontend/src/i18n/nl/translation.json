@@ -58,7 +58,9 @@
     "yes": "Ja",
     "cancel": "Annuleren",
     "save": "Opslaan",
-    "courseSaved": "Aanpassingen opgeslagen"
+    "courseSaved": "Aanpassingen opgeslagen",
+    "archived": "Gearchiveerd",
+    "score": "Score"
   },
   "cancel": "Annuleren",
   "ok": "Ok"

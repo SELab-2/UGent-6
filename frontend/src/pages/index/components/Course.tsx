@@ -25,7 +25,7 @@ const Course: FC<{ course: UserCourseType }> = ({ course }) => {
       }}
       bordered={false}
       hoverable
-      onClick={() => navigate(AppRoutes.COURSE.replace(":id", course.courseId.toString()))}
+      onClick={() => navigate(AppRoutes.COURSE.replace(":courseId", course.courseId.toString()))}
       type="inner"
       title={course.name}
       style={{ width: 300 }}

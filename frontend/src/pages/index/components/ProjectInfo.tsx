@@ -14,7 +14,7 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
   const items: DescriptionsProps['items'] = useMemo(()=> [
     {
       label: t("home.projects.name"),
-      children: project.course,
+      children: project.course.name,
       span: 12
     },
     {

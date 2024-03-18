@@ -19,17 +19,17 @@ export type CourseMemberType = {
 export const CourseContext = createContext<CourseContextType>({} as CourseContextType)
 
 const CourseRoutes: FC = () => {
-  const params = useParams<{ id: string }>()
+  const params = useParams<{ courseId: string }>()
   const [course, setCourse] = useState<CourseType | null>(null)
   const { courses } = useUser()
   const [member, setMember] = useState<UserCourseType | null>(null)
 
   useEffect(() => {
     if (!courses?.length) return
-    const member = courses.find((c) => c.courseId === parseInt(params.id ?? "0"))
+    const member = courses.find((c) => c.courseId === parseInt(params.courseId ?? "0"))
     if (!member) return // TODO: handle error
     setMember(member)
-  }, [courses, params.id])
+  }, [courses, params.courseId])
 
   useEffect(() => {
     // TODO: fetch course data: /api/courses/1
@@ -40,11 +40,17 @@ const CourseRoutes: FC = () => {
         members_url: "/api/courses/1/members",
         name: "Computationele biologie",
         description: "Een cursus over computationele biologie",
-        id: 1,
-        teachers: [],
+        courseId: 1,
+        teachers: [
+          {
+            name: "Peter",
+            surname: "Dawyndt",
+            url: "/api/users/1",
+          }
+        ],
       })
     }, 250)
-  }, [params.id])
+  }, [params.courseId])
 
   if (!course || !member)
     return (

@@ -87,7 +87,7 @@ type Course = {
  */
 export type GET_Responses = {
   [ApiRoutes.COURSES]: {
-    id: number
+    courseId: number
     name: string
     url: string
   }[]
@@ -101,7 +101,7 @@ export type GET_Responses = {
   [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
   [ApiRoutes.SUBMISSION]: {
     description: string
-    id: string
+    submittionId: string
     project_url: string
     submitted_file_url: string
     submitted_time: Timestamp
@@ -110,10 +110,14 @@ export type GET_Responses = {
   [ApiRoutes.SUBMISSION_FILE]: FormData
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
   [ApiRoutes.PROJECT]: {
-    course: string
+    course: {
+      name: string
+      url: string
+      courseId: number
+    }
     deadline: Timestamp
     description: string
-    id: number
+    projectId: number
     name: string
     submission_url: string
     tests_url: string
@@ -121,7 +125,7 @@ export type GET_Responses = {
   [ApiRoutes.PROJECT_TESTS]: {} // ??
   [ApiRoutes.GROUP]: {
     capacity: number
-    id: string
+    groupId: string
     members_amount: number
     members_url: string
     name: string
@@ -135,6 +139,7 @@ export type GET_Responses = {
   }[]
   [ApiRoutes.PROJECT_SCORE]: {
     score: number
+    feedback:string
   }
 
   [ApiRoutes.GROUP_MEMBER]: {
@@ -157,7 +162,7 @@ export type GET_Responses = {
   [ApiRoutes.CLUSTER]: GET_Responses[ApiRoutes.CLUSTER_GROUPS]
   [ApiRoutes.COURSE]: {
     description: string
-    id: number
+    courseId: number
     members_url: string
     name: string
     teachers: Teacher[] // Changed this

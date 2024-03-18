@@ -58,7 +58,9 @@
     "yes": "Yes",
     "cancel": "Cancel",
     "save": "Save",
-    "changesSaved": "Changes saved"
+    "changesSaved": "Changes saved",
+    "archived": "Archived",
+    "score": "Score"
   },
   "cancel": "Cancel",
   "ok": "OK"

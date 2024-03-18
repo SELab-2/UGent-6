@@ -1,10 +1,10 @@
 import { Form, FormInstance, Input } from "antd"
-import { FC } from "react"
+import { FC, PropsWithChildren } from "react"
 import { useTranslation } from "react-i18next"
 
 
 
-const CourseForm:FC<{form:FormInstance}> = ({form}) => {
+const CourseForm:FC<{form:FormInstance} & PropsWithChildren> = ({form,children}) => {
   const { t } = useTranslation()
 
   return (
@@ -28,6 +28,7 @@ const CourseForm:FC<{form:FormInstance}> = ({form}) => {
           placeholder={t("home.courseDescription")}
         />
       </Form.Item>
+      {children}
     </Form>
   )
 }
