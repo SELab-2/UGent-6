@@ -4,10 +4,11 @@ package com.ugent.pidgeon.controllers;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.GroupClusterJson;
+import com.ugent.pidgeon.model.json.GroupClusterCreateJson;
+import com.ugent.pidgeon.model.json.GroupClusterUpdateJson;
 import com.ugent.pidgeon.model.json.GroupReferenceJson;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
-import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.CourseRepository;
 import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
@@ -15,14 +16,11 @@ import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.logging.Logger;
 
 @RestController
 public class ClusterController {
@@ -70,7 +68,7 @@ public class ClusterController {
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters") // Creates a new cluster for a course
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> createClusterForCourse(@PathVariable("courseid") Long courseid, Auth auth, @RequestBody GroupClusterJson clusterJson) {
+    public ResponseEntity<?> createClusterForCourse(@PathVariable("courseid") Long courseid, Auth auth, @RequestBody GroupClusterCreateJson clusterJson) {
         // Get the user id
         long userId = auth.getUserEntity().getId();
         if (!courseRepository.adminOfCourse(courseid, userId)) {
@@ -113,4 +111,23 @@ public class ClusterController {
         // Return the cluster
         return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
     }
+
+    @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}") // Updates a cluster
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> updateCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
+        // Get the user id
+        long userId = auth.getUserEntity().getId();
+        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
+        if (cluster == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        }
+        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+        }
+        cluster.setName(clusterJson.name());
+        cluster.setMaxSize(clusterJson.capacity());
+        cluster = groupClusterRepository.save(cluster);
+        return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
+    }
+
 }
