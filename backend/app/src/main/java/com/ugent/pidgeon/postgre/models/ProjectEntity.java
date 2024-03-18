@@ -1,7 +1,7 @@
 package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
-import java.sql.Timestamp;
+
 import java.util.List;
 
 
@@ -30,7 +30,7 @@ public class ProjectEntity {
         private long testId;
 
         @Column(name="visible", nullable = false)
-        private Boolean projectType;
+        private Boolean visible;
 
         @OneToMany(mappedBy = "projectId")
         private List<DeadlineEntity> deadlines;
@@ -38,13 +38,13 @@ public class ProjectEntity {
         @Column(name="max_score")
         private Integer maxScore;
 
-        public ProjectEntity(long courseId, String name, String description, long groupClusterId, long testId, Boolean projectType, Integer maxScore) {
+        public ProjectEntity(long courseId, String name, String description, long groupClusterId, long testId, Boolean visible, Integer maxScore) {
                 this.courseId = courseId;
                 this.name = name;
                 this.description = description;
                 this.groupClusterId = groupClusterId;
                 this.testId = testId;
-                this.projectType = projectType;
+                this.visible = visible;
                 this.maxScore = maxScore;
         }
 
@@ -100,12 +100,12 @@ public class ProjectEntity {
                 this.testId = testId;
         }
 
-        public Boolean getProjectType() {
-                return projectType;
+        public Boolean isVisible() {
+                return visible;
         }
 
-        public void setProjectType(Boolean projectType) {
-                this.projectType = projectType;
+        public void setVisible(Boolean projectType) {
+                this.visible = projectType;
         }
 
         public List<DeadlineEntity> getDeadlines() {
