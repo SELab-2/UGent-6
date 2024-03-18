@@ -3,10 +3,7 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.GroupClusterJson;
-import com.ugent.pidgeon.model.json.GroupClusterCreateJson;
-import com.ugent.pidgeon.model.json.GroupClusterUpdateJson;
-import com.ugent.pidgeon.model.json.GroupReferenceJson;
+import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -44,10 +41,19 @@ public class ClusterController {
 
         // Get the clusters for the course
         List<GroupClusterEntity> clusters = groupClusterRepository.findClustersByCourseId(courseid);
-        List<GroupClusterJson> clusterJsons = clusters.stream().map(
-                this::clusterEntityToClusterJson).toList();
+        List<GroupClusterReferenceJson> clusterJsons = clusters.stream().map(
+                this::clusterEntityToClusterReferenceJson).toList();
         // Return the clusters
         return ResponseEntity.ok(clusterJsons);
+    }
+
+    private GroupClusterReferenceJson clusterEntityToClusterReferenceJson(GroupClusterEntity cluster) {
+        return new GroupClusterReferenceJson(
+                cluster.getId(),
+                cluster.getName(),
+                cluster.getGroupAmount(),
+                ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId()
+        );
     }
 
     private GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster) {
@@ -63,7 +69,9 @@ public class ClusterController {
                 cluster.getMaxSize(),
                 cluster.getGroupAmount(),
                 cluster.getCreatedAt(),
-                groups);
+                groups,
+                ApiRoutes.COURSE_BASE_PATH + "/" + cluster.getCourseId()
+                );
     }
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters") // Creates a new cluster for a course
