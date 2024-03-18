@@ -97,4 +97,20 @@ public class ClusterController {
         return ResponseEntity.status(HttpStatus.CREATED).body(clusterJsonResponse);
     }
 
+    @GetMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}") // Returns a cluster
+    @Roles({UserRole.student, UserRole.teacher})
+    public ResponseEntity<?> getCluster(@PathVariable("clusterid") Long clusterid, Auth auth) {
+        // Get the user id
+        long userId = auth.getUserEntity().getId();
+        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
+        if (cluster == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        }
+        if (courseUserRepository.findByCourseIdAndUserId(cluster.getCourseId(), userId).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of course");
+        }
+
+        // Return the cluster
+        return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
+    }
 }
