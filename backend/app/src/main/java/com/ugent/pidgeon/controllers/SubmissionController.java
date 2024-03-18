@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -165,19 +166,6 @@ public class SubmissionController {
             fileEntity.setPath(pathname);
             fileRepository.save(fileEntity);
 
-            // Create file for structureFeedback
-            Path structureFeedbackPath = Filehandler.getSubmissionPath(projectid, groupId, submission.getId()).resolve(Filehandler.STRUCTURE_FEEDBACK_FILENAME);
-            // TODO: remove this once the structure feedback writes to and creates this file
-            File file1 = new File(structureFeedbackPath.toString());
-            if (file1.createNewFile()) {
-                // Write content to the file
-                FileWriter fileWriter = new FileWriter(file1);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write("TEMPORARY STRUCTURETESTFEEDBACK");
-                bufferedWriter.close();
-            }
-            FileEntity structureFeedbackFile = new FileEntity(Filehandler.STRUCTURE_FEEDBACK_FILENAME, structureFeedbackPath.toString(), userId);
-            fileRepository.save(structureFeedbackFile);
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
@@ -196,24 +184,9 @@ public class SubmissionController {
             submission.setStructureAccepted(testresult);
             submission = submissionRepository.save(submission);
 
-            // Save temporare dockerfeedbackfile
-            Path dockerFeedbackPath = Filehandler.getSubmissionPath(projectid, groupId, submission.getId()).resolve(Filehandler.DOCKER_FEEDBACK_FILENAME);
-            // TODO: remove this once the docker feedback writes to and creates this file
-            File file2 = new File(dockerFeedbackPath.toString());
-            if (file2.createNewFile()) {
-                // Write content to the file
-                FileWriter fileWriter = new FileWriter(file2);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write("TEMPORARY DOCKERTESTFEEDBACK");
-                bufferedWriter.close();
-            }
-
-            FileEntity dockerFeedbackFile = new FileEntity(Filehandler.DOCKER_FEEDBACK_FILENAME, dockerFeedbackPath.toString(), userId);
-            fileRepository.save(dockerFeedbackFile);
-
             // Update the submission with the test feedbackfiles
-            submission.setDockerFeedbackFileId(dockerFeedbackFile.getId());
-            submission.setStructureFeedbackFileId(structureFeedbackFile.getId());
+            submission.setDockerFeedback("TEMP DOCKER FEEDBACK");
+            submission.setStructureFeedback("TEMP STRUCTURE FEEDBACK");
             submissionRepository.save(submission);
 
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
@@ -261,7 +234,7 @@ public class SubmissionController {
     }
 
 
-    public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, Long> feedbackFileIdGetter) {
+    public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, String> feedbackGetter) {
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
@@ -272,38 +245,21 @@ public class SubmissionController {
         if (!accesToSubmission(submission, auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-        // Get the file entry from the database
-        FileEntity file = fileRepository.findById(feedbackFileIdGetter.apply(submission)).orElse(null);
-        if (file == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
 
-        // Get the file from the server
-        try {
-            Resource feedbackFile = Filehandler.getFileAsResource(Path.of(file.getPath()));
-
-            // Set headers for the response
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
-            headers.add(HttpHeaders.CONTENT_TYPE, "text/plain");
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(feedbackFile);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.TEXT_PLAIN));
+        return ResponseEntity.ok().headers(headers).body(feedbackGetter.apply(submission));
     }
 
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/structurefeedback") //Route to get the structure feedback
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getStructureFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
-        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getStructureFeedbackFileId);
+        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getStructureFeedback);
     }
 
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/dockerfeedback") //Route to get the docker feedback
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getDockerFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
-        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedbackFileId);
+        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedback);
     }
 }

@@ -100,13 +100,13 @@ VALUES
 
 -- Inserting into `solutions`
 -- Linking solutions to projects and groups
-INSERT INTO submissions (project_id, group_id, file_id, structure_accepted, docker_accepted, structure_feedback_fileid, docker_feedback_fileid, submission_time)
+INSERT INTO submissions (project_id, group_id, file_id, structure_accepted, docker_accepted, structure_feedback, docker_feedback, submission_time)
 VALUES
-    (1, 1, 16, true, true, 17, 18, CURRENT_TIMESTAMP),
-    (2, 2, 17, false, false, 18, 19, CURRENT_TIMESTAMP),
-    (3, 3, 18, false, false, 19, 20, CURRENT_TIMESTAMP),
-    (4, 4, 19, true, true, 20, 21, CURRENT_TIMESTAMP),
-    (5, 5, 20, true, true, 21, 22, CURRENT_TIMESTAMP);
+    (1, 1, 16, true, true, 'temp structure feedback', 'temp docker feedback', CURRENT_TIMESTAMP),
+    (2, 2, 17, false, false, 'temp structure feedback', 'temp docker feedback', CURRENT_TIMESTAMP),
+    (3, 3, 18, false, false,'temp structure feedback', 'temp docker feedback', CURRENT_TIMESTAMP),
+    (4, 4, 19, true, true,'temp structure feedback', 'temp docker feedback', CURRENT_TIMESTAMP),
+    (5, 5, 20, true, true, 'temp structure feedback', 'temp docker feedback', CURRENT_TIMESTAMP);
 
 -- Inserting into `group_grades`
 -- Assign grades to group solutions

@@ -100,8 +100,8 @@ CREATE TABLE submissions (
     file_id INT REFERENCES files(file_id),
     structure_accepted BOOLEAN NOT NULL,
     docker_accepted BOOLEAN NOT NULL,
-    structure_feedback_fileid INT REFERENCES files(file_id),
-    docker_feedback_fileid INT REFERENCES files(file_id),
+    structure_feedback TEXT,
+    docker_feedback TEXT,
     submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

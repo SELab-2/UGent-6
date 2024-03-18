@@ -30,16 +30,16 @@ public class SubmissionEntity {
     @Column(name="docker_accepted", nullable = false)
     private Boolean dockerAccepted;
 
-    @Column(name="structure_feedback_fileid")
-    private Long structureFeedbackFileId;
+    @Column(name="structure_feedback")
+    private String structureFeedback;
 
-    @Column(name="docker_feedback_fileid")
-    private Long dockerFeedbackFileId;
+    @Column(name="docker_feedback")
+    private String dockerFeedback;
 
     public SubmissionEntity() {
     }
 
-    public SubmissionEntity(long projectId, long groupId, long fileId, Timestamp submissionTime, Boolean structureAccepted, Boolean dockerAccepted) {
+    public SubmissionEntity(long projectId, long groupId, Long fileId, Timestamp submissionTime, Boolean structureAccepted, Boolean dockerAccepted) {
         this.projectId = projectId;
         this.groupId = groupId;
         this.fileId = fileId;
@@ -101,19 +101,19 @@ public class SubmissionEntity {
         this.dockerAccepted = dockerAccepted;
     }
 
-    public Long getStructureFeedbackFileId() {
-        return structureFeedbackFileId;
+    public String getStructureFeedback() {
+        return structureFeedback;
     }
 
-    public void setStructureFeedbackFileId(Long structureFeedbackFileId) {
-        this.structureFeedbackFileId = structureFeedbackFileId;
+    public void setStructureFeedback(String structureFeedbackFileId) {
+        this.structureFeedback = structureFeedbackFileId;
     }
 
-    public Long getDockerFeedbackFileId() {
-        return dockerFeedbackFileId;
+    public String getDockerFeedback() {
+        return dockerFeedback;
     }
 
-    public void setDockerFeedbackFileId(Long dockerFeedbackFileId) {
-        this.dockerFeedbackFileId = dockerFeedbackFileId;
+    public void setDockerFeedback(String dockerFeedbackFileId) {
+        this.dockerFeedback = dockerFeedbackFileId;
     }
 }
