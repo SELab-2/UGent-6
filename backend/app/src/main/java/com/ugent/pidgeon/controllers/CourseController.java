@@ -59,8 +59,6 @@ public class CourseController {
     @Autowired
     private CourseUserRepository courseUserRepository;
 
-    @Autowired
-    private DeadlineRepository deadlineRepository;
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})

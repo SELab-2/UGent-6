@@ -104,10 +104,7 @@ public class ProjectController {
 
 
             ProjectEntity projectEntity = projectOptional.get();
-            // delete all the deadlines associated with the project
-            for (DeadlineEntity deadlineEntity : projectEntity.getDeadlines()) {
-                deadlineController.deleteDeadlineById(deadlineEntity.getDeadlineId(), auth);
-            }
+
 
             groupFeedbackRepository.deleteAll(groupFeedbackRepository.findByProjectId(projectId));
 

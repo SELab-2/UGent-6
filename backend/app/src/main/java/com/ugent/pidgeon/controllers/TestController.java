@@ -174,7 +174,7 @@ public class TestController {
         }
         testRepository.delete(testEntity);
         fileController.deleteFileById(testEntity.getStructureTestId());
-        fileController.deleteFileById(testEntity.getDockerTest());
+        fileController.deleteFileById(testEntity.getDockerTestId());
         return  ResponseEntity.ok().build();
     }
 }
