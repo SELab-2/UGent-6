@@ -11,6 +11,7 @@ import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -139,6 +140,7 @@ public class ClusterController {
 
     @DeleteMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}") // Deletes a cluster
     @Roles({UserRole.teacher, UserRole.student})
+    @Transactional
     public ResponseEntity<?> deleteCluster(@PathVariable("clusterid") Long clusterid, Auth auth) {
         // Get the user id
         long userId = auth.getUserEntity().getId();
