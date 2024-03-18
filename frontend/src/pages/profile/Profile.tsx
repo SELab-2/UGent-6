@@ -3,13 +3,11 @@ import { useEffect, useState } from "react";
 import { MsalAuthenticationTemplate, useMsal,MsalAuthenticationResult } from "@azure/msal-react";
 import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
 import { loginRequest } from "../../auth/AuthConfig";
-import ProfileCard from "./components/ProfileCard"
 import { callMsGraph } from "../../auth/MsGraphApiCall";
-import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import { Spin } from "antd";
-import apiCall from "../../util/apiFetch"
-
-export type UserType = GET_Responses[ApiRoutes.USER]
+import { User } from "../../providers/UserProvider"
+import ProfileCard from "./components/ProfileCard"
+import useUser from "../../hooks/useUser";
 
 const ErrorComponent: React.FC<MsalAuthenticationResult> = ({error}) => {
   return <h6>An Error Occurred: {error ? error.errorCode : "unknown error"}</h6>;
@@ -19,7 +17,8 @@ const ErrorComponent: React.FC<MsalAuthenticationResult> = ({error}) => {
 const ProfileContent = () => {
     const { instance, inProgress } = useMsal();
     const [id, setId] = useState<String | null>(null);
-    const [user, setUser] = useState<UserType | null>(null)
+    const [notuser, setNotuser] = useState<User | null>(null)
+    const { user } = useUser()
 
     useEffect(() => {
         if (!id && inProgress === InteractionStatus.None) {
@@ -49,7 +48,7 @@ const ProfileContent = () => {
 
         //TODO: get request
         setTimeout(() => {
-            setUser({
+            setNotuser({
                 course_url: "",
                 projects_url: "",
                 url: "",
@@ -71,7 +70,7 @@ const ProfileContent = () => {
             />
           </div>
         )
-      }
+    }
 
     return (
         <div style={{padding: "10px 2rem"}}>

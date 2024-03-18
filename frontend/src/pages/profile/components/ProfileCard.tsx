@@ -1,9 +1,9 @@
 import { Card, Avatar, theme } from "antd"
 import { UserOutlined } from '@ant-design/icons';
 import { useTranslation } from "react-i18next"
-import { UserType } from "../Profile";
+import { User } from "../../../providers/UserProvider"
 
-const ProfileCard: React.FC<{ user: UserType }> = ({ user }) => {
+const ProfileCard: React.FC<{ user: User }> = ({ user }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
 
