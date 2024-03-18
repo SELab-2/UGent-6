@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,7 +44,7 @@ public class SubmissionController {
     @Autowired
     private FileController fileController;
 
-    private Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
+    private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
         // Get the test file from the server
         FileEntity testfileEntity = fileRepository.findById(testEntity.getStructureTestId()).orElse(null);
         if (testfileEntity == null) {
@@ -155,10 +154,10 @@ public class SubmissionController {
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
-            Boolean testresult;
+            SubmissionTemplateModel.SubmissionResult testresult;
             if (testEntity == null) {
                 Logger.getLogger("SubmissionController").info("no test");
-                testresult = true;
+                testresult = new SubmissionTemplateModel.SubmissionResult(true, "");
             } else {
                 testresult = runStructureTest(new ZipFile(savedFile), testEntity);
             }
@@ -166,9 +165,9 @@ public class SubmissionController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
 
-            submissionEntity.setAccepted(testresult);
+            submissionEntity.setAccepted(testresult.passed);
+            //TODO add testresult.feedback to json body
             submissionRepository.save(submissionEntity);
-
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
