@@ -50,4 +50,5 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             WHERE p.id = ?1""")
     List<Long> findGroupIdsByProjectId(long projectId);
 
+
 }

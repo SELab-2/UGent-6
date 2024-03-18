@@ -7,10 +7,7 @@ import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.CourseRepository;
-import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
-import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +26,8 @@ public class ClusterController {
     CourseUserRepository courseUserRepository;
     @Autowired
     CourseRepository courseRepository;
+    @Autowired
+    GroupUserRepository groupUserRepository;
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters") // Returns all clusters for a course
     @Roles({UserRole.student, UserRole.teacher})
@@ -136,6 +135,30 @@ public class ClusterController {
         cluster.setMaxSize(clusterJson.capacity());
         cluster = groupClusterRepository.save(cluster);
         return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
+    }
+
+    @DeleteMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}") // Deletes a cluster
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> deleteCluster(@PathVariable("clusterid") Long clusterid, Auth auth) {
+        // Get the user id
+        long userId = auth.getUserEntity().getId();
+        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
+        if (cluster == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        }
+        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+        }
+        if (groupClusterRepository.usedInProject(clusterid)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cluster is being used in a project");
+        }
+        for (GroupEntity group : groupRepository.findAllByClusterId(clusterid)) {
+            // Delete all groupUsers
+            groupUserRepository.deleteAllByGroupId(group.getId());
+            groupRepository.deleteById(group.getId());
+        }
+        groupClusterRepository.deleteById(clusterid);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
