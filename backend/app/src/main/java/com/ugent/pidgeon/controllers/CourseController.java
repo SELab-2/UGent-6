@@ -90,7 +90,7 @@ public class CourseController {
 
     // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
     private record CourseJSONObject(long id, String name, String url){}
-
+    //https://apidog.com/apidoc/project-467959/api-5723791
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})
     public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseJson courseJson, Auth auth){
@@ -117,6 +117,7 @@ public class CourseController {
         }
     }
 
+    //https://apidog.com/apidoc/project-467959/api-5723806
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth){
@@ -152,17 +153,23 @@ public class CourseController {
         }
     }
 
+    //https://apidog.com/apidoc/project-467959/api-5723783
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<CourseEntity> getCourseByCourseId(@PathVariable Long courseId) {
+    public ResponseEntity<CourseEntity> getCourseByCourseId(@PathVariable Long courseId, Auth auth) {
         Optional<CourseEntity> courseopt = courseRepository.findById(courseId);
         if (courseopt.isEmpty()) {
             return ResponseEntity.notFound().build(); // Or return an empty list, based on your preference
         }
         CourseEntity course = courseopt.get();
+        if(courseUserRepository.findCourseUserEntitiesByUserIdAndCourseId(auth.getUserEntity().getId(), courseId) == null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         return ResponseEntity.ok(course);
     }
 
+    //https://apidog.com/apidoc/project-467959/api-5723808
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> deleteCourse(@PathVariable long courseId, Auth auth){
@@ -208,12 +215,17 @@ public class CourseController {
         }
     }
 
+    //https://apidog.com/apidoc/project-467959/api-5723840
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(@PathVariable Long courseId) {
+    public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(@PathVariable Long courseId, Auth auth) {
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
+
         if (projects.isEmpty()) {
             return ResponseEntity.notFound().build();
+        }
+        if(courseUserRepository.findCourseUserEntitiesByUserIdAndCourseId(auth.getUserEntity().getId(), courseId) == null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(projects);
     }

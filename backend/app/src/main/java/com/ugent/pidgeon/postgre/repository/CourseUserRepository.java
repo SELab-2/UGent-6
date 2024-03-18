@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.postgre.repository;
 
+import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.CourseUserEntity;
 import com.ugent.pidgeon.postgre.models.CourseUserId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,7 @@ public interface CourseUserRepository extends JpaRepository<CourseUserEntity, Co
 
     @Query("SELECT cu FROM CourseUserEntity cu WHERE cu.courseId = :courseId")
     List<CourseUserEntity> findAllUsersByCourseId(long courseId);
+
+    @Query("SELECT cu FROM CourseUserEntity cu WHERE cu.userId = :userId AND cu.courseId = :courseId")
+    CourseUserEntity findCourseUserEntitiesByUserIdAndCourseId(long userId, long courseId);
 }
