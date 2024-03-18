@@ -29,6 +29,8 @@ public class ClusterController {
     CourseRepository courseRepository;
     @Autowired
     GroupUserRepository groupUserRepository;
+    @Autowired
+    GroupController groupController;
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters") // Returns all clusters for a course
     @Roles({UserRole.student, UserRole.teacher})
@@ -163,4 +165,23 @@ public class ClusterController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @PostMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}/groups") // Creates a new group for a cluster
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> createGroupForCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupCreateJson groupJson) {
+        // Get the user id
+        long userId = auth.getUserEntity().getId();
+        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
+        if (cluster == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        }
+        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+        }
+        GroupEntity group = new GroupEntity(groupJson.name(), clusterid);
+        group = groupRepository.save(group);
+
+        cluster.setGroupAmount(cluster.getGroupAmount() + 1);
+        groupClusterRepository.save(cluster);
+        return ResponseEntity.status(HttpStatus.CREATED).body(groupController.groupEntityToJson(group));
+    }
 }
