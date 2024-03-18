@@ -21,8 +21,6 @@ public class Filehandler {
 
     static String BASEPATH = "data";
     public static String SUBMISSION_FILENAME = "files.zip";
-    public static String STRUCTURE_FEEDBACK_FILENAME = "structure_feedback.txt";
-    public static String DOCKER_FEEDBACK_FILENAME = "docker_feedback.txt";
 
     public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty
@@ -61,6 +59,39 @@ public class Filehandler {
     }
 
 
+
+    public static void deleteSubmission(Path directory) throws IOException {
+        deleteLocation(directory);
+    }
+
+    public static void deleteLocation(Path directory) throws IOException {
+        try {
+            File uploadDirectory = new File(directory.toString());
+            if (uploadDirectory.exists()) {
+                if(!uploadDirectory.delete()) {
+                    throw new IOException("Error while deleting directory");
+                }
+                deleteEmptyParentDirectories(uploadDirectory.getParentFile());
+            }
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
+    private static void deleteEmptyParentDirectories(File directory) {
+        if (directory != null && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null && files.length == 0) {
+                if (!directory.delete()) {
+                    System.err.println("Error while deleting empty directory: " + directory.getAbsolutePath());
+                } else {
+                    deleteEmptyParentDirectories(directory.getParentFile());
+                }
+            }
+        }
+    }
+
+
     static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
@@ -69,6 +100,19 @@ public class Filehandler {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
     }
 
+    static public void deleteTest(long projectid) throws IOException {
+        try {
+            File uploadDirectory = new File(getTestPath(projectid).toString());
+            if (uploadDirectory.exists()) {
+                if(!uploadDirectory.delete()) {
+                    throw new IOException("Error while deleting directory");
+                }
+            }
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
     public static File getFile(Path path) {
         return path.toFile();
     }
@@ -95,7 +139,7 @@ public class Filehandler {
         return new InputStreamResource(new FileInputStream(path.toFile()));
     }
 
-    // Hulpfunctie om de testbestanden over te zetten naar de server
+    // helper function to save a file to the server
     public static Path saveTest(MultipartFile file, long projectId) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {

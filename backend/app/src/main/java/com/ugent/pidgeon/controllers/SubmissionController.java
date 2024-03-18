@@ -45,6 +45,8 @@ public class SubmissionController {
     private ProjectRepository projectRepository;
     @Autowired
     private TestRepository testRepository;
+    @Autowired
+    private FileController fileController;
 
     private Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
         // Get the test file from the server
@@ -233,8 +235,8 @@ public class SubmissionController {
         }
     }
 
-
     public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, String> feedbackGetter) {
+   
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
@@ -261,5 +263,23 @@ public class SubmissionController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getDockerFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
         return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedback);
+    }
+  
+    @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<Void> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        // Get the submission entry from the database
+        SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
+        if (submission == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (!groupRepository.userInGroup(submission.getGroupId(), userId) && !projectRepository.adminOfProject(submission.getProjectId(), userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        submissionRepository.delete(submission);
+        fileController.deleteFileById(submission.getFileId());
+        return  ResponseEntity.ok().build();
     }
 }

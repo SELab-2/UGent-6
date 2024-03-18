@@ -63,7 +63,3 @@ public class CourseUserEntity {
 
 }
 
-class CourseUserId implements Serializable {
-    private long courseId;
-    private long userId;
-}

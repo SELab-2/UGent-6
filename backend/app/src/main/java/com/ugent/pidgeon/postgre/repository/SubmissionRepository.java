@@ -10,6 +10,13 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     List<SubmissionEntity> findByGroupIdAndProjectId(long groupId, long projectId);
 
 
+
+    @Query("SELECT s FROM SubmissionEntity s WHERE s.projectId = :projectId")
+    List<SubmissionEntity> findAllByProjectId(long projectId);
+
+    List<SubmissionEntity> findByProjectId(long projectId);
+
+
     @Query(value = """
     SELECT s.id
     FROM SubmissionEntity s
@@ -22,4 +29,5 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     ) ORDER BY s.id DESC LIMIT 1
     """)
     Long findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
+
 }

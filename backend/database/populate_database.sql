@@ -52,10 +52,11 @@ INSERT INTO files (file_path, file_name, uploaded_by) VALUES
 ('/path/to/file21', 'file21.txt', 2),
 ('/path/to/file22', 'file22.txt', 3);
 
+
 -- Assume tests are created before projects for foreign key constraints
 -- Inserting into `tests`
 INSERT INTO tests (docker_image, docker_test, structure_test_id) VALUES
-('docker/image1', 2, 3),
+('docker/image1', 16, 17),
 ('docker/image2', 5, 6),
 ('docker/image3', 8, 9),
 ('docker/image4', 12, 13),
