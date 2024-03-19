@@ -2,6 +2,7 @@ package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.CourseUserEntity;
 import com.ugent.pidgeon.postgre.models.CourseUserId;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -27,4 +28,16 @@ public interface CourseUserRepository extends JpaRepository<CourseUserEntity, Co
     """)
     Boolean isCourseAdmin(long courseId, long userId);
 
+    @Query(value = """
+            SELECT cu.relation FROM CourseUserEntity cu
+            WHERE cu.userId = ?2 AND cu.courseId = ?1
+    """)
+    CourseRelation getCourseRelation(long courseId, long userId);
+    @Query(value = """
+        SELECT CASE WHEN EXISTS (
+            SELECT cu FROM CourseUserEntity cu
+            WHERE (cu.userId = ?2 AND cu.courseId = ?1)
+        ) THEN true ELSE false END
+    """)
+    Boolean isCourseMember(long courseId, long userId);
 }

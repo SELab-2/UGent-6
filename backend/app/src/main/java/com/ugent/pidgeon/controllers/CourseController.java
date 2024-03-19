@@ -8,10 +8,7 @@ import com.ugent.pidgeon.model.json.UserIdJson;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.CourseRepository;
-import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
-import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +34,9 @@ public class CourseController {
     @Autowired
     private CourseUserRepository courseUserRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<CourseEntity> getCourseByCourseId(@PathVariable Long courseId) {
@@ -50,13 +50,14 @@ public class CourseController {
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(@PathVariable Long courseId) {
+    public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(Auth auth, @PathVariable Long courseId) {
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
         if (projects.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(projects);
     }
+
     Boolean hasCourseRights(long courseId, UserEntity user){
         if(user.getRole() == UserRole.admin){
             return true;
@@ -64,6 +65,7 @@ public class CourseController {
             return courseUserRepository.isCourseAdmin(courseId, user.getId());
         }
     }
+
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
         if(courseRepository.existsById(courseId)){
@@ -73,10 +75,23 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
         }
     }
+
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin})
     public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody UserIdJson userId) {
+        CourseRelation coursePermissions = courseUserRepository.getCourseRelation(courseId, auth.getUserEntity().getId());
         if(hasCourseRights(courseId, auth.getUserEntity())){
+            CourseRelation userRelation = courseUserRepository.getReferenceById(new CourseUserId(courseId, userId.getUserId())).getRelation();
+            if(userRelation == CourseRelation.creator){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove course creator");
+            }else if(userRelation == CourseRelation.course_admin){
+                if(coursePermissions != CourseRelation.creator){
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course admin cannot remove a course admin");
+                }else{
+                    courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
+                    return ResponseEntity.ok().build();
+                }
+            }
             courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
             return ResponseEntity.ok().build(); // Successfully removed
         }else{
@@ -87,8 +102,14 @@ public class CourseController {
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin})
     public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
+        if(request.getRelation() == CourseRelation.course_admin){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add a creator");
+        }
         // Only teacher and admin can add different users to a course.
         if(hasCourseRights(courseId, auth.getUserEntity())){
+            if(auth.getUserEntity().getRole() != UserRole.admin && request.getRelation() != CourseRelation.enrolled && courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) != CourseRelation.creator){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can create more course-admins");
+            }
             courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelation()));
             return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
         }else{
@@ -100,7 +121,18 @@ public class CourseController {
     @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin})
     public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
+        if(auth.getUserEntity().getId() == request.getUserId()){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change your own role.");
+        }
+
+        if(request.getRelation() == CourseRelation.course_admin){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change role to creator");
+        }
+        // Only teacher and admin can add different users to a course.
         if(hasCourseRights(courseId, auth.getUserEntity())){
+            if(auth.getUserEntity().getRole() != UserRole.admin && request.getRelation() != CourseRelation.enrolled && courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) != CourseRelation.creator){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can promote to course-admin");
+            }
             Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, request.getUserId()));
             if (ce.isPresent()) {
                 ce.get().setRelation(request.getRelation());
@@ -115,10 +147,32 @@ public class CourseController {
     }
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.admin, UserRole.student}) // student is allowed to see people in its class
-    public ResponseEntity<List<CourseUserEntity>> getCourseMembers(@PathVariable Long courseId) {
-        List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
-        return ResponseEntity.ok(members); // Successfully retrieved members
+    @Roles({UserRole.teacher, UserRole.student}) // student is allowed to see people in its class
+    public ResponseEntity<?> getCourseMembers(Auth auth, @PathVariable Long courseId) {
+        if(courseRepository.existsById(courseId)){
+            UserEntity ue = auth.getUserEntity();
+            if(ue.getRole() == UserRole.admin || courseUserRepository.isCourseMember(courseId, ue.getId())){
+                List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
+                List<Map<String, Object>> memberJson = members.stream().map(cue -> {
+                    Map<String, Object> json = new HashMap<>();
+                    // Assuming `CourseUserEntity` has some properties like `id`, `name`, etc.
+                    json.put("userId", ApiRoutes.USER_BASE_PATH + "/" + cue.getUserId());
+                    json.put("relation", cue.getRelation());
+                    UserEntity user = userRepository.getReferenceById(cue.getUserId());
+                    json.put("name", user.getName()); // should exist since relation still exists
+                    json.put("surname", user.getSurname());
+                    // Add more properties as needed
+                    return json;
+                }).toList();
+                Map<String, Object> resultJson = new HashMap<>();
+                resultJson.put("members", memberJson);
+                resultJson.put("courses", ApiRoutes.COURSE_BASE_PATH + "/" + courseId);
+                return ResponseEntity.ok(resultJson); // Successfully retrieved members
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a member of the course");
+        }else{
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
+        }
     }
 
 
