@@ -5,7 +5,6 @@ import { InteractionStatus, InteractionType, InteractionRequiredAuthError, Accou
 import { loginRequest } from "../../auth/AuthConfig";
 import { callMsGraph } from "../../auth/MsGraphApiCall";
 import { Spin } from "antd";
-import { User } from "../../providers/UserProvider"
 import ProfileCard from "./components/ProfileCard"
 import useUser from "../../hooks/useUser";
 
@@ -17,7 +16,6 @@ const ErrorComponent: React.FC<MsalAuthenticationResult> = ({error}) => {
 const ProfileContent = () => {
     const { instance, inProgress } = useMsal();
     const [id, setId] = useState<String | null>(null);
-    const [notuser, setNotuser] = useState<User | null>(null)
     const { user } = useUser()
 
     useEffect(() => {
@@ -42,24 +40,6 @@ const ProfileContent = () => {
             console.log(id);
         }
     }, [inProgress, id, instance]);
-
-    useEffect(() => {
-        if (!id) return
-
-        //TODO: get request
-        setTimeout(() => {
-            setNotuser({
-                course_url: "",
-                projects_url: "",
-                url: "",
-                role: "student",
-                email: "test@ugent.be",
-                id: 1,
-                name: "John",
-                surname: "Doe"
-            })
-        }, 250)
-    }, [id])
 
     if (user === null) {
         return (
