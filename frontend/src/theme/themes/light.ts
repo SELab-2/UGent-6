@@ -9,6 +9,7 @@ export const lightTheme: ThemeConfig = {
     colorBgBase: "#FEFBFF",
     colorPrimaryBg: "#D0E3FE",
     colorBorder: "rgba(0, 0, 0, 0.2)",
+    colorBorderSecondary: "rgba(0, 0, 0, 0.1)",
   },
   components: {
     Layout: {

@@ -7,6 +7,7 @@ import Course from "../pages/course/Course"
 import CourseRoutes from "./CourseRoutes"
 import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 import Project from "../pages/project/Project"
+import Submit from "../pages/submit/Submit"
 
 const AppRouter = () => {
   return (
@@ -17,7 +18,10 @@ const AppRouter = () => {
       />
 
       <Route path="/" element={<AuthenticatedRoute />}>
-   
+    
+        <Route path={AppRoutes.NEW_SUBMISSION} element={<Submit />} />
+    
+
         <Route
           path={AppRoutes.PROFILE}
           element={<Profile />}

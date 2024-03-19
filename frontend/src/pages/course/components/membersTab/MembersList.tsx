@@ -51,6 +51,7 @@ const MembersList: FC<{ members: CourseMemberType[] }> = ({ members }) => {
               <Tooltip placement="left" title={t("course.removeFromCourse", { name: user.name })}>
                 <Button
                   danger
+                  type="primary"
                   key="remove"
                   icon={<UserDeleteOutlined />}
                 />

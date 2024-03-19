@@ -24,6 +24,7 @@ export enum ApiRoutes {
   GROUP = "api/groups/:id",
   GROUP_MEMBERS = "api/groups/:id/members", 
   GROUP_MEMBER = "api/groups/:id/members/:userId", 
+  GROUP_SUBMISSIONS = "api/projects/:id/groups/:id/submissions",
 
   TEST = "api/test",
   USER = "api/users/:id",
@@ -100,12 +101,16 @@ export type GET_Responses = {
   }
   [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
   [ApiRoutes.SUBMISSION]: {
-    description: string
-    submittionId: string
+    submittionId: number
     project_url: string
-    submitted_file_url: string
+    file_url: string
+    group_url: string
+    structure_accepted: boolean
+    docker_accepted: boolean
+    structure_feedback: string
+    docker_feedback: string
     submitted_time: Timestamp
-    title: string
+
   }
   [ApiRoutes.SUBMISSION_FILE]: FormData
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]

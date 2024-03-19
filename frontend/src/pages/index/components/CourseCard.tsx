@@ -8,7 +8,7 @@ import { AppRoutes } from "../../../@types/routes"
 import { UserCourseType } from "../../../providers/UserProvider"
 
 
-const Course: FC<{ course: UserCourseType }> = ({ course }) => {
+const CourseCard: FC<{ course: UserCourseType }> = ({ course }) => {
   const { t } = useTranslation()
   const { token } = theme.useToken()
   const navigate = useNavigate()
@@ -64,4 +64,4 @@ const Course: FC<{ course: UserCourseType }> = ({ course }) => {
   )
 }
 
-export default Course
+export default CourseCard

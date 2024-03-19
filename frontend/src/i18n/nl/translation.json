@@ -43,6 +43,17 @@
     "admin": "Admin aan Universiteit Gent"
   },
 
+  "project": {
+    "submissions": "Indieningen",
+    "newSubmission": "Nieuwe indiening",
+    "submission": "Indiening",
+    "structure": "Structuur",
+    "addFiles": "Bestanden toevoegen",
+    "submit": "Indienen",
+    "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
+    "uploadAreaSubtitle": "Maximum file size is 10MB"
+  },
+
   "course": {
     "projects": "Projecten",
     "groups": "Groepen",

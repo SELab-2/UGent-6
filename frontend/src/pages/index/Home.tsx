@@ -1,6 +1,6 @@
 import { Button, Space, Typography } from "antd"
 import { useTranslation } from "react-i18next"
-import Course from "./components/Course"
+import CourseCard from "./components/CourseCard"
 import { PlusOutlined } from "@ant-design/icons"
 import CreateCourseModal from "./components/CreateCourseModal"
 import { useState } from "react"
@@ -36,8 +36,8 @@ const Home = () => {
           style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem" }}
         >
           {courses
-            .map((c, i) => (
-              <Course
+            .map((c) => (
+              <CourseCard
                 key={c.courseId}
                 course={c}
               />

@@ -42,7 +42,18 @@
     "teacher": "Teacher at Ghent University",
     "admin": "Admin at Ghent University"
   },
-
+  "project": {
+    "submissions": "Submissions",
+    "newSubmission": "New submission",
+    "submition": "Submition",
+    "structure": "Structure",
+    "addFiles": "Add files",
+    "submit": "Submit",
+    "uploadAreaTitle": "Click or drag file to this area to upload",
+    "uploadAreaSubtitle": "Maximum file size is 10MB"
+  
+    
+  },
   "course": {
     "projects": "Projects",
     "groups": "Groups",
