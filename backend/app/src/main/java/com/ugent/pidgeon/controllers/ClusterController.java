@@ -37,6 +37,9 @@ public class ClusterController {
     public ResponseEntity<?> getClustersForCourse(@PathVariable("courseid") Long courseid, Auth auth) {
         // Get the user id
         long userId = auth.getUserEntity().getId();
+        if (!courseRepository.existsById(courseid)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
         if (courseUserRepository.findByCourseIdAndUserId(courseid, userId).isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of course");
         }
@@ -81,6 +84,9 @@ public class ClusterController {
     public ResponseEntity<?> createClusterForCourse(@PathVariable("courseid") Long courseid, Auth auth, @RequestBody GroupClusterCreateJson clusterJson) {
         // Get the user id
         long userId = auth.getUserEntity().getId();
+        if (!courseRepository.existsById(courseid)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
         if (!courseRepository.adminOfCourse(courseid, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
