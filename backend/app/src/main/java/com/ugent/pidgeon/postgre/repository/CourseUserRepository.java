@@ -40,4 +40,7 @@ public interface CourseUserRepository extends JpaRepository<CourseUserEntity, Co
         ) THEN true ELSE false END
     """)
     Boolean isCourseMember(long courseId, long userId);
+
+    @Query("SELECT cu FROM CourseUserEntity cu WHERE cu.courseId = :courseId")
+    List<CourseUserEntity> findAllUsersByCourseId(long courseId);
 }

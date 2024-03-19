@@ -10,6 +10,12 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     List<SubmissionEntity> findByGroupIdAndProjectId(long groupId, long projectId);
 
 
+    @Query("SELECT s FROM SubmissionEntity s WHERE s.projectId = :projectId")
+    List<SubmissionEntity> findAllByProjectId(long projectId);
+
+    List<SubmissionEntity> findByProjectId(long projectId);
+
+
     //TODO: Once  deadlines are properly implemented, this query should be updated to take into account the deadline
     @Query(value = """
     SELECT s.id
@@ -23,4 +29,5 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     )
     """)
     Long findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
+
 }

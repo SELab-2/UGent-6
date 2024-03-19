@@ -41,7 +41,3 @@ public class GroupUserEntity {
     }
 }
 
-class GroupUserId implements Serializable {
-    private long groupId;
-    private long userId;
-}
