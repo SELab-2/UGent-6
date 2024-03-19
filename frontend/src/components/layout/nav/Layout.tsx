@@ -2,7 +2,7 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-reac
 import UnauthNav from "./UnauthNav"
 import AuthNav from "./AuthNav"
 import { FC, PropsWithChildren } from "react"
-import { Layout as AntLayout, Button, Dropdown, Flex, MenuProps, Typography } from "antd"
+import { Layout as AntLayout, Dropdown, Flex, MenuProps, Typography } from "antd"
 import Logo from "../../Logo"
 import { GlobalOutlined } from "@ant-design/icons"
 import useApp from "../../../hooks/useApp"
@@ -54,6 +54,7 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
             style={{
               width: "100%",
               height: "100%",
+              marginBottom:"3rem"
             }}
             justify="center"
           >

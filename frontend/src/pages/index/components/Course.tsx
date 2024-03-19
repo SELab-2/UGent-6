@@ -52,11 +52,11 @@ const Course: FC<{ course: UserCourseType }> = ({ course }) => {
       ]}
     >
       <List>
-        <List.Item actions={[<ProjectStatusTag status={["processing", "completed", "notStarted"][Math.floor(Math.random() * 3)] as ProjectStatus} />]}>
+        <List.Item actions={[<ProjectStatusTag icon status={["processing", "completed", "notStarted"][Math.floor(Math.random() * 3)] as ProjectStatus} />]}>
           <List.Item.Meta title={"Opdracht " + Math.floor(Math.random() * 100 + 1)} />
         </List.Item>
 
-        <List.Item actions={[<ProjectStatusTag status={["processing", "completed", "notStarted"][Math.floor(Math.random() * 3)] as ProjectStatus} />]}>
+        <List.Item actions={[<ProjectStatusTag icon status={["processing", "completed", "notStarted"][Math.floor(Math.random() * 3)] as ProjectStatus} />]}>
           <List.Item.Meta title={"Opdracht " + Math.floor(Math.random() * 100 + 1)} />
         </List.Item>
       </List>

@@ -59,7 +59,7 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
       // volcano, geekblue,green
       title: isTeacher ? t("home.projects.groupProgress")  : t("home.projects.projectStatus"),
       key: "status",
-      render: () => isTeacher ? <GroupProgress usersCompleted={Math.floor(Math.random() * 121)} userCount={121}/> : (Math.random() > 0.5 ? <ProjectStatusTag status="completed" /> : <ProjectStatusTag status="notStarted" />),
+      render: () => isTeacher ? <GroupProgress usersCompleted={Math.floor(Math.random() * 121)} userCount={121}/> : (Math.random() > 0.5 ? <ProjectStatusTag icon status="completed" /> : <ProjectStatusTag icon status="notStarted" />),
     },
     {
       key: "action",

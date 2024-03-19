@@ -9,6 +9,7 @@ const ProfileCard: React.FC<{ user: User }> = ({ user }) => {
 
   return (
     <Card
+    
       styles={{
         header: {
           background: token.colorPrimaryBg,
@@ -17,7 +18,6 @@ const ProfileCard: React.FC<{ user: User }> = ({ user }) => {
           fontSize: "1.1em",
         },
       }}
-      bordered={false}
       type="inner"
       title={
         <span>

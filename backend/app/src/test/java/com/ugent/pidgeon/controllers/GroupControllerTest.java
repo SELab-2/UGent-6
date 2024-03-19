@@ -35,8 +35,6 @@ public class GroupControllerTest extends ControllerTest {
                 .defaultRequest(MockMvcRequestBuilders.get("/**")
                         .with(request -> { request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication()); return request; }))
                 .build();
-
-
     }
 
 

@@ -21,6 +21,11 @@ body, html {
   background-color: rgba(255,255,255,0.2);
 }
 
+.light-theme .ant-layout-header > .ant-btn,
+.light-theme .ant-layout-header > .ant-typography, 
+.light-theme .ant-layout-header .ant-dropdown-trigger {
+  color: #fff
+}
 
 
 
