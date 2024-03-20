@@ -5,10 +5,7 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
-import com.ugent.pidgeon.postgre.models.FileEntity;
-import com.ugent.pidgeon.postgre.models.SubmissionEntity;
-import com.ugent.pidgeon.postgre.models.TestEntity;
-import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.Filehandler;
@@ -21,11 +18,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.zip.ZipFile;
 
@@ -66,15 +66,22 @@ public class SubmissionController {
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
                 ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
-                submission.getAccepted(),
-                submission.getSubmissionTime());
+                submission.getStructureAccepted(),
+                submission.getSubmissionTime(),
+                submission.getDockerAccepted(),
+                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/structurefeedback",
+                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/dockerfeedback"
+        );
+
     }
 
-    public boolean accesToSubmission(SubmissionEntity submission, UserEntity user) {
-        boolean inGroup = groupRepository.userInGroup(submission.getGroupId(), user.getId());
-        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(submission.getProjectId(), user.getId()));
+    public boolean accesToSubmission(long groupId, long projectId, UserEntity user) {
+        boolean inGroup = groupRepository.userInGroup(groupId, user.getId());
+        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
         return inGroup || isAdmin;
     }
+
+
 
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}") //Route to get a submission
     @Roles({UserRole.teacher, UserRole.student})
@@ -86,7 +93,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!accesToSubmission(submission, auth.getUserEntity())) {
+        if (!accesToSubmission(submission.getGroupId(), submission.getProjectId(),auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
@@ -137,7 +144,14 @@ public class SubmissionController {
             long fileid = fileRepository.save(fileEntity).getId();
 
 
-            SubmissionEntity submissionEntity = new SubmissionEntity(projectid, groupId, fileid, time, false);
+            SubmissionEntity submissionEntity = new SubmissionEntity(
+                    projectid,
+                    groupId,
+                    fileid,
+                    time,
+                    false,
+                    false
+            );
 
             //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
@@ -146,12 +160,13 @@ public class SubmissionController {
             String filename = file.getOriginalFilename();
             Path path = Filehandler.getSubmissionPath(projectid, groupId, submission.getId());
             File savedFile = Filehandler.saveSubmission(path, file);
-            String pathname = path + "/" + Filehandler.SUBMISSION_FILENAME;
+            String pathname = path.resolve(Filehandler.SUBMISSION_FILENAME).toString();
 
             //Update name and path for the file entry
             fileEntity.setName(filename);
             fileEntity.setPath(pathname);
             fileRepository.save(fileEntity);
+
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
@@ -166,8 +181,14 @@ public class SubmissionController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
 
-            submissionEntity.setAccepted(testresult);
-            submissionRepository.save(submissionEntity);
+            // Update the submission with the test result
+            submission.setStructureAccepted(testresult);
+            submission = submissionRepository.save(submission);
+
+            // Update the submission with the test feedbackfiles
+            submission.setDockerFeedback("TEMP DOCKER FEEDBACK");
+            submission.setStructureFeedback("TEMP STRUCTURE FEEDBACK");
+            submissionRepository.save(submission);
 
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
         } catch (Exception e) {
@@ -186,7 +207,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!accesToSubmission(submission, auth.getUserEntity())) {
+        if (!accesToSubmission(submission.getGroupId(), submission.getProjectId(),auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         // Get the file entry from the database
@@ -213,9 +234,8 @@ public class SubmissionController {
         }
     }
 
-    @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
-    @Roles({UserRole.teacher})
-    public ResponseEntity<Void> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
+    public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, String> feedbackGetter) {
+   
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
@@ -223,11 +243,61 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!groupRepository.userInGroup(submission.getGroupId(), userId) && !projectRepository.adminOfProject(submission.getProjectId(), userId)){
+        if (!accesToSubmission(submission, auth.getUserEntity())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.TEXT_PLAIN));
+        return ResponseEntity.ok().headers(headers).body(feedbackGetter.apply(submission));
+    }
+
+    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/structurefeedback") //Route to get the structure feedback
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getStructureFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
+        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getStructureFeedback);
+    }
+
+    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/dockerfeedback") //Route to get the docker feedback
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getDockerFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
+        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedback);
+    }
+  
+    @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<Void> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
+        // Get the submission entry from the database
+        SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
+        if (submission == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (!accesToSubmission(submission.getGroupId(), submission.getProjectId(),auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         submissionRepository.delete(submission);
         fileController.deleteFileById(submission.getFileId());
         return  ResponseEntity.ok().build();
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions/{groupid}") //Route to get all submissions for a project
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getSubmissionsForGroup(@PathVariable("projectid") long projectid, @PathVariable("groupid") long groupid, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        ProjectEntity project = projectRepository.findById(projectid).orElse(null);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
+        if (groupRepository.findByIdAndClusterId(groupid, project.getGroupClusterId()).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not part of project");
+        }
+        if (!accesToSubmission(groupid, projectid,auth.getUserEntity())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have access to this group");
+        }
+
+        List<SubmissionEntity> submissions = submissionRepository.findByProjectIdAndGroupId(projectid, groupid);
+        List<SubmissionJson> res = submissions.stream().map(this::getSubmissionJson).toList();
+        return ResponseEntity.ok(res);
     }
 }

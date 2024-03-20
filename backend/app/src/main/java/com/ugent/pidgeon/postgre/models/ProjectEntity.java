@@ -32,8 +32,8 @@ public class ProjectEntity {
         @Column(name="visible", nullable = false)
         private Boolean visible;
 
-        @OneToMany(mappedBy = "projectId")
-        private List<DeadlineEntity> deadlines;
+        @Column(name="deadline", nullable = false)
+        private Timestamp deadline;
 
         @Column(name="max_score")
         private Integer maxScore;
@@ -108,14 +108,19 @@ public class ProjectEntity {
                 this.visible = projectType;
         }
 
-        public List<DeadlineEntity> getDeadlines() {
-                return deadlines;
-        }
         public Integer getMaxScore() {
                 return maxScore;
         }
 
         public void setMaxScore(Integer maxScore) {
                 this.maxScore = maxScore;
+        }
+
+        public Timestamp getDeadline() {
+                return deadline;
+        }
+
+        public void setDeadline(Timestamp deadline) {
+                this.deadline = deadline;
         }
 }

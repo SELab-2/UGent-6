@@ -5,6 +5,7 @@ import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.ProjectJson;
 import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
+
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -24,7 +25,8 @@ public class ProjectController {
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
-    private DeadlineRepository deadlineRepository;
+    private TestRepository testRepository;
+
     @Autowired
     private SubmissionRepository submissionRepository;
     @Autowired
@@ -38,9 +40,6 @@ public class ProjectController {
     @Autowired
     private TestRepository testRepository;
 
-    //controllers
-    @Autowired
-    private DeadlineController deadlineController;
     @Autowired
     private SubmissionController filesubmissiontestController;
     @Autowired
@@ -64,13 +63,18 @@ public class ProjectController {
         return ResponseEntity.ok().body(projectsWithUrls);
     }
 
+    public boolean accesToProject(long projectId, UserEntity user) {
+        boolean studentof = projectRepository.userPartOfProject(projectId, user.getId());
+        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
+        return  studentof || isAdmin;
+    }
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
         return projectRepository.findById(projectId)
                 .map(project -> {
                     long userId = auth.getUserEntity().getId();
-                    if (!projectRepository.userPartOfProject(projectId, userId)) {
+                    if (!accesToProject(projectId, auth.getUserEntity())) {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                     } else {
                         return ResponseEntity.ok().body(project);
@@ -144,8 +148,7 @@ public class ProjectController {
             if (updateDTO.getDescription() != null) project.setDescription(updateDTO.getDescription());
 
             if (updateDTO.getDeadline() != null) {
-                DeadlineEntity deadlineEntity = new DeadlineEntity(projectId, updateDTO.getDeadline());
-                deadlineRepository.save(deadlineEntity);
+                project.setDeadline(updateDTO.getDeadline());
             }
             System.out.println(project.getName());
             projectRepository.save(project);
@@ -165,10 +168,7 @@ public class ProjectController {
 
 
             ProjectEntity projectEntity = projectOptional.get();
-            // delete all the deadlines associated with the project
-            for (DeadlineEntity deadlineEntity : projectEntity.getDeadlines()) {
-                deadlineController.deleteDeadlineById(deadlineEntity.getDeadlineId(), auth);
-            }
+
 
             groupFeedbackRepository.deleteAll(groupFeedbackRepository.findByProjectId(projectId));
 

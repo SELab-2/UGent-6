@@ -23,7 +23,7 @@ import java.io.*;
 import java.nio.file.Path;
 
 import java.util.Optional;
-import java.util.logging.FileHandler;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 @RestController
@@ -51,7 +51,7 @@ public class TestController {
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
 
         long userId = auth.getUserEntity().getId();
-        if(!projectRepository.userPartOfProject(projectId, userId)){
+        if(!projectRepository.adminOfProject(projectId, userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
         try {
@@ -76,7 +76,7 @@ public class TestController {
             } else {
                 TestEntity newTestEntity = testEntity.get();
                 newTestEntity.setDockerImage(dockerImage);
-                newTestEntity.setDockerTest(dockertestFileEntity.getId());
+                newTestEntity.setDockerTestId(dockertestFileEntity.getId());
                 newTestEntity.setStructureTestId(structuretestFileEntity.getId());
                 test = testRepository.save(newTestEntity);
             }
@@ -126,40 +126,32 @@ public class TestController {
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/structuretest")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> getStructureTestFile(@PathVariable("projectid") long testId, Auth auth) {
-        long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(testId, userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
-        }
-        Optional<TestEntity> testEntity = testRepository.findById(testId);
-        if (testEntity.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        long structuretestid = testEntity.get().getStructureTestId();
-        Optional<FileEntity> fileEntity = fileRepository.findById(structuretestid);
-        if (fileEntity.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        Resource file = Filehandler.getFileAsResource(Path.of(fileEntity.get().getPath()));
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileEntity.get().getName());
-        headers.add(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.TEXT_PLAIN));
-        return ResponseEntity.ok().headers(headers).body(file);
+    public ResponseEntity<Object> getStructureTestFile(@PathVariable("projectid") long projectId, Auth auth) {
+        return getTestFileResponseEnity(projectId, auth, TestEntity::getStructureTestId);
     }
 
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertest")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> getDockerTestFile(@PathVariable("projectid") long testId, Auth auth) {
+    public ResponseEntity<Object> getDockerTestFile(@PathVariable("projectid") long projectId, Auth auth) {
+        return getTestFileResponseEnity(projectId, auth, TestEntity::getDockerTestId);
+    }
+
+    public ResponseEntity<Object> getTestFileResponseEnity(long projectId, Auth auth, Function<TestEntity, Long> testFileIdGetter) {
         long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(testId, userId)) {
+        if (!projectRepository.adminOfProject(projectId, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
+        Optional<ProjectEntity> projectEntity = projectRepository.findById(projectId);
+        if (projectEntity.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        long testId = projectEntity.get().getTestId();
         Optional<TestEntity> testEntity = testRepository.findById(testId);
         if (testEntity.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        long dockertestid = testEntity.get().getDockerTest();
-        Optional<FileEntity> fileEntity = fileRepository.findById(dockertestid);
+        long testFileId = testFileIdGetter.apply(testEntity.get());
+        Optional<FileEntity> fileEntity = fileRepository.findById(testFileId);
         if (fileEntity.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -182,7 +174,7 @@ public class TestController {
         }
         testRepository.delete(testEntity);
         fileController.deleteFileById(testEntity.getStructureTestId());
-        fileController.deleteFileById(testEntity.getDockerTest());
+        fileController.deleteFileById(testEntity.getDockerTestId());
         return  ResponseEntity.ok().build();
     }
 }
