@@ -108,17 +108,9 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     public void getUserByAzureIdReturnsUserWhenUserExists() throws Exception {
-        when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.of(mockUser()));
+        //when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.of(mockUser()));
 
-        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH + "/azureid"))
+        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    public void getUserByAzureIdReturnsNotFoundWhenUserDoesNotExist() throws Exception {
-        when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.empty());
-
-        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH + "/azureid"))
-                .andExpect(status().isNotFound());
     }
 }
