@@ -5,10 +5,7 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
-import com.ugent.pidgeon.postgre.models.FileEntity;
-import com.ugent.pidgeon.postgre.models.SubmissionEntity;
-import com.ugent.pidgeon.postgre.models.TestEntity;
-import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.Filehandler;
@@ -78,11 +75,13 @@ public class SubmissionController {
 
     }
 
-    public boolean accesToSubmission(SubmissionEntity submission, UserEntity user) {
-        boolean inGroup = groupRepository.userInGroup(submission.getGroupId(), user.getId());
-        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(submission.getProjectId(), user.getId()));
+    public boolean accesToSubmission(long groupId, long projectId, UserEntity user) {
+        boolean inGroup = groupRepository.userInGroup(groupId, user.getId());
+        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
         return inGroup || isAdmin;
     }
+
+
 
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}") //Route to get a submission
     @Roles({UserRole.teacher, UserRole.student})
@@ -94,7 +93,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!accesToSubmission(submission, auth.getUserEntity())) {
+        if (!accesToSubmission(submission.getGroupId(), submission.getProjectId(),auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
@@ -208,7 +207,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!accesToSubmission(submission, auth.getUserEntity())) {
+        if (!accesToSubmission(submission.getGroupId(), submission.getProjectId(),auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         // Get the file entry from the database
@@ -268,18 +267,37 @@ public class SubmissionController {
     @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
     @Roles({UserRole.teacher})
     public ResponseEntity<Void> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
-        long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
         if (submission == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!groupRepository.userInGroup(submission.getGroupId(), userId) && !projectRepository.adminOfProject(submission.getProjectId(), userId)){
+        if (!accesToSubmission(submission.getGroupId(), submission.getProjectId(),auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         submissionRepository.delete(submission);
         fileController.deleteFileById(submission.getFileId());
         return  ResponseEntity.ok().build();
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions/{groupid}") //Route to get all submissions for a project
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getSubmissionsForGroup(@PathVariable("projectid") long projectid, @PathVariable("groupid") long groupid, Auth auth) {
+        long userId = auth.getUserEntity().getId();
+        ProjectEntity project = projectRepository.findById(projectid).orElse(null);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
+        if (groupRepository.findByIdAndClusterId(groupid, project.getGroupClusterId()).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not part of project");
+        }
+        if (!accesToSubmission(groupid, projectid,auth.getUserEntity())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have access to this group");
+        }
+
+        List<SubmissionEntity> submissions = submissionRepository.findByProjectIdAndGroupId(projectid, groupid);
+        List<SubmissionJson> res = submissions.stream().map(this::getSubmissionJson).toList();
+        return ResponseEntity.ok(res);
     }
 }

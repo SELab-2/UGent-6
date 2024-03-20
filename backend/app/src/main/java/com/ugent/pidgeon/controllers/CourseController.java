@@ -30,34 +30,17 @@ public class CourseController {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private TestRepository testRepository;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private FileRepository fileRepository;
-
-    @Autowired
-    private GroupRepository groupRepository;
-
-    @Autowired
-    private SubmissionRepository submissionRepository;
-
-    @Autowired
-    private GroupFeedbackRepository groupFeedbackRepository;
-
-    @Autowired
-    private GroupMemberRepository groupMemberRepository;
 
     @Autowired
     private GroupClusterRepository groupClusterRepository;
 
     @Autowired
-    private GroupClusterController groupClusterController;
+    private ClusterController groupClusterController;
 
     @Autowired
     private CourseUserRepository courseUserRepository;
+
 
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH)
@@ -192,7 +175,7 @@ public class CourseController {
             //voor elke groepcluster
             for(GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)){
                 // We verwijderen de groepfeedback niet omdat die al verwijderd werd wanneer het project verwijderd werd
-                groupClusterController.deleteGroupCluster(groupCluster.getId(), auth, false);
+                groupClusterController.deleteCluster(groupCluster.getId(), auth);
             }
 
             // Alle CourseUsers verwijderen
