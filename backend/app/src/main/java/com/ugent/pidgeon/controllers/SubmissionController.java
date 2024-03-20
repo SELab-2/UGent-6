@@ -18,11 +18,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.zip.ZipFile;
 
@@ -63,8 +66,13 @@ public class SubmissionController {
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
                 ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
-                submission.getAccepted(),
-                submission.getSubmissionTime());
+                submission.getStructureAccepted(),
+                submission.getSubmissionTime(),
+                submission.getDockerAccepted(),
+                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/structurefeedback",
+                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/dockerfeedback"
+        );
+
     }
 
     public boolean accesToSubmission(long groupId, long projectId, UserEntity user) {
@@ -136,7 +144,14 @@ public class SubmissionController {
             long fileid = fileRepository.save(fileEntity).getId();
 
 
-            SubmissionEntity submissionEntity = new SubmissionEntity(projectid, groupId, fileid, time, false);
+            SubmissionEntity submissionEntity = new SubmissionEntity(
+                    projectid,
+                    groupId,
+                    fileid,
+                    time,
+                    false,
+                    false
+            );
 
             //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
@@ -145,12 +160,13 @@ public class SubmissionController {
             String filename = file.getOriginalFilename();
             Path path = Filehandler.getSubmissionPath(projectid, groupId, submission.getId());
             File savedFile = Filehandler.saveSubmission(path, file);
-            String pathname = path + "/" + Filehandler.SUBMISSION_FILENAME;
+            String pathname = path.resolve(Filehandler.SUBMISSION_FILENAME).toString();
 
             //Update name and path for the file entry
             fileEntity.setName(filename);
             fileEntity.setPath(pathname);
             fileRepository.save(fileEntity);
+
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
@@ -165,8 +181,14 @@ public class SubmissionController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
 
-            submissionEntity.setAccepted(testresult);
-            submissionRepository.save(submissionEntity);
+            // Update the submission with the test result
+            submission.setStructureAccepted(testresult);
+            submission = submissionRepository.save(submission);
+
+            // Update the submission with the test feedbackfiles
+            submission.setDockerFeedback("TEMP DOCKER FEEDBACK");
+            submission.setStructureFeedback("TEMP STRUCTURE FEEDBACK");
+            submissionRepository.save(submission);
 
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
         } catch (Exception e) {
@@ -212,6 +234,36 @@ public class SubmissionController {
         }
     }
 
+    public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, String> feedbackGetter) {
+   
+        long userId = auth.getUserEntity().getId();
+        // Get the submission entry from the database
+        SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
+        if (submission == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (!accesToSubmission(submission, auth.getUserEntity())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.TEXT_PLAIN));
+        return ResponseEntity.ok().headers(headers).body(feedbackGetter.apply(submission));
+    }
+
+    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/structurefeedback") //Route to get the structure feedback
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getStructureFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
+        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getStructureFeedback);
+    }
+
+    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/dockerfeedback") //Route to get the docker feedback
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getDockerFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
+        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedback);
+    }
+  
     @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
     @Roles({UserRole.teacher})
     public ResponseEntity<Void> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
