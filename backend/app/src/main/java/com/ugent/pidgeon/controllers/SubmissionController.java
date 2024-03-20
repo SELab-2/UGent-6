@@ -243,7 +243,7 @@ public class SubmissionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        if (!accesToSubmission(submission, auth.getUserEntity())) {
+        if (!accesToSubmission(submission.getGroupId(), submission.getGroupId(), auth.getUserEntity())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 

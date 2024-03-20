@@ -1,6 +1,5 @@
 package com.ugent.pidgeon.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.ProjectJson;
@@ -15,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -26,7 +27,6 @@ public class ProjectController {
     private ProjectRepository projectRepository;
     @Autowired
     private TestRepository testRepository;
-
     @Autowired
     private SubmissionRepository submissionRepository;
     @Autowired
@@ -37,9 +37,8 @@ public class ProjectController {
     private CourseUserRepository courseUserRepository;
     @Autowired
     private GroupClusterRepository groupClusterRepository;
-    @Autowired
-    private TestRepository testRepository;
 
+    //controllers
     @Autowired
     private SubmissionController filesubmissiontestController;
     @Autowired
@@ -73,7 +72,6 @@ public class ProjectController {
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
         return projectRepository.findById(projectId)
                 .map(project -> {
-                    long userId = auth.getUserEntity().getId();
                     if (!accesToProject(projectId, auth.getUserEntity())) {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                     } else {
@@ -122,12 +120,20 @@ public class ProjectController {
             if(! testRepository.existsById(projectJson.getTestId())){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test with this id exists");
             }
-            // TODO: checken of deadline bestaat en ze dan ook in het project steken
+
+            // Check of de dealine bestaat en in de toekomst ligt.
+            Timestamp deadline = projectJson.getDeadline();
+            if(deadline == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No deadline given");
+            }
+            if(deadline.before(Timestamp.valueOf(LocalDateTime.now()))){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deadline is in the past");
+            }
 
             // Create a new ProjectEntity instance
             ProjectEntity project = new ProjectEntity(courseId, projectJson.getName(), projectJson.getDescription(),
                     projectJson.getGroupClusterId(), projectJson.getTestId(), projectJson.isVisible(),
-                    projectJson.getMaxScore());
+                    projectJson.getMaxScore(), projectJson.getDeadline());
 
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);

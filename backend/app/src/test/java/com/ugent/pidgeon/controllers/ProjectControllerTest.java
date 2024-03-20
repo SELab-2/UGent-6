@@ -14,11 +14,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.ArgumentMatchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +88,7 @@ public class ProjectControllerTest {
     public void testCreateProject() {
         // Mock data
         long courseId = 1L;
-        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1, 1, true, 100);
+        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1, 1, true, 100, Timestamp.valueOf(LocalDateTime.MIN));
 
         Auth auth = mock(Auth.class);
         UserEntity user = new UserEntity();
