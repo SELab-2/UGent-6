@@ -12,6 +12,9 @@ public class GroupUserId implements Serializable {
         this.userId = userId;
     }
 
+    public GroupUserId() {
+    }
+
     public long getGroupId() {
         return groupId;
     }
