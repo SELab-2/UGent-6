@@ -30,4 +30,5 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     """)
     Long findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
 
+    List<SubmissionEntity> findByProjectIdAndGroupId(long projectid, long groupid);
 }
