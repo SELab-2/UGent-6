@@ -101,7 +101,7 @@ export type GET_Responses = {
   }
   [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
   [ApiRoutes.SUBMISSION]: {
-    submittionId: number
+    submissionId: number
     project_url: string
     file_url: string
     group_url: string

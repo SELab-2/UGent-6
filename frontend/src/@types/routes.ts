@@ -9,6 +9,7 @@ export enum AppRoutes {
   PROJECT = "/courses/:courseId/projects/:projectId",
   COURSE = "/courses/:courseId",
   NEW_SUBMISSION = "/courses/:courseId/projects/:projectId/submit",
+  SUBMISSION = "/submissions/:submissionID",
   
   PROFILE = "/profile",
   }
