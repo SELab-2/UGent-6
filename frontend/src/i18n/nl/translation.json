@@ -53,7 +53,12 @@
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
     "uploadAreaSubtitle": "Maximum file size is 10MB"
   },
-
+  "landingPage":{
+    "title-1": "Officiële",
+    "title-2": "indien platform",
+    "subtitle": "Eenvoudig cursussen en projecten beheren, automatisch code testen en beoordelen.",
+    "getStarted": "Aan de slag"
+  },
   "course": {
     "projects": "Projecten",
     "groups": "Groepen",

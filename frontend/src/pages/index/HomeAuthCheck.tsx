@@ -1,6 +1,6 @@
 import { useIsAuthenticated } from "@azure/msal-react"
 import Home from "./Home"
-import Login from "./Login"
+import LandingPage from "./landing/LandingPage"
 
 
 
@@ -11,7 +11,7 @@ const HomeAuthCheck = () => {
   if (isAuthenticated) {
     return <Home/>
   }
-  return <Login/>
+  return <LandingPage/>
 
 }
 

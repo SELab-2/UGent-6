@@ -25,7 +25,7 @@ const Sidebar: FC = () => {
         key: "courses",
         label: t("home.yourCourses"),
         type: "sub1",
-        children: courses.map((c) => ({
+        children: (courses??[]).map((c) => ({
           key: c.courseId,
           label: c.name,
         })),

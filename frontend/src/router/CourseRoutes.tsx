@@ -34,7 +34,7 @@ const CourseRoutes: FC = () => {
   useEffect(() => {
     // TODO: fetch course data: /api/courses/1
 
-    // TODO: if user is not in member list -> redirect to dashboard + snackbar message
+    // TODO: if user is not in member list -> redirect to home + snackbar message
     setTimeout(() => {
       setCourse({
         members_url: "/api/courses/1/members",

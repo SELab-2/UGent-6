@@ -21,7 +21,7 @@ const ProjectCard: FC = () => {
             projectId: 1,
             name: "Opdracht 1",
             deadline: "2024-05-01T00:00:00Z",
-            description: "Maak een programma dat ...",
+            description: "Maak een programma dat dingen doet ... aaaaaa".repeat(10),
             submission_url: "/api/projects/1/submission",
             tests_url: "/api/projects/1/tests",
             course: {

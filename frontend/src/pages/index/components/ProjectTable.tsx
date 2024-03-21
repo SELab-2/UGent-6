@@ -40,6 +40,7 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
         title: t("home.projects.course"),
         dataIndex: "course",
         key: "course",
+        render: (course: ProjectType["course"]) => course.name,
       },
       {
         title: t("home.projects.deadline"),
@@ -105,6 +106,7 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
     ],
     [t, modal, isTeacher]
   )
+
 
   return (
     <Table

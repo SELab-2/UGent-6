@@ -51,8 +51,12 @@
     "submit": "Submit",
     "uploadAreaTitle": "Click or drag file to this area to upload",
     "uploadAreaSubtitle": "Maximum file size is 10MB"
-  
-    
+  },
+  "landingPage":{
+    "title-1": "Official",
+    "title-2": "submission platform",
+    "subtitle": "Effortlessly manage courses and projects, automatically test and assess code.",
+    "getStarted": "Get started"
   },
   "course": {
     "projects": "Projects",
