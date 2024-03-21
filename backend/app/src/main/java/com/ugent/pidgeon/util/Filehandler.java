@@ -59,6 +59,7 @@ public class Filehandler {
     }
 
 
+
     public static void deleteSubmission(Path directory) throws IOException {
         deleteLocation(directory);
     }
@@ -89,9 +90,6 @@ public class Filehandler {
             }
         }
     }
-
-
-
 
 
     static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {

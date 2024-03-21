@@ -27,12 +27,14 @@ public class CourseController {
     @Autowired
     private CourseRepository courseRepository;
 
-    @Autowired ProjectController projectController;
+    @Autowired 
+    private ProjectController projectController;
 
     @Autowired
     private ProjectRepository projectRepository;
 
     @Autowired
+
     private TestRepository testRepository;
 
     @Autowired
@@ -41,15 +43,21 @@ public class CourseController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private GroupClusterRepository groupClusterRepository;
 
     @Autowired
-    private GroupClusterController groupClusterController;
+    private ClusterController groupClusterController;
 
 
-    @GetMapping(ApiRoutes.COURSE_BASE_PATH)
+    @Autowired
+    private CourseUserRepository courseUserRepository;
+
+
+  @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> getUserCourses(Auth auth){
         long userID = auth.getUserEntity().getId();
@@ -181,7 +189,7 @@ public class CourseController {
             //voor elke groepcluster
             for(GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)){
                 // We verwijderen de groepfeedback niet omdat die al verwijderd werd wanneer het project verwijderd werd
-                groupClusterController.deleteGroupCluster(groupCluster.getId(), auth, false);
+                groupClusterController.deleteCluster(groupCluster.getId(), auth);
             }
 
             // Alle CourseUsers verwijderen
