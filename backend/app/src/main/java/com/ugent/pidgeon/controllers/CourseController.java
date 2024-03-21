@@ -217,6 +217,9 @@ public class CourseController {
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
         if(courseRepository.existsById(courseId)){
+            if(courseUserRepository.isCourseMember(courseId, auth.getUserEntity().getId())){
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
+            }
             courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
             return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
         }else{
