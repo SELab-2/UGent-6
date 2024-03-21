@@ -4,6 +4,9 @@ import com.ugent.pidgeon.model.submissionTesting.AddDockerModel;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTestModel;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class SubmissionTestTest {
 
 
@@ -19,6 +22,7 @@ public class SubmissionTestTest {
         // Example for running a bash script correctly
         String[] script = {"bash", "-c", "echo 'PUSH ALLOWED' > /output/testOutput"};
         SubmissionTestModel.TestOutput to = stm.runSubmission(script);
+        assertTrue(to.allowed);
     }
 
     @Test
@@ -31,6 +35,7 @@ public class SubmissionTestTest {
         // Run script
         String[] script = {"bash", "-c", "echo 'PUSH DENIED' > /output/testOutput"};
         SubmissionTestModel.TestOutput to = stm.runSubmission(script);
+        assertFalse(to.allowed);
     }
 
 
