@@ -289,16 +289,24 @@ public class CourseController {
     @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin})
     public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
-        if(auth.getUserEntity().getId() == request.getUserId()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change your own role.");
+        if (!courseRepository.existsById(courseId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
 
-        if(request.getRelation() == CourseRelation.course_admin){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change role to creator");
-        }
         // Only teacher and admin can add different users to a course.
         if(hasCourseRights(courseId, auth.getUserEntity())){
-            if(auth.getUserEntity().getRole() != UserRole.admin && request.getRelation() != CourseRelation.enrolled && courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) != CourseRelation.creator){
+            if(auth.getUserEntity().getId() == request.getUserId()){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change your own role.");
+            }
+
+            if(request.getRelation() == CourseRelation.course_admin){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change role to creator");
+            }
+
+            boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
+            boolean isCreator = courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) == CourseRelation.creator;
+            boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
+            if(creatingAdmin && (!isCreator  && !isAdmin)){
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can promote to course-admin");
             }
             Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, request.getUserId()));
@@ -310,7 +318,7 @@ public class CourseController {
                 return ResponseEntity.notFound().build(); //  User is not allowed to do the action, teachers cant remove students of other users course
             }
         }else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
     }
 
