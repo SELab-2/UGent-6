@@ -249,7 +249,7 @@ public class CourseController {
                     courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
                     return ResponseEntity.ok().build();
                 }
-            } 
+            }
             courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
             return ResponseEntity.ok().build(); // Successfully removed
         }else{
@@ -258,20 +258,30 @@ public class CourseController {
     }
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.admin})
+    @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
     public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
-        if(request.getRelation() == CourseRelation.course_admin){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add a creator");
+        if (!courseRepository.existsById(courseId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
+
         // Only teacher and admin can add different users to a course.
         if(hasCourseRights(courseId, auth.getUserEntity())){
-            if(auth.getUserEntity().getRole() != UserRole.admin && request.getRelation() != CourseRelation.enrolled && courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) != CourseRelation.creator){
+            if(request.getRelation() == CourseRelation.creator){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add a creator");
+            }
+            boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
+            boolean isCreator = courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) == CourseRelation.creator;
+            boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
+            if(creatingAdmin && (!isCreator  && !isAdmin)){
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can create more course-admins");
+            }
+            if (courseUserRepository.isCourseMember(courseId, request.getUserId())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
             }
             courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelation()));
             return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
         }else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
     }
 
