@@ -157,6 +157,11 @@ html {
   z-index: -1;
 }
 
+.white-color * {
+  color: #fff ;
+
+}
+
 /* if window width is smaller than 1000 px */
 @media screen and (max-width: 1200px) {
   .landing-page-btn {

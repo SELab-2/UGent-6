@@ -40,7 +40,7 @@ const LandingPage: FC = () => {
           style={{ textAlign: "start", height: "100%", marginTop: "8rem" }}
         >
           <Typography.Title
-            style={{ fontWeight: "700", fontSize: "3em", padding: 0, margin: 0, marginBottom: "0.5rem", zIndex: 3 }}
+            style={{ fontWeight: "700", fontSize: "3em", padding: 0, margin: 0, marginBottom: "0.5rem", zIndex: 3,color:"white" }}
             level={1}
           >
             {t("landingPage.title-1")} <span style={{ color: "#1E64C8" }}>UGent</span> {t("landingPage.title-2")}
