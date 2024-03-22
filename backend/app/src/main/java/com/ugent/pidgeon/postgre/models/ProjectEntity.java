@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
+
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -27,10 +28,10 @@ public class ProjectEntity {
         private long groupClusterId;
 
         @Column(name="test_id", nullable = false)
-        private long testId;
+        private Long testId;
 
         @Column(name="visible", nullable = false)
-        private Boolean projectType;
+        private Boolean visible;
 
         @Column(name="deadline", nullable = false)
         private Timestamp deadline;
@@ -38,14 +39,15 @@ public class ProjectEntity {
         @Column(name="max_score")
         private Integer maxScore;
 
-        public ProjectEntity(long courseId, String name, String description, long groupClusterId, long testId, Boolean projectType, Integer maxScore) {
+        public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, Timestamp deadline) {
                 this.courseId = courseId;
                 this.name = name;
                 this.description = description;
                 this.groupClusterId = groupClusterId;
                 this.testId = testId;
-                this.projectType = projectType;
+                this.visible = visible;
                 this.maxScore = maxScore;
+                this.deadline = deadline;
         }
 
         public ProjectEntity() {
@@ -92,20 +94,20 @@ public class ProjectEntity {
                 this.groupClusterId = groupClusterId;
         }
 
-        public long getTestId() {
+        public Long getTestId() {
                 return testId;
         }
 
-        public void setTestId(long testId) {
+        public void setTestId(Long testId) {
                 this.testId = testId;
         }
 
-        public Boolean getProjectType() {
-                return projectType;
+        public Boolean isVisible() {
+                return visible;
         }
 
-        public void setProjectType(Boolean projectType) {
-                this.projectType = projectType;
+        public void setVisible(Boolean projectType) {
+                this.visible = projectType;
         }
 
         public Integer getMaxScore() {

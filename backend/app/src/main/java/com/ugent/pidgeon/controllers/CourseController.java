@@ -148,7 +148,7 @@ public class CourseController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> deleteCourse(@PathVariable long courseId, Auth auth){
         try {
-            // Check of de user een admin of creator is van het vak
+            // De user vinden
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
 
@@ -198,58 +198,4 @@ public class CourseController {
         }
         return ResponseEntity.ok(projects);
     }
-
-
-    /* Function to add a new project to an existing course */
-    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
-    @Roles({UserRole.teacher})
-    public ResponseEntity<String> createProject(
-            @PathVariable long courseId,
-            @RequestParam String name,
-            @RequestParam String description,
-            @RequestParam long groupClusterId,
-            @RequestParam long testId,
-            @RequestParam boolean projectType,
-            @RequestParam Integer maxScore) {
-        try {
-            // Create a new ProjectEntity instance
-            ProjectEntity project = new ProjectEntity(courseId, name, description, groupClusterId, testId, projectType, maxScore);
-
-            // Save the project entity
-            ProjectEntity savedProject = projectRepository.save(project);
-
-
-
-            // Prepare response JSON
-            Map<String, Object> response = createJSONPostResponse(savedProject);
-
-            // Convert response map to JSON string
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            String jsonResponse = objectMapper.writeValueAsString(response);
-            // Return success response with JSON string
-            return ResponseEntity.ok(jsonResponse);
-        } catch (Exception e){
-            System.out.println("Error while creating project: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
-        }
-    }
-
-    /* Help function to create a JSON response when creating a new project */
-    private static Map<String, Object> createJSONPostResponse(ProjectEntity savedProject) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", savedProject.getId());
-        response.put("name", savedProject.getName());
-        response.put("description", savedProject.getDescription());
-        response.put("course", String.valueOf(savedProject.getCourseId()));
-        response.put("deadline", 0); // Placeholder for deadline
-            /* Optional timestamp
-            if (savedProject.getTimestamp() != null) {
-                response.put("timestamp", savedProject.getTimestamp().toString());
-            }*/
-        response.put("tests_url", ApiRoutes.PROJECT_BASE_PATH + "/" + savedProject.getId() + "/tests");
-        response.put("submission_url", ApiRoutes.PROJECT_BASE_PATH + "/" + savedProject.getId() + "/sumbmissions");
-        return response;
-    }
-
 }
