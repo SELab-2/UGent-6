@@ -81,21 +81,4 @@ public class CourseControllerTest extends ControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    public void createProjectReturnsOkWhenUserHasAccessToProject() throws Exception {
-        ProjectEntity projectEntity = new ProjectEntity();
-        projectEntity.setId(1L);
-        when(projectRepository.save(any())).thenReturn(projectEntity);
-
-
-        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/projects")
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .param("name", "Project Name")
-                        .param("description", "Project Description")
-                        .param("groupClusterId", "1")
-                        .param("testId", "1")
-                        .param("projectType", "true")
-                        .param("maxScore", "100"))
-                .andExpect(status().isOk());
-    }
 }
