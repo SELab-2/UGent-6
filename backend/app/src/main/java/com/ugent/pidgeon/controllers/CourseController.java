@@ -44,17 +44,11 @@ public class CourseController {
     private UserRepository userRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private GroupClusterRepository groupClusterRepository;
 
     @Autowired
     private ClusterController groupClusterController;
-
-
-    @Autowired
-    private CourseUserRepository courseUserRepository;
+    
 
 
   @GetMapping(ApiRoutes.COURSE_BASE_PATH)
