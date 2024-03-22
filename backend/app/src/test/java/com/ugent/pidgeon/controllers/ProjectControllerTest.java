@@ -88,7 +88,7 @@ public class ProjectControllerTest {
     public void testCreateProject() {
         // Mock data
         long courseId = 1L;
-        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1, 1, true, 100, Timestamp.valueOf(LocalDateTime.MIN));
+        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, Timestamp.valueOf(LocalDateTime.MIN));
 
         Auth auth = mock(Auth.class);
         UserEntity user = new UserEntity();
