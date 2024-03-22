@@ -143,7 +143,7 @@ public class CourseController {
             return ResponseEntity.notFound().build(); // Or return an empty list, based on your preference
         }
         CourseEntity course = courseopt.get();
-        if(courseUserRepository.findCourseUserEntitiesByUserIdAndCourseId(auth.getUserEntity().getId(), courseId) == null){
+        if(courseUserRepository.findByCourseIdAndUserId(auth.getUserEntity().getId(), courseId).isEmpty()){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -205,7 +205,7 @@ public class CourseController {
         if (projects.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if(courseUserRepository.findCourseUserEntitiesByUserIdAndCourseId(auth.getUserEntity().getId(), courseId) == null){
+        if(courseUserRepository.findByCourseIdAndUserId(auth.getUserEntity().getId(), courseId).isEmpty()){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(projects);
