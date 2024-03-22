@@ -28,7 +28,7 @@ public class ProjectEntity {
         private long groupClusterId;
 
         @Column(name="test_id", nullable = false)
-        private long testId;
+        private Long testId;
 
         @Column(name="visible", nullable = false)
         private Boolean visible;
@@ -39,7 +39,7 @@ public class ProjectEntity {
         @Column(name="max_score")
         private Integer maxScore;
 
-        public ProjectEntity(long courseId, String name, String description, long groupClusterId, long testId, Boolean visible, Integer maxScore, Timestamp deadline) {
+        public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, Timestamp deadline) {
                 this.courseId = courseId;
                 this.name = name;
                 this.description = description;
@@ -94,11 +94,11 @@ public class ProjectEntity {
                 this.groupClusterId = groupClusterId;
         }
 
-        public long getTestId() {
+        public Long getTestId() {
                 return testId;
         }
 
-        public void setTestId(long testId) {
+        public void setTestId(Long testId) {
                 this.testId = testId;
         }
 

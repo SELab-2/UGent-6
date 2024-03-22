@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.logging.Logger;
 
 
 @RestController
@@ -94,7 +95,7 @@ public class ProjectController {
             // het vak selecteren
             CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
             if (courseEntity == null) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
             }
 
             // check of de user admin of lesgever is van het vak
@@ -117,7 +118,7 @@ public class ProjectController {
             }
 
             // Check of de test bestaat
-            if(! testRepository.existsById(projectJson.getTestId())){
+            if(projectJson.getTestId() != null && !testRepository.existsById(projectJson.getTestId())){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test with this id exists");
             }
 
