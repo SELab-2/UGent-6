@@ -41,7 +41,7 @@ public class PermissionHandler {
         if (courseUserEntity.isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not in course");
         }
-        if (courseUserEntity.get().getRelation() != CourseRelation.course_admin) {
+        if (courseUserEntity.get().getRelation() != CourseRelation.course_admin && courseUserEntity.get().getRelation() != CourseRelation.creator) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not a course admin");
         }
         return null;
