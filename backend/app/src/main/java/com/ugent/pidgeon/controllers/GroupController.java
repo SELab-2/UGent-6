@@ -37,6 +37,19 @@ public class GroupController {
         return group;
     }
 
+    /* Function to add a new project to an existing course */
+
+    /**
+     * Function to add a new project to an existing course
+     *
+     * @param groupid identifier of a group
+     * @param auth    authentication object of the requesting user
+     * @return ResponseEntity<GroupJson>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723981">apiDog documentation</a>
+     * @HttpMethod Get
+     * @AllowedRoles student, teacher
+     * @ApiPath /api/groups/{groupid}
+     */
     @GetMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<GroupJson> getGroupById(@PathVariable("groupid") Long groupid, Auth auth) {
@@ -53,7 +66,7 @@ public class GroupController {
         }
 
         // Return 403 if the user does not have access to the group
-        if(!groupRepository.userAccessToGroup(userId, groupid)){
+        if (!groupRepository.userAccessToGroup(userId, groupid)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -62,7 +75,18 @@ public class GroupController {
         return ResponseEntity.ok(groupJson);
     }
 
-
+    /**
+     * Function to update the name of a group
+     *
+     * @param groupid     identifier of a group
+     * @param nameRequest object containing the new name of the group
+     * @param auth        authentication object of the requesting user
+     * @return ResponseEntity<GroupJson>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723995">apiDog documentation</a>
+     * @HttpMethod Put
+     * @AllowedRoles teacher
+     * @ApiPath /api/groups/{groupid}
+     */
     @PutMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher})
     public ResponseEntity<GroupJson> updateGroupName(@PathVariable("groupid") Long groupid, @RequestBody NameRequest nameRequest, Auth auth) {
@@ -76,7 +100,7 @@ public class GroupController {
         }
 
         // Return 403 if the user does not have access to the group
-        if(!groupRepository.userAccessToGroup(userId, groupid)){
+        if (!groupRepository.userAccessToGroup(userId, groupid)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -91,6 +115,17 @@ public class GroupController {
         return ResponseEntity.ok(groupJson);
     }
 
+    /**
+     * Function to delete a group
+     *
+     * @param groupid identifier of a group
+     * @param auth    authentication object of the requesting user
+     * @return ResponseEntity<Void>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723998">apiDog documentation</a>
+     * @HttpMethod Delete
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/groups/{groupid}
+     */
     @DeleteMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Void> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
@@ -104,7 +139,7 @@ public class GroupController {
         }
 
         // Return 403 if the user does not have access to the group
-        if(!groupRepository.userAccessToGroup(userId, groupid)){
+        if (!groupRepository.userAccessToGroup(userId, groupid)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
