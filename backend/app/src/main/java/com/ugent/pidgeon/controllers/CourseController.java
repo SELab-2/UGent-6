@@ -43,6 +43,15 @@ public class CourseController {
 
 
 
+    /**
+     * Function to retrieve all courses of a user
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6091747">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses
+     * @return ResponseEntity with a JSON string containing the courses of the user
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> getUserCourses(Auth auth){
@@ -71,7 +80,17 @@ public class CourseController {
 
     // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
     private record CourseJSONObject(long id, String name, String url){}
-    //https://apidog.com/apidoc/project-467959/api-5723791
+
+    /**
+     * Function to create a new course
+     * @param courseJson JSON object containing the course name and description
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723791">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher
+     * @ApiPath /api/courses
+     * @return ResponseEntity with the created course entity
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})
     public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseJson courseJson, Auth auth){
@@ -98,7 +117,17 @@ public class CourseController {
         }
     }
 
-    //https://apidog.com/apidoc/project-467959/api-5723806
+    /**
+     * Function to update a course
+     * @param courseJson JSON object containing the course name and description
+     * @param courseId ID of the course to update
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723806">apiDog documentation</a>
+     * @HttpMethod PUT
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}
+     * @return ResponseEntity with the updated course entity
+     */
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth){
@@ -134,7 +163,16 @@ public class CourseController {
         }
     }
 
-    //https://apidog.com/apidoc/project-467959/api-5723783
+    /**
+     * Function to retrieve a course by its ID
+     * @param courseId ID of the course to retrieve
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723783">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}
+     * @return ResponseEntity with the course entity
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<CourseEntity> getCourseByCourseId(@PathVariable Long courseId, Auth auth) {
@@ -150,7 +188,16 @@ public class CourseController {
         return ResponseEntity.ok(course);
     }
 
-    //https://apidog.com/apidoc/project-467959/api-5723808
+    /**
+     * Function to delete a course by its ID
+     * @param courseId ID of the course to delete
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723808">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}
+     * @return ResponseEntity with a message indicating the result of the deletion
+     */
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> deleteCourse(@PathVariable long courseId, Auth auth){
@@ -196,7 +243,16 @@ public class CourseController {
         }
     }
 
-    //https://apidog.com/apidoc/project-467959/api-5723840
+    /**
+     * Function to retrieve all projects of a course
+     * @param courseId ID of the course to retrieve the projects from
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723840">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/projects
+     * @return ResponseEntity with a JSON string containing the projects of the course
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(@PathVariable Long courseId, Auth auth) {
@@ -213,6 +269,21 @@ public class CourseController {
 
 
     /* Function to add a new project to an existing course */
+    /**
+     * Function to create a new project for a course
+     * @param courseId ID of the course to create the project for
+     * @param name name of the project
+     * @param description description of the project
+     * @param groupClusterId ID of the group cluster for the project
+     * @param testId ID of the test for the project
+     * @param projectType type of the project
+     * @param maxScore maximum score of the project
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723842">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher
+     * @ApiPath /api/courses/{courseId}/projects
+     * @return ResponseEntity with a JSON string containing the created project
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher})
     public ResponseEntity<String> createProject(
