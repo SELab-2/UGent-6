@@ -5,47 +5,55 @@ import com.ugent.pidgeon.postgre.models.CourseUserEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 
 import java.util.Optional;
 
 public class PermissionHandler {
 
-    public static ResponseEntity<String> userHasAccesToGroup(GroupRepository groupRepository, UserEntity user, long groupId) {
-        if (!groupRepository.userAccessToGroup(user.getId(), groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
-        }
-        return null;
+    public static Permission userHasAccesToGroup(GroupRepository groupRepository, UserEntity user, long groupId) {
+        return new Permission(groupRepository.userAccessToGroup(user.getId(), groupId), "User does not have access to this group");
     }
 
-    public static ResponseEntity<String> projectNotFound(ProjectEntity project) {
-        if (project == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
-        }
-        return null;
+    public static Permission projectNotFound(ProjectEntity project) {
+        return new Permission(project != null, "Project not found");
     }
 
-    public static ResponseEntity<String> scoreValidation(UpdateGroupScoreRequest request, ProjectEntity project) {
+    public static Permission scoreValidation(UpdateGroupScoreRequest request, ProjectEntity project) {
+        Permission permission = new Permission(false, "");
         float score = request.getScore();
         if (score < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Score can't be negative");
+           permission.setErrorMessage("Score can't be lower than 0");
         } else if (project.getMaxScore() != null && project.getMaxScore() < score) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Score can't be higher than the defined max score (" + project.getMaxScore() + ")");
+            permission.setErrorMessage("Score can't be higher than the defined max score (" + project.getMaxScore() + ")");
+        }else{
+            permission.setPermission(true);
         }
-        return null;
+        return permission;
     }
 
-    public static ResponseEntity<String> userIsCouresAdmin( Optional<CourseUserEntity> courseUserEntity) {
+    public static Permission userIsCouresAdmin( Optional<CourseUserEntity> courseUserEntity) {
+        Permission permission = new Permission(false, "");
         if (courseUserEntity.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not in course");
+            permission.setErrorMessage("User is not in course");
         }
-        if (courseUserEntity.get().getRelation() != CourseRelation.course_admin && courseUserEntity.get().getRelation() != CourseRelation.creator) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not a course admin");
+        else if (courseUserEntity.get().getRelation() != CourseRelation.course_admin && courseUserEntity.get().getRelation() != CourseRelation.creator) {
+            permission.setErrorMessage("User is not a course admin");
+        }else {
+            permission.setPermission(true);
         }
-        return null;
+        return permission;
     }
+
+    public static Permission accesToSubmission(GroupRepository groupRepository, ProjectRepository projectRepository, long groupId, long projectId, UserEntity user) {
+        boolean inGroup = groupRepository.userInGroup(groupId, user.getId());
+        boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
+        return new Permission(inGroup || isAdmin,"User does not have acces to the submission");
+    }
+
+
 
 
 }

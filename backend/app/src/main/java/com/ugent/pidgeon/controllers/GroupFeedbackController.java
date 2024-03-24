@@ -9,6 +9,7 @@ import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.Permission;
 import com.ugent.pidgeon.util.PermissionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,17 +32,19 @@ public class GroupFeedbackController {
     @Autowired
     private CourseUserRepository courseUserRepository;
 
-    private ResponseEntity<String> handleCommonChecks(long groupId, long projectId, UpdateGroupScoreRequest request, UserEntity user) {
+    private Permission handleCommonChecks(long groupId, long projectId, UpdateGroupScoreRequest request, UserEntity user) {
         // Access check
-        ResponseEntity<String> accessCheck = PermissionHandler.userHasAccesToGroup(groupRepository, user, groupId);
-        if (accessCheck != null) {
-            return accessCheck;
+        Permission permission = PermissionHandler.userHasAccesToGroup(groupRepository, user, groupId);
+        if (!permission.hasPermission()) {
+            return permission;
         }
 
         // Project check
         ProjectEntity project = projectRepository.findById(projectId).orElse(null);
-        ResponseEntity<String> projectCheck = PermissionHandler.projectNotFound(project);
-        if (projectCheck != null) return projectCheck;
+        permission = PermissionHandler.projectNotFound(project);
+        if (!permission.hasPermission()) {
+            return permission;
+        }
 
         // Score validation
         return PermissionHandler.scoreValidation(request, project);
@@ -75,12 +78,11 @@ public class GroupFeedbackController {
     private ResponseEntity<String> getStringResponseEntity(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
         UserEntity user = auth.getUserEntity();
 
-        ResponseEntity<String> errorResponse = handleCommonChecks(groupId, projectId, request, user);
-        if (errorResponse != null) {
-            return errorResponse;
+        Permission permission = handleCommonChecks(groupId, projectId, request, user);
+        if (!permission.hasPermission()) {
+            return permission.getResponseEntity();
         }
-        errorResponse = PermissionHandler.userIsCouresAdmin(courseUserRepository.findByCourseIdAndUserId(user.getId(), groupId));
-        return errorResponse;
+        return  PermissionHandler.userIsCouresAdmin(courseUserRepository.findByCourseIdAndUserId(user.getId(), groupId)).getResponseEntity();
     }
 
     /**
