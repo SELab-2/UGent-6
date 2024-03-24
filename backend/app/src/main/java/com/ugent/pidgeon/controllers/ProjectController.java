@@ -35,7 +35,16 @@ public class ProjectController {
     @Autowired
     private TestController testController;
 
-
+    /**
+     * //todo: correct apidog
+     * Function to get all projects of a user
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883808">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects
+     * @return ResponseEntity with a list of projects
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjects(Auth auth) {
@@ -58,6 +67,16 @@ public class ProjectController {
         boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
         return  studentof || isAdmin;
     }
+    /**
+     * Function to get a project by its ID
+     * @param projectId ID of the project to get
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723844">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectId}
+     * @return ResponseEntity with the project
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
@@ -73,7 +92,17 @@ public class ProjectController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
+    /**
+     * Function to update an existing project
+     * @param projectId ID of the project to get
+     * @param updateDTO ProjectUpdateDTO object containing the new project's information
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
+     * @HttpMethod Put
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectId}
+     * @return ResponseEntity with the created project
+     */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> putProjectById(@PathVariable Long projectId, @RequestBody ProjectUpdateDTO updateDTO, Auth auth) {
@@ -94,7 +123,16 @@ public class ProjectController {
         }
     }
 
-
+    /**
+     * Function to delete a project by its ID
+     * @param projectId ID of the project to delete
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723898">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectId}
+     * @return ResponseEntity with the deleted project
+     */
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth) {
