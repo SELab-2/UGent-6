@@ -34,7 +34,17 @@ public class GroupMemberController {
     @Autowired
     ProjectRepository projectController;
 
-
+    /**
+     * Function to remove a member from a group
+     * @param groupId ID of the group to remove the member from
+     * @param memberid ID of the member to be removed
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883809">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/groups/{groupid}/members/{memberid}
+     * @return ResponseEntity with a string message about the operation result
+     */
     @DeleteMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH+"/{memberid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> removeMemberFromGroup(@PathVariable("groupid") long groupId, @PathVariable("memberid") long memberid, Auth auth){
@@ -53,7 +63,17 @@ public class GroupMemberController {
 
     }
 
-
+    /**
+     * Function to add a member to a group
+     * @param groupId ID of the group to add the member to
+     * @param req MemberIdRequest object containing the ID of the member to be added
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883807">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/groups/{groupid}/members
+     * @return ResponseEntity with a list of UserJson objects containing the members of the group
+     */
     @PostMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> addMemberToGroup(@PathVariable("groupid") long groupId, @RequestBody MemberIdRequest req, Auth auth){
@@ -84,7 +104,15 @@ public class GroupMemberController {
         }
     }
 
-
+    /**
+     * Function to get all members of a group
+     * @param groupId ID of the group to get the members from
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883806">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/groups/{groupid}/members
+     * @return ResponseEntity with a list of UserReferenceJson objects containing the members of the group
+     */
     @GetMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> findAllMembersByGroupId(@PathVariable("groupid") long groupId){
