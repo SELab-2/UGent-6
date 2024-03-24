@@ -25,7 +25,7 @@
       "projectStatus": "Status",
       "status": {
         "completed": "Voltooid",
-        "processing": "Bezig",
+        "failed": "Verkeerd",
         "notStarted": "Niet begonnen"
       },
       "groupProgress": "Groeps voortgang",
@@ -51,7 +51,7 @@
     "addFiles": "Bestanden toevoegen",
     "submit": "Indienen",
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
-    "uploadAreaSubtitle": "Maximum file size is 10MB"
+    "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB"
   },
   "landingPage":{
     "title-1": "Officiële",

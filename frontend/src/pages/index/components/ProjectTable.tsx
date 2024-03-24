@@ -12,13 +12,14 @@ import { AppRoutes } from "../../../@types/routes"
 
 export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 
-const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
+const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }> = ({ projects,ignoreColumns }) => {
   const { t } = useTranslation()
   const { modal } = useAppApi()
   const isTeacher = useIsTeacher()
 
   const columns: TableProps<ProjectType>["columns"] = useMemo(
-    () => [
+    () => {
+      let columns:TableProps<ProjectType>["columns"] = [
       {
         title: t("home.projects.name"),
         dataIndex: "name",
@@ -103,7 +104,13 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
           </Space>
         ),
       },
-    ],
+    ]
+  
+    if(ignoreColumns) {
+      columns  = columns.filter((c) => !ignoreColumns.includes(c.key as string))
+    }
+    return columns
+  },
     [t, modal, isTeacher]
   )
 
@@ -113,7 +120,8 @@ const ProjectTable: FC<{ projects: ProjectType[] }> = ({ projects }) => {
       locale={{
         emptyText: t("home.projects.noProjects"),
       }}
-      dataSource={projects.map((p) => ({ ...p, key: p.projectId }))}
+      loading={projects == null}
+      dataSource={(projects??[]).map((p) => ({ ...p, key: p.projectId }))}
       columns={columns}
     />
   )

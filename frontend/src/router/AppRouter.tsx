@@ -8,6 +8,7 @@ import CourseRoutes from "./CourseRoutes"
 import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 import Project from "../pages/project/Project"
 import Submit from "../pages/submit/Submit"
+import Feedback from "../pages/feedback/Feedback"
 
 const AppRouter = () => {
   return (
@@ -37,6 +38,11 @@ const AppRouter = () => {
           <Route
             path={AppRoutes.PROJECT}
             element={<Project />}
+            />
+
+            <Route 
+              path={AppRoutes.SUBMISSION_FEEDBACK}
+              element={<Feedback />}
             />
         </Route>
         <Route

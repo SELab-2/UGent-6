@@ -26,7 +26,7 @@
       "projectStatus": "Status",
       "status": {
         "completed": "Completed",
-        "processing": "Processing",
+        "failed": "Failed",
         "notStarted": "Not started"
       },
       "groupProgress": "Group progress",

@@ -13,6 +13,8 @@ const props: UploadProps = {
 }
 
 const SubmitForm = () => {
+  const [form] = Form.useForm()
+
   const {t} = useTranslation()
   const normFile = (e: any) => {
     console.log("Upload event:", e)
@@ -24,15 +26,13 @@ const SubmitForm = () => {
 
   const onFinish = (values: any) => {
     console.log("Received values of form: ", values)
+
+    // TODO: make api call
   }
 
   return (
-    <Form layout="vertical">
-      <Form.Item
-        label={t("project.addFiles")}
-        style={{ maxWidth: 800 }}
-        
-      >
+    <Form form={form} layout="vertical">
+    
         <Form.Item
           name={t("project.addFiles")}
           valuePropName="fileList"
@@ -41,7 +41,7 @@ const SubmitForm = () => {
         >
           <Upload.Dragger
             {...props}
-            
+            style={{ height:"100%"}}
           >
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
@@ -50,17 +50,16 @@ const SubmitForm = () => {
             <p className="ant-upload-hint">{t("project.uploadAreaSubtitle")}</p>
           </Upload.Dragger>
         </Form.Item>
-      </Form.Item>
 
-      <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
-        <Space>
+      <Form.Item  style={{width:"100%",textAlign:"center",marginTop:"2rem"}}>
           <Button
             type="primary"
+            size="large"
             htmlType="submit"
+            disabled={!form.getFieldValue("fileList")?.length}
           >
             {t("project.submit")}
           </Button>
-        </Space>
       </Form.Item>
     </Form>
   )

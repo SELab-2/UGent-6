@@ -1,28 +1,30 @@
-import { Button, Card, Col, Row, Spin, theme } from "antd"
+import { Button, Card, Col, Row, Space, Spin, theme } from "antd"
 import { useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../@types/requests"
 import Markdown from "react-markdown"
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import {oneDark,oneLight} from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import useApp from "../../hooks/useApp"
 import { PlusOutlined } from "@ant-design/icons"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { AppRoutes } from "../../@types/routes"
+import GroupsCard from "../course/components/groupTab/GroupsCard"
+import SubmissionCard from "./components/SubmissionCard"
+import useCourse from "../../hooks/useCourse"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
-
-
 
 export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 
 const Project = () => {
   const { token } = theme.useToken()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const app = useApp()
   const navigate = useNavigate()
-
-  const [project, setProject] = useState<ProjectType|null>(null)
+  const course = useCourse()
+  const { projectId } = useParams()
+  const [project, setProject] = useState<ProjectType | null>(null)
 
   useEffect(() => {
     // TODO make api call to
@@ -45,38 +47,36 @@ const Project = () => {
     }, 300)
   }, [])
 
-
   const CodeBlock = {
-    code({children, className, node, ...rest}:any) {
-          const match = /language-(\w+)/.exec(className || '')
-          return match ? (
-            <SyntaxHighlighter
-              {...rest}
-              PreTag="div"
-              children={String(children).replace(/\n$/, '')}
-              language={match[1]}
-              style={app.theme === "light" ?oneLight : oneDark}
-            />
-          ) : (
-            <code {...rest} className={className}>
-              {children}
-            </code>
-          )
-    }
+    code({ children, className, node, ...rest }: any) {
+      const match = /language-(\w+)/.exec(className || "")
+      return match ? (
+        <SyntaxHighlighter
+          {...rest}
+          PreTag="div"
+          children={String(children).replace(/\n$/, "")}
+          language={match[1]}
+          style={app.theme === "light" ? oneLight : oneDark}
+        />
+      ) : (
+        <code
+          {...rest}
+          className={className}
+        >
+          {children}
+        </code>
+      )
+    },
   }
 
 
-  const handleNewSubmission = () => {
-    navigate(AppRoutes.NEW_SUBMISSION.replace(AppRoutes.PROJECT+"/",""))
-  }
-
-  if (!project) {
-    return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <Spin size="large" />
-      </div>
-    )
-  }
+  // if (!project) {
+  //   return (
+  //     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+  //       <Spin size="large" />
+  //     </div>
+  //   )
+  // }
 
   return (
     <div style={{ margin: "3rem 0", width: "100%" }}>
@@ -101,12 +101,13 @@ const Project = () => {
               },
               body: {
                 textWrap: "wrap",
-              }
+              },
             }}
-            style={{ width: "100%",marginBottom:"3rem"}}
-            title={project.name}
+            style={{ width: "100%", marginBottom: "3rem" }}
+            title={project?.name}
+            loading={!project}
           >
-            <Markdown components={CodeBlock}>{project.description}</Markdown>
+            {project && <Markdown components={CodeBlock}>{project.description}</Markdown>}
           </Card>
         </Col>
         <Col
@@ -115,10 +116,18 @@ const Project = () => {
           sm={24}
           xs={24}
         >
-          <Card extra={ <Button type="primary" onClick={handleNewSubmission} icon={<PlusOutlined/>}>{t("project.newSubmission")}</Button>} title={t("project.submissions")}></Card>
+          <SubmissionCard projectId={Number(projectId)} courseId={course.courseId}/>
+         
+
+          <GroupsCard
+            cardProps={{
+              title: t("course.groups"),
+              style: { width: "100%" },
+            }}
+            courseId={project?.course.courseId ?? null}
+          />
         </Col>
       </Row>
-      
     </div>
   )
 }
