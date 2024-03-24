@@ -268,7 +268,6 @@ public class CourseController {
     }
 
 
-    /* Function to add a new project to an existing course */
     /**
      * Function to create a new project for a course
      * @param courseId ID of the course to create the project for
