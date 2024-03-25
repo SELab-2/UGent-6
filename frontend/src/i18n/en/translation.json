@@ -10,7 +10,7 @@
   "error": {
     "title": "Error",
     "subtitle": "Something went wrong, please try again later",
-    "homepage": "Go back to the homepage",
-    "404_message" : "Not found"
+    "homepage": "Back Home",
+    "404_message" : "Sorry, the page you visited does not exist."
   }
 }

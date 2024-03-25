@@ -10,7 +10,7 @@
   "error": {
     "title": "Fout",
     "subtitle": "Er ging iets mis, probeer het later opnieuw",
-    "homepage": "Terug naar de startpagina",
-    "404_message" : "Niet gevonden"
+    "homepage": "Naar Start",
+    "404_message" : "Sorry, de pagina die je bezocht bestaat niet."
   }
 }
