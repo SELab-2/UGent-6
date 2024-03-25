@@ -50,7 +50,11 @@
     "addFiles": "Add files",
     "submit": "Submit",
     "uploadAreaTitle": "Click or drag file to this area to upload",
-    "uploadAreaSubtitle": "Maximum file size is 10MB"
+    "uploadAreaSubtitle": "Maximum file size is 10MB",
+    "deadlinePassed": "Deadline passed"
+  },
+  "group": {
+    "removeUserFromGroup": "Remove {{name}} from group"
   },
   "landingPage":{
     "title-1": "Official",

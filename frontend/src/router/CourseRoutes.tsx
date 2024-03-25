@@ -40,7 +40,7 @@ const CourseRoutes: FC = () => {
         members_url: "/api/courses/1/members",
         name: "Computationele biologie",
         description: "Een cursus over computationele biologie",
-        courseId: 1,
+        courseId: 10,
         teachers: [
           {
             name: "Peter",
@@ -55,7 +55,7 @@ const CourseRoutes: FC = () => {
   if (!course || !member)
     return (
       <div style={{ width: "100%", height: "100%", justifyContent: "center", display: "flex", alignItems: "center" }}>
-        <Spin size="large"></Spin>
+        <Spin size="large"/>
       </div>
     )
 

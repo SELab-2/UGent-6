@@ -14,6 +14,7 @@ export enum ApiRoutes {
   PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
   PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",
   PROJECT_GROUP = "api/projects/:id/groups/:groupId",
+  PROJECT_GROUPS = "api/projects/:id/groups",
 
   SUBMISSION = "api/submissions/:id",
   SUBMISSION_FILE = "api/submissions/:id/file",
@@ -189,5 +190,7 @@ export type GET_Responses = {
     name:string, 
     relation: "enrolled" | "course_admin" | "creator",
     url:string
-  }[]
+  }[],
+  [ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
+  [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.PROJECT_GROUP][]
 }

@@ -6,7 +6,7 @@ import { AppRoutes } from "../../../@types/routes"
 import { PlusOutlined } from "@ant-design/icons"
 import { useTranslation } from "react-i18next"
 
-const SubmissionCard: FC<{ projectId: number; courseId: number }> = ({ projectId, courseId }) => {
+const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmission?:boolean }> = ({ projectId, courseId,allowNewSubmission }) => {
   const navigate = useNavigate()
   const [submissions, setSubmissions] = useState<SubmissionType[] | null>(null)
   const { t } = useTranslation()
@@ -51,12 +51,12 @@ const SubmissionCard: FC<{ projectId: number; courseId: number }> = ({ projectId
       style={{ marginBottom: "1rem" }}
       styles={{
         body:{
-          padding:"8px"
+          padding:"8px 16px"
         }
       }}
       extra={
         <Button
-          disabled={!submissions}
+          disabled={!submissions || allowNewSubmission === false}
           type="primary"
           onClick={handleNewSubmission}
           icon={<PlusOutlined />}

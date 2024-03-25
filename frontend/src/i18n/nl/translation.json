@@ -51,7 +51,11 @@
     "addFiles": "Bestanden toevoegen",
     "submit": "Indienen",
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
-    "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB"
+    "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
+    "deadlinePassed": "Deadline is verstreken"
+  },
+  "group": {
+    "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
   },
   "landingPage":{
     "title-1": "Officiële",

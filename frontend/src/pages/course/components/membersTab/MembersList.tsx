@@ -11,7 +11,7 @@ const rolesNames = {
   creator: "Admin",
 }
 
-const MembersList: FC<{ members: CourseMemberType[] }> = ({ members }) => {
+const MembersList: FC<{ members: CourseMemberType[]|null }> = ({ members }) => {
   const { t } = useTranslation()
 
   const removeUserFromCourse = (userId: number) => {
@@ -25,7 +25,8 @@ const MembersList: FC<{ members: CourseMemberType[] }> = ({ members }) => {
 
   return (
     <List
-      dataSource={members}
+    loading={members === null}
+      dataSource={members??[]}
       renderItem={(user) => (
         <List.Item
           className="show-actions-on-hover"

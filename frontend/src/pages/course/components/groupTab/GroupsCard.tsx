@@ -3,6 +3,7 @@ import { FC, useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
+import GroupCollapseItem from "./GroupCollapseItem"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
@@ -87,7 +88,7 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
       key: group.clusterid.toString(),
       label: group.name,
       children: group.groups.map((g) => (
-        <GroupList
+        <GroupCollapseItem
           key={g.group_url}
           groupUrl={g.group_url}
         />
