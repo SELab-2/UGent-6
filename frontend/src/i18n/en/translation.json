@@ -6,5 +6,10 @@
     "theme": "Theme",
     "dark": "Dark",
     "light": "Light"
+  },
+  "error": {
+    "title": "Error",
+    "subtitle": "Something went wrong, please try again later.",
+    "404_message" : "Not found"
   }
 }
