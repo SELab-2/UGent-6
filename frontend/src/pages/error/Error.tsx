@@ -23,9 +23,19 @@ const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
         500: "500"
     };
 
+    const textMapping: { [key: number]: string} = {
+        404: t("error.404_message"),
+        403: t("error.404_message"),
+        500: t("error.404_message")
+    }
+
     // Add default message to error page when no error message was provided
     if(errorMessage === undefined){
-        errorMessage = t("error.subtitle");
+        if(errorCode !== undefined){
+            errorMessage = textMapping[errorCode] || t("error.subtitle");
+        }else{
+            errorMessage = t("error.subtitle");
+        }
     }
     // Add default error title if no error code was provided, otherwise set it to error code
     if(errorCode === undefined){
