@@ -14,7 +14,7 @@ const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
             <h1>{t("error.title")} {errorCode}</h1>
             <p>{t("error.subtitle")}</p>
             <p>{errorMessage}</p>
-            <Link to="/">Go to Homepage</Link>
+            <Link to="/">{t("error.homepage")}</Link>
         </div>
     );
 }

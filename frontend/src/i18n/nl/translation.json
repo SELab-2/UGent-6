@@ -9,7 +9,8 @@
   },
   "error": {
     "title": "Fout",
-    "subtitle": "Er ging iets mis, probeer het later opnieuw.",
+    "subtitle": "Er ging iets mis, probeer het later opnieuw",
+    "homepage": "Terug naar de startpagina",
     "404_message" : "Niet gevonden"
   }
 }

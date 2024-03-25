@@ -9,7 +9,8 @@
   },
   "error": {
     "title": "Error",
-    "subtitle": "Something went wrong, please try again later.",
+    "subtitle": "Something went wrong, please try again later",
+    "homepage": "Go back to the homepage",
     "404_message" : "Not found"
   }
 }
