@@ -11,6 +11,8 @@
     "title": "Error",
     "subtitle": "Something went wrong, please try again later",
     "homepage": "Back Home",
-    "404_message" : "Sorry, the page you visited does not exist."
+    "403_message": "you are not authorized to access this page.",
+    "404_message" : "Sorry, the page you visited does not exist.",
+    "500_message": "Sorry, Something went wrong"
   }
 }
