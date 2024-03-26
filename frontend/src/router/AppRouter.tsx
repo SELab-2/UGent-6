@@ -20,19 +20,15 @@ const AppRouter = () => {
         element={<HomeAuthCheck />}
       />
 
-    
-
-    
       <Route
         path="/"
         element={<AuthenticatedRoute />}
       >
-        <Route
-          path={AppRoutes.NEW_SUBMISSION}
-          element={<Submit />}
-        />
-        <Route path={AppRoutes.SUBMISSION} element={<Submission />} />
 
+      <Route
+        path={AppRoutes.SUBMISSION}
+        element={<Submission />}
+      />
         <Route
           path={AppRoutes.PROFILE}
           element={<Profile />}
@@ -59,8 +55,13 @@ const AppRouter = () => {
               path={AppRoutes.SUBMISSION_FEEDBACK}
               element={<Feedback />}
             />
+
+            <Route
+              path={AppRoutes.NEW_SUBMISSION}
+              element={<Submit />}
+            />
           </Route>
-          </Route>
+        </Route>
 
         <Route
           path="/api-test"
