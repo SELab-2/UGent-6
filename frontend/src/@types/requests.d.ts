@@ -106,8 +106,10 @@ export type GET_Responses = {
     file_url: string
     group_url: string
     structure_accepted: boolean
-    docker_accepted: boolean
     structure_feedback: string
+    //Docker results available variable, so that the structure test results can be displayed before the Docker tests are completed
+    docker_results_available: boolean,
+    docker_accepted: boolean
     docker_feedback: string
     submitted_time: Timestamp
 

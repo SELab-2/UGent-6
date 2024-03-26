@@ -1,5 +1,4 @@
-import { Card, Avatar, theme , Input } from "antd"
-import { UserOutlined } from '@ant-design/icons';
+import { Card, Spin, theme , Input } from "antd"
 import { useTranslation } from "react-i18next"
 import { GET_Responses } from "../../../@types/requests";
 import { ApiRoutes } from "../../../@types/requests";
@@ -34,6 +33,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       }
     >
       {t("submission.submittedFiles")}
+
       <ul style={{ listStyleType: 'none' }}>
         <li>
           <a href={submission.file_url}>indiening.zip</a>
@@ -41,6 +41,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       </ul>
 
       {t("submission.structuretest")}
+
       <ul style={{ listStyleType: 'none' }}>
         <li style={{ color: submission.structure_accepted ? '#67d765' : '#da4e4e' }}>
           {submission.structure_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
@@ -57,6 +58,8 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       </ul>
 
       {t("submission.dockertest")}
+
+      {submission.docker_results_available ?
       <ul style={{ listStyleType: 'none' }}>
         <li style={{ color: submission.docker_accepted ? '#67d765' : '#da4e4e' }}>
           {submission.docker_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
@@ -71,6 +74,13 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
           </div>}
         </li>
       </ul>
+
+      : <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Spin
+          tip="Loading..."
+          size="large"
+        />
+      </div>}
     </Card>
   )
 }

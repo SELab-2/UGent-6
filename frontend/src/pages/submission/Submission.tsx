@@ -8,7 +8,7 @@ const Submission = () => {
   const { t } = useTranslation()
   const [submission, setSubmission] = useState<SubmissionType | null>(null);
 
-  //TODO: niet met useEffect, maar met een echte submission werken
+  //TODO: niet met useEffect, maar met een echte submission werken (moet ook een keer updaten voor de docker resultaten)
   useEffect(() => {
     setTimeout(() => {
       setSubmission({
@@ -17,13 +17,30 @@ const Submission = () => {
         file_url: "1/file",
         group_url: "groups/1",
         structure_accepted: true,
+        structure_feedback: "verslag.pdf not found at the root of the zip file",
+        docker_results_available: false,
         docker_accepted: false,
-        structure_feedback: "Test 1:\nSyntax error: unexpected ; at line 218\nTest 2:\nSyntax error: unexpected ; at line 218\nTest 3:\nSyntax error: unexpected ; at line 218\nTest 4:\nSyntax error: unexpected ; at line 218\nTest 5:\nSyntax error: unexpected ; at line 218",
+        docker_feedback: "",
+        submitted_time: "10-03-2023"
+      })
+      console.log("sethalf")
+    }, 250)
+    setTimeout(() => {
+      setSubmission({
+        submissionId: 1,
+        project_url: "/projects/1",
+        file_url: "1/file",
+        group_url: "groups/1",
+        structure_accepted: true,
+        structure_feedback: "verslag.pdf not found at the root of the zip file",
+        docker_results_available: true,
+        docker_accepted: false,
         docker_feedback: "Test 1:\nSyntax error: unexpected ; at line 218\nTest 2:\nSyntax error: unexpected ; at line 218\nTest 3:\nSyntax error: unexpected ; at line 218\nTest 4:\nSyntax error: unexpected ; at line 218\nTest 5:\nSyntax error: unexpected ; at line 218",
         submitted_time: "10-03-2023"
       })
-    }, 250)
-  })
+      console.log("setfull")
+    }, 5000)
+  }, [])
 
   if (submission === null) {
     return (
