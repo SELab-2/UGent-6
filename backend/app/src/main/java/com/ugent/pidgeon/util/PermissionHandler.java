@@ -34,12 +34,12 @@ public class PermissionHandler {
         return permission;
     }
 
-    public static Permission userIsCouresAdmin( Optional<CourseUserEntity> courseUserEntity) {
+    public static Permission userIsCouresAdmin( CourseUserEntity courseUserEntity) {
         Permission permission = new Permission(false, "");
-        if (courseUserEntity.isEmpty()) {
+        if (courseUserEntity == null) {
             permission.setErrorMessage("User is not in course");
         }
-        else if (courseUserEntity.get().getRelation() != CourseRelation.course_admin && courseUserEntity.get().getRelation() != CourseRelation.creator) {
+        else if (courseUserEntity.getRelation() != CourseRelation.course_admin && courseUserEntity.getRelation() != CourseRelation.creator) {
             permission.setErrorMessage("User is not a course admin");
         }else {
             permission.setPermission(true);
@@ -52,6 +52,7 @@ public class PermissionHandler {
         boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
         return new Permission(inGroup || isAdmin,"User does not have acces to the submission");
     }
+
 
 
 
