@@ -22,6 +22,17 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Function to get a user by id
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod GET
+     * @ApiPath /user/{userid}
+     * @AllowedRoles student, teacher
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723824">apiDog documentation</a>
+     * @return user object
+     */
     @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
@@ -39,6 +50,17 @@ public class UserController {
     }
 
 
+    /**
+     * Function to get the courses of a user
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod GET
+     * @ApiPath /user/{userid}/courses
+     * @AllowedRoles student, teacher
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6091747">apiDog documentation</a>
+     * @return list of courses
+     */
     @GetMapping(ApiRoutes.USER_COURSES_BASE_PATH)
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<Object> getUserCourses(@PathVariable("userid") Long userid,Auth auth) {

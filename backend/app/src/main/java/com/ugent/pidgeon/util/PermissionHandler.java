@@ -9,7 +9,6 @@ import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 
-import java.util.Optional;
 
 public class PermissionHandler {
 

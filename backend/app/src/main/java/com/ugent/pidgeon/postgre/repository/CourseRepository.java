@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
@@ -16,7 +15,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
     @Query("SELECT p FROM ProjectEntity p WHERE p.courseId = :courseId")
     List<ProjectEntity> findAllProjectsByCourseId(long courseId);
 
-    public interface UserWithRelation {
+     interface UserWithRelation {
         UserEntity getUser();
         String getRelation();
     }
