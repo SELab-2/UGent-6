@@ -4,9 +4,7 @@ import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.json.UpdateGroupScoreRequest;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.GroupFeedbackJson;
-import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
-import com.ugent.pidgeon.postgre.models.ProjectEntity;
-import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.Permission;
@@ -15,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 
 @RestController
@@ -29,6 +29,8 @@ public class GroupFeedbackController {
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
     @Autowired
     private CourseUserRepository courseUserRepository;
 
@@ -82,7 +84,15 @@ public class GroupFeedbackController {
         if (!permission.hasPermission()) {
             return permission.getResponseEntity();
         }
-        return  PermissionHandler.userIsCouresAdmin(courseUserRepository.findByCourseIdAndUserId(user.getId(), groupId)).getResponseEntity();
+        CourseEntity courseEntity = courseRepository.findCourseEntityByGroupId(groupId).get(0);
+        if (courseEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
+        Optional<CourseUserEntity> courseUserEntity = courseUserRepository.findByCourseIdAndUserId(courseEntity.getId(), user.getId());
+        if (courseUserEntity.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
+        }
+        return  PermissionHandler.userIsCouresAdmin(courseUserEntity.get()).getResponseEntity();
     }
 
     /**
