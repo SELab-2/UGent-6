@@ -3,14 +3,12 @@ package com.ugent.pidgeon.controllers;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.TestJson;
-import com.ugent.pidgeon.postgre.models.FileEntity;
-import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
+import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.Filehandler;
-import com.ugent.pidgeon.postgre.models.ProjectEntity;
-import com.ugent.pidgeon.postgre.repository.FileRepository;
-import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.util.Permission;
+import com.ugent.pidgeon.util.PermissionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +35,24 @@ public class TestController {
     private TestRepository testRepository;
     @Autowired
     private FileController fileController;
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
+    private CourseUserRepository courseUserRepository;
 
+    /**
+     * Function to update the tests of a project
+     * @param dockerImage the docker image to use for the tests
+     * @param dockerTest the docker test file
+     * @param structureTest the structure test file
+     * @param projectId the id of the project to update the tests for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod PUT
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectid}/tests
+     * @return ResponseEntity with the updated tests
+     */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher})
     public ResponseEntity<Object> updateTests(
@@ -98,6 +113,16 @@ public class TestController {
         return fileRepository.save(fileEntity);
     }
 
+    /**
+     * Function to get the tests of a project
+     * @param projectId the id of the project to get the tests for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod GET
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724035">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests
+     * @return ResponseEntity with the tests of the project
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> getTests(@PathVariable("projectid") long projectId, Auth auth) {
@@ -124,12 +149,32 @@ public class TestController {
         );
     }
 
+    /**
+     * Function to get the structure test file of a project
+     * @param projectId the id of the project to get the structure test file for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod GET
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6133750">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/structuretest
+     * @return ResponseEntity with the structure test file
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/structuretest")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> getStructureTestFile(@PathVariable("projectid") long projectId, Auth auth) {
         return getTestFileResponseEnity(projectId, auth, TestEntity::getStructureTestId);
     }
 
+    /**
+     * Function to get the docker test file of a project
+     * @param projectId the id of the project to get the docker test file for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod GET
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6133798">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/dockertest
+     * @return ResponseEntity with the docker test file
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertest")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> getDockerTestFile(@PathVariable("projectid") long projectId, Auth auth) {
@@ -162,15 +207,36 @@ public class TestController {
         return ResponseEntity.ok().headers(headers).body(file);
     }
 
-
+    /**
+     * Function to delete the tests of a project
+     * @param testId the id of the test to delte
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod DELETE
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectid}/tests
+     * @return ResponseEntity
+     */
     @DeleteMapping(ApiRoutes.TEST_BASE_PATH + "/{testId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteTestById(@PathVariable("testId") long testId, Auth auth) {
         // Get the submission entry from the database
+        //TODO: update apidog
         TestEntity testEntity = testRepository.findById(testId).orElse(null);
-
         if (testEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        CourseEntity courseEntity = courseRepository.findCourseEntityByTestId(testId).get(0);
+        if (courseEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
+        Optional<CourseUserEntity> courseUserEntity = courseUserRepository.findByCourseIdAndUserId(courseEntity.getId(), auth.getUserEntity().getId());
+        if(courseUserEntity.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
+        }
+        Permission permission = PermissionHandler.userIsCouresAdmin(courseUserEntity.get());
+        if(!permission.hasPermission()){
+            return permission.getResponseEntity();
         }
         testRepository.delete(testEntity);
         fileController.deleteFileById(testEntity.getStructureTestId());
