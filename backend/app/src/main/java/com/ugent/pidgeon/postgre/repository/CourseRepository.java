@@ -35,4 +35,15 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
         ) THEN true ELSE false END
     """)
     Boolean adminOfCourse(long courseId, long userId);
+
+
+    @Query(value = """
+            SELECT g FROM CourseEntity g JOIN ProjectEntity p ON g.id = p.courseId WHERE p.testId =? 1
+            """)
+    List<CourseEntity> findCourseEntityByTestId(Long testId);
+
+    @Query(value = """
+            SELECT c FROM CourseEntity c JOIN GroupClusterEntity gc ON c.id = gc.courseId  JOIN GroupEntity g  ON gc.id = g.clusterId WHERE g.id = ?1""")
+    List<CourseEntity> findCourseEntityByGroupId(Long groupId);
+
 }
