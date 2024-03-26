@@ -36,7 +36,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
 
       <ul style={{ listStyleType: 'none' }}>
         <li>
-          <a href={submission.file_url}>indiening.zip</a>
+          <a href={submission.file_url}><u>indiening.zip</u></a>
         </li>
       </ul>
 
