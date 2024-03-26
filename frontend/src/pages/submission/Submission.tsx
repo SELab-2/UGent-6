@@ -16,7 +16,7 @@ const Submission = () => {
         project_url: "/projects/1",
         file_url: "1/file",
         group_url: "groups/1",
-        structure_accepted: false,
+        structure_accepted: true,
         docker_accepted: false,
         structure_feedback: "Test 1:\nSyntax error: unexpected ; at line 218\nTest 2:\nSyntax error: unexpected ; at line 218\nTest 3:\nSyntax error: unexpected ; at line 218\nTest 4:\nSyntax error: unexpected ; at line 218\nTest 5:\nSyntax error: unexpected ; at line 218",
         docker_feedback: "Test 1:\nSyntax error: unexpected ; at line 218\nTest 2:\nSyntax error: unexpected ; at line 218\nTest 3:\nSyntax error: unexpected ; at line 218\nTest 4:\nSyntax error: unexpected ; at line 218\nTest 5:\nSyntax error: unexpected ; at line 218",

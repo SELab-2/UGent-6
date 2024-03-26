@@ -54,6 +54,18 @@
   
     
   },
+
+  "submission": {
+    "submission": "Submission",
+    "submittedFiles": "Submitted files:",
+    "structuretest": "Structure test results:",
+    "dockertest": "Docker test results:",
+    "status": {
+      "accepted": "All tests succeeded.",
+      "failed": "Some tests failed."
+    }
+  },
+
   "course": {
     "projects": "Projects",
     "groups": "Groups",
