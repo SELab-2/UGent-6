@@ -11,5 +11,7 @@ export enum AppRoutes {
   NEW_SUBMISSION = "/courses/:courseId/projects/:projectId/submit",
   SUBMISSION_FEEDBACK = "/courses/:courseId/projects/:projectId/feedback/:submitionId",
   PROFILE = "/profile",
+  ERROR = "/error",
+  NOT_FOUND = "/not-found"
   }
 

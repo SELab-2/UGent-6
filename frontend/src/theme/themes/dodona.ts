@@ -6,7 +6,7 @@ export const dodonaTheme: ThemeConfig = {
   token: {
     fontFamily: "'Exo 2', sans-serif",
     colorBgLayout: '#3c3b3f',
-    colorTextHeading: "#00325a",
+    colorTextHeading: "#9ccaff",
     colorPrimary: "#00497F"
   },
   components: {

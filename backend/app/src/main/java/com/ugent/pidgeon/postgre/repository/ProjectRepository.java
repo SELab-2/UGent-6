@@ -18,6 +18,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             JOIN GroupUserEntity gu on gu.groupId = g.id
             WHERE gu.userId = ?1""")
     List<ProjectEntity> findProjectsByUserId(long userId);
+
     @Query(value = """
             SELECT CASE WHEN EXISTS (
                 SELECT gu
@@ -49,5 +50,6 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             JOIN ProjectEntity p ON p.groupClusterId = gc.id
             WHERE p.id = ?1""")
     List<Long> findGroupIdsByProjectId(long projectId);
+
 
 }

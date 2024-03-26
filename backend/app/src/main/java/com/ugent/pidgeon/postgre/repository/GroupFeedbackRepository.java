@@ -14,6 +14,9 @@ public interface GroupFeedbackRepository extends JpaRepository<GroupFeedbackEnti
     @Query(value = "SELECT * FROM group_feedback WHERE group_id = ?1 AND project_id = ?2", nativeQuery = true)
     GroupFeedbackEntity getGroupFeedback(long groupId, long projectId);
 
+    @Query(value= "SELECT gfb FROM GroupFeedbackEntity gfb WHERE gfb.groupId = ?1")
+    List<GroupFeedbackEntity> findGroupFeedbackEntitiesByGroupId(long id);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE group_feedback SET grade = ?1, feedback = ?4 WHERE group_id = ?2 AND project_id = ?3", nativeQuery = true)
