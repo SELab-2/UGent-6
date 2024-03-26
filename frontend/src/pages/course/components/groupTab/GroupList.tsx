@@ -1,81 +1,91 @@
 import { Button, List, Typography } from "antd"
-import { FC, useEffect, useState } from "react"
+import { FC, useMemo, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
 import useUser from "../../../../hooks/useUser"
 import { useTranslation } from "react-i18next"
+import GroupInfoModal from "./GroupInfoModal"
 
-export type GroupMembers = GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
+export type GroupType = GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
 
-const GroupList: FC<{ groupUrl: string }> = ({ groupUrl }) => {
-  const [group, setGroups] = useState<GroupMembers[] | null>(null)
-  const {user} = useUser()
+const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean,onClick:()=>void,onLeave:()=>void, onJoin:()=>void }> = ({ group, canJoin, canLeave,onClick,onJoin,onLeave }) => {
   const { t } = useTranslation()
 
-  useEffect(() => {
-    // TODO: do api call
+  return (
+    <List.Item
+    key={group.groupid}
+      actions={[
+        <Typography.Text key="cap">
+          {group.members.length} / {group.capacity}
+        </Typography.Text>,
+        canLeave ? (
+          <Button size="small" onClick={onLeave} key="leave">{t("course.leaveGroup")}</Button>
+        ) : (
+          <Button
+            key="join"
+            size="small"
+            disabled={canJoin}
+            onClick={onJoin}
+          >
+            {t("course.joinGroup")}
+          </Button>
+        ),
+      ]}
+    >
+      <List.Item.Meta title={<Button size="small" onClick={onClick} type="link">{group.name}</Button>} />
+    </List.Item>
+  )
+}
+
+const GroupList: FC<{ groups: GroupType[] | null }> = ({ groups }) => {
+  const { user } = useUser()
+  const [modalOpened, setModalOpened] = useState(false)
+  const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
+
+  let ownGroupId: number | null = useMemo(() => {
+    return groups?.find((group) => group.members.some((u) => u.userid === user?.id))?.groupid ?? null
+  }, [groups])
 
 
-    setTimeout(() => {
-      setGroups([
-        {
-          capacity: 10,
-          groupcluster_url: "/api/clusters/1",
-          groupid: 1,
-          name: "Groep 1",
-          members: [
-            {
-              url: "/api/groups/1/members/1",
-              name: "Piet",
-              surname: "Jansen",
-              userid: 1,
-            },
-            {
-              url: "/api/groups/1/members/2",
-              name: "Klaas",
-              surname: "Jansen",
-              userid: 2,
-            },
-            {
-              url: "/api/groups/1/members/3",
-              name: "Jan",
-              surname: "Jansen",
-              userid: 3,
-            },
-            {
-              url: "/api/groups/1/members/4",
-              name: "Bart",
-              surname: "Jansen",
-              userid: 4,
-            }
-          ],
-        },
-      ])
-    }, 250)
-  }, [groupUrl])
-
-
-  const Group = ({ group }: { group: GroupMembers }) => {
-    return (
-      <List.Item actions={[group.members.some(u => u.userid === user?.id) ? <Button>{t("course.leaveGroup")}</Button> :<Button disabled={group.members.length === group.capacity}>{t("course.joinGroup")}</Button>]}>
-        <List.Item.Meta
-          title={group.name}
-          description={group.members.map((m) => `${m.name} ${m.surname}`).join(", ")}
-        />
-        <div>
-          <Typography.Text>{group.members.length} / {group.capacity}</Typography.Text>
-        </div>
-      </List.Item>
-    )
+  const handleModalClick = (group:GroupType) => {
+    setSelectedGroup(group)
+    setModalOpened(true)
   }
 
-  return (
+  const onLeave = (group:GroupType) => {
+    // TODO: leave group request
+  }
+
+  const onJoin = (group:GroupType) => {
+    // TODO: join group request
+  }
+
+  const removeUserFromGroup = (userId: number) => {
+      // TODO: remove user fom group request
+
+  }
+
+  return (<>
     <List
-    locale={{
-      emptyText: "No groups available",
-    }}
-      dataSource={group ?? []}
-      renderItem={(g) => <Group group={g} />}
+      locale={{
+        emptyText: "No groups available",
+      }}
+      loading={groups === null}
+      rowKey="groupid"
+      dataSource={groups ?? []}
+      renderItem={(g) => (
+        <Group
+          onClick={()=> handleModalClick(g)}
+          canJoin={g.members.length < g.capacity || ownGroupId !== null}
+          canLeave={ownGroupId === g.groupid}
+          group={g}
+          onJoin={() => onJoin(g)}
+          onLeave={() => onLeave(g)}
+        />
+      )}
     />
+    
+    <GroupInfoModal removeUserFromGroup={removeUserFromGroup} group={selectedGroup} open={modalOpened} setOpen={setModalOpened} />
+    </>
   )
 }
 

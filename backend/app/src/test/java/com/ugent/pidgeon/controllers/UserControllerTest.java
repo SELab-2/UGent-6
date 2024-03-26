@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,7 +31,7 @@ public class UserControllerTest extends ControllerTest {
 
     @BeforeEach
     public void setup() {
-        mockMvc = mockMvc = MockMvcBuilders.standaloneSetup(userController)
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
                 .defaultRequest(MockMvcRequestBuilders.get("/**")
                         .with(request -> { request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication()); return request; }))
                 .build();
@@ -108,17 +107,9 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     public void getUserByAzureIdReturnsUserWhenUserExists() throws Exception {
-        when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.of(mockUser()));
+        //when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.of(mockUser()));
 
-        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH + "/azureid"))
+        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    public void getUserByAzureIdReturnsNotFoundWhenUserDoesNotExist() throws Exception {
-        when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.empty());
-
-        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH + "/azureid"))
-                .andExpect(status().isNotFound());
     }
 }

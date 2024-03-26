@@ -16,7 +16,7 @@ const AppApiProvider:FC<PropsWithChildren> = ({ children }) => {
 
 
 
-  return <AppApiContext.Provider value={{modal,message}}>{children}{modalContextHolder}{messageContextHolder}</AppApiContext.Provider>
+  return <AppApiContext.Provider value={{modal,message:messageApi}}>{children}{modalContextHolder}{messageContextHolder}</AppApiContext.Provider>
 }
 
 export default AppApiProvider

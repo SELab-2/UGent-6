@@ -1,4 +1,4 @@
-import { Button, Space, Typography } from "antd"
+import { Button, Card, Space, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import CourseCard from "./components/CourseCard"
 import { PlusOutlined } from "@ant-design/icons"
@@ -15,6 +15,7 @@ const Home = () => {
   return (
     <div >
       <div>
+        
         <Typography.Title
           level={3}
           style={{
@@ -35,13 +36,16 @@ const Home = () => {
           className="small-scroll-bar"
           style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem" }}
         >
-          {courses
+          {courses ?courses
             .map((c) => (
               <CourseCard
                 key={c.courseId}
                 course={c}
               />
-            ))}
+            ))
+            
+          
+          : Array(3).fill(0).map( (_,i) => <Card key={i} loading style={{ width: 300, height: 235 }} />)}
         </Space>
       </div>
       <br />

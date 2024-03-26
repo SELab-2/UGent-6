@@ -53,7 +53,7 @@ const ProfileContent = () => {
     }
 
     return (
-        <div style={{padding: "10px 2rem"}}>
+        <div style={{padding: "3rem"}}>
             <ProfileCard user={user} />
         </div>
     );

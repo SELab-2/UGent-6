@@ -9,6 +9,8 @@ import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 import Project from "../pages/project/Project"
 import Submit from "../pages/submit/Submit"
 import Submission from "../pages/submission/Submission"
+import Feedback from "../pages/feedback/Feedback"
+import ProjectRoutes from "./ProjectRoutes"
 
 const AppRouter = () => {
   return (
@@ -24,6 +26,14 @@ const AppRouter = () => {
 
         <Route path={AppRoutes.SUBMISSION} element={<Submission />} />
     
+      <Route
+        path="/"
+        element={<AuthenticatedRoute />}
+      >
+        <Route
+          path={AppRoutes.NEW_SUBMISSION}
+          element={<Submit />}
+        />
 
         <Route
           path={AppRoutes.PROFILE}
@@ -37,16 +47,26 @@ const AppRouter = () => {
             path=""
             element={<Course />}
           />
+
           <Route
             path={AppRoutes.PROJECT}
-            element={<Project />}
+            element={<ProjectRoutes />}
+          >
+            <Route
+              path={AppRoutes.PROJECT}
+              element={<Project />}
             />
+
+            <Route
+              path={AppRoutes.SUBMISSION_FEEDBACK}
+              element={<Feedback />}
+            />
+          </Route>
         </Route>
         <Route
           path="/api-test"
           element={<ApiTest />}
         />
-        
       </Route>
     </Routes>
   )

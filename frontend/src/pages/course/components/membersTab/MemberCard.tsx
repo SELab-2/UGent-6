@@ -6,7 +6,7 @@ import { CourseMemberType } from "../../../../router/CourseRoutes"
 
 const MembersCard = () => {
   const { t } = useTranslation()
-  const [members, setMembers] = useState<CourseMemberType[]>([])
+  const [members, setMembers] = useState<CourseMemberType[]|null>(null)
 
 
   setTimeout(()=> {

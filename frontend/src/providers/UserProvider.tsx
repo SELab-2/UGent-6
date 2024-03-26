@@ -6,7 +6,7 @@ import { useIsAuthenticated } from "@azure/msal-react"
 type UserContextProps = {
   user: User | null
   updateUser: () => void
-  courses: UserCourseType[]
+  courses: UserCourseType[] | null
 }
 
 export type UserCourseType = GET_Responses[ApiRoutes.USER_COURSES][number]
@@ -17,7 +17,7 @@ export type User = GET_Responses[ApiRoutes.USER]
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
   const [user, setUser] = useState<User | null>(null)
-  const [courses, setCourses] = useState<UserCourseType[]>([])
+  const [courses, setCourses] = useState<UserCourseType[]|null>(null)
 
   useEffect(() => {
     if (isAuthenticated) {
