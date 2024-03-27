@@ -8,6 +8,7 @@ import { Themes } from "../../../@types/appTypes"
 import { AppRoutes } from "../../../@types/routes"
 import useApp from "../../../hooks/useApp"
 
+
 const AuthNav = () => {
   const { t } = useTranslation()
   const app = useApp()
@@ -67,7 +68,7 @@ const AuthNav = () => {
     }
   }
   
-  return (
+  return (<>
     <div
       style={{
         width: "100%",
@@ -79,6 +80,8 @@ const AuthNav = () => {
         <Typography.Text style={{cursor:"pointer"}}>{auth!.name} <DownOutlined /></Typography.Text>
       </Dropdown>
     </div>
+    
+    </>
   )
 }
 

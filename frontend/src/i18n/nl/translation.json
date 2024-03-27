@@ -46,6 +46,7 @@
   "project": {
     "submissions": "Indieningen",
     "newSubmission": "Nieuwe indiening",
+    "files": "Bestanden",
     "submission": "Indiening",
     "structure": "Structuur",
     "addFiles": "Bestanden toevoegen",

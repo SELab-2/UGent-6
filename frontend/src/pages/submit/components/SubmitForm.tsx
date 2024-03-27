@@ -1,6 +1,7 @@
 import { InboxOutlined } from "@ant-design/icons"
-import { Button, Form, Space, Upload } from "antd"
+import { Button, Form, FormInstance, Space, Upload } from "antd"
 import { UploadProps } from "antd/lib"
+import { FC } from "react"
 import { useTranslation } from "react-i18next"
 
 
@@ -12,8 +13,7 @@ const props: UploadProps = {
   directory: true,
 }
 
-const SubmitForm = () => {
-  const [form] = Form.useForm()
+const SubmitForm:FC<{form:FormInstance}> = ({form}) => {
 
   const {t} = useTranslation()
   const normFile = (e: any) => {
