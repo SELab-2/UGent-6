@@ -50,9 +50,11 @@
     "structure": "Structure",
     "addFiles": "Add files",
     "submit": "Submit",
+    "back": "Annuleren",
     "uploadAreaTitle": "Click or drag file to this area to upload",
     "uploadAreaSubtitle": "Maximum file size is 10MB",
-    "deadlinePassed": "Deadline passed"
+    "deadlinePassed": "Deadline passed",
+    "downloadSubmissions": "Download all submissions"
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"

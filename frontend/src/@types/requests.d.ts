@@ -102,15 +102,24 @@ export type GET_Responses = {
   }
   [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
   [ApiRoutes.SUBMISSION]: {
-    submittionId: number
+    submissionId: number
     project_url: string
     file_url: string
     group_url: string
+    group: {
+      name:string;
+      groupId:number;
+      members: { name:string, surname:string, url:string, userId:number }[]
+    }
     structure_accepted: boolean
     docker_accepted: boolean
     structure_feedback: string
     docker_feedback: string
     submitted_time: Timestamp
+    feedback: {
+      feedback: string|null;
+      score: number|null;
+    }
 
   }
   [ApiRoutes.SUBMISSION_FILE]: FormData
@@ -145,7 +154,8 @@ export type GET_Responses = {
   }[]
   [ApiRoutes.PROJECT_SCORE]: {
     score: number
-    feedback:string
+    feedback:string,
+    maxScore: number
   }
 
   [ApiRoutes.GROUP_MEMBER]: {

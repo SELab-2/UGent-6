@@ -47,13 +47,15 @@
     "submissions": "Indieningen",
     "newSubmission": "Nieuwe indiening",
     "files": "Bestanden",
+    "back": "Annuleren",
     "submission": "Indiening",
     "structure": "Structuur",
     "addFiles": "Bestanden toevoegen",
     "submit": "Indienen",
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
     "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
-    "deadlinePassed": "Deadline is verstreken"
+    "deadlinePassed": "Deadline is verstreken",
+    "downloadSubmissions": "Download alle indieningen"
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"

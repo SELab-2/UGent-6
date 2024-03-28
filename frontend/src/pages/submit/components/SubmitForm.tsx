@@ -31,17 +31,18 @@ const SubmitForm:FC<{form:FormInstance}> = ({form}) => {
   }
 
   return (
-    <Form form={form} layout="vertical">
+    <Form form={form} layout="vertical" style={{height:"100%"}}>
     
         <Form.Item
           name={t("project.addFiles")}
           valuePropName="fileList"
           getValueFromEvent={normFile}
-          noStyle
+          style={{height:"100%"}}
         >
           <Upload.Dragger
             {...props}
             style={{ height:"100%"}}
+            
           >
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
@@ -50,17 +51,6 @@ const SubmitForm:FC<{form:FormInstance}> = ({form}) => {
             <p className="ant-upload-hint">{t("project.uploadAreaSubtitle")}</p>
           </Upload.Dragger>
         </Form.Item>
-
-      <Form.Item  style={{width:"100%",textAlign:"center",marginTop:"2rem"}}>
-          <Button
-            type="primary"
-            size="large"
-            htmlType="submit"
-            disabled={!form.getFieldValue("fileList")?.length}
-          >
-            {t("project.submit")}
-          </Button>
-      </Form.Item>
     </Form>
   )
 }

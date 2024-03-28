@@ -20,7 +20,7 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
         <AntLayout.Header style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
           <Sidebar />
 
-          <Logo style={{ margin: 0, padding: 0, width: "100%" }} />
+          <Logo className="nav-logo" style={{ margin: 0, padding: 0, width: "100%" }} />
           {/* <UnauthenticatedTemplate>
           <UnauthNav />
         </UnauthenticatedTemplate> */}
