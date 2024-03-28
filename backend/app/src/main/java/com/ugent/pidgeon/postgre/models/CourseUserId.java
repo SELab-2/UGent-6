@@ -2,6 +2,7 @@ package com.ugent.pidgeon.postgre.models;
 
 import java.io.Serializable;
 
+
 // Hulpklasse zodat de CourseUserRepository correct met meerdere primary keys kan werken
 public class CourseUserId implements Serializable {
     private long courseId;

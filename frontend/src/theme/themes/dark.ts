@@ -7,11 +7,13 @@ export const darkTheme: ThemeConfig = {
     fontFamily: "'Exo 2', sans-serif",
     colorTextBase:"#efefef",
     colorTextHeading: "#f0f0f0",
-
+    colorPrimaryBg: "#0050b3",
+   colorBgLayout:"#141414",
+   colorBgBase: "#090909"
   },
   components: {
    Layout: {
-    headerBg: "#1b1b1B",
+    headerBg: "#002766", //#1b1b1B
     headerHeight: 48,
 
    }

@@ -4,13 +4,18 @@ import { ThemeConfig } from 'antd/es/config-provider';
 export const lightTheme: ThemeConfig = {
   algorithm: theme.defaultAlgorithm,
   token: {
-    colorBgElevated: "#FBFBFA",
+    fontFamily: "'Exo 2', sans-serif",
+    colorBgLayout: "#FBF8FD",
+    colorBgBase: "#FEFBFF",
+    colorPrimaryBg: "#D0E3FE",
+    colorBorder: "rgba(0, 0, 0, 0.2)",
+    colorBorderSecondary: "rgba(0, 0, 0, 0.1)",
   },
   components: {
     Layout: {
-      headerBg: "#E9E9EA",
+      headerBg: "#1D64C7",
       headerHeight: 48,
-    },
+    }
 
   }
 };

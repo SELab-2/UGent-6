@@ -1,52 +1,50 @@
-import { AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react"
-import UnauthNav from "./UnauthNav"
+import { AuthenticatedTemplate, useIsAuthenticated } from "@azure/msal-react"
 import AuthNav from "./AuthNav"
 import { FC, PropsWithChildren } from "react"
-import { Layout as AntLayout, Button, Dropdown, MenuProps, Typography } from "antd"
+import { Layout as AntLayout, Flex } from "antd"
 import Logo from "../../Logo"
-import { GlobalOutlined } from "@ant-design/icons"
-import useApp from "../../../hooks/useApp"
-import { Language } from "../../../@types/types"
 
-const items: MenuProps["items"] = [
-  {
-    key: Language.EN,
-    label: "English",
-  },
-  {
-    key: Language.NL,
-    label: "Nederlands",
-  },
-]
+import Sidebar from "../sidebar/Sidebar"
+import LanguageDropdown from "../../LanguageDropdown"
+
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
-  const app = useApp()
+  const isAuthenticated = useIsAuthenticated()
 
-  const languageChange: MenuProps["onClick"] = (props) => {
-    app.setLanguage(props.key as Language)
-  }
+
+
+  if(!isAuthenticated) return children
 
   return (
     <div style={{ position: "fixed", width: "100vw" }}>
-      <AntLayout.Header style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-        <Logo style={{ margin: 0, padding: 0, width: "100%" }} />
-        <UnauthenticatedTemplate>
+        <AntLayout.Header style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+          <Sidebar />
+
+          <Logo style={{ margin: 0, padding: 0, width: "100%" }} />
+          {/* <UnauthenticatedTemplate>
           <UnauthNav />
-        </UnauthenticatedTemplate>
-        <AuthenticatedTemplate>
-          <AuthNav />
-        </AuthenticatedTemplate>
+        </UnauthenticatedTemplate> */}
+          <AuthenticatedTemplate>
+            <AuthNav />
+          </AuthenticatedTemplate>
 
-        <Dropdown menu={{ items, onClick: languageChange }}>
-        <Typography.Text style={{cursor:"pointer",width:"5rem"}}><GlobalOutlined /> {app.language}</Typography.Text>
-        
-        </Dropdown>
-      </AntLayout.Header>
+          <LanguageDropdown/>
+        </AntLayout.Header>
       <AntLayout style={{ height: "calc(100vh - 48px)", overflow: "auto" }}>
-        <AntLayout.Content>{children}</AntLayout.Content>
-
+        <AntLayout.Content>
+          <Flex
+            style={{
+              width: "100%",
+              height: "100%",
+              marginBottom: "3rem",
+            }}
+            justify="center"
+          >
+            <div style={{ maxWidth: "1200px", width: "100%", height: "100%" }}>{children}</div>
+          </Flex>
+          <AntLayout.Footer style={{ height: "2rem", width: "100%", bottom: 0 }}></AntLayout.Footer>
+        </AntLayout.Content>
       </AntLayout>
-        <AntLayout.Footer style={{background:"red",position:"relative"}}>.</AntLayout.Footer>
     </div>
   )
 }

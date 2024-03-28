@@ -1,10 +1,95 @@
 {
   "nav": {
+    "profile": "Profiel",
     "login": "Aanmelden",
     "logout": "Afmelden",
     "accountSwitch": "Account wisselen",
     "theme": "Stijl",
     "dark": "Donker",
     "light": "Licht"
+  },
+  "home": {
+    "yourCourses": "Vakken",
+    "createCourse": "Vak aanmaken",
+    "courseName": "Vak naam",
+    "courseDescription": "Beschrijving",
+    "yourProjects": "Projecten",
+    "projects": {
+      "noProjects": "Geen projecten",
+      "name": "Naam",
+      "description": "Beschrijving",
+      "course": "Vak",
+      "deadline": "Deadline",
+      "showMore": "Toon meer",
+
+      "projectStatus": "Status",
+      "status": {
+        "completed": "Voltooid",
+        "failed": "Verkeerd",
+        "notStarted": "Niet begonnen"
+      },
+      "groupProgress": "Groeps voortgang",
+      "completeProgress": "{{count}} / {{total}} voltooid",
+
+      "activeProjects": "{{count}} actief project",
+      "activeProjects_plural": "{{count}} actieve projecten",
+      "submit": "Inleveren",
+      "userCourseCount": "{{count}} gebruikers in dit vak"
+    }
+  },
+  "profile": {
+    "student": "Student aan Universiteit Gent",
+    "teacher": "Professor aan Universiteit Gent",
+    "admin": "Admin aan Universiteit Gent"
+  },
+
+  "project": {
+    "submissions": "Indieningen",
+    "newSubmission": "Nieuwe indiening",
+    "submission": "Indiening",
+    "structure": "Structuur",
+    "addFiles": "Bestanden toevoegen",
+    "submit": "Indienen",
+    "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
+    "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
+    "deadlinePassed": "Deadline is verstreken"
+  },
+  "group": {
+    "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
+  },
+  "landingPage":{
+    "title-1": "Officiële",
+    "title-2": "indien platform",
+    "subtitle": "Eenvoudig cursussen en projecten beheren, automatisch code testen en beoordelen.",
+    "getStarted": "Aan de slag"
+  },
+  "course": {
+    "projects": "Projecten",
+    "groups": "Groepen",
+    "info": "Informatie",
+    "grades": "Punten",
+    "members":  "Leden",
+    "settings": "Instellingen",
+    "leaveGroup": "Groep verlaten",
+    "joinGroup": "Groepslid worden",
+    "removeFromCourse": "Verwijder {{name}} van dit vak",
+    "removeUserConfirmTitle": "Gebruiker verwijderen",
+    "removeUserConfirm": "Bent u zeker dat u {{name}} van dit vak wilt verwijderen?",
+    "yes": "Ja",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "courseSaved": "Aanpassingen opgeslagen",
+    "archived": "Gearchiveerd",
+    "score": "Score"
+  },
+  "cancel": "Annuleren",
+  "ok": "Ok",
+  "error": {
+    "title": "Fout",
+    "subtitle": "Er ging iets mis, probeer het later opnieuw.",
+    "homepage": "Naar Start",
+    "403_message": "Je bent niet bevoegd om deze pagina te bezoeken.",
+    "404_message" : "Sorry, de pagina die je bezocht bestaat niet.",
+    "500_message": "Sorry, er ging iets mis."
   }
 }

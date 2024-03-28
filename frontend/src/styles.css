@@ -1,22 +1,203 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@100..900&display=swap");
 
-
-body, html {
-  padding:0;
+body,
+html {
+  padding: 0;
   margin: 0;
   width: 100%;
   height: 100%;
 }
 
-.dodona-theme .ant-layout-header .ant-typography,.dodona-theme .ant-layout-header .ant-btn {
+.dodona-theme .ant-layout-header .ant-typography,
+.dodona-theme .ant-layout-header .ant-btn {
   color: #00325a;
-   
 }
 
 .dodona-theme .ant-layout-header .ant-btn {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .dodona-theme .ant-layout-header .ant-btn:hover {
   color: #00325a;
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.light-theme .ant-layout-header > .ant-btn,
+.light-theme .ant-layout-header > .ant-typography,
+.light-theme .ant-layout-header .ant-dropdown-trigger {
+  color: #fff;
+}
+
+.small-scroll-bar::-webkit-scrollbar {
+  width: 3px; /* Adjust scrollbar width */
+  height: 3px;
+}
+
+.small-scroll-bar::-webkit-scrollbar-thumb {
+  height: 2px; /* Adjust scrollbar height */
+  width: 2px;
+}
+
+/* This applies to all scrollable elements */
+::-webkit-scrollbar {
+  width: 5px; /* width of the entire scrollbar */
+  height: 5px; /* height of the entire scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4); /* color of the tracking area */
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1); /* color of the scroll thumb */
+  border-radius: 4px; /* roundness of the scroll thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* color of the scroll thumb when hovering */
+}
+
+.show-actions-on-hover .ant-list-item-action {
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.show-actions-on-hover:hover .ant-list-item-action {
+  opacity: 1;
+}
+
+/* *************************** Landing page *************************** */
+
+.landing-page * {
+  font-family: "Barlow", sans-serif;
+}
+
+.landing-page-btn {
+  background-color: #fff;
+  color: #000;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 5px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 12px;
+}
+
+.landing-page-btn:hover {
+  background-color: #eee;
+}
+
+.ugent-logo {
+  width: 110px;
+  margin: 0 auto;
+  display: block;
+  rotate: 5deg;
+  position: relative;
+  top: -120px;
+  left: 320px;
+}
+
+.code-logo {
+  width: 100px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  top: -450px;
+  left: 250px;
+  rotate: -10deg;
+}
+
+.js-logo {
+  width: 70px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  top: -500px;
+  left: 100px;
+  rotate: 10deg;
+}
+
+.docker-logo {
+  width: 100px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  top: -500px;
+  left: 550px;
+  rotate: -10deg;
+}
+
+.py-logo {
+  width: 80px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  top: -400px;
+  left: 480px;
+  rotate: 10deg;
+}
+
+.c-logo {
+  width: 80px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  top: -450px;
+  left: 200px;
+  rotate: -10deg;
+}
+
+.blob-image {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  transform: translate(0, 10%);
+  width: 100%;
+  z-index: -1;
+}
+
+.white-color * {
+  color: #fff ;
+
+}
+
+/* if window width is smaller than 1000 px */
+@media screen and (max-width: 1200px) {
+  .landing-page-btn {
+    padding: 12px 25px;
+    font-size: 1.4rem;
+  }
+
+  .ugent-logo {
+    display: none;
+  }
+
+  .code-logo {
+    display: none;
+  }
+
+  .js-logo {
+    display: none;
+  }
+
+  .docker-logo {
+    display: none;
+  }
+
+  .py-logo {
+    display: none;
+  }
+
+  .c-logo {
+    display: none;
+  }
+
+  .blob-image {
+    top: 400px;
+  }
+
+  .landing-title {
+    padding: 0 2rem;
+  }
 }

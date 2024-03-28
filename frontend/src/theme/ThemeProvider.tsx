@@ -3,7 +3,7 @@ import { FC, PropsWithChildren } from "react"
 import useApp from "../hooks/useApp"
 import {darkTheme} from "./themes/dark"
 import {lightTheme} from "./themes/light"
-import { Language, Themes } from "../@types/types"
+import { Language, Themes } from "../@types/appTypes"
 import { dodonaTheme } from "./themes/dodona"
 import nlNL from 'antd/locale/nl_NL';
 import enUS from 'antd/locale/en_US';
