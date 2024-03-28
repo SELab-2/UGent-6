@@ -18,9 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -180,11 +178,8 @@ public class SubmissionController {
             if (testresult == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
-
-            submissionEntity.setAccepted(testresult.passed);
-            //TODO add testresult.feedback to json body
             submissionRepository.save(submissionEntity);
-            // Update the submission with the test result
+            // Update the submission with the test resultsetAccepted
             submission.setStructureAccepted(testresult.passed);
             submission = submissionRepository.save(submission);
 
