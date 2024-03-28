@@ -5,11 +5,11 @@ import GradesList from "./GradesList"
 import useCourse from "../../../../hooks/useCourse"
 
 export type GroupFeedback = GET_Responses[ApiRoutes.PROJECT_SCORE] & {
+  maxScore:number
   project: {
     name: string
     url: string
     projectId: number,
-    maxScore:number
   }
   group: {
     groupId: number
@@ -30,7 +30,6 @@ const GradesCard = () => {
     setTimeout(() => {
       setFeedback([
         {
-      
           group: {
             groupId: 1,
             groupName: "Group 1",
@@ -42,8 +41,8 @@ const GradesCard = () => {
             name: "Project 1",
             url: "/project-1",
             projectId: 1,
-            maxScore: 100,
           },
+          maxScore: 100,
           updatedOn: "2021-09-01"
         },
         {
@@ -59,8 +58,8 @@ const GradesCard = () => {
             name: "Project 2",
             url: "/project-2",
             projectId: 2,
-            maxScore: 100,
           },
+          maxScore: 100,
           updatedOn: "2025-09-01"
         },
         {
@@ -76,8 +75,8 @@ const GradesCard = () => {
             name: "Project 2",
             url: "/api/projects/3",
             projectId: 3,
-            maxScore: 20
           },
+          maxScore: 20,
           updatedOn: "2023-09-01"
         },
       ])

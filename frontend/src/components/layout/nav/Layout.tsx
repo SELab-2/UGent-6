@@ -8,12 +8,12 @@ import Sidebar from "../sidebar/Sidebar"
 import LanguageDropdown from "../../LanguageDropdown"
 
 
-const Layout: FC<PropsWithChildren> = ({ children }) => {
+const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
 
 
 
-  if(!isAuthenticated) return children
+  if(!isAuthenticated) return <>{children}</>
 
   return (
     <div style={{ position: "fixed", width: "100vw" }}>
