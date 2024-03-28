@@ -51,7 +51,22 @@
     "submit": "Submit",
     "uploadAreaTitle": "Click or drag file to this area to upload",
     "uploadAreaSubtitle": "Maximum file size is 10MB",
-    "deadlinePassed": "Deadline passed"
+    "deadlinePassed": "Deadline passed",
+    "change": {
+      "name": "Name",
+      "nameMessage": "Please enter Project Name",
+      "description": "Description",
+      "descriptionMessage": "Please enter the project description",
+      "groupClusterId": "Group Cluster ID",
+      "groupClusterIdMessage": "Please enter the Group Cluster ID (Number)",
+      "testId": "Test Id",
+      "testIdMessage": "Please enter the Test ID (Number)",
+      "visible": "Make the project visible",
+      "maxScore": "Maximum score",
+      "maxScoreMessage": "Please enter the maximum score for the project",
+      "deadline": "Deadline",
+      "create": "Create"
+    }
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"

@@ -11,6 +11,7 @@ import Submit from "../pages/submit/Submit"
 import Feedback from "../pages/feedback/Feedback"
 import ProjectRoutes from "./ProjectRoutes"
 import Error from "../pages/error/Error";
+import ProjectCreate from "../pages/projectCreate/ProjectCreate";
 
 
 
@@ -43,6 +44,10 @@ const AppRouter = () => {
                       path=""
                       element={<Course />}
                   />
+                  <Route
+                      path={AppRoutes.PROJECT_CREATE}
+                      element={<ProjectCreate />}
+                  />
 
                   <Route
                       path={AppRoutes.PROJECT}
@@ -52,7 +57,6 @@ const AppRouter = () => {
                       path={AppRoutes.PROJECT}
                       element={<Project />}
                   />
-
                   <Route
                       path={AppRoutes.SUBMISSION_FEEDBACK}
                       element={<Feedback />}

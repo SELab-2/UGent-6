@@ -10,6 +10,7 @@ export enum ApiRoutes {
   COURSE_CLUSTERS = "api/courses/:id/clusters",
 
   PROJECT = "api/projects/:id",
+  PROJECT_CREATE = "api/courses/:courseId/create",
   PROJECT_TESTS = "api/projects/:id/tests",
   PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
   PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",

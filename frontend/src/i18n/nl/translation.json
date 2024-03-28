@@ -52,7 +52,22 @@
     "submit": "Indienen",
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
     "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
-    "deadlinePassed": "Deadline is verstreken"
+    "deadlinePassed": "Deadline is verstreken",
+    "change": {
+      "name": "Naam",
+      "nameMessage": "Vul de naam van het project in asljeblieft",
+      "description": "Beschrijving",
+      "descriptionMessage": "Vul de beschrijving van het project in alsjeblieft",
+      "groupClusterId": "Groep Cluster ID",
+      "groupClusterIdMessage": "Vul de Groep Cluster ID in alsjeblieft (Getal)",
+      "testId": "Test Id",
+      "testIdMessage": "Vul de Test ID in alsjeblieft (Getal)",
+      "visible": "Project zichtbaar maken",
+      "maxScore": "Maximum score",
+      "maxScoreMessage": "Vul alsjeblieft de maximum score van het project in (Getal)",
+      "deadline": "Deadline",
+      "create": "Project Aanmaken"
+    }
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
