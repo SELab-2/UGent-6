@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -181,8 +179,13 @@ public class SubmissionController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
 
-//<<<<<<< HEAD
+
+
             // Update the submission with the test result
+
+            submissionRepository.save(submissionEntity);
+            // Update the submission with the test resultsetAccepted
+
             submission.setStructureAccepted(testresult.passed);
             submission = submissionRepository.save(submission);
 
@@ -191,11 +194,9 @@ public class SubmissionController {
             submission.setStructureFeedback("TEMP STRUCTURE FEEDBACK");
             submissionRepository.save(submission);
 
-//=======
 //            submissionEntity.setAccepted(testresult.passed);
 //            //TODO add testresult.feedback to json body
 //            submissionRepository.save(submissionEntity);
-//>>>>>>> 9b56458 (added feedback feature.)
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
