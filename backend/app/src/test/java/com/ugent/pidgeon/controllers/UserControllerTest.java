@@ -1,10 +1,13 @@
 package com.ugent.pidgeon.controllers;
 
-import org.hamcrest.Matchers;
+import com.ugent.pidgeon.model.json.UserJson;
+import com.ugent.pidgeon.postgre.models.UserEntity;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -12,9 +15,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,7 +30,10 @@ public class UserControllerTest extends ControllerTest {
 
     @BeforeEach
     public void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .defaultRequest(MockMvcRequestBuilders.get("/**")
+                        .with(request -> { request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication()); return request; }))
+                .build();
     }
 
     /*@Test
@@ -44,4 +51,64 @@ public class UserControllerTest extends ControllerTest {
         System.out.println("Response body: " + responseBody);
         // Add more tests here for the response body if needed
     }*/
+
+
+    @Test
+    public void getUserByIdReturnsUserWhenUserExistsAndHasAccess() throws Exception {
+        UserEntity userEntity = mockUser();
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(userEntity));
+
+        MvcResult result = mockMvc.perform(get(ApiRoutes.USER_BASE_PATH + "/1"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+
+        System.out.println("Response body: " + responseBody);
+        UserJson userJson = new ObjectMapper().readValue(responseBody, UserJson.class);
+
+        assertEquals(userEntity.getId(), userJson.getId());
+        assertEquals(userEntity.getName(), userJson.getName());
+        assertEquals(userEntity.getSurname(), userJson.getSurname());
+        assertEquals(userEntity.getEmail(), userJson.getEmail());
+        assertEquals(userEntity.getRole(), userJson.getRole());
+    }
+
+    @Test
+    public void getUserByIdReturnsForbiddenWhenUserExistsButNoAccess() throws Exception {
+
+        mockMvc.perform(get(ApiRoutes.USER_BASE_PATH + "/2"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void getUserByIdReturnsNotFoundWhenUserDoesNotExist() throws Exception {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get(ApiRoutes.USER_BASE_PATH + "/1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getUserCoursesReturnsCoursesWhenUserExistsAndHasAccess() throws Exception {
+        when(userRepository.findCourseIdsByUserId(anyLong())).thenReturn(new ArrayList<>());
+
+        mockMvc.perform(get(ApiRoutes.USER_COURSES_BASE_PATH.replace("{userid}","1") ))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getUserCoursesReturnsForbiddenWhenUserExistsButNoAccess() throws Exception {
+
+        mockMvc.perform(get(ApiRoutes.USER_COURSES_BASE_PATH .replace("{userid}","2")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void getUserByAzureIdReturnsUserWhenUserExists() throws Exception {
+        //when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.of(mockUser()));
+
+        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH))
+                .andExpect(status().isOk());
+    }
 }

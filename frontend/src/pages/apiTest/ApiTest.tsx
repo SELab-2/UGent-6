@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import apiCall,{accessToken, apiCallInit} from "../../util/apiFetch"
+import apiCall, { accessToken, apiCallInit } from "../../util/apiFetch"
 import { Button, Input, InputRef, Result, Select, Space, Typography } from "antd"
 
 const { Option } = Select
@@ -11,7 +11,6 @@ const ApiTest = () => {
   const [error, setError] = useState<[string, number] | null>(null)
   const [apiToken, setApiToken] = useState<string | null>(null)
   const [requestBody, setRequestBody] = useState<string>("{}")
-
 
   useEffect(() => {
     apiCallInit().then(setApiToken)
@@ -37,9 +36,9 @@ const ApiTest = () => {
       const response = await apiCall[method](route)
       console.log(response)
       setResult(JSON.stringify(response.data, null, 2))
-    } catch (err:any ) {
-      console.log(err);
-      setError([err.message + ".\n " + (err?.response?.data?.message??err.response?.data??""), err.status])
+    } catch (err: any) {
+      console.log(err)
+      setError([err.message + ".\n " + (err?.response?.data?.message ?? err.response?.data ?? ""), err.status])
     }
   }
 
@@ -47,7 +46,7 @@ const ApiTest = () => {
     <Select
       defaultValue="get"
       onChange={(value) => setMethod(value)}
-      style={{width:"100px"}}
+      style={{ width: "100px" }}
     >
       <Option value="get">GET</Option>
       <Option value="post">POST</Option>
@@ -65,14 +64,16 @@ const ApiTest = () => {
           code
           style={{ maxHeight: "100%" }}
         >
-          {apiToken ? JSON.stringify(
-            {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-            null,
-            2
-          ): "Loading token..."}
+          {apiToken
+            ? JSON.stringify(
+                {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json",
+                },
+                null,
+                2
+              )
+            : "Loading token..."}
         </Typography.Text>
 
         <Typography.Title level={4}>Test:</Typography.Title>
@@ -93,23 +94,31 @@ const ApiTest = () => {
           </Button>
         </Space.Compact>
 
-       {method !== "get" && <Input.TextArea onChange={(e) => setRequestBody(e.currentTarget.value)} value={requestBody} placeholder="body" style={{ marginTop: "1rem" }} rows={7} />}
+        {method !== "get" && (
+          <Input.TextArea
+            onChange={(e) => setRequestBody(e.currentTarget.value)}
+            value={requestBody}
+            placeholder="body"
+            style={{ marginTop: "1rem" }}
+            rows={7}
+          />
+        )}
 
         <Typography.Title level={4}>Result:</Typography.Title>
 
         {error ? (
           <Result
             status="error"
-            title={"Request failed: " + (error[1]??"")}
+            title={"Request failed: " + (error[1] ?? "")}
           >
             <Typography.Text code>{error[0]}</Typography.Text>
           </Result>
         ) : (
           <pre>{result}</pre>
         )}
-<br/>
-<br/><br/>
-
+        <br />
+        <br />
+        <br />
       </div>
     </div>
   )

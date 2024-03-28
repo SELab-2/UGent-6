@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren, createContext, useEffect, useState } from "react"
-import { Language, Themes } from "../@types/types"
+import { Language, Themes } from "../@types/appTypes"
 import { useTranslation } from "react-i18next"
 
 export type AppContextT = {
