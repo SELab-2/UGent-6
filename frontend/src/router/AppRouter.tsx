@@ -10,6 +10,9 @@ import Project from "../pages/project/Project"
 import Submit from "../pages/submit/Submit"
 import Feedback from "../pages/feedback/Feedback"
 import ProjectRoutes from "./ProjectRoutes"
+import Error from "../pages/error/Error";
+
+
 
 const AppRouter = () => {
   return (
@@ -23,43 +26,50 @@ const AppRouter = () => {
         path="/"
         element={<AuthenticatedRoute />}
       >
+       <Route
+         path={AppRoutes.NEW_SUBMISSION}
+         element={<Submit />}
+       />
+
+      <Route
+        path={AppRoutes.PROFILE}
+        element={<Profile />}
+      />
+      <Route
+        path={AppRoutes.COURSE}
+        element={<CourseRoutes />}
+      >
         <Route
-          path={AppRoutes.NEW_SUBMISSION}
-          element={<Submit />}
+          path=""
+          element={<Course />}
         />
 
         <Route
-          path={AppRoutes.PROFILE}
-          element={<Profile />}
-        />
-        <Route
-          path={AppRoutes.COURSE}
-          element={<CourseRoutes />}
+          path={AppRoutes.PROJECT}
+          element={<ProjectRoutes />}
         >
           <Route
-            path=""
-            element={<Course />}
+            path={AppRoutes.PROJECT}
+            element={<Project />}
           />
 
           <Route
-            path={AppRoutes.PROJECT}
-            element={<ProjectRoutes />}
-          >
-            <Route
-              path={AppRoutes.PROJECT}
-              element={<Project />}
-            />
-
-            <Route
-              path={AppRoutes.SUBMISSION_FEEDBACK}
-              element={<Feedback />}
+            path={AppRoutes.SUBMISSION_FEEDBACK}
+            element={<Feedback />}
             />
           </Route>
-        </Route>
+      </Route>
         <Route
           path="/api-test"
           element={<ApiTest />}
         />
+
+        {/*De 404 errorpagina route, deze moet de laatste lijn staan, routes hieronder worden nooit gematchd!*/}
+        <Route 
+          path={"*"}
+          element={<Error errorCode={404}/>}
+        />
+
       </Route>
     </Routes>
   )

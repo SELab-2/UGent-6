@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GroupControllerTest extends ControllerTest {
     @Mock
     private GroupRepository groupRepository;
+
+    @Mock
+    GroupClusterRepository groupClusterRepository;
 
     @InjectMocks
     private GroupController groupController;
