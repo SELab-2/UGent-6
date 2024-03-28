@@ -54,7 +54,19 @@
     "uploadAreaTitle": "Click or drag file to this area to upload",
     "uploadAreaSubtitle": "Maximum file size is 10MB",
     "deadlinePassed": "Deadline passed",
-    "downloadSubmissions": "Download all submissions"
+    "downloadSubmissions": "Download all submissions",
+    "group": "Group",
+    "status": "Status",
+    "feedback": "Feedback",
+    "groupEmpty": "No members in this group",
+    "testFailed": "Tests failed",
+    "structureFailed": "Structure failed",
+    "submission": "Submission",
+    "passed": "Passed",
+    "submissionTime": "Submission time",
+    "noSubmissions": "No submissions",
+    "loadingSubmissions": "Loading submissions..."
+
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"

@@ -28,6 +28,7 @@ const ProjectRoutes = () => {
         projectId: 1,
         submission_url: "submission_url",
         tests_url: "tests_url",
+        maxScore: 50
       })
     }, 300)
   }, [])

@@ -55,7 +55,18 @@
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
     "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
     "deadlinePassed": "Deadline is verstreken",
-    "downloadSubmissions": "Download alle indieningen"
+    "downloadSubmissions": "Download alle indieningen",
+    "group": "Groep",
+    "status": "Status",
+    "feedback": "Feedback",
+    "groupEmpty": "Geen leden in deze groep",
+    "testFailed": "Testen gefaalt",
+    "structureFailed": "Structuur testen gefaalt",
+    "passed": "Geslaagd",
+    "submissionTime": "Indienings tijd",
+    "noSubmissions": "Geen indieningen",
+    "loadingSubmissions": "Indieningen laden..."
+
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"

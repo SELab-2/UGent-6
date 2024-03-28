@@ -25,7 +25,17 @@ const SubmissionsCard = () => {
           group_url: "/api/groups/1",
           group: {
             groupId: 1,
-            members: [],
+            members: [{
+              name: "Bard",
+              surname: "Carter",
+              url: "/api/groups/1/members/1",
+              userId:1
+            },{
+              name: "Bob",
+              surname: "Carter",
+              url: "/api/groups/1/members/2",
+              userId:2
+            }],
             name: "Groep 1",
           },
           project_url: "/api/projects/1",
@@ -52,6 +62,9 @@ const SubmissionsCard = () => {
           <Button onClick={handleDownloadSubmissions} icon={<DownloadOutlined />} />
         </Tooltip>
       }
+      styles={{
+        body: {padding: 0}
+      }}
     >
       <SubmissionsTable submissions={submissions} />
 

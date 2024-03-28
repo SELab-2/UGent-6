@@ -136,6 +136,7 @@ export type GET_Responses = {
     name: string
     submission_url: string
     tests_url: string
+    maxScore:number
   }
   [ApiRoutes.PROJECT_TESTS]: {} // ??
   [ApiRoutes.GROUP]: {
