@@ -15,7 +15,7 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     {
       label: t("home.projects.name"),
       children: project.course.name,
-      span: 12
+      span: 24
     },
     {
       label:t("home.projects.deadline"),
@@ -26,25 +26,26 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
         hour: "2-digit",
         minute: "2-digit",
       }),
-      span: 10
+      span: 24
     },
     {
       label: t("home.projects.description"),
       children: project.description,
-      span: 12
+      span: 24
     },
     {
       label: t("home.projects.projectStatus"),
       children: <ProjectStatusTag status={Math.random() > 0.5? "completed": "notStarted"} />,
-      span: 10
+      span: 24
     },
     {
       label: t("home.projects.groupProgress"),
       children: <GroupProgress usersCompleted={Math.floor(Math.random() * 121)} userCount={121} />,
+      span: 24
     }
   ],[project, t])
 
-  return <Descriptions bordered items={items} />
+  return <Descriptions column={24} bordered items={items} />
 }
 
 export default ProjectInfo
