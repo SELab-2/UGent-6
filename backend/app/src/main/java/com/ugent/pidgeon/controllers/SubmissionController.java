@@ -171,7 +171,7 @@ public class SubmissionController {
             SubmissionTemplateModel.SubmissionResult testresult;
             if (testEntity == null) {
                 Logger.getLogger("SubmissionController").info("no test");
-                testresult = new SubmissionTemplateModel.SubmissionResult(true, "structure is free for this project.");
+                testresult = new SubmissionTemplateModel.SubmissionResult(true, "No structure requirements for this project.");
             } else {
                 testresult = runStructureTest(new ZipFile(savedFile), testEntity);
             }

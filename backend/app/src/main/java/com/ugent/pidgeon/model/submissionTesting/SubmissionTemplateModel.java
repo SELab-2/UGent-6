@@ -155,11 +155,11 @@ public class SubmissionTemplateModel {
                 feedback += String.join("\n    -", filesMissing);
             }
             if (!filesUnrequested.isEmpty()) {
-                feedback += " -The following files are not requested in the template: \n    -";
+                feedback += "\n -The following files are not requested in the template: \n    -";
                 feedback += String.join("\n    -", filesUnrequested);
             }
             if (!filesDenied.isEmpty()) {
-                feedback += " -The following files are not allowed in the project: \n    -";
+                feedback += "\n -The following files are not allowed in the project: \n    -";
                 feedback += String.join("\n    -", filesDenied);
             }
 
