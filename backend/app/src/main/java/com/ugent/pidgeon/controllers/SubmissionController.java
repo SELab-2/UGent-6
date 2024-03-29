@@ -171,7 +171,11 @@ public class SubmissionController {
             SubmissionTemplateModel.SubmissionResult testresult;
             if (testEntity == null) {
                 Logger.getLogger("SubmissionController").info("no test");
+<<<<<<< HEAD
                 testresult = new SubmissionTemplateModel.SubmissionResult(true, "");
+=======
+                testresult = new SubmissionTemplateModel.SubmissionResult(true, "No structure requirements for this project.");
+>>>>>>> 4126c0a (added missing newlines + changed feedbackstring)
             } else {
                 testresult = runStructureTest(new ZipFile(savedFile), testEntity);
             }

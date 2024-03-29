@@ -4,6 +4,7 @@ import com.ugent.pidgeon.model.json.UserJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
