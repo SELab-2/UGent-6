@@ -8,13 +8,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
 
     @Query("SELECT p FROM ProjectEntity p WHERE p.courseId = :courseId")
     List<ProjectEntity> findAllProjectsByCourseId(long courseId);
+
+    @Query("SELECT c FROM CourseEntity c WHERE c.joinKey = :courseKey")
+
+    CourseEntity findByJoinKey(String courseKey);
 
     public interface UserWithRelation {
         UserEntity getUser();

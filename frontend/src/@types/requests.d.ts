@@ -8,7 +8,7 @@ export enum ApiRoutes {
   COURSE_MEMBER = "api/courses/:id/users/:userId",
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
-
+  COURSE_FIND_WITH_KEY =  "api/courses/key/:key",
   PROJECT = "api/projects/:id",
   PROJECT_TESTS = "api/projects/:id/tests",
   PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
@@ -111,7 +111,6 @@ export type GET_Responses = {
     structure_feedback: string
     docker_feedback: string
     submitted_time: Timestamp
-
   }
   [ApiRoutes.SUBMISSION_FILE]: FormData
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
@@ -173,6 +172,11 @@ export type GET_Responses = {
     name: string
     teachers: Teacher[] // Changed this
   }
+  [ApiRoutes.COURSE_FIND_WITH_KEY]: {
+    courseId: number
+    description: string
+    name: string
+  },
   [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER]
   [ApiRoutes.USER]: {
     course_url: string

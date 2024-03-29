@@ -27,7 +27,7 @@ public class CourseController {
     @Autowired
     private CourseRepository courseRepository;
 
-    @Autowired 
+    @Autowired
     private ProjectController projectController;
 
     @Autowired
@@ -48,12 +48,11 @@ public class CourseController {
 
     @Autowired
     private ClusterController groupClusterController;
-    
 
 
-  @GetMapping(ApiRoutes.COURSE_BASE_PATH)
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<String> getUserCourses(Auth auth){
+    public ResponseEntity<String> getUserCourses(Auth auth) {
         long userID = auth.getUserEntity().getId();
         try {
             List<UserRepository.CourseIdWithRelation> userCourses = userRepository.findCourseIdsByUserId(userID);
@@ -78,11 +77,12 @@ public class CourseController {
     }
 
     // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
-    private record CourseJSONObject(long id, String name, String url){}
+    private record CourseJSONObject(long id, String name, String url) {
+    }
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})
-    public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseJson courseJson, Auth auth){
+    public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseJson courseJson, Auth auth) {
         try {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
@@ -100,7 +100,7 @@ public class CourseController {
             courseUserRepository.save(courseUserEntity);
 
             return ResponseEntity.ok(courseEntity);
-        } catch (Exception e){
+        } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -108,7 +108,7 @@ public class CourseController {
 
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth){
+    public ResponseEntity<?> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth) {
         try {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
@@ -125,8 +125,8 @@ public class CourseController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
             }
             CourseUserEntity courseUserEntity = courseUserEntityOptional.get();
-            if(courseUserEntity.getRelation() == CourseRelation.enrolled){
-               return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to update the course");
+            if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to update the course");
             }
 
             //update velden
@@ -136,7 +136,7 @@ public class CourseController {
 
             // Response verzenden
             return ResponseEntity.ok(courseEntity);
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -154,7 +154,7 @@ public class CourseController {
 
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<String> deleteCourse(@PathVariable long courseId, Auth auth){
+    public ResponseEntity<String> deleteCourse(@PathVariable long courseId, Auth auth) {
         try {
             // De user vinden
             UserEntity user = auth.getUserEntity();
@@ -171,17 +171,17 @@ public class CourseController {
             if (courseUserEntity == null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
             }
-            if(courseUserEntity.getRelation() != CourseRelation.creator){
+            if (courseUserEntity.getRelation() != CourseRelation.creator) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to delete the course");
             }
 
             //voor elk project
-            for(ProjectEntity project : courseRepository.findAllProjectsByCourseId(courseId)){
+            for (ProjectEntity project : courseRepository.findAllProjectsByCourseId(courseId)) {
                 projectController.deleteProjectById(project.getId(), auth);
             }
 
             //voor elke groepcluster
-            for(GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)){
+            for (GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)) {
                 // We verwijderen de groepfeedback niet omdat die al verwijderd werd wanneer het project verwijderd werd
                 groupClusterController.deleteCluster(groupCluster.getId(), auth);
             }
@@ -192,7 +192,7 @@ public class CourseController {
             //vak verwijderen
             courseRepository.delete(courseEntity);
             return ResponseEntity.ok("Vak verwijderd");
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Probleem bij vak verwijderen: " + e.getMessage());
         }
     }
@@ -207,10 +207,10 @@ public class CourseController {
         return ResponseEntity.ok(projects);
     }
 
-    Boolean hasCourseRights(long courseId, UserEntity user){
-        if(user.getRole() == UserRole.admin){
+    Boolean hasCourseRights(long courseId, UserEntity user) {
+        if (user.getRole() == UserRole.admin) {
             return true;
-        }else{
+        } else {
             return courseUserRepository.isCourseAdmin(courseId, user.getId());
         }
     }
@@ -218,13 +218,13 @@ public class CourseController {
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
-        if(courseRepository.existsById(courseId)){
-            if(courseUserRepository.isCourseMember(courseId, auth.getUserEntity().getId())){
+        if (courseRepository.existsById(courseId)) {
+            if (courseUserRepository.isCourseMember(courseId, auth.getUserEntity().getId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
             }
             courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
             return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
         }
     }
@@ -236,28 +236,28 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
         CourseRelation coursePermissions = courseUserRepository.getCourseRelation(courseId, auth.getUserEntity().getId());
-        if(hasCourseRights(courseId, auth.getUserEntity())){
+        if (hasCourseRights(courseId, auth.getUserEntity())) {
             Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, userId.getUserId()));
             if (courseUserEntityOptional.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
             CourseRelation userRelation = courseUserEntityOptional.get().getRelation();
-            if (auth.getUserEntity().getId() == userId.getUserId()){
+            if (auth.getUserEntity().getId() == userId.getUserId()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove yourself");
             }
-            if(userRelation == CourseRelation.creator){
+            if (userRelation == CourseRelation.creator) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove course creator");
-            } else if (userRelation == CourseRelation.course_admin){
-                if(coursePermissions != CourseRelation.creator){
+            } else if (userRelation == CourseRelation.course_admin) {
+                if (coursePermissions != CourseRelation.creator) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course admin cannot remove a course admin");
-                }else{
+                } else {
                     courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
                     return ResponseEntity.ok().build();
                 }
             }
             courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
             return ResponseEntity.ok().build(); // Successfully removed
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
     }
@@ -270,14 +270,14 @@ public class CourseController {
         }
 
         // Only teacher and admin can add different users to a course.
-        if(hasCourseRights(courseId, auth.getUserEntity())){
-            if(request.getRelation() == CourseRelation.creator){
+        if (hasCourseRights(courseId, auth.getUserEntity())) {
+            if (request.getRelation() == CourseRelation.creator) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add a creator");
             }
             boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
-            boolean isCreator = courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) == CourseRelation.creator;
+            boolean isCreator = courseUserRepository.getCourseRelation(courseId, auth.getUserEntity().getId()) == CourseRelation.creator;
             boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
-            if(creatingAdmin && (!isCreator  && !isAdmin)){
+            if (creatingAdmin && (!isCreator && !isAdmin)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can create more course-admins");
             }
             if (courseUserRepository.isCourseMember(courseId, request.getUserId())) {
@@ -285,7 +285,7 @@ public class CourseController {
             }
             courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelation()));
             return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
     }
@@ -299,19 +299,19 @@ public class CourseController {
         }
 
         // Only teacher and admin can add different users to a course.
-        if(hasCourseRights(courseId, auth.getUserEntity())){
-            if(auth.getUserEntity().getId() == request.getUserId()){
+        if (hasCourseRights(courseId, auth.getUserEntity())) {
+            if (auth.getUserEntity().getId() == request.getUserId()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change your own role.");
             }
 
-            if(request.getRelation() == CourseRelation.course_admin){
+            if (request.getRelation() == CourseRelation.course_admin) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change role to creator");
             }
 
             boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
-            boolean isCreator = courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) == CourseRelation.creator;
+            boolean isCreator = courseUserRepository.getCourseRelation(courseId, auth.getUserEntity().getId()) == CourseRelation.creator;
             boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
-            if(creatingAdmin && (!isCreator  && !isAdmin)){
+            if (creatingAdmin && (!isCreator && !isAdmin)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can promote to course-admin");
             }
             Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, request.getUserId()));
@@ -322,7 +322,7 @@ public class CourseController {
             } else {
                 return ResponseEntity.notFound().build(); //  User is not allowed to do the action, teachers cant remove students of other users course
             }
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
     }
@@ -330,9 +330,9 @@ public class CourseController {
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.student}) // student is allowed to see people in its class
     public ResponseEntity<?> getCourseMembers(Auth auth, @PathVariable Long courseId) {
-        if(courseRepository.existsById(courseId)){
+        if (courseRepository.existsById(courseId)) {
             UserEntity ue = auth.getUserEntity();
-            if(ue.getRole() == UserRole.admin || courseUserRepository.isCourseMember(courseId, ue.getId())){
+            if (ue.getRole() == UserRole.admin || courseUserRepository.isCourseMember(courseId, ue.getId())) {
                 List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
                 List<PublicUserDTO> memberJson = members.stream().map(cue -> {
                     Map<String, Object> json = new HashMap<>();
@@ -346,8 +346,58 @@ public class CourseController {
                 return ResponseEntity.ok(memberJson); // Successfully retrieved members
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a member of the course");
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No course with given id");
         }
+    }
+
+    @Roles({UserRole.teacher})
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/getJoinKey")
+    // will return a join key if there is an existing one, otherwise it will return a 404
+    public ResponseEntity<String> getCourseKey(Auth auth, @PathVariable Long courseId) {
+        if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
+            if (courseRepository.existsById(courseId)) {
+                CourseEntity course = courseRepository.findById(courseId).get();
+                if (course.getJoinKey() == null)
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No join key found");
+                return ResponseEntity.ok(course.getJoinKey());
+            }
+            return null;
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a course admin, thus not allowed to request the key.");
+        }
+    }
+
+    // Function for invalidating the previous key and generating a new one, can be useful when staring a new year.
+    @Roles({UserRole.teacher})
+    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "key/{courseKey}")
+    public ResponseEntity<String> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
+        if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
+            if (courseRepository.existsById(courseId)) {
+                CourseEntity course = courseRepository.findById(courseId).get();
+                String key = UUID.randomUUID().toString();
+                course.setJoinKey(key);
+                courseRepository.save(course);
+                return ResponseEntity.ok(key);
+            }
+            return null;
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a course admin, thus not allowed to generate a new key.");
+        }
+    }
+    @Roles({UserRole.teacher})
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "key/{courseKey}")
+    public ResponseEntity<HashMap<String,Object>> getCourseWithKey(@PathVariable String courseKey) {
+        CourseEntity course = courseRepository.findByJoinKey(courseKey);
+        if (course == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        HashMap<String, Object> json = new HashMap<>();
+        json.put("id", course.getId());
+        json.put("name", course.getName());
+        json.put("description", course.getDescription());
+        json.put("url", ApiRoutes.COURSE_BASE_PATH + "/" + course.getId());
+
+        return ResponseEntity.ok(json);
     }
 }

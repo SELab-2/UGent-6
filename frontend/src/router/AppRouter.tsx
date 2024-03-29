@@ -11,6 +11,7 @@ import Submit from "../pages/submit/Submit"
 import Feedback from "../pages/feedback/Feedback"
 import ProjectRoutes from "./ProjectRoutes"
 import Error from "../pages/error/Error";
+import JoinCourse from "../pages/joinCoursePage/JoinCourse";
 
 
 
@@ -35,6 +36,10 @@ const AppRouter = () => {
         path={AppRoutes.PROFILE}
         element={<Profile />}
       />
+      <Route
+        path={AppRoutes.JOIN_COURSE} // routed seperately from courses, since we don't go by id but by unique key
+        element={<JoinCourse/>}/>
+
       <Route
         path={AppRoutes.COURSE}
         element={<CourseRoutes />}

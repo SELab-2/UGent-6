@@ -3,8 +3,6 @@ package com.ugent.pidgeon.postgre.models;
 import jakarta.persistence.*;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Entity
@@ -22,6 +20,17 @@ public class CourseEntity {
 
     @Column(name = "created_at")
     private Timestamp createdAt;
+
+    public String getJoinKey() {
+        return joinKey;
+    }
+
+    public void setJoinKey(String joinKey) {
+        this.joinKey = joinKey;
+    }
+
+    @Column(name = "join_key", nullable=true)
+    private String joinKey;
 
     public CourseEntity(String name, String description) {
         this.name = name;
