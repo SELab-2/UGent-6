@@ -1,8 +1,10 @@
-import { Card, Spin, theme , Input } from "antd"
+import { Card, Spin, theme , Input, Button, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import { GET_Responses } from "../../../@types/requests";
 import { ApiRoutes } from "../../../@types/requests";
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
+import { AppRoutes } from "../../../@types/routes";
 import '@fontsource/jetbrains-mono';
 
 export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
@@ -10,6 +12,20 @@ export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
+
+  const downloadSubmission = () => {
+    //TODO: file vullen met echte file content
+    const fileContent = 'Hello world';
+    const blob = new Blob([fileContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'indiening.zip';
+    document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+};
 
   return (
     <Card
@@ -25,9 +41,10 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       type="inner"
       title={
         <span>
-          <span onClick={() => window.location.href = submission.project_url}>
-            <ArrowLeftOutlined style={{ marginRight: 8, cursor: 'pointer' }}/>
-          </span>
+          {/*TODO: moet werken met projectId en courseId*/}
+          <Link to={AppRoutes.PROJECT.replace(":projectId","...").replace(":courseId","...")}>
+            <Button type="text" style={{marginRight: 16}}><ArrowLeftOutlined/></Button>
+          </Link>
           {t("submission.submission")}
         </span>
       }
@@ -36,15 +53,17 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
 
       <ul style={{ listStyleType: 'none' }}>
         <li>
-          <a href={submission.file_url}><u>indiening.zip</u></a>
+          <Button type="link" style={{padding: 0}}onClick={downloadSubmission}><u>indiening.zip</u></Button>
         </li>
       </ul>
 
       {t("submission.structuretest")}
 
       <ul style={{ listStyleType: 'none' }}>
-        <li style={{ color: submission.structure_accepted ? '#67d765' : '#da4e4e' }}>
-          {submission.structure_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
+        <li>
+          <Typography.Text type={submission.structure_accepted ? "success" : "danger"}>
+            {submission.structure_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
+          </Typography.Text>
           {submission.structure_accepted ? null : <div>
             <Input.TextArea
               readOnly
@@ -61,8 +80,10 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
 
       {submission.docker_results_available ?
       <ul style={{ listStyleType: 'none' }}>
-        <li style={{ color: submission.docker_accepted ? '#67d765' : '#da4e4e' }}>
-          {submission.docker_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
+        <li>
+          <Typography.Text type={submission.docker_accepted ? "success" : "danger"}>
+            {submission.docker_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
+          </Typography.Text>
           {submission.docker_accepted ? null : <div>
             <Input.TextArea
               readOnly
