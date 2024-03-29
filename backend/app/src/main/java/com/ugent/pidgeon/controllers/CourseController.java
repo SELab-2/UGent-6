@@ -352,7 +352,7 @@ public class CourseController {
     }
 
     @Roles({UserRole.teacher})
-    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/getJoinKey")
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     // will return a join key if there is an existing one, otherwise it will return a 404
     public ResponseEntity<String> getCourseKey(Auth auth, @PathVariable Long courseId) {
         if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
@@ -370,7 +370,7 @@ public class CourseController {
 
     // Function for invalidating the previous key and generating a new one, can be useful when staring a new year.
     @Roles({UserRole.teacher})
-    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "key/{courseKey}")
+    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<String> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
         if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
             if (courseRepository.existsById(courseId)) {
@@ -386,7 +386,23 @@ public class CourseController {
         }
     }
     @Roles({UserRole.teacher})
-    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "key/{courseKey}")
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
+    public ResponseEntity<String> deleteCourseKey(Auth auth, @PathVariable Long courseId) {
+        if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
+            if (courseRepository.existsById(courseId)) {
+                CourseEntity course = courseRepository.findById(courseId).get();
+                course.setJoinKey(null);
+                courseRepository.save(course);
+                return ResponseEntity.ok("Join key removed");
+            }
+            return null;
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a course admin, thus not allowed to remove the key.");
+        }
+    }
+
+    @Roles({UserRole.teacher})
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/key/{courseKey}")
     public ResponseEntity<HashMap<String,Object>> getCourseWithKey(@PathVariable String courseKey) {
         CourseEntity course = courseRepository.findByJoinKey(courseKey);
         if (course == null) {
