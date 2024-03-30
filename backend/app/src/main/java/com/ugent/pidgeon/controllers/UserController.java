@@ -28,16 +28,16 @@ public class UserController {
      * @param userid identifier of a user
      * @param auth   authentication object
      * @HttpMethod GET
-     * @ApiPath /user/{userid}
-     * @AllowedRoles student, teacher
+     * @ApiPath /api/user/{userid}
+     * @AllowedRoles student
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723824">apiDog documentation</a>
      * @return user object
      */
     @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
-    @Roles({UserRole.student, UserRole.teacher})
+    @Roles({UserRole.student})
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
         UserEntity user = auth.getUserEntity();
-        if (user.getId() != userid && user.getRole() != UserRole.teacher) {
+        if (user.getId() != userid) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You does not have access to this user");
         }
 
@@ -56,16 +56,16 @@ public class UserController {
      * @param userid identifier of a user
      * @param auth   authentication object
      * @HttpMethod GET
-     * @ApiPath /user/{userid}/courses
-     * @AllowedRoles student, teacher
+     * @ApiPath /api/user/{userid}/courses
+     * @AllowedRoles student
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6091747">apiDog documentation</a>
      * @return list of courses
      */
     @GetMapping(ApiRoutes.USER_COURSES_BASE_PATH)
-    @Roles({UserRole.student, UserRole.teacher})
+    @Roles({UserRole.student})
     public ResponseEntity<Object> getUserCourses(@PathVariable("userid") Long userid,Auth auth) {
         UserEntity user = auth.getUserEntity();
-        if (userid != user.getId() && user.getRole() != UserRole.teacher) {
+        if (userid != user.getId()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this user's courses");
         }
 
