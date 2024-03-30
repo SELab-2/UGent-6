@@ -62,11 +62,11 @@ public class GroupFeedbackController {
      * @return ResponseEntity<String>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883691">apiDog documentation</a>
      * @HttpMethod Patch
-     * @AllowedRoles teacher
+     * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}/projects/{projectid}/feedback
      */
     @PatchMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> updateGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
         ResponseEntity<String> errorResponse1 = getStringResponseEntity(groupId, projectId, request, auth);
         if (errorResponse1 != null) return errorResponse1;

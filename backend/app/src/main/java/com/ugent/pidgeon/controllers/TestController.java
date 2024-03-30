@@ -66,7 +66,7 @@ public class TestController {
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
 
         long userId = auth.getUserEntity().getId();
-        if(!projectRepository.adminOfProject(projectId, userId)){
+        if(!projectRepository.adminOfProject(projectId, userId) && auth.getUserEntity().getRole() != UserRole.admin){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
         try {
@@ -125,14 +125,14 @@ public class TestController {
      */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> getTests(@PathVariable("projectid") long projectId, Auth auth) {
+    public ResponseEntity<?> getTests(@PathVariable("projectid") long projectId, Auth auth) {
         long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(projectId, userId)) {
+        if (!projectRepository.adminOfProject(projectId, userId) && auth.getUserEntity().getRole() != UserRole.admin){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
         Optional<TestEntity> testEntity = testRepository.findByProjectId(projectId);
         if (testEntity.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
         }
         TestEntity test = testEntity.get();
         TestJson res  = entityToTestJson(test, projectId);
@@ -161,7 +161,7 @@ public class TestController {
      */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/structuretest")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> getStructureTestFile(@PathVariable("projectid") long projectId, Auth auth) {
+    public ResponseEntity<?> getStructureTestFile(@PathVariable("projectid") long projectId, Auth auth) {
         return getTestFileResponseEnity(projectId, auth, TestEntity::getStructureTestId);
     }
 
@@ -177,28 +177,28 @@ public class TestController {
      */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertest")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> getDockerTestFile(@PathVariable("projectid") long projectId, Auth auth) {
+    public ResponseEntity<?> getDockerTestFile(@PathVariable("projectid") long projectId, Auth auth) {
         return getTestFileResponseEnity(projectId, auth, TestEntity::getDockerTestId);
     }
 
-    public ResponseEntity<Object> getTestFileResponseEnity(long projectId, Auth auth, Function<TestEntity, Long> testFileIdGetter) {
+    public ResponseEntity<?> getTestFileResponseEnity(long projectId, Auth auth, Function<TestEntity, Long> testFileIdGetter) {
         long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(projectId, userId)) {
+        if (!projectRepository.adminOfProject(projectId, userId) && auth.getUserEntity().getRole() != UserRole.admin){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
         Optional<ProjectEntity> projectEntity = projectRepository.findById(projectId);
         if (projectEntity.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found with id: " + projectId);
         }
         long testId = projectEntity.get().getTestId();
         Optional<TestEntity> testEntity = testRepository.findById(testId);
         if (testEntity.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
         }
         long testFileId = testFileIdGetter.apply(testEntity.get());
         Optional<FileEntity> fileEntity = fileRepository.findById(testFileId);
         if (fileEntity.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No file found for test with id: " + testFileId);
         }
         Resource file = Filehandler.getFileAsResource(Path.of(fileEntity.get().getPath()));
         HttpHeaders headers = new HttpHeaders();
@@ -209,7 +209,7 @@ public class TestController {
 
     /**
      * Function to delete the tests of a project
-     * @param testId the id of the test to delte
+     * @param testId the id of the test to delete
      * @param auth the authentication object of the requesting user
      * @HttpMethod DELETE
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
@@ -221,7 +221,6 @@ public class TestController {
     @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteTestById(@PathVariable("testId") long testId, Auth auth) {
         // Get the submission entry from the database
-        //TODO: update apidog
         TestEntity testEntity = testRepository.findById(testId).orElse(null);
         if (testEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -230,13 +229,15 @@ public class TestController {
         if (courseEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
-        Optional<CourseUserEntity> courseUserEntity = courseUserRepository.findByCourseIdAndUserId(courseEntity.getId(), auth.getUserEntity().getId());
-        if(courseUserEntity.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
-        }
-        Permission permission = PermissionHandler.userIsCouresAdmin(courseUserEntity.get());
-        if(!permission.hasPermission()){
-            return permission.getResponseEntity();
+        if(auth.getUserEntity().getRole()!= UserRole.admin) {
+            Optional<CourseUserEntity> courseUserEntity = courseUserRepository.findByCourseIdAndUserId(courseEntity.getId(), auth.getUserEntity().getId());
+            if (courseUserEntity.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
+            }
+            Permission permission = PermissionHandler.userIsCouresAdmin(courseUserEntity.get());
+            if (!permission.hasPermission()) {
+                return permission.getResponseEntity();
+            }
         }
         testRepository.delete(testEntity);
         fileController.deleteFileById(testEntity.getStructureTestId());

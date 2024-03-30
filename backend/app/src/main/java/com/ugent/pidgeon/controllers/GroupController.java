@@ -37,7 +37,6 @@ public class GroupController {
         return group;
     }
 
-    /* Function to add a new project to an existing course */
 
     /**
      * Function to add a new project to an existing course
@@ -52,7 +51,7 @@ public class GroupController {
      */
     @GetMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.student, UserRole.teacher})
-    public ResponseEntity<GroupJson> getGroupById(@PathVariable("groupid") Long groupid, Auth auth) {
+    public ResponseEntity<?> getGroupById(@PathVariable("groupid") Long groupid, Auth auth) {
 
 
         // Get userId
@@ -62,12 +61,12 @@ public class GroupController {
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
 
         if (group == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
         }
 
         // Return 403 if the user does not have access to the group
-        if (!groupRepository.userAccessToGroup(userId, groupid)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
         // Return the group
@@ -89,19 +88,20 @@ public class GroupController {
      */
     @PutMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher})
-    public ResponseEntity<GroupJson> updateGroupName(@PathVariable("groupid") Long groupid, @RequestBody NameRequest nameRequest, Auth auth) {
+    public ResponseEntity<?> updateGroupName(@PathVariable("groupid") Long groupid, @RequestBody NameRequest nameRequest, Auth auth) {
         // Get userId
         long userId = auth.getUserEntity().getId();
 
         // Get the group, return 404 if it does not exist
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
         if (group == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
+
         }
 
         // Return 403 if the user does not have access to the group
-        if (!groupRepository.userAccessToGroup(userId, groupid)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
         // Update the group name
@@ -128,19 +128,19 @@ public class GroupController {
      */
     @DeleteMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Void> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
+    public ResponseEntity<?> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
         // Get userId
         long userId = auth.getUserEntity().getId();
 
         // Get the group, return 404 if it does not exist
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
         if (group == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
         }
 
         // Return 403 if the user does not have access to the group
-        if (!groupRepository.userAccessToGroup(userId, groupid)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
         // Delete the group
@@ -155,7 +155,7 @@ public class GroupController {
             groupClusterRepository.save(cluster);
         });
         // Return 204
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
     }
 
 }

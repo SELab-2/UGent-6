@@ -52,8 +52,8 @@ public class ClusterController {
         if (!courseRepository.existsById(courseid)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
-        if (courseUserRepository.findByCourseIdAndUserId(courseid, userId).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of course");
+        if (courseUserRepository.findByCourseIdAndUserId(courseid, userId).isEmpty() && auth.getUserEntity().getRole()!=UserRole.admin){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this course");
         }
 
         // Get the clusters for the course
@@ -111,7 +111,7 @@ public class ClusterController {
         if (!courseRepository.existsById(courseid)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
-        if (!courseRepository.adminOfCourse(courseid, userId)) {
+        if (!courseRepository.adminOfCourse(courseid, userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
 
@@ -155,7 +155,7 @@ public class ClusterController {
         if (cluster == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
         }
-        if (courseUserRepository.findByCourseIdAndUserId(cluster.getCourseId(), userId).isEmpty()) {
+        if (courseUserRepository.findByCourseIdAndUserId(cluster.getCourseId(), userId).isEmpty() && auth.getUserEntity().getRole()!=UserRole.admin){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of course");
         }
 
@@ -184,7 +184,7 @@ public class ClusterController {
         if (cluster == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
         }
-        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
+        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
         cluster.setName(clusterJson.name());
@@ -214,7 +214,7 @@ public class ClusterController {
         if (cluster == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
         }
-        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
+        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
         if (groupClusterRepository.usedInProject(clusterid)) {
@@ -250,7 +250,7 @@ public class ClusterController {
         if (cluster == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
         }
-        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
+        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
         GroupEntity group = new GroupEntity(groupJson.name(), clusterid);

@@ -36,7 +36,6 @@ public class ProjectController {
     private TestController testController;
 
     /**
-     * //todo: correct apidog
      * Function to get all projects of a user
      * @param auth authentication object of the requesting user
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883808">apiDog documentation</a>
@@ -84,7 +83,7 @@ public class ProjectController {
                 .map(project -> {
                     long userId = auth.getUserEntity().getId();
                     if (!accesToProject(projectId, auth.getUserEntity())) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to view this project");
                     } else {
                         return ResponseEntity.ok().body(project);
                     }
@@ -108,6 +107,9 @@ public class ProjectController {
     public ResponseEntity<?> putProjectById(@PathVariable Long projectId, @RequestBody ProjectUpdateDTO updateDTO, Auth auth) {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
         if (projectOptional.isPresent()) {
+            if (!accesToProject(projectId, auth.getUserEntity())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to update this project");
+            }
             ProjectEntity project = projectOptional.get();
             if (updateDTO.getName() != null) project.setName(updateDTO.getName());
             if (updateDTO.getDescription() != null) project.setDescription(updateDTO.getDescription());
@@ -115,11 +117,10 @@ public class ProjectController {
             if (updateDTO.getDeadline() != null) {
                 project.setDeadline(updateDTO.getDeadline());
             }
-            System.out.println(project.getName());
             projectRepository.save(project);
             return ResponseEntity.ok(project);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("project not found with id " + projectId);
         }
     }
 
@@ -139,7 +140,9 @@ public class ProjectController {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
 
         if (projectOptional.isPresent()) {
-
+            if(!accesToProject(projectId, auth.getUserEntity())){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete this project");
+            }
 
             ProjectEntity projectEntity = projectOptional.get();
 
@@ -159,7 +162,7 @@ public class ProjectController {
             return ResponseEntity.ok().build();
 
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("project not found with id " + projectId);
         }
 
 
