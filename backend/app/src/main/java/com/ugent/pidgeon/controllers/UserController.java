@@ -38,7 +38,7 @@ public class UserController {
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
         UserEntity user = auth.getUserEntity();
         if (user.getId() != userid) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You does not have access to this user");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to this user");
         }
 
         UserJson res = userRepository.findById(userid).map(UserJson::new).orElse(null);
@@ -47,40 +47,6 @@ public class UserController {
         }
 
         return ResponseEntity.ok().body(res);
-    }
-
-
-    /**
-     * Function to get the courses of a user
-     *
-     * @param userid identifier of a user
-     * @param auth   authentication object
-     * @HttpMethod GET
-     * @ApiPath /api/user/{userid}/courses
-     * @AllowedRoles student
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6091747">apiDog documentation</a>
-     * @return list of courses
-     */
-    @GetMapping(ApiRoutes.USER_COURSES_BASE_PATH)
-    @Roles({UserRole.student})
-    public ResponseEntity<Object> getUserCourses(@PathVariable("userid") Long userid,Auth auth) {
-        UserEntity user = auth.getUserEntity();
-        if (userid != user.getId()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this user's courses");
-        }
-
-        List<UserRepository.CourseIdWithRelation> courses = userRepository.findCourseIdsByUserId(userid);
-
-        List<CourseWithRelationJson> userCourses = courses.stream().map(
-                c -> new CourseWithRelationJson(
-                        ApiRoutes.COURSE_BASE_PATH+"/" + c.getCourseId(),
-                            c.getRelation(),
-                            c.getName(),
-                            c.getCourseId()
-
-                )).toList();
-
-        return ResponseEntity.ok().body(userCourses);
     }
 
 }

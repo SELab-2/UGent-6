@@ -234,7 +234,7 @@ public class TestController {
             if (courseUserEntity.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
             }
-            Permission permission = PermissionHandler.userIsCouresAdmin(courseUserEntity.get());
+            Permission permission = PermissionHandler.userIsCourseAdmin(courseUserEntity.get());
             if (!permission.hasPermission()) {
                 return permission.getResponseEntity();
             }

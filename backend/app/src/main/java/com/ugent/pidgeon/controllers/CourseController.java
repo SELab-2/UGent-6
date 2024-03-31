@@ -277,21 +277,4 @@ public class CourseController {
         return ResponseEntity.ok(projects);
     }
 
-    /* Help function to create a JSON response when creating a new project */
-    private static Map<String, Object> createJSONPostResponse(ProjectEntity savedProject) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", savedProject.getId());
-        response.put("name", savedProject.getName());
-        response.put("description", savedProject.getDescription());
-        response.put("course", String.valueOf(savedProject.getCourseId()));
-        response.put("deadline", 0); // Placeholder for deadline
-            /* Optional timestamp
-            if (savedProject.getTimestamp() != null) {
-                response.put("timestamp", savedProject.getTimestamp().toString());
-            }*/
-        response.put("tests_url", ApiRoutes.PROJECT_BASE_PATH + "/" + savedProject.getId() + "/tests");
-        response.put("submission_url", ApiRoutes.PROJECT_BASE_PATH + "/" + savedProject.getId() + "/sumbmissions");
-        return response;
-    }
-
 }

@@ -97,7 +97,7 @@ public class GroupFeedbackController {
             if (courseUserEntity.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
             }
-            return PermissionHandler.userIsCouresAdmin(courseUserEntity.get()).getResponseEntity();
+            return PermissionHandler.userIsCourseAdmin(courseUserEntity.get()).getResponseEntity();
         } else {
             return null;
         }
@@ -150,11 +150,12 @@ public class GroupFeedbackController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> getGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, Auth auth) {
         UserEntity user = auth.getUserEntity();
-        if (user.getRole() == UserRole.student && !groupRepository.userInGroup(groupId, user.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not in this group");
-        } else if (user.getRole() == UserRole.teacher && !groupRepository.isAdminOfGroup(user.getId(), groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Teacher does not have access to this group");
+        if (!user.getRole().equals(UserRole.admin)) {
+            if (!groupRepository.userInGroup(groupId, user.getId()) && !groupRepository.isAdminOfGroup(user.getId(), groupId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
+            }
         }
+
 
         GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectId);
         if (groupFeedbackEntity == null) {

@@ -33,7 +33,7 @@ public class PermissionHandler {
         return permission;
     }
 
-    public static Permission userIsCouresAdmin( CourseUserEntity courseUserEntity) {
+    public static Permission userIsCourseAdmin(CourseUserEntity courseUserEntity) {
         Permission permission = new Permission(false, "");
         if (courseUserEntity == null) {
             permission.setErrorMessage("User is not in course");

@@ -37,7 +37,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
 
 
     @Query(value = """
-            SELECT g FROM CourseEntity g JOIN ProjectEntity p ON g.id = p.courseId WHERE p.testId =? 1
+            SELECT g FROM CourseEntity g JOIN ProjectEntity p ON g.id = p.courseId WHERE p.testId =?1
             """)
     List<CourseEntity> findCourseEntityByTestId(Long testId);
 

@@ -107,7 +107,7 @@ public class ProjectController {
     public ResponseEntity<?> putProjectById(@PathVariable Long projectId, @RequestBody ProjectUpdateDTO updateDTO, Auth auth) {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
         if (projectOptional.isPresent()) {
-            if (!accesToProject(projectId, auth.getUserEntity())) {
+            if (!projectRepository.adminOfProject(projectId, auth.getUserEntity().getId()) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to update this project");
             }
             ProjectEntity project = projectOptional.get();
@@ -140,7 +140,7 @@ public class ProjectController {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
 
         if (projectOptional.isPresent()) {
-            if(!accesToProject(projectId, auth.getUserEntity())){
+            if (!projectRepository.adminOfProject(projectId, auth.getUserEntity().getId()) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete this project");
             }
 
