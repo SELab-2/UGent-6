@@ -351,7 +351,7 @@ public class CourseController {
         }
     }
 
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     // will return a join key if there is an existing one, otherwise it will return a 404
     public ResponseEntity<String> getCourseKey(Auth auth, @PathVariable Long courseId) {
@@ -369,9 +369,9 @@ public class CourseController {
     }
 
     // Function for invalidating the previous key and generating a new one, can be useful when staring a new year.
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
-    public ResponseEntity<String> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
+    public ResponseEntity<?> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
         if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
             if (courseRepository.existsById(courseId)) {
                 CourseEntity course = courseRepository.findById(courseId).get();
@@ -380,12 +380,12 @@ public class CourseController {
                 courseRepository.save(course);
                 return ResponseEntity.ok(key);
             }
-            return null;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a course admin, thus not allowed to generate a new key.");
         }
     }
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<String> deleteCourseKey(Auth auth, @PathVariable Long courseId) {
         if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
@@ -395,18 +395,18 @@ public class CourseController {
                 courseRepository.save(course);
                 return ResponseEntity.ok("Join key removed");
             }
-            return null;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a course admin, thus not allowed to remove the key.");
         }
     }
 
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/key/{courseKey}")
-    public ResponseEntity<HashMap<String,Object>> getCourseWithKey(@PathVariable String courseKey) {
+    public ResponseEntity<?> getCourseWithKey(@PathVariable String courseKey) {
         CourseEntity course = courseRepository.findByJoinKey(courseKey);
         if (course == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No course found with given key");
         }
         HashMap<String, Object> json = new HashMap<>();
         json.put("id", course.getId());
