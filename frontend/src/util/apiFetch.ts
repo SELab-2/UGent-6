@@ -66,9 +66,6 @@ async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", rou
 }
 
 const apiCall = {
-  get_param: async <T extends keyof GET_Responses>(route: ApiRoutes.COURSE_FIND_WITH_KEY, pathValues?: {
-    courseId: string | undefined
-  })                                  => apiFetch("GET", route,undefined,pathValues) as Promise<AxiosResponse<GET_Responses[T]>>,
   get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues)                                  => apiFetch("GET", route,undefined,pathValues) as Promise<AxiosResponse<GET_Responses[T]>>,
   post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T], pathValues?:ApiCallPathValues)         => apiFetch("POST", route, body,pathValues) as Promise<AxiosResponse<POST_Responses[T]>>,
   put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T], pathValues?:ApiCallPathValues)            => apiFetch("PUT", route, body,pathValues),
