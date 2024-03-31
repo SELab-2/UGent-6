@@ -1,4 +1,5 @@
 import { Card, Spin, theme , Input, Button, Typography } from "antd"
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next"
 import { GET_Responses } from "../../../@types/requests";
 import { ApiRoutes } from "../../../@types/requests";
@@ -12,6 +13,21 @@ export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
+  const [projectId, setProjectId] = useState<string | null>(null)
+  const [courseId, setCourseId] = useState<string | null>(null)
+
+  //TODO: dezen moeten vervangen worden met echte API calls
+  useEffect(() => {
+    setTimeout(() => {
+      setProjectId("1")
+    }, 100)
+  }, [])
+
+  useEffect(() => {
+    setTimeout(() => {
+      setCourseId("1")
+    }, 100)
+  }, [projectId])
 
   const downloadSubmission = () => {
     //TODO: file vullen met echte file content
@@ -41,8 +57,11 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       type="inner"
       title={
         <span>
-          {/*TODO: moet werken met projectId en courseId*/}
-          <Link to={AppRoutes.PROJECT.replace(":projectId","...").replace(":courseId","...")}>
+          {/*This complicated looking code makes it so that if projectId or courseId is null, you won't be able to navigate by clicking the back button*/}
+          <Link to={(projectId === null || courseId === null)
+              ? "#"
+              : AppRoutes.PROJECT.replace(":projectId", projectId).replace(":courseId", courseId)}
+              onClick={(projectId === null || courseId === null) ? (e) => e.preventDefault() : (e) => e}>
             <Button type="text" style={{marginRight: 16}}><ArrowLeftOutlined/></Button>
           </Link>
           {t("submission.submission")}
