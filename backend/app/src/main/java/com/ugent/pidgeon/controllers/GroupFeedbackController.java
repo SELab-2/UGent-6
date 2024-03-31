@@ -36,10 +36,14 @@ public class GroupFeedbackController {
 
     private Permission handleCommonChecks(long groupId, long projectId, UpdateGroupScoreRequest request, UserEntity user) {
         // Access check
-        Permission permission = PermissionHandler.userHasAccesToGroup(groupRepository, user, groupId);
-        if (!permission.hasPermission()) {
-            return permission;
+        Permission permission;
+        if (!user.getRole().equals(UserRole.admin)) {
+            permission = PermissionHandler.userHasAccesToGroup(groupRepository, user, groupId);
+            if (!permission.hasPermission()) {
+                return permission;
+            }
         }
+
 
         // Project check
         ProjectEntity project = projectRepository.findById(projectId).orElse(null);
@@ -88,11 +92,15 @@ public class GroupFeedbackController {
         if (courseEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
-        Optional<CourseUserEntity> courseUserEntity = courseUserRepository.findByCourseIdAndUserId(courseEntity.getId(), user.getId());
-        if (courseUserEntity.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
+        if (!user.getRole().equals(UserRole.admin)) {
+            Optional<CourseUserEntity> courseUserEntity = courseUserRepository.findByCourseIdAndUserId(courseEntity.getId(), user.getId());
+            if (courseUserEntity.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
+            }
+            return PermissionHandler.userIsCouresAdmin(courseUserEntity.get()).getResponseEntity();
+        } else {
+            return null;
         }
-        return  PermissionHandler.userIsCouresAdmin(courseUserEntity.get()).getResponseEntity();
     }
 
     /**
@@ -105,11 +113,11 @@ public class GroupFeedbackController {
      * @return ResponseEntity<String>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883691">apiDog documentation</a>
      * @HttpMethod Post
-     * @AllowedRoles teacher
+     * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}/projects/{projectid}/feedback
      */
     @PostMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> addGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
         ResponseEntity<String> errorResponse = getStringResponseEntity(groupId, projectId, request, auth);
         if (errorResponse != null) return errorResponse;
@@ -144,7 +152,7 @@ public class GroupFeedbackController {
         UserEntity user = auth.getUserEntity();
         if (user.getRole() == UserRole.student && !groupRepository.userInGroup(groupId, user.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not in this group");
-        } else if (user.getRole() == UserRole.teacher && !groupRepository.userAccessToGroup(user.getId(), groupId)) {
+        } else if (user.getRole() == UserRole.teacher && !groupRepository.isAdminOfGroup(user.getId(), groupId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Teacher does not have access to this group");
         }
 

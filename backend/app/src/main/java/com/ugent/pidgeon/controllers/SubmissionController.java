@@ -123,7 +123,7 @@ public class SubmissionController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
         long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(projectid, userId)) {
+        if (!projectRepository.adminOfProject(projectid, userId) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
         }
 
@@ -349,12 +349,12 @@ public class SubmissionController {
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
         if (submission == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("submission not found");
         }
-
-        Permission permission = PermissionHandler.accesToSubmission(groupRepository, projectRepository, submission.getGroupId(), submission.getProjectId(), auth.getUserEntity());
-        if (!permission.hasPermission()) return permission.getResponseEntity();
-
+        if(!auth.getUserEntity().getRole().equals(UserRole.admin)) {
+            Permission permission = PermissionHandler.accesToSubmission(groupRepository, projectRepository, submission.getGroupId(), submission.getProjectId(), auth.getUserEntity());
+            if (!permission.hasPermission()) return permission.getResponseEntity();
+        }
         submissionRepository.delete(submission);
         fileController.deleteFileById(submission.getFileId());
         return ResponseEntity.ok().build();
