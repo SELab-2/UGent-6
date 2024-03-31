@@ -1,10 +1,12 @@
 import i18next from "i18next"
 import { initReactI18next } from "react-i18next"
+
+
 import translation_en from "./en/translation.json"
 import translation_nl from "./nl/translation.json"
 
 i18next.use(initReactI18next).init({
-  debug: true,
+  debug: false,
   resources: {
     en: {
       translation: translation_en,

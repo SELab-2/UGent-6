@@ -3,8 +3,6 @@ package com.ugent.pidgeon.postgre.models;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import jakarta.persistence.*;
 
-import java.io.Serializable;
-
 @Entity
 @IdClass(CourseUserId.class)
 @Table(name="course_users")
@@ -59,7 +57,6 @@ public class CourseUserEntity {
     public void setRelation(CourseRelation relation) {
         this.relation = relation.toString();
     }
-
 
 }
 

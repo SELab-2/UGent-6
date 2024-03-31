@@ -6,12 +6,10 @@
 export enum AppRoutes {
   HOME = "/",
   COURSES = "/courses",
-  DASHBOARD = "/dashboard",
-  COURSE = "/courses/:id",
-  LOGIN = "/login",
-  LOGOUT = "/logout",
+  PROJECT = "/courses/:courseId/projects/:projectId",
+  COURSE = "/courses/:courseId",
+  NEW_SUBMISSION = "/courses/:courseId/projects/:projectId/submit",
+  SUBMISSION_FEEDBACK = "/courses/:courseId/projects/:projectId/feedback/:submitionId",
   PROFILE = "/profile",
-  ERROR = "/error",
-  NOT_FOUND = "/not-found"
-}
+  }
 

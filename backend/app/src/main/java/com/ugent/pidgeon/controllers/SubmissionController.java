@@ -46,7 +46,8 @@ public class SubmissionController {
     private FileController fileController;
 
 
-    private Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
+    private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
+
         // Get the test file from the server
         FileEntity testfileEntity = fileRepository.findById(testEntity.getStructureTestId()).orElse(null);
         if (testfileEntity == null) {
@@ -201,24 +202,24 @@ public class SubmissionController {
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
-            Boolean testresult;
+            SubmissionTemplateModel.SubmissionResult testresult;
             if (testEntity == null) {
                 Logger.getLogger("SubmissionController").info("no test");
-                testresult = true;
+                testresult = new SubmissionTemplateModel.SubmissionResult(true, "No structure requirements for this project.");
             } else {
                 testresult = runStructureTest(new ZipFile(savedFile), testEntity);
             }
             if (testresult == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
-
-            // Update the submission with the test result
-            submission.setStructureAccepted(testresult);
+            submissionRepository.save(submissionEntity);
+            // Update the submission with the test resultsetAccepted
+            submission.setStructureAccepted(testresult.passed);
             submission = submissionRepository.save(submission);
 
             // Update the submission with the test feedbackfiles
             submission.setDockerFeedback("TEMP DOCKER FEEDBACK");
-            submission.setStructureFeedback("TEMP STRUCTURE FEEDBACK");
+            submission.setStructureFeedback(testresult.feedback);
             submissionRepository.save(submission);
 
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
@@ -331,6 +332,7 @@ public class SubmissionController {
     public ResponseEntity<?> getDockerFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
         return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedback);
     }
+
 
     /**
      * Function to delete a submission

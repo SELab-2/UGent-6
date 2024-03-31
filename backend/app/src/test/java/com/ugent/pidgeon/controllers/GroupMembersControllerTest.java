@@ -50,6 +50,9 @@ public class GroupMembersControllerTest extends ControllerTest {
         when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupMemberRepository.removeMemberFromGroup(anyLong(), anyLong())).thenReturn(1);
 
+
+
+
         mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}","1") + "/1"))
                 .andExpect(status().isNoContent());
     }
