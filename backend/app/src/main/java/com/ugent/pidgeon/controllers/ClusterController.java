@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.logging.Logger;
 
 @RestController
 public class ClusterController {
@@ -102,7 +103,7 @@ public class ClusterController {
         GroupClusterEntity clusterEntity =  groupClusterRepository.save(cluster);
 
         for (int i = 0; i < clusterJson.groupCount(); i++) {
-            groupRepository.save(new GroupEntity( "Group " + (i+1), cluster.getId()));
+            groupRepository.save(new GroupEntity( "Group " + (i+1), clusterEntity.getId()));
         }
 
         GroupClusterJson clusterJsonResponse = clusterEntityToClusterJson(clusterEntity);
