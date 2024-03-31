@@ -215,10 +215,35 @@ public class CourseController {
         }
     }
 
+    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
+    @Roles({UserRole.student, UserRole.teacher})
+    public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId, @PathVariable String courseKey) {
+        CourseEntity course = courseRepository.findById(courseId).orElse(null);
+        if (course != null) {
+            if (course.getJoinKey() == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course does not require a join key. Use " + ApiRoutes.COURSE_BASE_PATH + "/" + courseId + "/join");
+            }
+            if (!course.getJoinKey().equals(courseKey)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid join key");
+            }
+            if (courseUserRepository.isCourseMember(courseId, auth.getUserEntity().getId())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
+            }
+            courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
+            return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
+        }
+    }
+
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
-        if (courseRepository.existsById(courseId)) {
+        CourseEntity course = courseRepository.findById(courseId).orElse(null);
+        if (course != null) {
+            if (course.getJoinKey() != null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course requires a join key. Use " + ApiRoutes.COURSE_BASE_PATH + "/" + courseId + "/join/{courseKey}");
+            }
             if (courseUserRepository.isCourseMember(courseId, auth.getUserEntity().getId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
             }
