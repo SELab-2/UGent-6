@@ -18,9 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -45,7 +43,7 @@ public class SubmissionController {
     @Autowired
     private FileController fileController;
 
-    private Boolean runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
+    private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
         // Get the test file from the server
         FileEntity testfileEntity = fileRepository.findById(testEntity.getStructureTestId()).orElse(null);
         if (testfileEntity == null) {
@@ -170,24 +168,24 @@ public class SubmissionController {
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
-            Boolean testresult;
+            SubmissionTemplateModel.SubmissionResult testresult;
             if (testEntity == null) {
                 Logger.getLogger("SubmissionController").info("no test");
-                testresult = true;
+                testresult = new SubmissionTemplateModel.SubmissionResult(true, "No structure requirements for this project.");
             } else {
                 testresult = runStructureTest(new ZipFile(savedFile), testEntity);
             }
             if (testresult == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
             }
-
-            // Update the submission with the test result
-            submission.setStructureAccepted(testresult);
+            submissionRepository.save(submissionEntity);
+            // Update the submission with the test resultsetAccepted
+            submission.setStructureAccepted(testresult.passed);
             submission = submissionRepository.save(submission);
 
             // Update the submission with the test feedbackfiles
             submission.setDockerFeedback("TEMP DOCKER FEEDBACK");
-            submission.setStructureFeedback("TEMP STRUCTURE FEEDBACK");
+            submission.setStructureFeedback(testresult.feedback);
             submissionRepository.save(submission);
 
             return ResponseEntity.ok(getSubmissionJson(submissionEntity));
@@ -235,7 +233,7 @@ public class SubmissionController {
     }
 
     public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, String> feedbackGetter) {
-   
+
         long userId = auth.getUserEntity().getId();
         // Get the submission entry from the database
         SubmissionEntity submission = submissionRepository.findById(submissionid).orElse(null);
@@ -263,7 +261,7 @@ public class SubmissionController {
     public ResponseEntity<?> getDockerFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
         return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedback);
     }
-  
+
     @DeleteMapping(ApiRoutes.SUBMISSION_BASE_PATH+"/{submissionid}")
     @Roles({UserRole.teacher})
     public ResponseEntity<Void> deleteSubmissionById(@PathVariable("submissionid") long submissionid, Auth auth) {
