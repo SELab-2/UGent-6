@@ -49,13 +49,11 @@ const AuthNav = () => {
   ]
 
   const handleDropdownClick: MenuProps["onClick"] = (menu) => {
-    console.log(menu.keyPath,menu.key);
     switch (menu.key) {
       case "profile":
         navigate(AppRoutes.PROFILE)
         break
       case "logout":
-        console.log(auth);
         msalInstance.logoutPopup({
           account: auth,
         })

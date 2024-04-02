@@ -18,14 +18,6 @@ const AuthenticatedRoute: FC = () => {
     } 
   }, [isAuthenticated,inProgress])
 
-  // useEffect(()=>{
-  //   console.log(s);
-  //     if(!auth) {
-  //       console.log(auth);
-  //       console.log("Not authenticated!");
-  //      // navigate(AppRoutes.HOME)
-  //     }
-  // },[auth,s])
 
   if (isAuthenticated) {
     return <Outlet />

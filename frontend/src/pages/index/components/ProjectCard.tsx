@@ -1,13 +1,14 @@
-import { FC, useEffect, useState } from "react"
+import { FC, memo, useEffect, useState } from "react"
 import ProjectTable, { ProjectType } from "./ProjectTable"
 import { Card } from "antd"
 
-const ProjectCard: FC<{courseId?:number|string}> = ({courseId}) => {
+const ProjectCard: FC<{courseId?:number}> = ({courseId}) => {
   const [projects,setProjects] = useState<ProjectType[]|null>(null)
 
 
   useEffect(()=> {
     // TODO:  do projects fetch to either all projects or course projects if courseId != undefined
+    if(!courseId) return
     setTimeout(() => {
       setProjects([{
         projectId: 1,
@@ -25,7 +26,7 @@ const ProjectCard: FC<{courseId?:number|string}> = ({courseId}) => {
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",
-          courseId: 1
+          courseId: courseId
         }
       },
       {
@@ -44,13 +45,14 @@ const ProjectCard: FC<{courseId?:number|string}> = ({courseId}) => {
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",
-          courseId: 1
+          courseId: courseId
         }
       }])
 
     }, 300)
 
-  },[])
+  },[courseId])
+  console.log("======>", courseId);
 
   return (
     <Card

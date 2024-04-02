@@ -3,10 +3,7 @@ package com.ugent.pidgeon.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.CourseMemberRequestJson;
-import com.ugent.pidgeon.model.json.PublicUserDTO;
-import com.ugent.pidgeon.model.json.UserIdJson;
-import com.ugent.pidgeon.model.json.CourseJson;
+import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -56,18 +53,19 @@ public class CourseController {
     public ResponseEntity<String> getUserCourses(Auth auth){
         long userID = auth.getUserEntity().getId();
         try {
-            List<UserRepository.CourseIdWithRelation> userCourses = userRepository.findCourseIdsByUserId(userID);
+            List<UserRepository.CourseIdWithRelation> courses = userRepository.findCourseIdsByUserId(userID);
 
-            // Retrieve course entities based on user courses
-            List<CourseJSONObject> courseJSONObjects = userCourses.stream()
-                    .map(courseWithRelation -> courseRepository.findById(courseWithRelation.getCourseId())
-                            .orElse(null))
-                    .filter(Objects::nonNull)
-                    .map(entity -> new CourseJSONObject(entity.getId(), entity.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + entity.getId()))
-                    .toList();
+            List<CourseWithRelationJson> userCourses = courses.stream().map(
+                    c -> new CourseWithRelationJson(
+                            ApiRoutes.COURSE_BASE_PATH+"/" + c.getCourseId(),
+                            c.getRelation(),
+                            c.getName(),
+                            c.getCourseId()
+
+                    )).toList();
 
             ObjectMapper objectMapper = new ObjectMapper();
-            String jsonResponse = objectMapper.writeValueAsString(courseJSONObjects);
+            String jsonResponse = objectMapper.writeValueAsString(userCourses);
 
 
             // Return the JSON string in ResponseEntity
@@ -77,8 +75,6 @@ public class CourseController {
         }
     }
 
-    // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
-    private record CourseJSONObject(long id, String name, String url){}
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})

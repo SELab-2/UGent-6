@@ -39,6 +39,8 @@ const SubmissionsCard = () => {
             name: "Groep 1",
           },
           project_url: "/api/projects/1",
+          projectId: 1,
+          courseId: 1,
           structure_accepted: true,
           structure_feedback: "",
           submitted_time: "2024-01-01T00:00:00.000Z",

@@ -34,13 +34,15 @@ const CourseRoutes: FC = () => {
   useEffect(() => {
     // TODO: fetch course data: /api/courses/1
 
-    // TODO: if user is not in member list -> redirect to home + snackbar message
+
+
+    // TODO: if user is not in member list -> render 403 page
     setTimeout(() => {
       setCourse({
         members_url: "/api/courses/1/members",
         name: "Computationele biologie",
         description: "Een cursus over computationele biologie",
-        courseId: 1,
+        courseId: parseInt(params.courseId??"0"),
         teacher:  {
             name: "Peter",
             surname: "Dawyndt",
@@ -51,7 +53,6 @@ const CourseRoutes: FC = () => {
     }, 250)
   }, [params.courseId])
 
-  console.log(course,courses);
 
   if (!course || !member)
     return (

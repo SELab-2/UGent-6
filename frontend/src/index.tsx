@@ -15,7 +15,6 @@ msalInstance.initialize().then(() => {
     msalInstance.setActiveAccount(accounts[0])
   }
 
-  console.log(accounts);
 
   msalInstance.addEventCallback((event: EventMessage) => {
     if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {

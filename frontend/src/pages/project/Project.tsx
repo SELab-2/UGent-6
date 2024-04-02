@@ -1,4 +1,4 @@
-import { Card, Col, Row, Space, Tooltip, theme } from "antd"
+import { Button, Card, Col, Row, Space, Tooltip, theme } from "antd"
 import { ApiRoutes, GET_Responses } from "../../@types/requests"
 import Markdown from "react-markdown"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
@@ -14,6 +14,7 @@ import ScoreCard from "./components/ScoreCard"
 import CourseEnrolledView from "../../hooks/CourseEnrolledView"
 import CourseAdminView from "../../hooks/CourseAdminView"
 import SubmissionsCard from "./components/SubmissionsCard"
+import { EditFilled } from "@ant-design/icons"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -86,6 +87,11 @@ const Project = () => {
             style={{ width: "100%", marginBottom: "3rem" }}
             title={project?.name}
             loading={!project}
+            extra={
+              <CourseAdminView >
+                <Button type="primary" icon={<EditFilled/>}>Edit</Button>
+              </CourseAdminView>
+            }
           >
             {project && <Markdown components={CodeBlock}>{project.description}</Markdown>}
           </Card>

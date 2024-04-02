@@ -34,7 +34,6 @@ const ProfileContent = () => {
             }).catch(err => {
                 console.log(err);
             });
-            console.log(id);
         }
     }, [inProgress, id, instance]);
 

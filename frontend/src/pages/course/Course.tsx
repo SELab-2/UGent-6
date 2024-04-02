@@ -34,9 +34,7 @@ const Course: FC = () => {
         key: "2",
         label: t("course.groups"),
         children: <GroupsCard courseId={course.courseId!} />,
-      },
-     
-      
+      }
     ]
 
     if (isCourseAdmin) {
@@ -64,7 +62,9 @@ const Course: FC = () => {
     }
 
     return tabs
-  }, [t, isCourseAdmin])
+  }, [t, isCourseAdmin,course])
+
+
 
   return (
     <div style={{ marginTop: "3rem" }}>

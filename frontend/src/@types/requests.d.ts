@@ -105,6 +105,8 @@ export type GET_Responses = {
   [ApiRoutes.SUBMISSION]: {
     submissionId: number
     project_url: string
+    projectId: number
+    courseId: number
     file_url: string
     group_url: string
     group: {

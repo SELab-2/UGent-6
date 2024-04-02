@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next"
 import { DownloadOutlined } from "@ant-design/icons"
 import useProject from "../../../hooks/useProject"
 import SubmissionStatusTag from "./SubmissionStatusTag"
+import { Link } from "react-router-dom"
+import { AppRoutes } from "../../../@types/routes"
 
 const GroupMember = ({ name, surname }: ProjectSubmissionsType["group"]["members"][number]) => {
   return <List.Item>{name + " " + surname}</List.Item>
@@ -33,7 +35,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       },
       {
         title: t("project.submission"),
-        render: (s:ProjectSubmissionsType) => <Typography.Link>#{s.submissionId}</Typography.Link>,
+        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION_FEEDBACK.replace(":submissionId", s.submissionId+"")}><Button type="link">#{s.submissionId}</Button></Link>,
       },
       {
         title: t("project.status"),
