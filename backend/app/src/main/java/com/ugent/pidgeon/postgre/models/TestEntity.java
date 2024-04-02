@@ -16,7 +16,7 @@ public class TestEntity {
     private String dockerImage;
 
     @Column(name = "docker_test")
-    private long dockerTest;
+    private long dockerTestId;
 
     @Column(name = "structure_test_id")
     private long structureTestId;
@@ -24,9 +24,9 @@ public class TestEntity {
     public TestEntity() {
     }
 
-    public TestEntity(String dockerImage, long dockerTest, long structureTestId) {
+    public TestEntity(String dockerImage, long dockerTestId, long structureTestId) {
         this.dockerImage = dockerImage;
-        this.dockerTest = dockerTest;
+        this.dockerTestId = dockerTestId;
         this.structureTestId = structureTestId;
     }
 
@@ -47,12 +47,12 @@ public class TestEntity {
         this.dockerImage = dockerImage;
     }
 
-    public long getDockerTest() {
-        return dockerTest;
+    public long getDockerTestId() {
+        return dockerTestId;
     }
 
-    public void setDockerTest(long dockerTest) {
-        this.dockerTest = dockerTest;
+    public void setDockerTestId(long dockerTest) {
+        this.dockerTestId = dockerTest;
     }
 
     public long getStructureTestId() {

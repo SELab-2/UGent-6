@@ -7,6 +7,7 @@ import com.ugent.pidgeon.model.json.NameRequest;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,9 +20,11 @@ import java.util.List;
 public class GroupController {
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private GroupClusterRepository groupClusterRepository;
 
 
-    private GroupJson groupEntityToJson(GroupEntity groupEntity) {
+    public GroupJson groupEntityToJson(GroupEntity groupEntity) {
         GroupJson group = new GroupJson(groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
 
         // Get the members of the group
@@ -89,7 +92,7 @@ public class GroupController {
     }
 
     @DeleteMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Void> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
         // Get userId
         long userId = auth.getUserEntity().getId();
@@ -111,6 +114,11 @@ public class GroupController {
         groupRepository.deleteGroupFeedbacksByGroupId(groupid);
         groupRepository.deleteById(groupid);
 
+        // update groupcount in cluster
+        groupClusterRepository.findById(group.getClusterId()).ifPresent(cluster -> {
+            cluster.setGroupAmount(cluster.getGroupAmount() - 1);
+            groupClusterRepository.save(cluster);
+        });
         // Return 204
         return ResponseEntity.noContent().build();
     }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
     @Transactional
@@ -76,6 +77,8 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
             WHERE p.id = ?1 AND gu.userId = ?2""")
     Long groupIdByProjectAndUser(long projectId, long userId);
 
+    List<GroupEntity> findAllByClusterId(long CusterId);
 
+    Optional<GroupEntity> findByIdAndClusterId(long id, long clusterId);
 
 }

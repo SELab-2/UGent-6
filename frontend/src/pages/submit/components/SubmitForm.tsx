@@ -1,6 +1,7 @@
 import { InboxOutlined } from "@ant-design/icons"
-import { Button, Form, Space, Upload } from "antd"
+import { Button, Form, FormInstance, Space, Upload } from "antd"
 import { UploadProps } from "antd/lib"
+import { FC } from "react"
 import { useTranslation } from "react-i18next"
 
 
@@ -12,8 +13,7 @@ const props: UploadProps = {
   directory: true,
 }
 
-const SubmitForm = () => {
-  const [form] = Form.useForm()
+const SubmitForm:FC<{form:FormInstance}> = ({form}) => {
 
   const {t} = useTranslation()
   const normFile = (e: any) => {
@@ -31,17 +31,18 @@ const SubmitForm = () => {
   }
 
   return (
-    <Form form={form} layout="vertical">
+    <Form form={form} layout="vertical" style={{height:"100%"}}>
     
         <Form.Item
           name={t("project.addFiles")}
           valuePropName="fileList"
           getValueFromEvent={normFile}
-          noStyle
+          style={{height:"100%"}}
         >
           <Upload.Dragger
             {...props}
             style={{ height:"100%"}}
+            
           >
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
@@ -50,17 +51,6 @@ const SubmitForm = () => {
             <p className="ant-upload-hint">{t("project.uploadAreaSubtitle")}</p>
           </Upload.Dragger>
         </Form.Item>
-
-      <Form.Item  style={{width:"100%",textAlign:"center",marginTop:"2rem"}}>
-          <Button
-            type="primary"
-            size="large"
-            htmlType="submit"
-            disabled={!form.getFieldValue("fileList")?.length}
-          >
-            {t("project.submit")}
-          </Button>
-      </Form.Item>
     </Form>
   )
 }

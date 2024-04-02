@@ -28,7 +28,7 @@ const GradesList: FC<{ feedback: GroupFeedback[], courseId:number }> = ({ feedba
           <List.Item
             actions={[
               <Typography.Text>
-                {score.score} / {score.project.maxScore}
+                {score.score} / {score.maxScore}
               </Typography.Text>,
             ]}
           >

@@ -10,7 +10,6 @@
     "@fontsource/jetbrains-mono": "^5.0.19",
     "@fontsource/roboto-mono": "^5.0.17",
     "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^20.11.28",
@@ -36,7 +35,22 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|webp|svg)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(jest-)?@azure/msal-react)"
+    ],
+    "testMatch": [
+      "**/?(*.)+(spec|test).ts?(x)"
+    ]
   },
   "eslintConfig": {
     "extends": [
@@ -57,6 +71,11 @@
     ]
   },
   "devDependencies": {
-    "@types/react-syntax-highlighter": "^15.5.11"
+    "@testing-library/react": "^14.2.2",
+    "@types/react-syntax-highlighter": "^15.5.11",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "ts-jest": "^29.1.2"
   }
 }

@@ -16,6 +16,7 @@ const ProjectCard: FC<{courseId?:number|string}> = ({courseId}) => {
         description: "Maak een programma dat dingen doet ... aaaaaa".repeat(10),
         submission_url: "/api/projects/1/submission",
         tests_url: "/api/projects/1/tests",
+        maxScore: 100,
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",
@@ -29,6 +30,7 @@ const ProjectCard: FC<{courseId?:number|string}> = ({courseId}) => {
         description: "Maak een programma dat ...",
         submission_url: "/api/projects/2/submission",
         tests_url: "/api/projects/2/tests",
+        maxScore: 100,
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",

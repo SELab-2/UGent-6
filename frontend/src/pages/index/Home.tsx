@@ -10,12 +10,11 @@ import useUser from "../../hooks/useUser"
 const Home = () => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const {courses} = useUser()
-  
+  const { courses } = useUser()
+
   return (
-    <div >
+    <div>
       <div>
-        
         <Typography.Title
           level={3}
           style={{
@@ -23,7 +22,6 @@ const Home = () => {
           }}
         >
           {t("home.yourCourses")}
-          {/* <TeacherView> */}{" "}
           <Button
             onClick={() => setOpen(true)}
             type="text"
@@ -36,16 +34,22 @@ const Home = () => {
           className="small-scroll-bar"
           style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem" }}
         >
-          {courses ?courses
-            .map((c) => (
-              <CourseCard
-                key={c.courseId}
-                course={c}
-              />
-            ))
-            
-          
-          : Array(3).fill(0).map( (_,i) => <Card key={i} loading style={{ width: 300, height: 235 }} />)}
+          {courses
+            ? courses.map((c) => (
+                <CourseCard
+                  key={c.courseId}
+                  course={c}
+                />
+              ))
+            : Array(3)
+                .fill(0)
+                .map((_, i) => (
+                  <Card
+                    key={i}
+                    loading
+                    style={{ width: 300, height: 235 }}
+                  />
+                ))}
         </Space>
       </div>
       <br />

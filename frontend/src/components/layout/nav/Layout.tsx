@@ -8,19 +8,19 @@ import Sidebar from "../sidebar/Sidebar"
 import LanguageDropdown from "../../LanguageDropdown"
 
 
-const Layout: FC<PropsWithChildren> = ({ children }) => {
+const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
 
 
 
-  if(!isAuthenticated) return children
+  if(!isAuthenticated) return <>{children}</>
 
   return (
     <div style={{ position: "fixed", width: "100vw" }}>
         <AntLayout.Header style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
           <Sidebar />
 
-          <Logo style={{ margin: 0, padding: 0, width: "100%" }} />
+          <Logo className="nav-logo" style={{ margin: 0, padding: 0, width: "100%" }} />
           {/* <UnauthenticatedTemplate>
           <UnauthNav />
         </UnauthenticatedTemplate> */}

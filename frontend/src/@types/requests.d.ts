@@ -106,6 +106,11 @@ export type GET_Responses = {
     project_url: string
     file_url: string
     group_url: string
+    group: {
+      name:string;
+      groupId:number;
+      members: { name:string, surname:string, url:string, userId:number }[]
+    }
     structure_accepted: boolean
     structure_feedback: string
     //Docker results available variable, so that the structure test results can be displayed before the Docker tests are completed
@@ -113,6 +118,10 @@ export type GET_Responses = {
     docker_accepted: boolean
     docker_feedback: string
     submitted_time: Timestamp
+    feedback: {
+      feedback: string|null;
+      score: number|null;
+    }
 
   }
   [ApiRoutes.SUBMISSION_FILE]: FormData
@@ -129,6 +138,7 @@ export type GET_Responses = {
     name: string
     submission_url: string
     tests_url: string
+    maxScore:number
   }
   [ApiRoutes.PROJECT_TESTS]: {} // ??
   [ApiRoutes.GROUP]: {
@@ -147,7 +157,8 @@ export type GET_Responses = {
   }[]
   [ApiRoutes.PROJECT_SCORE]: {
     score: number
-    feedback:string
+    feedback:string,
+    maxScore: number
   }
 
   [ApiRoutes.GROUP_MEMBER]: {
@@ -182,7 +193,7 @@ export type GET_Responses = {
     url: string
     role: "teacher" | "student" | "admin"
     email: string
-    id: int
+    id: number
     name: string
     surname: string
   },

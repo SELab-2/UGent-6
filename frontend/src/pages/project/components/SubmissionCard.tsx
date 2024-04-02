@@ -23,8 +23,35 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
           project_url: "/api/projects/1",
           structure_accepted: true,
           structure_feedback: "",
-          submittionId: 1,
+          submissionId: 1,
           submitted_time: "2024-01-01T00:00:00.000Z",
+          feedback: {
+            feedback: "Wow, that's a great submission!",
+            score:20
+          },
+          group: {
+            name:"Groep 1",
+            groupId: 1,
+            members: [{
+              name:"Bard",
+              surname:"Jansen",
+              url:"/api/groups/1/members/1",
+              userId: 4
+            },
+            {
+              name:"Bard1",
+              surname:"Jansen",
+              url:"/api/groups/1/members/1",
+              userId: 5
+            },
+            {
+              name:"Bard2",
+              surname:"Jansen",
+              url:"/api/groups/1/members/1",
+              userId: 6
+            }],
+            
+          }
         },
         {
           docker_accepted: false,
@@ -34,8 +61,38 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
           project_url: "/api/projects/1",
           structure_accepted: true,
           structure_feedback: "",
-          submittionId: 2,
+          submissionId: 2,
           submitted_time: "2024-01-01T00:00:00.000Z",
+          feedback: {
+            feedback: null,
+            score:null
+          },
+          group: {
+            name:"Groep 1",
+            groupId: 1,
+            members: [
+              {
+                name:"Piet",
+                surname:"Jansen",
+                url:"/api/groups/1/members/1",
+                userId: 1
+              },
+              {
+                name:"Piet1",
+                surname:"Jansen",
+                url:"/api/groups/1/members/1",
+                userId: 2
+              },
+              {
+                name:"Piet2",
+                surname:"Jansen",
+                url:"/api/groups/1/members/1",
+                userId: 3
+              }
+            ],
+            
+          }
+
         },
       ].slice(0,5)) // Limit to 5 submissions 
     }, 250)
@@ -48,7 +105,6 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
   return (
     <Card
       loading={!submissions}
-      style={{ marginBottom: "1rem" }}
       styles={{
         body:{
           padding:"8px 16px"

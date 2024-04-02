@@ -20,8 +20,8 @@ const SubmissionList: FC<{ submissions: SubmissionType[] | null }> = ({ submissi
       >
         <List.Item.Meta
           title={
-            <Link to={"feedback/" + submission.submittionId}>
-                <Button type="link" size="small" >#{submission.submittionId}</Button>
+            <Link to={"feedback/" + submission.submissionId}>
+                <Button type="link" size="small" >#{submission.submissionId}</Button>
             </Link>
           }
         />

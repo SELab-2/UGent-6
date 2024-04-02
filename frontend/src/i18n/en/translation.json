@@ -45,13 +45,28 @@
   "project": {
     "submissions": "Submissions",
     "newSubmission": "New submission",
+    "files": "Files",
     "submition": "Submition",
     "structure": "Structure",
     "addFiles": "Add files",
     "submit": "Submit",
+    "back": "Annuleren",
     "uploadAreaTitle": "Click or drag file to this area to upload",
     "uploadAreaSubtitle": "Maximum file size is 10MB",
-    "deadlinePassed": "Deadline passed"
+    "deadlinePassed": "Deadline passed",
+    "downloadSubmissions": "Download all submissions",
+    "group": "Group",
+    "status": "Status",
+    "feedback": "Feedback",
+    "groupEmpty": "No members in this group",
+    "testFailed": "Tests failed",
+    "structureFailed": "Structure failed",
+    "submission": "Submission",
+    "passed": "Passed",
+    "submissionTime": "Submission time",
+    "noSubmissions": "No submissions",
+    "loadingSubmissions": "Loading submissions..."
+
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"
@@ -94,5 +109,13 @@
     "score": "Score"
   },
   "cancel": "Cancel",
-  "ok": "OK"
+  "ok": "OK",
+  "error": {
+    "title": "Error",
+    "subtitle": "Something went wrong, please try again later",
+    "homepage": "Back Home",
+    "403_message": "you are not authorized to access this page.",
+    "404_message" : "Sorry, the page you visited does not exist.",
+    "500_message": "Sorry, Something went wrong"
+  }
 }

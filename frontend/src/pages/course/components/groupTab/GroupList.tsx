@@ -18,13 +18,14 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean,onClick:
           {group.members.length} / {group.capacity}
         </Typography.Text>,
         canLeave ? (
-          <Button size="small" onClick={onLeave} key="leave">{t("course.leaveGroup")}</Button>
+          <Button  style={{width:"130px"}} size="small" onClick={onLeave} key="leave">{t("course.leaveGroup")}</Button>
         ) : (
           <Button
             key="join"
             size="small"
             disabled={canJoin}
             onClick={onJoin}
+            style={{width:"130px"}}
           >
             {t("course.joinGroup")}
           </Button>
