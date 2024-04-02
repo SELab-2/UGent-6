@@ -16,7 +16,7 @@ const GroupCard: FC<{}> = () => {
     setTimeout(() => {
       setGroups([
         {
-          groupid: 1,
+          groupId: 1,
           name: "Groep 1",
           capacity: 10,
           groupcluster_url: "/groups/1",
@@ -24,31 +24,31 @@ const GroupCard: FC<{}> = () => {
             {
               name: "ikke",
               surname: "ikee",
-              userid: 1,
+              userId: 1,
               url: "/users/1",
             },
             {
               name: "boby",
               surname: "babsy",
-              userid: 44,
+              userId: 44,
               url: "/users/44",
             },
             {
               name: "boba",
               surname: "bibs",
-              userid: 42,
+              userId: 42,
               url: "/users/42",
             },
             {
               name: "bobs",
               surname: "bobo",
-              userid: 41,
+              userId: 41,
               url: "/users/41",
             },
           ],
         },
         {
-          groupid: 2,
+          groupId: 2,
 
           name: "string",
           capacity: 4,
@@ -57,25 +57,25 @@ const GroupCard: FC<{}> = () => {
             {
               name: "ok",
               surname: "idk",
-              userid: 43,
+              userId: 43,
               url: "/users/43",
             },
             {
               name: "idk",
               surname: "k",
-              userid: 44,
+              userId: 44,
               url: "/users/44",
             },
             {
               name: "baaaaaaoba",
               surname: "biaaaaaabs",
-              userid: 42,
+              userId: 42,
               url: "/users/42",
             },
             {
               name: "aaaaaaa",
               surname: "bbbbbbbb",
-              userid: 41,
+              userId: 41,
               url: "/users/41",
             },
           ],

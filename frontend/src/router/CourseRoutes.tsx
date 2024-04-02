@@ -27,7 +27,7 @@ const CourseRoutes: FC = () => {
   useEffect(() => {
     if (!courses?.length) return
     const member = courses.find((c) => c.courseId === parseInt(params.courseId ?? "0"))
-    if (!member) return // TODO: handle error
+    if (!member) return console.error("Member not found") // // TODO: handle error
     setMember(member)
   }, [courses, params.courseId])
 
@@ -40,17 +40,18 @@ const CourseRoutes: FC = () => {
         members_url: "/api/courses/1/members",
         name: "Computationele biologie",
         description: "Een cursus over computationele biologie",
-        courseId: 10,
-        teachers: [
-          {
+        courseId: 1,
+        teacher:  {
             name: "Peter",
             surname: "Dawyndt",
             url: "/api/users/1",
-          }
-        ],
+          },
+        assistents: []
       })
     }, 250)
   }, [params.courseId])
+
+  console.log(course,courses);
 
   if (!course || !member)
     return (

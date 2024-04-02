@@ -28,10 +28,15 @@ const ProjectRoutes = () => {
         projectId: 1,
         submission_url: "submission_url",
         tests_url: "tests_url",
-        maxScore: 50
+        maxScore: 50,
+        progress:{
+          usersCompleted: 40,
+          userCount: 61
+        },
+        state: "failed",
       })
     }, 300)
-  }, [])
+  }, [projectId])
 
 
   return (

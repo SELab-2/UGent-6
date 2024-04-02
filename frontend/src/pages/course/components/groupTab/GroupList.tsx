@@ -12,7 +12,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean,onClick:
 
   return (
     <List.Item
-    key={group.groupid}
+    key={group.groupId}
       actions={[
         <Typography.Text key="cap">
           {group.members.length} / {group.capacity}
@@ -43,7 +43,7 @@ const GroupList: FC<{ groups: GroupType[] | null }> = ({ groups }) => {
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
 
   let ownGroupId: number | null = useMemo(() => {
-    return groups?.find((group) => group.members.some((u) => u.userid === user?.id))?.groupid ?? null
+    return groups?.find((group) => group.members.some((u) => u.userId === user?.id))?.groupId ?? null
   }, [groups])
 
 
@@ -71,13 +71,13 @@ const GroupList: FC<{ groups: GroupType[] | null }> = ({ groups }) => {
         emptyText: "No groups available",
       }}
       loading={groups === null}
-      rowKey="groupid"
+      rowKey="groupId"
       dataSource={groups ?? []}
       renderItem={(g) => (
         <Group
           onClick={()=> handleModalClick(g)}
           canJoin={g.members.length < g.capacity || ownGroupId !== null}
-          canLeave={ownGroupId === g.groupid}
+          canLeave={ownGroupId === g.groupId}
           group={g}
           onJoin={() => onJoin(g)}
           onLeave={() => onLeave(g)}

@@ -35,12 +35,12 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     },
     {
       label: t("home.projects.projectStatus"),
-      children: <ProjectStatusTag status={Math.random() > 0.5? "completed": "notStarted"} />,
+      children: <ProjectStatusTag status={project.state} />,
       span: 24
     },
     {
       label: t("home.projects.groupProgress"),
-      children: <GroupProgress usersCompleted={Math.floor(Math.random() * 121)} userCount={121} />,
+      children: <GroupProgress usersCompleted={project.progress.usersCompleted} userCount={project.progress.userCount} />,
       span: 24
     }
   ],[project, t])

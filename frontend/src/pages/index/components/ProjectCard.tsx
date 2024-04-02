@@ -17,6 +17,11 @@ const ProjectCard: FC<{courseId?:number|string}> = ({courseId}) => {
         submission_url: "/api/projects/1/submission",
         tests_url: "/api/projects/1/tests",
         maxScore: 100,
+        progress:{
+          usersCompleted: 40,
+          userCount: 61
+        },
+        state: "completed",
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",
@@ -31,6 +36,11 @@ const ProjectCard: FC<{courseId?:number|string}> = ({courseId}) => {
         submission_url: "/api/projects/2/submission",
         tests_url: "/api/projects/2/tests",
         maxScore: 100,
+        progress:{
+          usersCompleted: 5,
+          userCount: 61
+        },
+        state: "notStarted",
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",

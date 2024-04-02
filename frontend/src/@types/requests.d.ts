@@ -2,7 +2,9 @@
  * Routes used to make API calls
  */
 export enum ApiRoutes {
+  USER_COURSES = "api/courses", 
   COURSES = "api/courses",
+  
   COURSE = "api/courses/:id",
   COURSE_MEMBERS = "api/courses/:id/users",
   COURSE_MEMBER = "api/courses/:id/users/:userId",
@@ -30,7 +32,6 @@ export enum ApiRoutes {
   TEST = "api/test",
   USER = "api/users/:id",
   USER_AUTH = "api/auth",
-  USER_COURSES = "api/users/:id/courses",
 }
 
 export type Timestamp = string
@@ -73,10 +74,10 @@ export type PUT_Requests = {
 }
 
 
-type Teacher = {
+type CourseTeacher = {
   name: string
   surname: string
-  url: string
+  url: string,
 }
 
 type Course = {
@@ -84,15 +85,14 @@ type Course = {
   name: string
 }
 
+export type ProjectStatus = "completed" | "failed" | "notStarted"
+
+
 /**
  * The response you get from the GET request
  */
 export type GET_Responses = {
-  [ApiRoutes.COURSES]: {
-    courseId: number
-    name: string
-    url: string
-  }[]
+
   [ApiRoutes.TEST]: {
     name: string
     firstName: string
@@ -100,7 +100,8 @@ export type GET_Responses = {
     email: string
     oid: string
   }
-  [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
+  [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][],
+  [ApiRoutes.GROUP_SUBMISSIONS]: Omit<GET_Responses[ApiRoutes.SUBMISSION], "group" | "feedback" >
   [ApiRoutes.SUBMISSION]: {
     submissionId: number
     project_url: string
@@ -122,7 +123,6 @@ export type GET_Responses = {
       feedback: string|null;
       score: number|null;
     }
-
   }
   [ApiRoutes.SUBMISSION_FILE]: FormData
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
@@ -139,6 +139,11 @@ export type GET_Responses = {
     submission_url: string
     tests_url: string
     maxScore:number
+    state: ProjectStatus
+    progress: {
+      usersCompleted: number
+      userCount: number
+    }
   }
   [ApiRoutes.PROJECT_TESTS]: {} // ??
   [ApiRoutes.GROUP]: {
@@ -149,11 +154,11 @@ export type GET_Responses = {
     name: string
   }
   [ApiRoutes.CLUSTER_GROUPS]: {
-    groupid: number
+    groupId: number
     name: string
     capacity: number
     groupcluster_url: string
-    members: { userid: number; name:string, surname:string, url:string }[]
+    members: { userId: number; name:string, surname:string, url:string }[]
   }[]
   [ApiRoutes.PROJECT_SCORE]: {
     score: number
@@ -162,7 +167,7 @@ export type GET_Responses = {
   }
 
   [ApiRoutes.GROUP_MEMBER]: {
-    id: string
+    userId: string
     name: string
     surname: string
     url: string
@@ -170,21 +175,25 @@ export type GET_Responses = {
   [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
 
-  [ApiRoutes.COURSE_CLUSTERS]: {
-    clusterid: number
-    name: string
-    capacity: number
-    course_url: string
-    groups: { name: string; group_url: string }[]
-  }[]
+  [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][]
   
-  [ApiRoutes.CLUSTER]: GET_Responses[ApiRoutes.CLUSTER_GROUPS]
+  [ApiRoutes.CLUSTER]: {
+    clusterId: number;
+    name: string;
+    capacity: number;
+    groupCount: number;
+    created_at: Timestamp;
+    groups: { name: string; group_url: string, groupId: number }[]
+    course_url: string
+  }
   [ApiRoutes.COURSE]: {
     description: string
     courseId: number
     members_url: string
     name: string
-    teachers: Teacher[] // Changed this
+    teacher: CourseTeacher
+    assistents: CourseTeacher[]
+    members_url: string
   }
   [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER]
   [ApiRoutes.USER]: {
@@ -204,6 +213,6 @@ export type GET_Responses = {
     relation: "enrolled" | "course_admin" | "creator",
     url:string
   }[],
-  [ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
-  [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.PROJECT_GROUP][]
+  //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
+  [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.CLUSTER_GROUPS] //GET_Responses[ApiRoutes.PROJECT_GROUP][]
 }

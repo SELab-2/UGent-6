@@ -72,12 +72,8 @@ const Course: FC = () => {
         <Typography.Title style={{marginBottom:"0.5rem"}} level={1}>{course.name}</Typography.Title>
         <Space direction="horizontal" size="small" style={{marginBottom:"0.5rem"}}>
           <Tag color="blue">2024-2025</Tag> 
-          {
-            course.teachers.map((teacher) => (
-
-              <Tag key={teacher.url} color="orange">{teacher.name} {teacher.surname}</Tag>
-            ))
-          }
+           <Tag key={course.teacher.url} color="orange">{course.teacher.name} {course.teacher.surname}</Tag>
+          
         </Space>
         <br/>
         <Tabs
