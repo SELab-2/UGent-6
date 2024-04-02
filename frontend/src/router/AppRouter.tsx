@@ -8,6 +8,7 @@ import CourseRoutes from "./CourseRoutes"
 import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 import Project from "../pages/project/Project"
 import Submit from "../pages/submit/Submit"
+import Submission from "../pages/submission/Submission"
 import Feedback from "../pages/feedback/Feedback"
 import ProjectRoutes from "./ProjectRoutes"
 import Error from "../pages/error/Error";
@@ -26,6 +27,13 @@ const AppRouter = () => {
         path="/"
         element={<AuthenticatedRoute />}
       >
+
+
+      <Route
+        path={AppRoutes.SUBMISSION}
+        element={<Submission />}
+      />
+
        <Route
          path={AppRoutes.NEW_SUBMISSION}
          element={<Submit />}
@@ -39,6 +47,7 @@ const AppRouter = () => {
         path={AppRoutes.COURSE}
         element={<CourseRoutes />}
       >
+
         <Route
           path=""
           element={<Course />}
@@ -57,8 +66,14 @@ const AppRouter = () => {
             path={AppRoutes.SUBMISSION_FEEDBACK}
             element={<Feedback />}
             />
+
+            <Route
+              path={AppRoutes.NEW_SUBMISSION}
+              element={<Submit />}
+            />
           </Route>
-      </Route>
+        </Route>
+
         <Route
           path="/api-test"
           element={<ApiTest />}

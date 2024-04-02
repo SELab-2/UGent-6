@@ -64,6 +64,12 @@ html {
 
 .show-actions-on-hover:hover .ant-list-item-action {
   opacity: 1;
+  
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('\theme\fonts\JetBrainsMono-Regular.ttf') format('truetype');
 }
 
 /* *************************** Landing page *************************** */

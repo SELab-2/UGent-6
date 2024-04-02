@@ -112,8 +112,10 @@ export type GET_Responses = {
       members: { name:string, surname:string, url:string, userId:number }[]
     }
     structure_accepted: boolean
-    docker_accepted: boolean
     structure_feedback: string
+    //Docker results available variable, so that the structure test results can be displayed before the Docker tests are completed
+    docker_results_available: boolean,
+    docker_accepted: boolean
     docker_feedback: string
     submitted_time: Timestamp
     feedback: {

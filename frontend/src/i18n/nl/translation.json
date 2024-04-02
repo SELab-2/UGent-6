@@ -77,6 +77,18 @@
     "subtitle": "Eenvoudig cursussen en projecten beheren, automatisch code testen en beoordelen.",
     "getStarted": "Aan de slag"
   },
+  
+  "submission": {
+    "submission": "Indiening",
+    "submittedFiles": "Ingediende bestanden:",
+    "structuretest": "Resultaten structuurtest:",
+    "dockertest": "Resultaten dockertest:",
+    "status": {
+      "accepted": "Alle testen geslaagd.",
+      "failed": "Sommige testen niet geslaagd."
+    }
+  },
+
   "course": {
     "projects": "Projecten",
     "groups": "Groepen",
