@@ -8,7 +8,7 @@ const ProjectCard: FC<{courseId?:number}> = ({courseId}) => {
 
   useEffect(()=> {
     // TODO:  do projects fetch to either all projects or course projects if courseId != undefined
-    if(!courseId) return
+    
     setTimeout(() => {
       setProjects([{
         projectId: 1,
@@ -26,7 +26,7 @@ const ProjectCard: FC<{courseId?:number}> = ({courseId}) => {
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",
-          courseId: courseId
+          courseId: courseId??1
         }
       },
       {
@@ -45,7 +45,7 @@ const ProjectCard: FC<{courseId?:number}> = ({courseId}) => {
         course: {
           name: "Computationele biologie",
           url: "/api/courses/1",
-          courseId: courseId
+          courseId: courseId??1
         }
       }])
 

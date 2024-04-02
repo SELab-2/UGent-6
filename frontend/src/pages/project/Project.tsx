@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import useApp from "../../hooks/useApp"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import SubmissionCard from "./components/SubmissionCard"
 import useCourse from "../../hooks/useCourse"
 import GroupCard from "./components/GroupCard"
@@ -15,6 +15,7 @@ import CourseEnrolledView from "../../hooks/CourseEnrolledView"
 import CourseAdminView from "../../hooks/CourseAdminView"
 import SubmissionsCard from "./components/SubmissionsCard"
 import { EditFilled } from "@ant-design/icons"
+import { AppRoutes } from "../../@types/routes"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -89,7 +90,9 @@ const Project = () => {
             loading={!project}
             extra={
               <CourseAdminView >
+                <Link to="edit">
                 <Button type="primary" icon={<EditFilled/>}>Edit</Button>
+                </Link>
               </CourseAdminView>
             }
           >

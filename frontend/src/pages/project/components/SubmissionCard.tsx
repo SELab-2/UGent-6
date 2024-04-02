@@ -14,8 +14,9 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
   useEffect(() => {
     //TODO: fetch submissions
     setTimeout(() => {
-      setSubmissions([
+      const submissions: SubmissionType[] = [
         {
+          docker_results_available: true,
           docker_accepted: true,
           docker_feedback: "",
           file_url: "/api/submissions/1/file",
@@ -29,6 +30,8 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
             feedback: "Wow, that's a great submission!",
             score:20
           },
+          
+
           group: {
             name:"Groep 1",
             groupId: 1,
@@ -54,6 +57,7 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
           }
         },
         {
+          docker_results_available: true,
           docker_accepted: false,
           docker_feedback: "Failed test case 1",
           file_url: "/api/submissions/2/file",
@@ -94,7 +98,9 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
           }
 
         },
-      ].slice(0,5)) // Limit to 5 submissions 
+      ]
+
+      setSubmissions(submissions.slice(0,5)) // Limit to 5 submissions 
     }, 250)
   }, [])
 

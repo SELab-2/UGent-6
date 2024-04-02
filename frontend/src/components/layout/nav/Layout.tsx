@@ -42,7 +42,7 @@ const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
           >
             <div style={{ maxWidth: "1200px", width: "100%", height: "100%" }}>{children}</div>
           </Flex>
-          <AntLayout.Footer style={{ height: "2rem", width: "100%", bottom: 0 }}></AntLayout.Footer>
+          {/* <AntLayout.Footer style={{ height: "2rem", width: "100%", bottom: 0 }}></AntLayout.Footer> */}
         </AntLayout.Content>
       </AntLayout>
     </div>

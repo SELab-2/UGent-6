@@ -109,7 +109,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
               value={submission.docker_feedback}
               style={{ width: '100%', overflowX: 'auto', overflowY: 'auto', resize: 'none', fontFamily: 'Jetbrains Mono', marginTop: 8 }}
               rows={4}
-              autoSize={{ minRows: 4, maxRows: 8 }}
+              autoSize={{ minRows: 4, maxRows: 16 }}
             />
           </div>}
         </li>

@@ -35,7 +35,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       },
       {
         title: t("project.submission"),
-        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION_FEEDBACK.replace(":submissionId", s.submissionId+"")}><Button type="link">#{s.submissionId}</Button></Link>,
+        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION.replace(":submissionID", s.submissionId+"")}><Button type="link">#{s.submissionId}</Button></Link>,
       },
       {
         title: t("project.status"),
