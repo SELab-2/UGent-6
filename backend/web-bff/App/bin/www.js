@@ -4,22 +4,22 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('msal:server');
-var http = require('http');
+const app = require('../app');
+const debug = require('debug')('msal:server');
+const http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -34,7 +34,7 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-    var port = parseInt(val, 10);
+    const port = parseInt(val, 10);
 
     if (isNaN(port)) {
         // named pipe

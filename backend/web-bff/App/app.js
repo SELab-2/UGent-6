@@ -1,37 +1,45 @@
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License.
- */
-
 require('dotenv').config();
 
-var path = require('path');
-var express = require('express');
-var session = require('express-session');
-var createError = require('http-errors');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const path = require('path');
+const express = require('express');
+const session = require('cookie-session');
+const createError = require('http-errors');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const helmet = require('helmet');
+const hpp = require('hpp');
+const csurf = require('csurf');
+const rateLimit = require('express-rate-limit')
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var authRouter = require('./routes/auth');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth');
 
-// initialize express
-var app = express();
+/* initialize express */
+const app = express();
+
+/* Set security configs */
+app.use(helmet());
+app.use(hpp());
+
 
 /**
- * Using express-session middleware for persistent user session. Be sure to
- * familiarize yourself with available options. Visit: https://www.npmjs.com/package/express-session
+ * Using cookie-session middleware for persistent user session.
  */
 app.use(session({
+    name: 'session',
     secret: process.env.EXPRESS_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        secure: false, // set this to true on production
-    }
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
 }));
+
+app.use(csurf(undefined));
+
+const limiter = rateLimit({
+   windowMs: 15 * 60 * 1000,
+    max: 100,
+});
+
+app.use(limiter);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
