@@ -10,6 +10,7 @@ import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import MembersCard from "./components/membersTab/MemberCard"
 import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
+import { useLocation, useNavigate } from "react-router-dom"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -17,6 +18,9 @@ const Course: FC = () => {
   const { t } = useTranslation()
   const course = useCourse()
   const isCourseAdmin = useIsCourseAdmin()
+  const navigate = useNavigate()
+  const location = useLocation();
+
 
   const items: TabsProps["items"] = useMemo(() => {
     let tabs: TabsProps["items"] = [
@@ -64,8 +68,6 @@ const Course: FC = () => {
     return tabs
   }, [t, isCourseAdmin,course])
 
-
-
   return (
     <div style={{ marginTop: "3rem" }}>
       <div style={{ padding: "0 2rem" }}>
@@ -77,7 +79,8 @@ const Course: FC = () => {
         </Space>
         <br/>
         <Tabs
-          defaultActiveKey="1"
+          onChange={(k) => navigate(`#${k}`)}
+          defaultActiveKey={location.hash.slice(1) || "1"}
           items={items}
         />
       </div>

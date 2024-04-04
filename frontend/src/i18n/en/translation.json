@@ -74,7 +74,8 @@
   "landingPage":{
     "title-1": "Official",
     "title-2": "submission platform",
-    "subtitle": "Effortlessly manage courses and projects, automatically test and assess code.",
+    "subtitle-1": "Effortlessly manage courses and projects,",
+    "subtitle-2": "automatically test and assess code.",
     "getStarted": "Get started"
   },
 
@@ -106,7 +107,8 @@
     "save": "Save",
     "changesSaved": "Changes saved",
     "archived": "Archived",
-    "score": "Score"
+    "score": "Score",
+    "noGroups": "No groups available"
   },
   "cancel": "Cancel",
   "ok": "OK",

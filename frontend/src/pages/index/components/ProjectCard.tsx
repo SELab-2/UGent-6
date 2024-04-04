@@ -52,7 +52,6 @@ const ProjectCard: FC<{courseId?:number}> = ({courseId}) => {
     }, 300)
 
   },[courseId])
-  console.log("======>", courseId);
 
   return (
     <Card

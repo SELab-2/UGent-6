@@ -74,7 +74,8 @@
   "landingPage":{
     "title-1": "Officiële",
     "title-2": "indien platform",
-    "subtitle": "Eenvoudig cursussen en projecten beheren, automatisch code testen en beoordelen.",
+    "subtitle-1": "Eenvoudig cursussen en projecten beheren,",
+    "subtitle-2": "automatisch code testen en beoordelen.",
     "getStarted": "Aan de slag"
   },
   
@@ -106,7 +107,8 @@
     "save": "Opslaan",
     "courseSaved": "Aanpassingen opgeslagen",
     "archived": "Gearchiveerd",
-    "score": "Score"
+    "score": "Score",
+    "noGroups": "Geen groepen beschikbaar"
   },
   "cancel": "Annuleren",
   "ok": "Ok",

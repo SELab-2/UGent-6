@@ -102,18 +102,20 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     groups?.map((group) => ({
       key: group.clusterId.toString(),
       label: group.name,
-      children: group.groups.map((g) => (
+      children: 
         <GroupCollapseItem
-          key={g.group_url}
-          groupUrl={g.group_url}
+          key={group.course_url}
+          clustedId={group.clusterId}
         />
-      )),
-    })) ?? []
 
-  return (
+    })) 
+    
+
+
+    return (
     <Card
       {...cardProps}
-      loading={!groups}
+
       styles={{
         body: {
           padding: "0",

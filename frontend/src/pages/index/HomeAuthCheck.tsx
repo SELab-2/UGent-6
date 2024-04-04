@@ -8,20 +8,20 @@ const HomeAuthCheck = () => {
   const isAuthenticated = useIsAuthenticated()
   const { inProgress } = useMsal()
 
-  if (inProgress !== InteractionStatus.None)
-    return (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    )
+  // if (inProgress !== InteractionStatus.None)
+  //   return (
+  //     <div
+  //       style={{
+  //         width: "100%",
+  //         height: "100%",
+  //         display: "flex",
+  //         justifyContent: "center",
+  //         alignItems: "center",
+  //       }}
+  //     >
+  //       <Spin size="large" />
+  //     </div>
+  //   )
   if (isAuthenticated) {
     return <Home />
   }

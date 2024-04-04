@@ -9,7 +9,6 @@ export type GroupType = GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
 
 const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean,onClick:()=>void,onLeave:()=>void, onJoin:()=>void }> = ({ group, canJoin, canLeave,onClick,onJoin,onLeave }) => {
   const { t } = useTranslation()
-
   return (
     <List.Item
     key={group.groupId}
@@ -41,6 +40,7 @@ const GroupList: FC<{ groups: GroupType[] | null }> = ({ groups }) => {
   const { user } = useUser()
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
+  const {t} = useTranslation()
 
   let ownGroupId: number | null = useMemo(() => {
     return groups?.find((group) => group.members.some((u) => u.userId === user?.id))?.groupId ?? null
@@ -65,10 +65,11 @@ const GroupList: FC<{ groups: GroupType[] | null }> = ({ groups }) => {
 
   }
 
+
   return (<>
     <List
       locale={{
-        emptyText: "No groups available",
+        emptyText: t("course.noGroups") ,
       }}
       loading={groups === null}
       rowKey="groupId"
