@@ -54,7 +54,8 @@ public class FileStructureTest {
             System.out.println("Template: " + content);
             model.parseSubmissionTemplate(content);
             // Expose all the paths in a zipfile
-            return model.checkSubmission(testDirectory + testpath + "test.zip");
+            SubmissionTemplateModel.SubmissionResult result = model.checkSubmission(testDirectory + testpath + "test.zip");
+            return result.passed;
         } catch (IOException e) {
             e.printStackTrace();
         }
