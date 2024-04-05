@@ -22,12 +22,23 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Function to get a user by id
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod GET
+     * @ApiPath /api/user/{userid}
+     * @AllowedRoles student
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723824">apiDog documentation</a>
+     * @return user object
+     */
     @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
-    @Roles({UserRole.student, UserRole.teacher})
+    @Roles({UserRole.student})
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
         UserEntity user = auth.getUserEntity();
-        if (user.getId() != userid && user.getRole() != UserRole.teacher) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You does not have access to this user");
+        if (user.getId() != userid) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to this user");
         }
 
         UserJson res = userRepository.findById(userid).map(UserJson::new).orElse(null);
@@ -39,27 +50,8 @@ public class UserController {
     }
 
 
-    @GetMapping(ApiRoutes.USER_COURSES_BASE_PATH)
-    @Roles({UserRole.student, UserRole.teacher})
-    public ResponseEntity<Object> getUserCourses(@PathVariable("userid") Long userid,Auth auth) {
-        UserEntity user = auth.getUserEntity();
-        if (userid != user.getId() && user.getRole() != UserRole.teacher) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this user's courses");
-        }
 
-        List<UserRepository.CourseIdWithRelation> courses = userRepository.findCourseIdsByUserId(userid);
-
-        List<CourseWithRelationJson> userCourses = courses.stream().map(
-                c -> new CourseWithRelationJson(
-                        ApiRoutes.COURSE_BASE_PATH+"/" + c.getCourseId(),
-                            c.getRelation(),
-                            c.getName(),
-                            c.getCourseId()
-
-                )).toList();
-
-        return ResponseEntity.ok().body(userCourses);
-    }
+    
     @GetMapping(ApiRoutes.USER_AUTH_PATH)
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<Object> getUserByAzureId(Auth auth) {
