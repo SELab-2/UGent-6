@@ -1,11 +1,8 @@
 package com.ugent.pidgeon.controllers;
 
-import com.ugent.pidgeon.postgre.models.GroupEntity;
-import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
-import com.ugent.pidgeon.postgre.models.ProjectEntity;
-import com.ugent.pidgeon.postgre.repository.GroupFeedbackRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
-import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import com.ugent.pidgeon.postgre.repository.*;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -35,6 +33,12 @@ public class GroupFeedbackControllerTest extends ControllerTest {
     @Mock
     private ProjectRepository projectRepository;
 
+    @Mock
+    private CourseRepository courseRepository;
+
+    @Mock
+    private CourseUserRepository courseUserRepository;
+
     @InjectMocks
     private GroupFeedbackController groupFeedbackController;
 
@@ -51,8 +55,12 @@ public class GroupFeedbackControllerTest extends ControllerTest {
         when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(new ProjectEntity()));
         when(groupFeedbackRepository.updateGroupScore(anyFloat(), anyLong(), anyLong(), anyString())).thenReturn(1);
-
-
+        CourseEntity mockedCourse = new CourseEntity();
+        mockedCourse.setId(1L);
+        when(courseRepository.findCourseEntityByGroupId(anyLong())).thenReturn(List.of(mockedCourse));
+        CourseUserEntity mockedCourseUser = new CourseUserEntity();
+        mockedCourseUser.setRelation(CourseRelation.course_admin);
+        when(courseUserRepository.findByCourseIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(mockedCourseUser));
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.GROUP_FEEDBACK_PATH.replace("{groupid}", "1").replace("{projectid}", "1"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"score\": 5, \"feedback\": \"Good work\"}"))
@@ -64,7 +72,12 @@ public class GroupFeedbackControllerTest extends ControllerTest {
         when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
         when(projectRepository.findById(anyLong())).thenReturn(Optional.of(new ProjectEntity()));
         when(groupFeedbackRepository.addGroupScore(anyFloat(), anyLong(), anyLong(), anyString())).thenReturn(1);
-
+        CourseEntity mockedCourse = new CourseEntity();
+        mockedCourse.setId(1L);
+        when(courseRepository.findCourseEntityByGroupId(anyLong())).thenReturn(List.of(mockedCourse));
+        CourseUserEntity mockedCourseUser = new CourseUserEntity();
+        mockedCourseUser.setRelation(CourseRelation.course_admin);
+        when(courseUserRepository.findByCourseIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(mockedCourseUser));
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.GROUP_FEEDBACK_PATH.replace("{groupid}", "1").replace("{projectid}", "1"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"score\": 5, \"feedback\": \"Good work\"}"))

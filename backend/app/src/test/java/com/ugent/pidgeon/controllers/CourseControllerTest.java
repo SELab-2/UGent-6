@@ -1,9 +1,11 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.repository.CourseRepository;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import org.hamcrest.Matchers;
@@ -37,6 +39,9 @@ public class CourseControllerTest extends ControllerTest {
     @Mock
     private ProjectRepository projectRepository;
 
+    @Mock
+    private CourseUserRepository courseUserRepository;
+
     @InjectMocks
     private CourseController courseController;
 
@@ -51,7 +56,7 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void getCourseByCourseIdReturnsCourseWhenCourseExists() throws Exception {
         when(courseRepository.findById(anyLong())).thenReturn(Optional.of(new CourseEntity()));
-
+        when(courseUserRepository.findByCourseIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(new CourseUserEntity()));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))
                 .andExpect(status().isOk());
     }
@@ -68,6 +73,7 @@ public class CourseControllerTest extends ControllerTest {
     public void getProjectByCourseIdReturnsProjectsWhenProjectsExist() throws Exception {
         List<ProjectEntity> projects = Arrays.asList(new ProjectEntity(), new ProjectEntity());
         when(projectRepository.findByCourseId(anyLong())).thenReturn(projects);
+        when(courseUserRepository.findByCourseIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(new CourseUserEntity()));
 
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
                 .andExpect(status().isOk());

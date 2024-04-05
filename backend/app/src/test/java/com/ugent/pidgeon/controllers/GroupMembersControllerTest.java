@@ -2,6 +2,7 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupMemberRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
@@ -34,6 +35,9 @@ public class GroupMembersControllerTest extends ControllerTest {
     @Mock
     private GroupRepository groupRepository;
 
+    @Mock
+    private GroupClusterRepository groupClusterRepository;
+
     @InjectMocks
     private GroupMemberController groupMemberController;
 
@@ -47,9 +51,8 @@ public class GroupMembersControllerTest extends ControllerTest {
 
     @Test
     public void removeMemberFromGroupReturnsNoContentWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupMemberRepository.removeMemberFromGroup(anyLong(), anyLong())).thenReturn(1);
-
+        when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
 
 
 
@@ -61,8 +64,13 @@ public class GroupMembersControllerTest extends ControllerTest {
     public void addMemberToGroupReturnsOkWhenGroupExistsAndUserHasAccess() throws Exception {
         when(userRepository.existsById(anyLong())).thenReturn(true);
         when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(false);
+        GroupEntity mockedGroup = new GroupEntity();
+        mockedGroup.setClusterId(1);
+        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockedGroup));
+        when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
+        when(groupClusterRepository.userInGroupForCluster(anyLong(), anyLong())).thenReturn(false);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}", "1"))
+        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}", "1") + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"memberId\": 1}"))
                 .andExpect(status().isOk());
@@ -72,7 +80,7 @@ public class GroupMembersControllerTest extends ControllerTest {
     public void findAllMembersByGroupIdReturnsOkWhenGroupExists() throws Exception {
         List<UserEntity> members = Arrays.asList(new UserEntity(), new UserEntity());
         when(groupMemberRepository.findAllMembersByGroupId(anyLong())).thenReturn(members);
-
+        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}", "1")))
                 .andExpect(status().isOk());
     }
