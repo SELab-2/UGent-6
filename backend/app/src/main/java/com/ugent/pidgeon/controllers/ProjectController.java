@@ -2,6 +2,7 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.ProjectJson;
 import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
 
@@ -18,6 +19,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Logger;
+
+import static java.util.Arrays.stream;
 
 
 @RestController
@@ -44,6 +47,10 @@ public class ProjectController {
     private SubmissionController filesubmissiontestController;
     @Autowired
     private TestController testController;
+    @Autowired
+    private GroupController groupController;
+    @Autowired
+    private GroupRepository groupRepository;
 
     /**
      * Function to get all projects of a user
@@ -236,7 +243,34 @@ public class ProjectController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("project not found with id " + projectId);
         }
-
-
     }
+
+    /**
+     * Function to get all groups of a project
+     * @param projectId ID of the project to get the groups of
+     * @ApiDog <a href="https://app.apidog.com/project/467959/apis/api-6343073">apiDog documentation</a>
+     * @HttpMethod GET
+     * @ApiPath /api/projects/{projectId}/groups
+     * @return ResponseEntity with groups as specified in the apidog
+     */
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}/groups")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getGroupsOfProject(@PathVariable Long projectId, Auth auth) {
+        // Check if the user is an admin of the project
+        UserEntity user = auth.getUserEntity();
+        if (!user.getRole().equals(UserRole.admin)) {
+            if (!accesToProject(projectId, user)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to view this project");
+            }
+        }
+
+        List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
+        List<GroupJson> groupjsons = groups.stream()
+                .map((Long id) -> {
+                    GroupEntity group = groupRepository.findById(id).orElse(null);
+                    return groupController.groupEntityToJson(group);
+                }).toList();
+        return ResponseEntity.ok(groupjsons);
+    }
+
 }
