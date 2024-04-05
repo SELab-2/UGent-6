@@ -104,8 +104,8 @@
     "403_message": "Je bent niet bevoegd om deze pagina te bezoeken.",
     "404_message" : "Sorry, de pagina die je bezocht bestaat niet.",
     "500_message": "Sorry, er ging iets mis."
+
   },
   "cancel": "Annuleren",
   "ok": "Ok"
-
 }

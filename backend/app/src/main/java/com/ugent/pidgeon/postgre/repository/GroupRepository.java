@@ -60,6 +60,18 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
 """)
     Boolean userAccessToGroup(long userId, long groupId);
 
+    @Query(value = """
+        SELECT CASE WHEN EXISTS (
+            SELECT g FROM GroupEntity g
+            JOIN GroupClusterEntity gc ON g.clusterId = gc.id
+            JOIN ProjectEntity p ON p.groupClusterId = gc.id
+            JOIN CourseEntity c ON p.courseId = c.id
+            JOIN CourseUserEntity cu ON cu.courseId = c.id and (cu.relation = 'course_admin' or cu.relation = 'creator')
+            WHERE cu.userId = ?1 AND g.id = ?2
+        ) THEN true ELSE false END
+""")
+    Boolean isAdminOfGroup(long userId, long groupId);
+
 
     @Query(value = """
             SELECT p.id FROM ProjectEntity p

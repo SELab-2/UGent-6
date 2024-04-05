@@ -14,7 +14,6 @@
     "courseName": "Course name",
     "courseDescription": "Description",
     "yourProjects": "Your projects",
-    
     "projects": {
       "noProjects": "No projects",
       "name": "Name",
@@ -34,7 +33,6 @@
       "activeProjects": "{{count}} active project",
       "activeProjects_plural": "{{count}} active projects",
       "userCourseCount": "{{count}} users are in this course"
-      
     }
   },
   "profile": {
@@ -71,7 +69,7 @@
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"
   },
-  "landingPage":{
+  "landingPage": {
     "title-1": "Official",
     "title-2": "submission platform",
     "subtitle": "Effortlessly manage courses and projects, automatically test and assess code.",
@@ -101,10 +99,9 @@
     "subtitle": "Something went wrong, please try again later",
     "homepage": "Back Home",
     "403_message": "you are not authorized to access this page.",
-    "404_message" : "Sorry, the page you visited does not exist.",
+    "404_message": "Sorry, the page you visited does not exist.",
     "500_message": "Sorry, Something went wrong"
   },
   "cancel": "Cancel",
   "ok": "OK"
-
 }
