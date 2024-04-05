@@ -15,7 +15,11 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
     @Query("SELECT p FROM ProjectEntity p WHERE p.courseId = :courseId")
     List<ProjectEntity> findAllProjectsByCourseId(long courseId);
 
-     interface UserWithRelation {
+    @Query("SELECT c FROM CourseEntity c WHERE c.joinKey = :courseKey")
+
+    CourseEntity findByJoinKey(String courseKey);
+
+    public interface UserWithRelation {
         UserEntity getUser();
         String getRelation();
     }

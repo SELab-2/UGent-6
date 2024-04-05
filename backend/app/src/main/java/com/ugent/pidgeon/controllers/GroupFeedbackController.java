@@ -78,7 +78,7 @@ public class GroupFeedbackController {
         if (groupFeedbackRepository.updateGroupScore(request.getScore(), groupId, projectId, request.getFeedback()) == 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group feedback not found");
         }
-        return null;
+        return ResponseEntity.ok("Score updated successfully");
     }
 
     private ResponseEntity<String> getStringResponseEntity(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {

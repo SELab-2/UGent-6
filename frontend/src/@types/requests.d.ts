@@ -111,7 +111,6 @@ export type GET_Responses = {
     structure_feedback: string
     docker_feedback: string
     submitted_time: Timestamp
-
   }
   [ApiRoutes.SUBMISSION_FILE]: FormData
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
