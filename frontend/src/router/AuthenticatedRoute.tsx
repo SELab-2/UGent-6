@@ -11,7 +11,7 @@ const AuthenticatedRoute: FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (inProgress === InteractionStatus.None && !isAuthenticated) {
+    if ((inProgress === InteractionStatus.None ||  inProgress === InteractionStatus.Logout ) && !isAuthenticated) {
       // instance.loginRedirect(loginRequest);
       console.log("NOT AUTHENTICATED");
       navigate(AppRoutes.HOME)

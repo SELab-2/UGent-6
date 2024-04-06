@@ -6,11 +6,10 @@ import { CourseMemberType } from "../../../../router/CourseRoutes"
 
 const MembersCard = () => {
   const { t } = useTranslation()
-  const [members, setMembers] = useState<CourseMemberType[]|null>(null)
+  const [members, setMembers] = useState<CourseMemberType[] | null>(null)
 
-
-  setTimeout(()=> {
-    const you:CourseMemberType = {
+  setTimeout(() => {
+    const you: CourseMemberType = {
       userId: 1,
       relation: "course_admin",
       name: "Wout",
@@ -41,15 +40,18 @@ const MembersCard = () => {
         name: "Bart",
         surname: "Jansen",
       },
-      you
+      you,
     ])
   }, 350)
 
-
   return (
-    <Card title={t("course.members")}>
-      <MembersList members={members} />
-    </Card>
+    <>
+      <Card title={t("course.members")}>
+        <MembersList members={members} />
+      </Card>
+      <br />
+      <br />
+    </>
   )
 }
 
