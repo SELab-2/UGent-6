@@ -58,8 +58,8 @@ public class ClusterController {
 
         // Get the clusters for the course
         List<GroupClusterEntity> clusters = groupClusterRepository.findClustersByCourseId(courseid);
-        List<GroupClusterReferenceJson> clusterJsons = clusters.stream().map(
-                this::clusterEntityToClusterReferenceJson).toList();
+        List<GroupClusterJson> clusterJsons = clusters.stream().map(
+                this::clusterEntityToClusterJson).toList();
         // Return the clusters
         return ResponseEntity.ok(clusterJsons);
     }
@@ -74,11 +74,8 @@ public class ClusterController {
     }
 
     private GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster) {
-        List<GroupReferenceJson> groups = groupRepository.findAllByClusterId(cluster.getId()).stream().map(
-                group -> new GroupReferenceJson(
-                        group.getName(),
-                        ApiRoutes.GROUP_BASE_PATH + "/" + group.getId()
-                )
+        List<GroupJson> groups = groupRepository.findAllByClusterId(cluster.getId()).stream().map(
+                group -> groupController.groupEntityToJson(group)
         ).toList();
         return new GroupClusterJson(
                 cluster.getId(),
