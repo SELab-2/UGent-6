@@ -17,7 +17,7 @@ export type User = GET_Responses[ApiRoutes.USER]
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
   const [user, setUser] = useState<User | null>(null)
-  const [courses, setCourses] = useState<UserCourseType[]|null>(null)
+  const [courses, setCourses] = useState<UserCourseType[] | null>(null)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -25,30 +25,20 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [isAuthenticated])
 
-  const updateUser = () => {
-    apiCall
-      .get(ApiRoutes.USER_AUTH)
-      .then((data) => {
-        setUser(data.data)
+  const updateUser = async () => {
+    try {
+      let data = await apiCall.get(ApiRoutes.USER_AUTH)
 
-        apiCall
-          .get(ApiRoutes.USER_COURSES, { 
-            id: data.data.id 
-          })
-          .then((data) => {
-            setCourses(data.data)
-          })
-          .catch((error) => {
-            console.error(error)
-            // TODO: handle error
-          })
+      setUser(data.data)
 
-
+      let response = await apiCall.get(ApiRoutes.USER_COURSES, {
+        id: data.data.id,
       })
-      .catch((error) => {
-        // TODO: handle error
-        console.error(error)
-      })
+      console.log("------------", response.data);
+      setCourses(response.data)
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   return <UserContext.Provider value={{ updateUser, user, courses }}>{children}</UserContext.Provider>

@@ -4,6 +4,8 @@ import { CourseType } from "../pages/course/Course"
 import { Flex, Spin } from "antd"
 import useUser from "../hooks/useUser"
 import { UserCourseType } from "../providers/UserProvider"
+import apiCall from "../util/apiFetch"
+import { ApiRoutes } from "../@types/requests.d"
 
 export type CourseContextType = {
   course: CourseType
@@ -19,45 +21,45 @@ export type CourseMemberType = {
 export const CourseContext = createContext<CourseContextType>({} as CourseContextType)
 
 const CourseRoutes: FC = () => {
-  const params = useParams<{ courseId: string }>()
+  const { courseId } = useParams<{ courseId: string }>()
   const [course, setCourse] = useState<CourseType | null>(null)
   const { courses } = useUser()
   const [member, setMember] = useState<UserCourseType | null>(null)
 
   useEffect(() => {
-    if (!courses?.length) return
-    const member = courses.find((c) => c.courseId === parseInt(params.courseId ?? "0"))
-    if (!member) return console.error("Member not found") // // TODO: handle error
+    if (!courses?.length || !course) return
+    const member = courses.find((c) => c.courseId === parseInt(courseId ?? "0"))
+    if (!member) return console.error("Member not found") // TODO: handle error
     setMember(member)
-  }, [courses, params.courseId])
+  }, [courses, courseId])
 
   useEffect(() => {
+    let ignore = false
     // TODO: fetch course data: /api/courses/1
-
-
-
-    // TODO: if user is not in member list -> render 403 page
-    setTimeout(() => {
-      setCourse({
-        members_url: "/api/courses/1/members",
-        name: "Computationele biologie",
-        description: "Een cursus over computationele biologie",
-        courseId: parseInt(params.courseId??"0"),
-        teacher:  {
-            name: "Peter",
-            surname: "Dawyndt",
-            url: "/api/users/1",
-          },
-        assistents: []
+    console.log(courseId);
+    apiCall
+      .get(ApiRoutes.COURSE, { courseId: courseId! })
+      .then((res) => {
+        // TODO: if user is not in member list -> render 403 page
+        if (!ignore) {
+          console.log("=>", res.data)
+          setCourse(res.data)
+        }
       })
-    }, 250)
-  }, [params.courseId])
+      .catch((err) => {
+        // TODO: handle error
+        console.log(err)
+      })
 
+    return () => {
+      ignore = true
+    }
+  }, [courseId])
 
   if (!course || !member)
     return (
       <div style={{ width: "100%", height: "100%", justifyContent: "center", display: "flex", alignItems: "center" }}>
-        <Spin size="large"/>
+        <Spin size="large" />
       </div>
     )
 

@@ -5,9 +5,8 @@ export enum ApiRoutes {
   USER_COURSES = "api/courses", 
   COURSES = "api/courses",
   
-  COURSE = "api/courses/:id",
-  COURSE_MEMBERS = "api/courses/:id/users",
-  COURSE_MEMBER = "api/courses/:id/users/:userId",
+  COURSE = "api/courses/:courseId",
+  COURSE_MEMBERS = "api/courses/:courseId/members",
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
 
@@ -196,6 +195,7 @@ export type GET_Responses = {
     members_url: string
   }
   [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER]
+  [ApiRoutes.COURSE_MEMBER]: GET_Responses[ApiRoutes.GROUP_MEMBER]
   [ApiRoutes.USER]: {
     course_url: string
     projects_url: string
