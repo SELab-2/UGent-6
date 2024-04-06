@@ -13,6 +13,7 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,10 +75,20 @@ public class CourseController {
 
             // Retrieve course entities based on user courses
             List<CourseJSONObject> courseJSONObjects = userCourses.stream()
-                    .map(courseWithRelation -> courseRepository.findById(courseWithRelation.getCourseId())
-                            .orElse(null))
+                    .map(courseWithRelation -> {
+                        CourseEntity course = courseRepository.findById(courseWithRelation.getCourseId()).orElse(null);
+                        if (course == null) {
+                            return null;
+                        }
+                        return new CourseJSONObject(
+                                course.getId(),
+                                course.getName(),
+                                ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
+                                courseWithRelation.getRelation()
+                        );
+                    }
+                    )
                     .filter(Objects::nonNull)
-                    .map(entity -> new CourseJSONObject(entity.getId(), entity.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + entity.getId()))
                     .toList();
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -92,7 +103,7 @@ public class CourseController {
     }
 
     // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
-    private record CourseJSONObject(long id, String name, String url) {
+    private record CourseJSONObject(long courseId, String name, String url, CourseRelation relation) {
     }
 
     /**
