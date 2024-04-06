@@ -54,7 +54,7 @@ public class TestController {
      * @return ResponseEntity with the updated tests
      */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> updateTests(
             @RequestParam("dockerimage") String dockerImage,
             @RequestParam("dockertest") MultipartFile dockerTest,
@@ -218,7 +218,7 @@ public class TestController {
      * @return ResponseEntity
      */
     @DeleteMapping(ApiRoutes.TEST_BASE_PATH + "/{testId}")
-    @Roles({UserRole.teacher})
+    @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteTestById(@PathVariable("testId") long testId, Auth auth) {
         // Get the submission entry from the database
         TestEntity testEntity = testRepository.findById(testId).orElse(null);

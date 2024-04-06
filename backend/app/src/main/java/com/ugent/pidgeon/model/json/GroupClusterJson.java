@@ -9,7 +9,7 @@ public record GroupClusterJson(
         int capacity,
         int groupCount,
         Timestamp createdAt,
-        List<GroupReferenceJson>  groups,
+        List<GroupJson>  groups,
 
         String courseUrl
 ) {
