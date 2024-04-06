@@ -2,6 +2,8 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.json.GroupFeedbackJson;
+import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
@@ -44,7 +46,11 @@ public class SubmissionController {
     private TestRepository testRepository;
     @Autowired
     private FileController fileController;
+    @Autowired
+    private GroupController groupController;
 
+    @Autowired
+    private GroupFeedbackRepository groupFeedbackRepository;
 
     private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
 
@@ -67,6 +73,8 @@ public class SubmissionController {
                 submission.getId(),
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
                 ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
+                submission.getProjectId(),
+                submission.getGroupId(),
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
                 submission.getStructureAccepted(),
                 submission.getSubmissionTime(),
@@ -123,25 +131,39 @@ public class SubmissionController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions") //Route to get all submissions for a project
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
-        long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(projectid, userId) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
-        }
-
-        List<Long> projectGroupIds = projectRepository.findGroupIdsByProjectId(projectid);
-        List<LastGroupSubmissionJson> res = projectGroupIds.stream().map(groupId -> {
-            Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId);
-            if (submissionId == null) {
-                return new LastGroupSubmissionJson(
-                        ApiRoutes.GROUP_BASE_PATH + "/" + groupId, null
-                );
+        try {
+            long userId = auth.getUserEntity().getId();
+            if (!projectRepository.adminOfProject(projectid, userId) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
             }
-            return new LastGroupSubmissionJson(
-                    ApiRoutes.GROUP_BASE_PATH + "/" + groupId,
-                    ApiRoutes.SUBMISSION_BASE_PATH + "/" + submissionId
-            );
-        }).toList();
-        return ResponseEntity.ok(res);
+
+            List<Long> projectGroupIds = projectRepository.findGroupIdsByProjectId(projectid);
+            List<LastGroupSubmissionJson> res = projectGroupIds.stream().map(groupId -> {
+                GroupEntity group = groupRepository.findById(groupId).orElse(null);
+                if (group == null) {
+                    throw new RuntimeException("Group not found");
+                }
+                GroupJson groupjson = groupController.groupEntityToJson(group);
+                GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectid);
+                GroupFeedbackJson groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId());
+
+                Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId);
+                if (submissionId == null) {
+                    return new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson);
+                }
+
+                SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
+                if (submission == null) {
+                    throw new RuntimeException("Submission not found");
+                }
+
+                return new LastGroupSubmissionJson(getSubmissionJson(submission), groupjson, groupFeedbackJson);
+
+            }).toList();
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
 
