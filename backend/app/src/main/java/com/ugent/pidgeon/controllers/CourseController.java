@@ -3,6 +3,7 @@ package com.ugent.pidgeon.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.CourseMemberRequestJson;
 import com.ugent.pidgeon.model.json.PublicUserDTO;
 import com.ugent.pidgeon.model.json.UserIdJson;
@@ -50,6 +51,7 @@ public class CourseController {
 
     @Autowired
     private ClusterController groupClusterController;
+
 
 
 
@@ -278,16 +280,20 @@ public class CourseController {
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectByCourseId(@PathVariable Long courseId, Auth auth) {
-        List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
-
-        if (projects.isEmpty()) {
+        CourseEntity course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
-
-      if (courseUserRepository.findByCourseIdAndUserId(auth.getUserEntity().getId(), courseId).isEmpty() && auth.getUserEntity().getRole() != UserRole.admin){
+        if (courseUserRepository.findByCourseIdAndUserId(auth.getUserEntity().getId(), courseId).isEmpty() && auth.getUserEntity().getRole() != UserRole.admin){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed access this project");
         }
-        return ResponseEntity.ok(projects);
+        UserEntity user = auth.getUserEntity();
+        List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
+        List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
+            projectController.projectEntityToProjectResponseJson(projectEntity, course, user)
+        ).toList();
+
+        return ResponseEntity.ok(projectResponseJsons);
     }
 
     Boolean hasCourseRights(long courseId, UserEntity user) {

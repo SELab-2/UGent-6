@@ -2,9 +2,8 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.GroupJson;
-import com.ugent.pidgeon.model.json.ProjectJson;
-import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
+import com.ugent.pidgeon.model.ProjectResponseJson;
+import com.ugent.pidgeon.model.json.*;
 
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
@@ -96,15 +95,65 @@ public class ProjectController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
+        UserEntity user = auth.getUserEntity();
         return projectRepository.findById(projectId)
                 .map(project -> {
                     if (!accesToProject(projectId, auth.getUserEntity())) {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to view this project");
                     } else {
-                        return ResponseEntity.ok().body(project);
+                        CourseEntity course = courseRepository.findById(project.getCourseId()).orElse(null);
+                        if (course == null) {
+                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+                        }
+                        return ResponseEntity.ok().body(projectEntityToProjectResponseJson(project, course, user));
                     }
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    public ProjectResponseJson projectEntityToProjectResponseJson(ProjectEntity project, CourseEntity course, UserEntity user) {
+        // Calculate the progress of the project for all groups
+        List<Long> groupIds = projectRepository.findGroupIdsByProjectId(project.getId());
+        Integer total = groupIds.size();
+        Integer completed = groupIds.stream().map(groupId -> {
+            Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId);
+            if (submissionId == null) {
+                return 0;
+            }
+            SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
+            if (submission == null) {
+                return 0;
+            }
+            if (submission.getDockerAccepted() && submission.getStructureAccepted()) return 1;
+            return 0;
+        }).reduce(0, Integer::sum);
+
+        // Get the submissonUrl, depends on if the user is a course_admin or enrolled
+        String submissionUrl = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/submissions";
+        CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(course.getId(), user.getId())).orElse(null);
+        if (courseUserEntity == null) {
+            return null;
+        }
+        if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
+            Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+            if (groupId == null) {
+                return null;
+            }
+            submissionUrl += "/" + groupId;
+        }
+
+        return new ProjectResponseJson(
+            new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
+            project.getDeadline(),
+            project.getDescription(),
+            project.getId(),
+            project.getName(),
+            submissionUrl,
+            ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
+            project.getMaxScore(),
+            project.isVisible(),
+            new ProjectProgressJson(completed, total)
+        );
     }
 
     /* Function to add a new project to an existing course */
@@ -163,8 +212,7 @@ public class ProjectController {
 
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);
-
-            return ResponseEntity.ok(savedProject);
+            return ResponseEntity.ok(projectEntityToProjectResponseJson(savedProject, courseEntity, user));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
         }
