@@ -2,7 +2,7 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name="submissions")
@@ -22,7 +22,7 @@ public class SubmissionEntity {
     private long fileId;
 
     @Column(name="submission_time", nullable=false)
-    private Timestamp submissionTime;
+    private OffsetDateTime submissionTime;
 
     @Column(name="structure_accepted", nullable=false)
     private Boolean structureAccepted;
@@ -39,7 +39,7 @@ public class SubmissionEntity {
     public SubmissionEntity() {
     }
 
-    public SubmissionEntity(long projectId, long groupId, Long fileId, Timestamp submissionTime, Boolean structureAccepted, Boolean dockerAccepted) {
+    public SubmissionEntity(long projectId, long groupId, Long fileId, OffsetDateTime submissionTime, Boolean structureAccepted, Boolean dockerAccepted) {
         this.projectId = projectId;
         this.groupId = groupId;
         this.fileId = fileId;
@@ -60,11 +60,11 @@ public class SubmissionEntity {
         this.fileId = fileId;
     }
 
-    public Timestamp getSubmissionTime() {
+    public OffsetDateTime getSubmissionTime() {
         return submissionTime;
     }
 
-    public void setSubmissionTime(Timestamp submissionTime) {
+    public void setSubmissionTime(OffsetDateTime submissionTime) {
         this.submissionTime = submissionTime;
     }
 

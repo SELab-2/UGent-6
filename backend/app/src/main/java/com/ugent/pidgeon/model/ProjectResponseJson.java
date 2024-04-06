@@ -1,13 +1,17 @@
 package com.ugent.pidgeon.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.ugent.pidgeon.model.json.CourseReferenceJson;
 import com.ugent.pidgeon.model.json.ProjectProgressJson;
+import com.ugent.pidgeon.postgre.models.OffsetDateTimeSerializer;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 public record ProjectResponseJson(
         CourseReferenceJson course,
-        Timestamp deadline,
+
+        @JsonSerialize(using = OffsetDateTimeSerializer.class)
+        OffsetDateTime deadline,
         String description,
         Long projectId,
         String name,

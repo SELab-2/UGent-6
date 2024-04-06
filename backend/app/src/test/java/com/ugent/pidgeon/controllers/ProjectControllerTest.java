@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +89,7 @@ public class ProjectControllerTest {
     public void testCreateProject() {
         // Mock data
         long courseId = 1L;
-        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, Timestamp.valueOf(LocalDateTime.MIN));
+        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MIN);
 
         Auth auth = mock(Auth.class);
         UserEntity user = new UserEntity();

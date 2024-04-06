@@ -3,6 +3,7 @@ package com.ugent.pidgeon.postgre.models;
 import jakarta.persistence.*;
 
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 
@@ -34,12 +35,12 @@ public class ProjectEntity {
         private Boolean visible;
 
         @Column(name="deadline", nullable = false)
-        private Timestamp deadline;
+        private OffsetDateTime deadline;
 
         @Column(name="max_score")
         private Integer maxScore;
 
-        public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, Timestamp deadline) {
+        public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
                 this.courseId = courseId;
                 this.name = name;
                 this.description = description;
@@ -118,11 +119,11 @@ public class ProjectEntity {
                 this.maxScore = maxScore;
         }
 
-        public Timestamp getDeadline() {
+        public OffsetDateTime getDeadline() {
                 return deadline;
         }
 
-        public void setDeadline(Timestamp deadline) {
+        public void setDeadline(OffsetDateTime deadline) {
                 this.deadline = deadline;
         }
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -191,29 +192,25 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Group cluster isn't linked to this course");
             }
 
-            // Check of de test bestaat
-            if(projectJson.getTestId() != null && !testRepository.existsById(projectJson.getTestId())){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test with this id exists");
-            }
-
             // Check of de dealine bestaat en in de toekomst ligt.
-            Timestamp deadline = projectJson.getDeadline();
+            OffsetDateTime deadline = projectJson.getDeadline();
             if(deadline == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No deadline given");
             }
-            if(deadline.before(Timestamp.valueOf(LocalDateTime.now()))){
+            if(deadline.isBefore(OffsetDateTime.now())){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deadline is in the past");
             }
 
             // Create a new ProjectEntity instance
             ProjectEntity project = new ProjectEntity(courseId, projectJson.getName(), projectJson.getDescription(),
-                    projectJson.getGroupClusterId(), projectJson.getTestId(), projectJson.isVisible(),
+                    projectJson.getGroupClusterId(), null, projectJson.isVisible(),
                     projectJson.getMaxScore(), projectJson.getDeadline());
 
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);
             return ResponseEntity.ok(projectEntityToProjectResponseJson(savedProject, courseEntity, user));
         } catch (Exception e){
+            Logger.getGlobal().severe("Error while creating project: " + Arrays.toString(e.getStackTrace()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
         }
     }
