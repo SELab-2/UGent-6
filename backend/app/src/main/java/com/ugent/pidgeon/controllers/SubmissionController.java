@@ -145,8 +145,12 @@ public class SubmissionController {
                 }
                 GroupJson groupjson = groupController.groupEntityToJson(group);
                 GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectid);
-                GroupFeedbackJson groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId());
-
+                GroupFeedbackJson groupFeedbackJson;
+                if (groupFeedbackEntity == null) {
+                     groupFeedbackJson = null;
+                } else {
+                    groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId());
+                }
                 Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId);
                 if (submissionId == null) {
                     return new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson);
