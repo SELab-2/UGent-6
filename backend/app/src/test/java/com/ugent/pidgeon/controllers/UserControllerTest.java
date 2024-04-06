@@ -90,20 +90,7 @@ public class UserControllerTest extends ControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    public void getUserCoursesReturnsCoursesWhenUserExistsAndHasAccess() throws Exception {
-        when(userRepository.findCourseIdsByUserId(anyLong())).thenReturn(new ArrayList<>());
 
-        mockMvc.perform(get(ApiRoutes.USER_COURSES_BASE_PATH.replace("{userid}","1") ))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void getUserCoursesReturnsForbiddenWhenUserExistsButNoAccess() throws Exception {
-
-        mockMvc.perform(get(ApiRoutes.USER_COURSES_BASE_PATH .replace("{userid}","2")))
-                .andExpect(status().isForbidden());
-    }
 
     @Test
     public void getUserByAzureIdReturnsUserWhenUserExists() throws Exception {

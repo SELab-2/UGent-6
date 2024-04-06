@@ -2,8 +2,8 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.ProjectJson;
-import com.ugent.pidgeon.model.json.ProjectUpdateDTO;
+import com.ugent.pidgeon.model.ProjectResponseJson;
+import com.ugent.pidgeon.model.json.*;
 
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
@@ -18,6 +18,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Logger;
+
+import static java.util.Arrays.stream;
 
 
 @RestController
@@ -44,8 +46,20 @@ public class ProjectController {
     private SubmissionController filesubmissiontestController;
     @Autowired
     private TestController testController;
+    @Autowired
+    private GroupController groupController;
+    @Autowired
+    private GroupRepository groupRepository;
 
-
+    /**
+     * Function to get all projects of a user
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883808">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects
+     * @return ResponseEntity with a list of projects
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjects(Auth auth) {
@@ -68,18 +82,78 @@ public class ProjectController {
         boolean isAdmin = (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId, user.getId()));
         return  studentof || isAdmin;
     }
+    /**
+     * Function to get a project by its ID
+     * @param projectId ID of the project to get
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723844">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectId}
+     * @return ResponseEntity with the project
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId, Auth auth) {
+        UserEntity user = auth.getUserEntity();
         return projectRepository.findById(projectId)
                 .map(project -> {
                     if (!accesToProject(projectId, auth.getUserEntity())) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to view this project");
                     } else {
-                        return ResponseEntity.ok().body(project);
+                        CourseEntity course = courseRepository.findById(project.getCourseId()).orElse(null);
+                        if (course == null) {
+                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+                        }
+                        return ResponseEntity.ok().body(projectEntityToProjectResponseJson(project, course, user));
                     }
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    public ProjectResponseJson projectEntityToProjectResponseJson(ProjectEntity project, CourseEntity course, UserEntity user) {
+        // Calculate the progress of the project for all groups
+        List<Long> groupIds = projectRepository.findGroupIdsByProjectId(project.getId());
+        Integer total = groupIds.size();
+        Integer completed = groupIds.stream().map(groupId -> {
+            Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId);
+            if (submissionId == null) {
+                return 0;
+            }
+            SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
+            if (submission == null) {
+                return 0;
+            }
+            if (submission.getDockerAccepted() && submission.getStructureAccepted()) return 1;
+            return 0;
+        }).reduce(0, Integer::sum);
+
+        // Get the submissonUrl, depends on if the user is a course_admin or enrolled
+        String submissionUrl = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/submissions";
+        CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(course.getId(), user.getId())).orElse(null);
+        if (courseUserEntity == null) {
+            return null;
+        }
+        if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
+            Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+            if (groupId == null) {
+                return null;
+            }
+            submissionUrl += "/" + groupId;
+        }
+
+        return new ProjectResponseJson(
+            new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
+            project.getDeadline(),
+            project.getDescription(),
+            project.getId(),
+            project.getName(),
+            submissionUrl,
+            ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
+            project.getMaxScore(),
+            project.isVisible(),
+            new ProjectProgressJson(completed, total)
+        );
     }
 
     /* Function to add a new project to an existing course */
@@ -138,18 +212,31 @@ public class ProjectController {
 
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);
-
-            return ResponseEntity.ok(savedProject);
+            return ResponseEntity.ok(projectEntityToProjectResponseJson(savedProject, courseEntity, user));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
         }
     }
 
+     /**
+     * Function to update an existing project
+     * @param projectId ID of the project to get
+     * @param updateDTO ProjectUpdateDTO object containing the new project's information
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
+     * @HttpMethod Put
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectId}
+     * @return ResponseEntity with the created project
+     */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> putProjectById(@PathVariable Long projectId, @RequestBody ProjectUpdateDTO updateDTO, Auth auth) {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
         if (projectOptional.isPresent()) {
+            if (!projectRepository.adminOfProject(projectId, auth.getUserEntity().getId()) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to update this project");
+            }
             ProjectEntity project = projectOptional.get();
             if (updateDTO.getName() != null) project.setName(updateDTO.getName());
             if (updateDTO.getDescription() != null) project.setDescription(updateDTO.getDescription());
@@ -157,22 +244,32 @@ public class ProjectController {
             if (updateDTO.getDeadline() != null) {
                 project.setDeadline(updateDTO.getDeadline());
             }
-            System.out.println(project.getName());
             projectRepository.save(project);
             return ResponseEntity.ok(project);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("project not found with id " + projectId);
         }
     }
 
-
+    /**
+     * Function to delete a project by its ID
+     * @param projectId ID of the project to delete
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723898">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectId}
+     * @return ResponseEntity with the deleted project
+     */
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth) {
         Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
 
         if (projectOptional.isPresent()) {
-
+            if (!projectRepository.adminOfProject(projectId, auth.getUserEntity().getId()) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete this project");
+            }
 
             ProjectEntity projectEntity = projectOptional.get();
 
@@ -192,9 +289,36 @@ public class ProjectController {
             return ResponseEntity.ok().build();
 
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("project not found with id " + projectId);
+        }
+    }
+
+    /**
+     * Function to get all groups of a project
+     * @param projectId ID of the project to get the groups of
+     * @ApiDog <a href="https://app.apidog.com/project/467959/apis/api-6343073">apiDog documentation</a>
+     * @HttpMethod GET
+     * @ApiPath /api/projects/{projectId}/groups
+     * @return ResponseEntity with groups as specified in the apidog
+     */
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}/groups")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getGroupsOfProject(@PathVariable Long projectId, Auth auth) {
+        // Check if the user is an admin of the project
+        UserEntity user = auth.getUserEntity();
+        if (!user.getRole().equals(UserRole.admin)) {
+            if (!accesToProject(projectId, user)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to view this project");
+            }
         }
 
-
+        List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
+        List<GroupJson> groupjsons = groups.stream()
+                .map((Long id) -> {
+                    GroupEntity group = groupRepository.findById(id).orElse(null);
+                    return groupController.groupEntityToJson(group);
+                }).toList();
+        return ResponseEntity.ok(groupjsons);
     }
+
 }

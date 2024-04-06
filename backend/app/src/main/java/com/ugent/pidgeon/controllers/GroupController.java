@@ -25,7 +25,7 @@ public class GroupController {
 
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
-        GroupJson group = new GroupJson(groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
+        GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
 
         // Get the members of the group
         List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
@@ -37,9 +37,21 @@ public class GroupController {
         return group;
     }
 
+
+    /**
+     * Function to add a new project to an existing course
+     *
+     * @param groupid identifier of a group
+     * @param auth    authentication object of the requesting user
+     * @return ResponseEntity<GroupJson>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723981">apiDog documentation</a>
+     * @HttpMethod Get
+     * @AllowedRoles student, teacher
+     * @ApiPath /api/groups/{groupid}
+     */
     @GetMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.student, UserRole.teacher})
-    public ResponseEntity<GroupJson> getGroupById(@PathVariable("groupid") Long groupid, Auth auth) {
+    public ResponseEntity<?> getGroupById(@PathVariable("groupid") Long groupid, Auth auth) {
 
 
         // Get userId
@@ -49,12 +61,12 @@ public class GroupController {
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
 
         if (group == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
         }
 
         // Return 403 if the user does not have access to the group
-        if(!groupRepository.userAccessToGroup(userId, groupid)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
         // Return the group
@@ -62,22 +74,34 @@ public class GroupController {
         return ResponseEntity.ok(groupJson);
     }
 
-
+    /**
+     * Function to update the name of a group
+     *
+     * @param groupid     identifier of a group
+     * @param nameRequest object containing the new name of the group
+     * @param auth        authentication object of the requesting user
+     * @return ResponseEntity<GroupJson>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723995">apiDog documentation</a>
+     * @HttpMethod Put
+     * @AllowedRoles teacher
+     * @ApiPath /api/groups/{groupid}
+     */
     @PutMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher})
-    public ResponseEntity<GroupJson> updateGroupName(@PathVariable("groupid") Long groupid, @RequestBody NameRequest nameRequest, Auth auth) {
+    public ResponseEntity<?> updateGroupName(@PathVariable("groupid") Long groupid, @RequestBody NameRequest nameRequest, Auth auth) {
         // Get userId
         long userId = auth.getUserEntity().getId();
 
         // Get the group, return 404 if it does not exist
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
         if (group == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
+
         }
 
         // Return 403 if the user does not have access to the group
-        if(!groupRepository.userAccessToGroup(userId, groupid)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
         // Update the group name
@@ -91,21 +115,32 @@ public class GroupController {
         return ResponseEntity.ok(groupJson);
     }
 
+    /**
+     * Function to delete a group
+     *
+     * @param groupid identifier of a group
+     * @param auth    authentication object of the requesting user
+     * @return ResponseEntity<Void>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723998">apiDog documentation</a>
+     * @HttpMethod Delete
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/groups/{groupid}
+     */
     @DeleteMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Void> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
+    public ResponseEntity<?> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
         // Get userId
         long userId = auth.getUserEntity().getId();
 
         // Get the group, return 404 if it does not exist
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
         if (group == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
         }
 
         // Return 403 if the user does not have access to the group
-        if(!groupRepository.userAccessToGroup(userId, groupid)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
         // Delete the group
@@ -120,7 +155,7 @@ public class GroupController {
             groupClusterRepository.save(cluster);
         });
         // Return 204
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
     }
 
 }

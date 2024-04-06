@@ -20,4 +20,13 @@ public interface GroupClusterRepository extends JpaRepository<GroupClusterEntity
 """)
     Boolean usedInProject(long clusterId);
 
+    @Query(value = """
+    SELECT CASE WHEN EXISTS (
+    	SELECT g.id FROM GroupEntity g 
+    	JOIN GroupUserEntity gu ON g.id = gu.groupId
+    	WHERE gu.userId = ?2 AND g.clusterId = ?1
+    ) THEN true ELSE false END
+    """)
+    Boolean userInGroupForCluster(long clusterId, long userId);
+
 }
