@@ -5,6 +5,7 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.NameRequest;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
+import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
@@ -26,7 +27,12 @@ public class GroupController {
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
         GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
-
+        GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
+        if (cluster != null && cluster.getGroupAmount() > 1){
+            group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
+        } else {
+            group.setGroupClusterUrl(null);
+        }
         // Get the members of the group
         List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
                 new UserReferenceJson(user.getName(), ApiRoutes.USER_BASE_PATH + "/" + user.getUserId())
