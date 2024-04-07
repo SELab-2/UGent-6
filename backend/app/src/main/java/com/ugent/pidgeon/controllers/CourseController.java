@@ -383,7 +383,35 @@ public class CourseController {
         return true;
     }
 
-    /* Join course with key */
+    private boolean removeIndividualClusterGroup(long courseId, long userId) {
+        GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
+        if (groupClusterEntity == null) {
+            return false;
+        }
+        // Find the group of the user
+        Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
+        if (groupEntityOptional.isEmpty()) {
+            return false;
+        }
+        GroupEntity groupEntity = groupEntityOptional.get();
+        // Remove the user from the group
+        groupUserRepository.deleteAllByGroupId(groupEntity.getId());
+        groupRepository.deleteById(groupEntity.getId());
+        return true;
+    }
+
+    /**
+     * Function to join course with key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to join
+     * @param courseKey key of the course to join
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog TODO
+     * @HttpMethod POST
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join/{courseKey}
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId, @PathVariable String courseKey) {
@@ -401,7 +429,18 @@ public class CourseController {
         }
     }
 
-
+    /**
+     * Function to get course information for joining course with key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the join key from
+     * @param courseKey key of the course to get the join key from
+     * @return ResponseEntity with a statuscode and a JSON object containing the course information
+     * @ApiDog TODO
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join/{courseKey}
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> getCourseJoinKey(Auth auth, @PathVariable Long courseId, @PathVariable String courseKey) {
@@ -415,7 +454,17 @@ public class CourseController {
         }
     }
 
-    /* Join course without key */
+    /**
+     * Function to join course without key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to join
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog TODO
+     * @HttpMethod POST
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
@@ -433,6 +482,17 @@ public class CourseController {
         }
     }
 
+    /**
+     * Function to get course information for joining course without key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the join key from
+     * @return ResponseEntity with a statuscode and a JSON object containing the course information
+     * @ApiDog TODO
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> getCourseJoinKey(Auth auth, @PathVariable Long courseId) {
@@ -446,7 +506,18 @@ public class CourseController {
         }
     }
 
-
+    /**
+     * Function to remove a different user from a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to leave
+     * @param userId JSON object containing the user id
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog TODO
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/leave
+     */
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
     public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody UserIdJson userId) {
@@ -474,12 +545,27 @@ public class CourseController {
                 }
             }
             courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
+            if (userRelation.equals(CourseRelation.enrolled)) {
+                removeIndividualClusterGroup(courseId, userId.getUserId());
+            }
             return ResponseEntity.ok().build(); // Successfully removed
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
     }
 
+    /**
+     * Function to add a different user to a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to add the user to
+     * @param request JSON object containing the user id and relation
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog TODO
+     * @HttpMethod POST
+     * @AllowedRoles teacher, admin, student
+     * @ApiPath /api/courses/{courseId}/members
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
     public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
@@ -502,13 +588,27 @@ public class CourseController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
             }
             courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelation()));
+            if (request.getRelation().equals(CourseRelation.enrolled)) {
+                createNewIndividualClusterGroup(courseId, request.getUserId());
+            }
             return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
     }
 
-
+    /**
+     * Function to update the relation of a user in a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to update the user in
+     * @param request JSON object containing the user id and relation
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog TODO
+     * @HttpMethod PATCH
+     * @AllowedRoles teacher, admin
+     * @ApiPath /api/courses/{courseId}/members
+     */
     @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin})
     public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
@@ -536,6 +636,11 @@ public class CourseController {
             if (ce.isPresent()) {
                 ce.get().setRelation(request.getRelation());
                 courseUserRepository.save(ce.get());
+                if (request.getRelation().equals(CourseRelation.enrolled)) {
+                    createNewIndividualClusterGroup(courseId, request.getUserId());
+                } else {
+                    removeIndividualClusterGroup(courseId, request.getUserId());
+                }
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.notFound().build(); //  User is not allowed to do the action, teachers cant remove students of other users course
@@ -545,6 +650,17 @@ public class CourseController {
         }
     }
 
+    /**
+     * Function to get all members of a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the members from
+     * @return ResponseEntity with a JSON object containing the members of the course
+     * @ApiDog TODO
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/members
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.student}) // student is allowed to see people in its class
     public ResponseEntity<?> getCourseMembers(Auth auth, @PathVariable Long courseId) {
@@ -577,6 +693,17 @@ public class CourseController {
         }
     }
 
+    /**
+     * Function to get the join link of a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the join link from
+     * @return ResponseEntity with the join link of the course
+     * @ApiDog TODO
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/joinLink
+     */
     @Roles({UserRole.teacher, UserRole.student})
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
     // will return a join key if there is an existing one, otherwise it will return a 404
@@ -593,6 +720,17 @@ public class CourseController {
     }
 
     // Function for invalidating the previous key and generating a new one, can be useful when staring a new year.
+    /**
+     * Function to generate a new join link for a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to generate the join link for
+     * @return ResponseEntity with the new join link of the course
+     * @ApiDog TODO
+     * @HttpMethod PUT
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/joinLink
+     */
     @Roles({UserRole.teacher, UserRole.student})
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
     public ResponseEntity<?> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
@@ -609,6 +747,18 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a course admin, thus not allowed to generate a new link.");
         }
     }
+
+    /**
+     * Function to remove the joinKey from the joinLink of a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to remove the join link from
+     * @return ResponseEntity with the new join link of the course (without the key)
+     * @ApiDog TODO
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/joinLink
+     */
     @Roles({UserRole.teacher, UserRole.student})
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
     public ResponseEntity<String> deleteCourseKey(Auth auth, @PathVariable Long courseId) {
