@@ -51,6 +51,8 @@ public class ProjectController {
     private GroupController groupController;
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private ClusterController clusterController;
 
     /**
      * Function to get all projects of a user
@@ -157,7 +159,17 @@ public class ProjectController {
         );
     }
 
-    /* Function to add a new project to an existing course */
+    /**
+     * Function to create a new project
+     * @param courseId ID of the course to create the project in
+     * @param projectJson ProjectJson object containing the new project's information
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723877">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/projects
+     * @return ResponseEntity with the created project
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> createProject(
@@ -264,7 +276,7 @@ public class ProjectController {
      * @HttpMethod DELETE
      * @AllowedRoles teacher
      * @ApiPath /api/projects/{projectId}
-     * @return ResponseEntity with the deleted project
+     * @return ResponseEntity with the status, no content
      */
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher})
@@ -315,6 +327,15 @@ public class ProjectController {
             if (!accesToProject(projectId, user)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to view this project");
             }
+        }
+        ProjectEntity project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
+
+        if (clusterController.isIndividualCluster(project.getGroupClusterId())) {
+            String memberUrl = ApiRoutes.COURSE_BASE_PATH + "/" + project.getCourseId() + "/members";
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No groups for this project: use " + memberUrl + " to get the members of the course");
         }
 
         List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
