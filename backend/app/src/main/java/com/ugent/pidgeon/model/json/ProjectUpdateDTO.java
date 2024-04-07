@@ -1,6 +1,5 @@
 package com.ugent.pidgeon.model.json;
 
-import java.sql.Timestamp; // Import Timestamp
 import java.time.OffsetDateTime;
 
 public class ProjectUpdateDTO {

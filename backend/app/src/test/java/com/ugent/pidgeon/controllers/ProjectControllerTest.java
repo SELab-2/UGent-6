@@ -17,8 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +101,6 @@ public class ProjectControllerTest {
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(courseEntity));
         when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
         when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
-        when(testRepository.existsById(projectJson.getTestId())).thenReturn(true);
 
         // Call controller method
         ResponseEntity<Object> responseEntity = projectController.createProject(courseId, projectJson, auth);

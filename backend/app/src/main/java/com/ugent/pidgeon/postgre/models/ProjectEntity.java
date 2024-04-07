@@ -2,9 +2,7 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
-import java.util.List;
 
 
 @Entity
