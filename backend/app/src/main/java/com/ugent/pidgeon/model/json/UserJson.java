@@ -5,9 +5,7 @@ import com.ugent.pidgeon.controllers.ApiRoutes;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.OffsetDateTime;
 
 public class UserJson {
 
@@ -17,7 +15,7 @@ public class UserJson {
     private String email;
     private UserRole role;
 
-    private Timestamp createdAt;
+    private OffsetDateTime createdAt;
 
 //    private List<CourseWithRelationJson> courses;
 
@@ -74,11 +72,11 @@ public class UserJson {
         this.role = role;
     }
 
-    public Timestamp getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
