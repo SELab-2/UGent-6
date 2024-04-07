@@ -154,6 +154,7 @@ public class CourseController {
 
             // Create new cluster with size 1 for projects without groups
             GroupClusterEntity groupClusterEntity = new GroupClusterEntity(courseEntity.getId(), 1, "Students", 0);
+            groupClusterEntity.setCreatedAt(currentTimestamp);
             groupClusterRepository.save(groupClusterEntity);
 
             return ResponseEntity.ok(courseEntityToCourseWithInfo(courseEntity));
@@ -360,6 +361,7 @@ public class CourseController {
         }
         return ResponseEntity.status(successtatus).body(bodySupplier.get());
     }
+
 
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
     @Roles({UserRole.student, UserRole.teacher})

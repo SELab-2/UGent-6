@@ -57,7 +57,7 @@ public class ClusterController {
         }
 
         // Get the clusters for the course
-        List<GroupClusterEntity> clusters = groupClusterRepository.findClustersByCourseId(courseid);
+        List<GroupClusterEntity> clusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(courseid);
         List<GroupClusterJson> clusterJsons = clusters.stream().map(
                 this::clusterEntityToClusterJson).toList();
         // Return the clusters
@@ -149,7 +149,7 @@ public class ClusterController {
         // Get the user id
         long userId = auth.getUserEntity().getId();
         GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
-        if (cluster == null) {
+        if (cluster == null || cluster.getMaxSize() <= 1) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
         }
         if (courseUserRepository.findByCourseIdAndUserId(cluster.getCourseId(), userId).isEmpty() && auth.getUserEntity().getRole()!=UserRole.admin){

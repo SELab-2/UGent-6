@@ -183,13 +183,21 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to create new projects");
             }
 
-            // Check of de GroupCluster deel is van het vak
-            GroupClusterEntity groupCluster = groupClusterRepository.findById(projectJson.getGroupClusterId()).orElse(null);
-            if(groupCluster == null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster does not exist");
-            }
-            if(groupCluster.getCourseId() != courseId){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Group cluster isn't linked to this course");
+            if (projectJson.getGroupClusterId() != null) {
+                // Check of de GroupCluster deel is van het vak
+                GroupClusterEntity groupCluster = groupClusterRepository.findById(projectJson.getGroupClusterId()).orElse(null);
+                if (groupCluster == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster does not exist");
+                }
+                if (groupCluster.getCourseId() != courseId) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Group cluster isn't linked to this course");
+                }
+            } else {
+                GroupClusterEntity groupCluster = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
+                if (groupCluster == null) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal error while creating project without group, contact an administrator");
+                }
+                projectJson.setGroupClusterId(groupCluster.getId());
             }
 
             // Check of de dealine bestaat en in de toekomst ligt.
