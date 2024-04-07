@@ -125,7 +125,6 @@ class AuthProvider {
             if (!req.body || !req.body.state) {
                 return next(new Error('Error: response not found'));
             }
-
             const authCodeRequest = {
                 ...req.session.authCodeRequest,
                 code: req.body.code,
@@ -141,11 +140,11 @@ class AuthProvider {
 
                 const tokenResponse = await msalInstance.acquireTokenByCode(authCodeRequest, req.body);
 
-                req.session.tokenCache = msalInstance.getTokenCache().serialize();
+                // req.session.tokenCache = msalInstance.getTokenCache().serialize();
                 req.session.idToken = tokenResponse.idToken;
-                req.session.account = tokenResponse.account;
+                // req.session.account = tokenResponse.account;
                 req.session.isAuthenticated = true;
-
+                
                 const state = JSON.parse(this.cryptoProvider.base64Decode(req.body.state));
                 res.redirect(state.successRedirect);
             } catch (error) {

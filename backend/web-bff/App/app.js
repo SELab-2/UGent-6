@@ -32,7 +32,7 @@ app.use(session({
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
 }));
 
-app.use(csurf(undefined));
+
 
 const limiter = rateLimit({
    windowMs: 15 * 60 * 1000,
