@@ -24,6 +24,14 @@ public class GroupController {
     @Autowired
     private GroupClusterRepository groupClusterRepository;
 
+    public boolean isIndividualGroup(long groupId) {
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return false;
+        }
+        GroupClusterEntity cluster = groupClusterRepository.findById(group.getClusterId()).orElse(null);
+        return cluster != null && cluster.getGroupAmount() <= 1;
+    }
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
         GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
@@ -110,6 +118,10 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
+        if (isIndividualGroup(groupid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change name of individual group");
+        }
+
         // Update the group name
         group.setName(nameRequest.getName());
 
@@ -147,6 +159,10 @@ public class GroupController {
         // Return 403 if the user does not have access to the group
         if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
+        }
+
+        if (isIndividualGroup(groupid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot delete individual group");
         }
 
         removeGroup(groupid);
