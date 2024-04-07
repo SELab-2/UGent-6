@@ -152,6 +152,10 @@ public class CourseController {
             CourseUserEntity courseUserEntity = new CourseUserEntity(courseEntity.getId(), userId, CourseRelation.creator);
             courseUserRepository.save(courseUserEntity);
 
+            // Create new cluster with size 1 for projects without groups
+            GroupClusterEntity groupClusterEntity = new GroupClusterEntity(courseEntity.getId(), 1, "Students", 0);
+            groupClusterRepository.save(groupClusterEntity);
+
             return ResponseEntity.ok(courseEntityToCourseWithInfo(courseEntity));
         } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
