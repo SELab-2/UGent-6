@@ -6,6 +6,7 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.function.Supplier;
 
 @RestController
 public class ClusterController {
@@ -168,6 +170,24 @@ public class ClusterController {
         return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
     }
 
+    private CheckResult getClusterUpdateResponseEntity(Long clusterId, UserEntity user) {
+        // Get the user id
+        long userId = user.getId();
+        GroupClusterEntity cluster = groupClusterRepository.findById(clusterId).orElse(null);
+        if (cluster == null) {
+            return new CheckResult(HttpStatus.NOT_FOUND, "Cluster not found");
+        }
+        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && user.getRole()!=UserRole.admin) {
+            return new CheckResult(HttpStatus.FORBIDDEN, "User not admin of the course");
+        }
+
+        if (isIndividualCluster(clusterId)) {
+            return new CheckResult(HttpStatus.CONFLICT, "Cannot update individual cluster");
+        }
+
+        return new CheckResult(HttpStatus.OK, null);
+    }
+
     /**
      * Updates a cluster
      *
@@ -183,25 +203,51 @@ public class ClusterController {
     @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
-        // Get the user id
-        long userId = auth.getUserEntity().getId();
-        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
-        if (cluster == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
-        }
-        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+        CheckResult checkResult = getClusterUpdateResponseEntity(clusterid, auth.getUserEntity());
+
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        if (isIndividualCluster(clusterid)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot update individual cluster");
+        if (clusterJson.getCapacity() == null || clusterJson.getName() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Capacity and name must be provided");
         }
 
-        cluster.setName(clusterJson.name());
-        cluster.setMaxSize(clusterJson.capacity());
-        cluster = groupClusterRepository.save(cluster);
-        return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
+        return doGroupClusterUpdate(groupClusterRepository.findById(clusterid).get(), clusterJson);
     }
+
+    public ResponseEntity<?> doGroupClusterUpdate(GroupClusterEntity clusterEntity, GroupClusterUpdateJson clusterJson) {
+        if (clusterJson.getCapacity() <= 1) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Capacity must be greater than 1");
+        }
+        clusterEntity.setMaxSize(clusterJson.getCapacity());
+        clusterEntity.setName(clusterJson.getName());
+        groupClusterRepository.save(clusterEntity);
+        return ResponseEntity.ok(clusterEntityToClusterJson(clusterEntity));
+    }
+
+    @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> patchCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
+        CheckResult checkResult = getClusterUpdateResponseEntity(clusterid, auth.getUserEntity());
+
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).get();
+
+        if (clusterJson.getCapacity() == null) {
+            clusterJson.setCapacity(cluster.getMaxSize());
+        }
+
+        if (clusterJson.getName() == null) {
+            clusterJson.setName(cluster.getName());
+        }
+
+        return doGroupClusterUpdate(cluster, clusterJson);
+    }
+
 
     /**
      * Deletes a cluster
