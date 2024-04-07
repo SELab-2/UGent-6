@@ -10,7 +10,6 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.time.OffsetDateTime;
-import java.time.LocalDateTime;
 
 @RestController
 public class CourseController {
@@ -33,10 +31,6 @@ public class CourseController {
 
     @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
-
-    private TestRepository testRepository;
 
     @Autowired
     private CourseUserRepository courseUserRepository;
@@ -170,6 +164,35 @@ public class CourseController {
         }
     }
 
+    private CheckResult getCourseUpdateCheckResult(long courseId, UserEntity user) {
+        // het vak selecteren
+        CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
+        if (courseEntity == null) {
+            return new CheckResult(HttpStatus.NOT_FOUND, "Course not found");
+        }
+
+        if (user.getRole() != UserRole.admin) {
+            // check of de user admin of lesgever is van het vak
+            Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, user.getId()));
+            if (courseUserEntityOptional.isEmpty()) {
+                return new CheckResult(HttpStatus.FORBIDDEN, "User is not part of the course");
+            }
+            CourseUserEntity courseUserEntity = courseUserEntityOptional.get();
+            if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
+                return new CheckResult(HttpStatus.FORBIDDEN, "User is not allowed to update the course");
+            }
+        }
+
+        return new CheckResult(HttpStatus.OK, null);
+    }
+
+    private ResponseEntity<?> doCourseUpdate(CourseEntity courseEntity, CourseJson courseJson) {
+        courseEntity.setName(courseJson.getName());
+        courseEntity.setDescription(courseJson.getDescription());
+        courseRepository.save(courseEntity);
+        return ResponseEntity.ok(courseEntityToCourseWithInfo(courseEntity));
+    }
+
     /**
      * Function to update a course
      *
@@ -189,31 +212,46 @@ public class CourseController {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
 
-            // het vak selecteren
-            CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
-            if (courseEntity == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+            CheckResult checkResult = getCourseUpdateCheckResult(courseId, user);
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
 
-            if (user.getRole() != UserRole.admin) {
-                // check of de user admin of lesgever is van het vak
-                Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, userId));
-                if (courseUserEntityOptional.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
-                }
-                CourseUserEntity courseUserEntity = courseUserEntityOptional.get();
-                if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to update the course");
-                }
+            if (courseJson.getName() == null || courseJson.getDescription() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name and description are required");
             }
 
-            //update velden
-            courseEntity.setName(courseJson.getName());
-            courseEntity.setDescription(courseJson.getDescription());
-            courseRepository.save(courseEntity);
+            return doCourseUpdate(courseRepository.findById(courseId).get(), courseJson);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
-            // Response verzenden
-            return ResponseEntity.ok(courseEntityToCourseWithInfo(courseEntity));
+    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
+    @Roles({UserRole.teacher, UserRole.student})
+public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth) {
+        try {
+            UserEntity user = auth.getUserEntity();
+            long userId = user.getId();
+
+            CheckResult checkResult = getCourseUpdateCheckResult(courseId, user);
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+            }
+
+            if (courseJson.getName() == null && courseJson.getDescription() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name or description is required");
+            }
+
+            CourseEntity courseEntity = courseRepository.findById(courseId).get();
+            if (courseJson.getName() == null) {
+                courseJson.setName(courseEntity.getName());
+            }
+            if (courseJson.getDescription() == null) {
+                courseJson.setDescription(courseEntity.getDescription());
+            }
+
+            return doCourseUpdate(courseEntity, courseJson);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

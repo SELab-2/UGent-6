@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.function.Supplier;
 
 @RestController
 public class ClusterController {
@@ -170,7 +169,7 @@ public class ClusterController {
         return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
     }
 
-    private CheckResult getClusterUpdateResponseEntity(Long clusterId, UserEntity user) {
+    private CheckResult getClusterUpdateCheckResult(Long clusterId, UserEntity user) {
         // Get the user id
         long userId = user.getId();
         GroupClusterEntity cluster = groupClusterRepository.findById(clusterId).orElse(null);
@@ -203,7 +202,7 @@ public class ClusterController {
     @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
-        CheckResult checkResult = getClusterUpdateResponseEntity(clusterid, auth.getUserEntity());
+        CheckResult checkResult = getClusterUpdateCheckResult(clusterid, auth.getUserEntity());
 
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
@@ -229,7 +228,7 @@ public class ClusterController {
     @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
-        CheckResult checkResult = getClusterUpdateResponseEntity(clusterid, auth.getUserEntity());
+        CheckResult checkResult = getClusterUpdateCheckResult(clusterid, auth.getUserEntity());
 
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
@@ -247,7 +246,6 @@ public class ClusterController {
 
         return doGroupClusterUpdate(cluster, clusterJson);
     }
-
 
     /**
      * Deletes a cluster
