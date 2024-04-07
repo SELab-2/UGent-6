@@ -697,7 +697,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
      * @ApiPath /api/courses/{courseId}/members
      */
     @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.admin})
+    @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
         if (!courseRepository.existsById(courseId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
@@ -720,6 +720,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can promote to course-admin");
             }
             Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, request.getUserId()));
+
             if (ce.isPresent()) {
                 ce.get().setRelation(request.getRelation());
                 courseUserRepository.save(ce.get());
@@ -732,7 +733,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
                 }
                 return ResponseEntity.ok().build();
             } else {
-                return ResponseEntity.notFound().build(); //  User is not allowed to do the action, teachers cant remove students of other users course
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not part of course"); //  User is not allowed to do the action, teachers cant remove students of other users course
             }
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
