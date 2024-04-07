@@ -108,7 +108,7 @@ public class ProjectController {
                         return ResponseEntity.ok().body(projectEntityToProjectResponseJson(project, course, user));
                     }
                 })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found"));
     }
 
     public ProjectResponseJson projectEntityToProjectResponseJson(ProjectEntity project, CourseEntity course, UserEntity user) {

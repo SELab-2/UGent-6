@@ -87,7 +87,7 @@ public class ProjectControllerTest {
     public void testCreateProject() {
         // Mock data
         long courseId = 1L;
-        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MIN);
+        ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX);
 
         Auth auth = mock(Auth.class);
         UserEntity user = new UserEntity();
@@ -101,9 +101,10 @@ public class ProjectControllerTest {
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(courseEntity));
         when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
         when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
-
+        when(projectRepository.save(ArgumentMatchers.any(ProjectEntity.class))).thenReturn(new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX));
         // Call controller method
         ResponseEntity<Object> responseEntity = projectController.createProject(courseId, projectJson, auth);
+
 
         // Verify response
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
