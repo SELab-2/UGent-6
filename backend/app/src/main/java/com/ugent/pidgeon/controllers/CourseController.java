@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.time.LocalDateTime;
 
 @RestController
@@ -149,7 +149,7 @@ public class CourseController {
             // nieuw vak aanmaken
             CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription());
             // Get current time and convert to SQL Timestamp
-            Timestamp currentTimestamp = Timestamp.valueOf(LocalDateTime.now());
+            OffsetDateTime currentTimestamp = OffsetDateTime.now();
             courseEntity.setCreatedAt(currentTimestamp);
             // vak opslaan
             courseRepository.save(courseEntity);

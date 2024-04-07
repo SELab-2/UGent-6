@@ -2,7 +2,7 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 
 @Entity
@@ -19,7 +19,7 @@ public class CourseEntity {
     private String description;
 
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private OffsetDateTime createdAt;
 
     public String getJoinKey() {
         return joinKey;
@@ -68,11 +68,11 @@ public class CourseEntity {
     }
 
 
-    public Timestamp getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

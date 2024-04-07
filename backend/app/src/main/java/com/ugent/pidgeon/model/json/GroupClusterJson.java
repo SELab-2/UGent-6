@@ -1,6 +1,6 @@
 package com.ugent.pidgeon.model.json;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record GroupClusterJson(
@@ -8,7 +8,7 @@ public record GroupClusterJson(
         String name,
         int capacity,
         int groupCount,
-        Timestamp createdAt,
+        OffsetDateTime createdAt,
         List<GroupJson>  groups,
 
         String courseUrl

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -127,7 +128,7 @@ public class ClusterController {
                 clusterJson.name(),
                 clusterJson.groupCount()
         );
-        cluster.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        cluster.setCreatedAt(OffsetDateTime.now());
         GroupClusterEntity clusterEntity = groupClusterRepository.save(cluster);
 
         for (int i = 0; i < clusterJson.groupCount(); i++) {
