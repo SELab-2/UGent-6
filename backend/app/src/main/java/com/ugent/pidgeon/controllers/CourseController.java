@@ -49,6 +49,10 @@ public class CourseController {
 
     @Autowired
     private ClusterController groupClusterController;
+    @Autowired
+    private GroupRepository groupRepository;
+    @Autowired
+    private GroupUserRepository groupUserRepository;
 
 
     public UserReferenceJson userEntityToUserReference(UserEntity user) {
@@ -233,7 +237,7 @@ public class CourseController {
 
         }
         CourseEntity course = courseopt.get();
-        if (courseUserRepository.findByCourseIdAndUserId(auth.getUserEntity().getId(), courseId).isEmpty() && auth.getUserEntity().getRole() != UserRole.admin) {
+        if (courseUserRepository.findByCourseIdAndUserId(courseId, auth.getUserEntity().getId()).isEmpty() && auth.getUserEntity().getRole() != UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to acces this course");
         }
 
@@ -362,12 +366,32 @@ public class CourseController {
         return ResponseEntity.status(successtatus).body(bodySupplier.get());
     }
 
+    private boolean createNewIndividualClusterGroup(long courseId, long userId) {
+        GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
+        if (groupClusterEntity == null) {
+            return false;
+        }
+        // Create new group for the cluster
+        GroupEntity groupEntity = new GroupEntity("", groupClusterEntity.getId());
+        groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() + 1);
+        groupClusterRepository.save(groupClusterEntity);
+        groupEntity = groupRepository.save(groupEntity);
 
+        // Add user to the group
+        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), userId);
+        groupUserRepository.save(groupUserEntity);
+        return true;
+    }
+
+    /* Join course with key */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId, @PathVariable String courseKey) {
         CourseEntity course = courseRepository.findById(courseId).orElse(null);
         if (course != null) {
+            if (!createNewIndividualClusterGroup(courseId, auth.getUserEntity().getId())) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
+            }
             return getJoinWithKeyResponseEntity(auth.getUserEntity().getId(), course, courseKey, HttpStatus.CREATED, () -> {
                 courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
                 return null;
@@ -376,6 +400,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
         }
     }
+
 
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
     @Roles({UserRole.student, UserRole.teacher})
@@ -390,11 +415,15 @@ public class CourseController {
         }
     }
 
+    /* Join course without key */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
         CourseEntity course = courseRepository.findById(courseId).orElse(null);
         if (course != null) {
+            if (!createNewIndividualClusterGroup(courseId, auth.getUserEntity().getId())) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
+            }
             return getJoinResponseEntity(auth.getUserEntity().getId(), course, HttpStatus.CREATED, () -> {
                 courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
                 return null;
