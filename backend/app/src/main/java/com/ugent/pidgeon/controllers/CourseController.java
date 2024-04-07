@@ -53,6 +53,8 @@ public class CourseController {
     private GroupRepository groupRepository;
     @Autowired
     private GroupUserRepository groupUserRepository;
+    @Autowired
+    private GroupController groupController;
 
 
     public UserReferenceJson userEntityToUserReference(UserEntity user) {
@@ -216,6 +218,8 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+
 
     /**
      * Function to retrieve a course by its ID
@@ -390,14 +394,7 @@ public class CourseController {
         }
         // Find the group of the user
         Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
-        if (groupEntityOptional.isEmpty()) {
-            return false;
-        }
-        GroupEntity groupEntity = groupEntityOptional.get();
-        // Remove the user from the group
-        groupUserRepository.deleteAllByGroupId(groupEntity.getId());
-        groupRepository.deleteById(groupEntity.getId());
-        return true;
+        return groupEntityOptional.filter(groupEntity -> groupController.removeGroup(groupEntity.getId())).isPresent();
     }
 
     /**
@@ -507,6 +504,54 @@ public class CourseController {
     }
 
     /**
+     * Function to leave a course
+     *
+     * @param courseId ID of the course to leave
+     * @param auth authentication object of the requesting user
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog TODO
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/leave
+     */
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/leave")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> leaveCourse(@PathVariable long courseId, Auth auth) {
+        try {
+            UserEntity user = auth.getUserEntity();
+            long userId = user.getId();
+
+            // het vak selecteren
+            CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
+            if (courseEntity == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+            }
+
+            // check of de user admin of lesgever is van het vak
+            Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, userId));
+            if (courseUserEntityOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
+            }
+            CourseUserEntity courseUserEntity = courseUserEntityOptional.get();
+            if (courseUserEntity.getRelation() == CourseRelation.creator) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to leave the course");
+            }
+
+            // Verwijder de user uit het vak
+            courseUserRepository.deleteById(new CourseUserId(courseId, userId));
+            if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
+                if (!removeIndividualClusterGroup(courseId, userId)) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
+                }
+            }
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
      * Function to remove a different user from a course
      *
      * @param auth authentication object of the requesting user
@@ -516,7 +561,7 @@ public class CourseController {
      * @ApiDog TODO
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
-     * @ApiPath /api/courses/{courseId}/leave
+     * @ApiPath /api/courses/{courseId}/members
      */
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
@@ -546,7 +591,9 @@ public class CourseController {
             }
             courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
             if (userRelation.equals(CourseRelation.enrolled)) {
-                removeIndividualClusterGroup(courseId, userId.getUserId());
+                if (!removeIndividualClusterGroup(courseId, userId.getUserId())) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
+                }
             }
             return ResponseEntity.ok().build(); // Successfully removed
         } else {
@@ -597,6 +644,8 @@ public class CourseController {
         }
     }
 
+
+
     /**
      * Function to update the relation of a user in a course
      *
@@ -639,7 +688,9 @@ public class CourseController {
                 if (request.getRelation().equals(CourseRelation.enrolled)) {
                     createNewIndividualClusterGroup(courseId, request.getUserId());
                 } else {
-                    removeIndividualClusterGroup(courseId, request.getUserId());
+                    if (!removeIndividualClusterGroup(courseId, request.getUserId())) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
+                    }
                 }
                 return ResponseEntity.ok().build();
             } else {

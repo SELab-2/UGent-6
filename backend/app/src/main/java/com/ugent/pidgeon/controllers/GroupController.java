@@ -143,19 +143,24 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
+        removeGroup(groupid);
+        // Return 204
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
+    }
+
+    public boolean removeGroup(long groupId) {
         // Delete the group
-        groupRepository.deleteGroupUsersByGroupId(groupid);
-        groupRepository.deleteSubmissionsByGroupId(groupid);
-        groupRepository.deleteGroupFeedbacksByGroupId(groupid);
-        groupRepository.deleteById(groupid);
+        groupRepository.deleteGroupUsersByGroupId(groupId);
+        groupRepository.deleteSubmissionsByGroupId(groupId);
+        groupRepository.deleteGroupFeedbacksByGroupId(groupId);
+        groupRepository.deleteById(groupId);
 
         // update groupcount in cluster
-        groupClusterRepository.findById(group.getClusterId()).ifPresent(cluster -> {
+        groupClusterRepository.findById(groupId).ifPresent(cluster -> {
             cluster.setGroupAmount(cluster.getGroupAmount() - 1);
             groupClusterRepository.save(cluster);
         });
-        // Return 204
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
+        return true;
     }
 
 }
