@@ -116,6 +116,10 @@ public class ClusterController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
 
+        if (clusterJson.capacity() <= 1) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Capacity must be greater than 1");
+        }
+
         // Create the cluster
         GroupClusterEntity cluster = new GroupClusterEntity(
                 courseid,
