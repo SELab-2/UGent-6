@@ -4,15 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.CourseMemberRequestJson;
-import com.ugent.pidgeon.model.json.PublicUserDTO;
-import com.ugent.pidgeon.model.json.UserIdJson;
-import com.ugent.pidgeon.model.json.CourseJson;
+import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,7 +51,26 @@ public class CourseController {
     private ClusterController groupClusterController;
 
 
+    public UserReferenceJson userEntityToUserReference(UserEntity user) {
+        return new UserReferenceJson(user.getName() + " " + user.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + user.getId());
+    }
+    public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course) {
+        UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
+        UserReferenceJson teacherJson = userEntityToUserReference(teacher);
 
+        List<UserEntity> assistants = courseRepository.findAssistantsByCourseId(course.getId());
+        List<UserReferenceJson> assistantsJson = assistants.stream().map(this::userEntityToUserReference).toList();
+
+        return new CourseWithInfoJson(
+                course.getId(),
+                course.getName(),
+                course.getDescription(),
+                teacherJson,
+                assistantsJson,
+                ApiRoutes.COURSE_BASE_PATH + "/" + course.getId() + "/members",
+                getJoinLink(course.getJoinKey(), "" + course.getId())
+        );
+    }
 
     /**
      * Function to retrieve all courses of a user
@@ -74,10 +91,20 @@ public class CourseController {
 
             // Retrieve course entities based on user courses
             List<CourseJSONObject> courseJSONObjects = userCourses.stream()
-                    .map(courseWithRelation -> courseRepository.findById(courseWithRelation.getCourseId())
-                            .orElse(null))
+                    .map(courseWithRelation -> {
+                        CourseEntity course = courseRepository.findById(courseWithRelation.getCourseId()).orElse(null);
+                        if (course == null) {
+                            return null;
+                        }
+                        return new CourseJSONObject(
+                                course.getId(),
+                                course.getName(),
+                                ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
+                                courseWithRelation.getRelation()
+                        );
+                    }
+                    )
                     .filter(Objects::nonNull)
-                    .map(entity -> new CourseJSONObject(entity.getId(), entity.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + entity.getId()))
                     .toList();
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -92,7 +119,7 @@ public class CourseController {
     }
 
     // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
-    private record CourseJSONObject(long id, String name, String url) {
+    private record CourseJSONObject(long courseId, String name, String url, CourseRelation relation) {
     }
 
     /**
@@ -108,7 +135,7 @@ public class CourseController {
      */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})
-    public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseJson courseJson, Auth auth) {
+    public ResponseEntity<CourseWithInfoJson> createCourse(@RequestBody CourseJson courseJson, Auth auth) {
         try {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
@@ -125,7 +152,7 @@ public class CourseController {
             CourseUserEntity courseUserEntity = new CourseUserEntity(courseEntity.getId(), userId, CourseRelation.creator);
             courseUserRepository.save(courseUserEntity);
 
-            return ResponseEntity.ok(courseEntity);
+            return ResponseEntity.ok(courseEntityToCourseWithInfo(courseEntity));
         } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -175,7 +202,7 @@ public class CourseController {
             courseRepository.save(courseEntity);
 
             // Response verzenden
-            return ResponseEntity.ok(courseEntity);
+            return ResponseEntity.ok(courseEntityToCourseWithInfo(courseEntity));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -205,8 +232,10 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to acces this course");
         }
 
-        return ResponseEntity.ok(course);
+        return ResponseEntity.ok(courseEntityToCourseWithInfo(course));
     }
+
+
 
     /**
      * Function to delete a course by its ID
@@ -505,6 +534,14 @@ public class CourseController {
         }
     }
 
+    public String getJoinLink(String courseKey, String courseId) {
+        if (courseKey != null) {
+            return ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}".replace("{courseId}", courseId).replace("{courseKey}", courseKey);
+        } else {
+            return ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join".replace("{courseId}", courseId);
+        }
+    }
+
     @Roles({UserRole.teacher, UserRole.student})
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
     // will return a join key if there is an existing one, otherwise it will return a 404
@@ -512,11 +549,9 @@ public class CourseController {
         if (auth.getUserEntity().getRole() == UserRole.admin || courseUserRepository.isCourseAdmin(courseId, auth.getUserEntity().getId())) {
             if (courseRepository.existsById(courseId)) {
                 CourseEntity course = courseRepository.findById(courseId).get();
-                if (course.getJoinKey() == null)
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No join key found");
-                return ResponseEntity.ok(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}".replace("{courseId}", courseId.toString()).replace("{courseKey}", course.getJoinKey()));
+                return ResponseEntity.ok(getJoinLink(course.getJoinKey(), courseId.toString()));
             }
-            return null;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a course admin, thus not allowed to request the link.");
         }
