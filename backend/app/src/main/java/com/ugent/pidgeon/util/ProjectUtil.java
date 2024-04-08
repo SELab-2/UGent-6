@@ -24,4 +24,15 @@ public class ProjectUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    public CheckResult<ProjectEntity> getProjectIfAdmin(long projectId, UserEntity user) {
+        ProjectEntity project = getProjectIfExists(projectId);
+        if (project == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "Project not found", null);
+        }
+        if (!projectRepository.adminOfProject(projectId, user.getId()) && !user.getRole().equals(UserRole.admin)) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "You are not an admin of this project", null);
+        }
+        return new CheckResult<>(HttpStatus.OK, "", project);
+    }
+
 }

@@ -29,15 +29,10 @@ public class TestController {
     private TestRepository testRepository;
     @Autowired
     private FileController fileController;
-    @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
-    private CourseUserRepository courseUserRepository;
 
     @Autowired
     private TestUtil testUtil;
-    @Autowired
-    private ProjectUtil projectUtil;
+
     @Autowired
     private FileUtil fileUtil;
 
@@ -107,8 +102,8 @@ public class TestController {
         try {
 
             // Save the files on server
-            Long dockertestFileEntityId;
-            Long structuretestFileEntityId;
+            long dockertestFileEntityId;
+            long structuretestFileEntityId;
             if (dockerTest != null) {
                 Path dockerTestPath = Filehandler.saveTest(dockerTest, projectId);
                 FileEntity dockertestFileEntity = fileUtil.saveFileEntity(dockerTestPath, projectId, user.getId());
@@ -151,20 +146,14 @@ public class TestController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getTests(@PathVariable("projectid") long projectId, Auth auth) {
-        CheckResult projectCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
+        CheckResult<TestEntity> projectCheck = testUtil.getTestIfAdmin(projectId, auth.getUserEntity());
         if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
-
-        TestEntity test = testUtil.getTestIfExists(projectId);
-        if (test == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
-        }
+        TestEntity test = projectCheck.getData();
         TestJson res  = testUtil.testEntityToTestJson(test, projectId);
         return ResponseEntity.ok(res);
     }
-
-
 
     /**
      * Function to get the structure test file of a project
@@ -199,15 +188,11 @@ public class TestController {
     }
 
     public ResponseEntity<?> getTestFileResponseEnity(long projectId, Auth auth, Function<TestEntity, Long> testFileIdGetter) {
-        CheckResult projectCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
+        CheckResult<TestEntity> projectCheck = testUtil.getTestIfAdmin(projectId, auth.getUserEntity());
         if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
-
-        TestEntity testEntity = testUtil.getTestIfExists(projectId);
-        if (testEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
-        }
+        TestEntity testEntity = projectCheck.getData();
 
         long testFileId = testFileIdGetter.apply(testEntity);
         Optional<FileEntity> fileEntity = fileRepository.findById(testFileId);
@@ -234,21 +219,12 @@ public class TestController {
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteTestById(@PathVariable("projectid") long projectId, Auth auth) {
-        CheckResult projectCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
-        if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
-            return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null, HttpMethod.DELETE);
+        if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(updateCheckResult.getStatus()).body(updateCheckResult.getMessage());
         }
-
-        // Get the test entry from the database
-        TestEntity testEntity = testUtil.getTestIfExists(projectId);
-        if (testEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project");
-        }
-
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElse(null);
-        if (projectEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
-        }
+        ProjectEntity projectEntity = updateCheckResult.getData().getSecond();
+        TestEntity testEntity = updateCheckResult.getData().getFirst();
 
         projectEntity.setTestId(null);
         projectRepository.save(projectEntity);
