@@ -52,7 +52,7 @@ public class CourseController {
 
 
     public UserReferenceJson userEntityToUserReference(UserEntity user) {
-        return new UserReferenceJson(user.getName() + " " + user.getSurname(), ApiRoutes.USER_BASE_PATH + "/" + user.getId());
+        return new UserReferenceJson(user.getName() + " " + user.getSurname(), user.getEmail(), user.getId());
     }
     public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course) {
         UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
@@ -135,10 +135,18 @@ public class CourseController {
      */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})
-    public ResponseEntity<CourseWithInfoJson> createCourse(@RequestBody CourseJson courseJson, Auth auth) {
+    public ResponseEntity<?> createCourse(@RequestBody CourseJson courseJson, Auth auth) {
         try {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
+
+            if (courseJson.getName() == null || courseJson.getDescription() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("name and description are required");
+            }
+
+            if (courseJson.getName().isBlank()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name cannot be empty");
+            }
 
             // nieuw vak aanmaken
             CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription());
@@ -457,7 +465,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
             }
             return getJoinWithKeyResponseEntity(auth.getUserEntity().getId(), course, courseKey, HttpStatus.CREATED, () -> {
                 courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
-                return null;
+                return courseEntityToCourseWithInfo(course);
             });
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
@@ -510,7 +518,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
             }
             return getJoinResponseEntity(auth.getUserEntity().getId(), course, HttpStatus.CREATED, () -> {
                 courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
-                return null;
+                return courseEntityToCourseWithInfo(course);
             });
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
@@ -656,6 +664,10 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
     public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
         if (!courseRepository.existsById(courseId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
+
+        if (!userRepository.existsById(request.getUserId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not exist");
         }
 
         // Only teacher and admin can add different users to a course.

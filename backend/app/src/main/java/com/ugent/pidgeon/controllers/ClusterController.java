@@ -108,6 +108,10 @@ public class ClusterController {
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> createClusterForCourse(@PathVariable("courseid") Long courseid, Auth auth, @RequestBody GroupClusterCreateJson clusterJson) {
+        if (clusterJson.capacity() == null || clusterJson.name() == null || clusterJson.groupCount() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("capacity, name and groupCount must be provided");
+        }
+
         // Get the user id
         long userId = auth.getUserEntity().getId();
         if (!courseRepository.existsById(courseid)) {
@@ -117,8 +121,16 @@ public class ClusterController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
 
+        if (clusterJson.name().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name cannot be empty");
+        }
+
         if (clusterJson.capacity() <= 1) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Capacity must be greater than 1");
+        }
+
+        if (clusterJson.groupCount() < 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Group count must be 0 or greater");
         }
 
         // Create the cluster
@@ -301,6 +313,14 @@ public class ClusterController {
     @PostMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}/groups")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> createGroupForCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupCreateJson groupJson) {
+        if (groupJson.name() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("name must be provided");
+        }
+
+        if (groupJson.name().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name cannot be empty");
+        }
+
         // Get the user id
         long userId = auth.getUserEntity().getId();
         GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);

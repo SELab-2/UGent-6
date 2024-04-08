@@ -170,16 +170,16 @@ public class GroupFeedbackController {
     }
 
     private CheckResult checkGroupFeedbackUpdateJson(UpdateGroupScoreRequest request, Long projectId) {
-        long maxScore = projectRepository.findById(projectId).get().getMaxScore();
+        Integer maxScore = projectRepository.findById(projectId).get().getMaxScore();
         if (request.getScore() == null || request.getFeedback() == null) {
             return new CheckResult(HttpStatus.BAD_REQUEST, "Score and feedback need to be provided");
         }
 
-        if (request.getScore() < 0) {
+        if (maxScore != null && request.getScore() < 0) {
             return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be lower than 0");
         }
 
-        if (maxScore != 0 && request.getScore() > maxScore) {
+        if (maxScore != null && request.getScore() > maxScore) {
             return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be higher than the defined max score (" + maxScore + ")");
         }
 

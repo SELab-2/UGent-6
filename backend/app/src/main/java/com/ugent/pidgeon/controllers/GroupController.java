@@ -25,6 +25,7 @@ public class GroupController {
     @Autowired
     private GroupClusterRepository groupClusterRepository;
 
+
     public boolean isIndividualGroup(long groupId) {
         GroupEntity group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
@@ -44,7 +45,7 @@ public class GroupController {
         }
         // Get the members of the group
         List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
-                new UserReferenceJson(user.getName(), ApiRoutes.USER_BASE_PATH + "/" + user.getUserId())
+                new UserReferenceJson(user.getName(), user.getEmail(), user.getUserId())
         ).toList();
 
         // Return the group with its members
