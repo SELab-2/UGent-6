@@ -156,6 +156,61 @@ public class ProjectController {
         );
     }
 
+
+    private CheckResult checkProjectJson(ProjectJson projectJson, long courseId) {
+        if (projectJson.getName() == null ||
+            projectJson.getDescription() == null ||
+            projectJson.getMaxScore() == null ||
+            projectJson.getGroupClusterId() == null ||
+            projectJson.getDeadline() == null) {
+            return new CheckResult(HttpStatus.BAD_REQUEST, "name, description, maxScore and deadline are required fields");
+        }
+
+        if (projectJson.getName().isBlank()) {
+            return new CheckResult(HttpStatus.BAD_REQUEST, "name cannot be empty");
+        }
+
+        // Check of de GroupCluster deel is van het vak
+        GroupClusterEntity groupCluster = groupClusterRepository.findById(projectJson.getGroupClusterId()).orElse(null);
+        if (groupCluster == null) {
+            return new CheckResult(HttpStatus.NOT_FOUND, "Group cluster does not exist");
+        }
+        if (groupCluster.getCourseId() != courseId) {
+            return new CheckResult(HttpStatus.FORBIDDEN, "Group cluster isn't linked to this course");
+        }
+
+        if (projectJson.getDeadline().isBefore(OffsetDateTime.now())) {
+            return new CheckResult(HttpStatus.BAD_REQUEST, "Deadline is in the past");
+        }
+
+        if (projectJson.getMaxScore() < 0) {
+            return new CheckResult(HttpStatus.BAD_REQUEST, "Max score cannot be negative");
+        }
+
+        return new CheckResult(HttpStatus.OK, "");
+    }
+
+    private CheckResult checkCourseAcces(long courseId, UserEntity user) {
+        long userId = user.getId();
+
+        // het vak selecteren
+        CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
+        if (courseEntity == null) {
+            return new CheckResult(HttpStatus.NOT_FOUND, "Course not found");
+        }
+
+        // check of de user admin of lesgever is van het vak
+        CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).
+                orElse(null);
+        if (courseUserEntity == null) {
+            return new CheckResult(HttpStatus.FORBIDDEN, "User is not part of the course");
+        }
+        if(courseUserEntity.getRelation() == CourseRelation.enrolled){
+            return new CheckResult(HttpStatus.FORBIDDEN, "User is not an admin of the course");
+        }
+        return new CheckResult(HttpStatus.OK, "");
+    }
+
     /**
      * Function to create a new project
      * @param courseId ID of the course to create the project in
@@ -174,34 +229,12 @@ public class ProjectController {
         try {
             // De user vinden
             UserEntity user = auth.getUserEntity();
-            long userId = user.getId();
-
-            // het vak selecteren
-            CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
-            if (courseEntity == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+            CheckResult checkAcces = checkCourseAcces(courseId, user);
+            if (checkAcces.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkAcces.getStatus()).body(checkAcces.getMessage());
             }
 
-            // check of de user admin of lesgever is van het vak
-            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).
-                    orElse(null);
-            if (courseUserEntity == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
-            }
-            if(courseUserEntity.getRelation() == CourseRelation.enrolled){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to create new projects");
-            }
-
-            if (projectJson.getGroupClusterId() != null) {
-                // Check of de GroupCluster deel is van het vak
-                GroupClusterEntity groupCluster = groupClusterRepository.findById(projectJson.getGroupClusterId()).orElse(null);
-                if (groupCluster == null) {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster does not exist");
-                }
-                if (groupCluster.getCourseId() != courseId) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Group cluster isn't linked to this course");
-                }
-            } else {
+            if (projectJson.getGroupClusterId() == null) {
                 GroupClusterEntity groupCluster = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
                 if (groupCluster == null) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal error while creating project without group, contact an administrator");
@@ -209,13 +242,9 @@ public class ProjectController {
                 projectJson.setGroupClusterId(groupCluster.getId());
             }
 
-            // Check of de dealine bestaat en in de toekomst ligt.
-            OffsetDateTime deadline = projectJson.getDeadline();
-            if(deadline == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No deadline given");
-            }
-            if(deadline.isBefore(OffsetDateTime.now())){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deadline is in the past");
+            CheckResult checkResult = checkProjectJson(projectJson, courseId);
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
 
             // Create a new ProjectEntity instance
@@ -225,11 +254,31 @@ public class ProjectController {
 
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);
+            CourseEntity courseEntity = courseRepository.findById(courseId).get();
             return ResponseEntity.ok(projectEntityToProjectResponseJson(savedProject, courseEntity, user));
         } catch (Exception e){
             Logger.getGlobal().severe("Error while creating project: " + Arrays.toString(e.getStackTrace()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
         }
+    }
+
+    private CheckResult checkProjectUpdateAcces(long projectId, UserEntity user) {
+        ProjectEntity project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) {
+            return new CheckResult(HttpStatus.NOT_FOUND, "Project not found");
+        }
+        return checkCourseAcces(project.getCourseId(), user);
+    }
+
+    private ResponseEntity<?> doProjectUpdate(ProjectEntity project, ProjectJson projectJson, UserEntity user) {
+        project.setName(projectJson.getName());
+        project.setDescription(projectJson.getDescription());
+        project.setGroupClusterId(projectJson.getGroupClusterId());
+        project.setDeadline(projectJson.getDeadline());
+        project.setMaxScore(projectJson.getMaxScore());
+        project.setVisible(projectJson.isVisible());
+        projectRepository.save(project);
+        return ResponseEntity.ok(projectEntityToProjectResponseJson(project, courseRepository.findById(project.getCourseId()).get(), user));
     }
 
      /**
@@ -244,25 +293,77 @@ public class ProjectController {
      * @return ResponseEntity with the created project
      */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
-    @Roles({UserRole.teacher})
-    public ResponseEntity<?> putProjectById(@PathVariable Long projectId, @RequestBody ProjectUpdateDTO updateDTO, Auth auth) {
-        Optional<ProjectEntity> projectOptional = projectRepository.findById(projectId);
-        if (projectOptional.isPresent()) {
-            if (!projectRepository.adminOfProject(projectId, auth.getUserEntity().getId()) && !auth.getUserEntity().getRole().equals(UserRole.admin)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to update this project");
-            }
-            ProjectEntity project = projectOptional.get();
-            if (updateDTO.getName() != null) project.setName(updateDTO.getName());
-            if (updateDTO.getDescription() != null) project.setDescription(updateDTO.getDescription());
-
-            if (updateDTO.getDeadline() != null) {
-                project.setDeadline(updateDTO.getDeadline());
-            }
-            projectRepository.save(project);
-            return ResponseEntity.ok(project);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("project not found with id " + projectId);
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> putProjectById(@PathVariable Long projectId, @RequestBody ProjectJson projectJson, Auth auth) {
+        CheckResult checkResult = checkProjectUpdateAcces(projectId, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+
+        ProjectEntity project = projectRepository.findById(projectId).get();
+
+        if (projectJson.getGroupClusterId() == null) {
+            GroupClusterEntity groupCluster = groupClusterRepository.findIndividualClusterByCourseId(project.getCourseId()).orElse(null);
+            if (groupCluster == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal error while updating project without group, contact an administrator");
+            }
+            projectJson.setGroupClusterId(groupCluster.getId());
+        }
+
+        CheckResult checkProject = checkProjectJson(projectJson, project.getCourseId());
+        if (checkProject.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkProject.getStatus()).body(checkProject.getMessage());
+        }
+
+        return doProjectUpdate(project, projectJson, auth.getUserEntity());
+    }
+
+    /**
+     * Function to update an existing project
+     * @param projectId ID of the project to get
+     * @param updateDTO ProjectUpdateDTO object containing the new project's information
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
+     * @HttpMethod Patch
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectId}
+     * @return ResponseEntity with the created project
+     */
+    @PatchMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> patchProjectById(@PathVariable Long projectId, @RequestBody ProjectJson projectJson, Auth auth) {
+        CheckResult checkResult = checkProjectUpdateAcces(projectId, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        ProjectEntity project = projectRepository.findById(projectId).get();
+
+        if (projectJson.getName() == null) {
+            projectJson.setName(project.getName());
+        }
+        if (projectJson.getDescription() == null) {
+            projectJson.setDescription(project.getDescription());
+        }
+        if (projectJson.getGroupClusterId() == null) {
+            projectJson.setGroupClusterId(project.getGroupClusterId());
+        }
+        if (projectJson.getDeadline() == null) {
+            projectJson.setDeadline(project.getDeadline());
+        }
+        if (projectJson.getMaxScore() == null) {
+            projectJson.setMaxScore(project.getMaxScore());
+        }
+        if (projectJson.isVisible() == null) {
+            projectJson.setVisible(project.isVisible());
+        }
+
+        CheckResult checkProject = checkProjectJson(projectJson, project.getCourseId());
+        if (checkProject.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkProject.getStatus()).body(checkProject.getMessage());
+        }
+
+        return doProjectUpdate(project, projectJson, auth.getUserEntity());
     }
 
     /**
