@@ -10,6 +10,7 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.ClusterUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +35,8 @@ public class ClusterController {
     @Autowired
     GroupController groupController;
 
-    public boolean isIndividualCluster(long clusterId) {
-        GroupClusterEntity cluster = groupClusterRepository.findById(clusterId).orElse(null);
-        return cluster != null && cluster.getGroupAmount() <= 1;
-    }
+    @Autowired
+    private ClusterUtil clusterUtil;
 
     /**
      * Returns all clusters for a course
@@ -193,7 +192,7 @@ public class ClusterController {
             return new CheckResult(HttpStatus.FORBIDDEN, "User not admin of the course", null);
         }
 
-        if (isIndividualCluster(clusterId)) {
+        if (clusterUtil.isIndividualCluster(clusterId)) {
             return new CheckResult(HttpStatus.CONFLICT, "Cannot update individual cluster", null);
         }
 
@@ -287,7 +286,7 @@ public class ClusterController {
         if (groupClusterRepository.usedInProject(clusterid)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Cluster is being used in a project");
         }
-        if (isIndividualCluster(clusterid)) {
+        if (clusterUtil.isIndividualCluster(clusterid)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete individual cluster");
         }
         for (GroupEntity group : groupRepository.findAllByClusterId(clusterid)) {
@@ -331,7 +330,7 @@ public class ClusterController {
         if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
-        if (isIndividualCluster(clusterid)) {
+        if (clusterUtil.isIndividualCluster(clusterid)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot create group in individual cluster");
         }
         GroupEntity group = new GroupEntity(groupJson.name(), clusterid);
