@@ -41,6 +41,9 @@ public class GroupMembersControllerTest extends ControllerTest {
     @Mock
     private GroupController groupController;
 
+    @Mock
+    private CourseController courseController;
+
     @InjectMocks
     private GroupMemberController groupMemberController;
 
@@ -70,6 +73,7 @@ public class GroupMembersControllerTest extends ControllerTest {
         GroupEntity mockedGroup = new GroupEntity();
         mockedGroup.setClusterId(1);
         when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockedGroup));
+        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupClusterRepository.userInGroupForCluster(anyLong(), anyLong())).thenReturn(false);
         when(groupController.isIndividualGroup(anyLong())).thenReturn(false);
