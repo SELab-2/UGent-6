@@ -703,6 +703,9 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
 
+        if (request.getUserId() == null || request.getRelation() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User id and relation are required");
+        }
         // Only teacher and admin can add different users to a course.
         if (hasCourseRights(courseId, auth.getUserEntity())) {
             if (auth.getUserEntity().getId() == request.getUserId()) {
