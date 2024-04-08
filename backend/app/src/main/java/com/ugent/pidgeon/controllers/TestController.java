@@ -6,9 +6,7 @@ import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.Filehandler;
-import com.ugent.pidgeon.util.Permission;
-import com.ugent.pidgeon.util.PermissionHandler;
+import com.ugent.pidgeon.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -36,6 +34,13 @@ public class TestController {
     private CourseRepository courseRepository;
     @Autowired
     private CourseUserRepository courseUserRepository;
+
+    @Autowired
+    private TestUtil testUtil;
+    @Autowired
+    private ProjectUtil projectUtil;
+    @Autowired
+    private FileUtil fileUtil;
 
     /**
      * Function to update the tests of a project
@@ -92,29 +97,16 @@ public class TestController {
             MultipartFile structureTest,
             HttpMethod httpMethod
     ) {
-        ProjectEntity projectEntity = projectRepository.findById(projectId).orElse(null);
-        if (projectEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
-        }
 
-        if(!projectRepository.adminOfProject(projectId, user.getId()) && user.getRole() != UserRole.admin){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have acces to update the tests of this project");
-        }
-
-        if (httpMethod.equals(HttpMethod.POST) && projectEntity.getTestId() != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Tests already exist for this project");
-        }
-
-        if (!httpMethod.equals(HttpMethod.PATCH)) {
-            if (dockerImage == null || dockerTest == null || structureTest == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing parameters: dockerimage (string), dockertest (file), structuretest (file) are required");
-            }
+        CheckResult checkResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerTest, structureTest, httpMethod);
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
         try {
             // Get test entity
-            Optional<TestEntity> testEntityOptional = testRepository.findByProjectId(projectId);
-            if (testEntityOptional.isEmpty() && !httpMethod.equals(HttpMethod.POST)) {
+            TestEntity testEntity = testUtil.getTestIfExists(projectId);
+            if (testEntity == null && !httpMethod.equals(HttpMethod.POST)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
             }
             // Save the files on server
@@ -122,39 +114,33 @@ public class TestController {
             Long structuretestFileEntityId;
             if (dockerTest != null) {
                 Path dockerTestPath = Filehandler.saveTest(dockerTest, projectId);
-                FileEntity dockertestFileEntity = saveFileEntity(dockerTestPath, projectId, user.getId());
+                FileEntity dockertestFileEntity = fileUtil.saveFileEntity(dockerTestPath, projectId, user.getId());
                 dockertestFileEntityId = dockertestFileEntity.getId();
             } else {
-                dockertestFileEntityId = testEntityOptional.get().getDockerTestId();
+                dockertestFileEntityId = testEntity.getDockerTestId();
             }
 
             if (structureTest != null) {
                 Path structureTestPath = Filehandler.saveTest(structureTest, projectId);
-                FileEntity structuretestFileEntity = saveFileEntity(structureTestPath, projectId, user.getId());
+                FileEntity structuretestFileEntity = fileUtil.saveFileEntity(structureTestPath, projectId, user.getId());
                 structuretestFileEntityId = structuretestFileEntity.getId();
             } else {
-                structuretestFileEntityId = testEntityOptional.get().getStructureTestId();
+                structuretestFileEntityId = testEntity.getStructureTestId();
             }
 
             // Create/update test entity
             TestEntity test = new TestEntity(dockerImage, dockertestFileEntityId, structuretestFileEntityId);
             test = testRepository.save(test);
+            ProjectEntity projectEntity = projectUtil.getProjectIfExists(projectId);
             projectEntity.setTestId(test.getId());
             projectRepository.save(projectEntity);
-            return ResponseEntity.ok(entityToTestJson(test, projectId));
+            return ResponseEntity.ok(testUtil.testEntityToTestJson(test, projectId));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving files: " + e.getMessage());
         }
     }
 
-    // Hulpfunctie om de tests correct op de database te zetten
-    private FileEntity saveFileEntity(Path filePath, long projectId, long userId) throws IOException {
-        // Save the file entity to the database
-        Logger.getGlobal().info("file path: " + filePath.toString());
-        Logger.getGlobal().info("file name: " + filePath.getFileName().toString());
-        FileEntity fileEntity = new FileEntity(filePath.getFileName().toString(), filePath.toString(), userId);
-        return fileRepository.save(fileEntity);
-    }
+
 
     /**
      * Function to get the tests of a project
@@ -169,28 +155,20 @@ public class TestController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getTests(@PathVariable("projectid") long projectId, Auth auth) {
-        long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(projectId, userId) && auth.getUserEntity().getRole() != UserRole.admin){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        CheckResult projectCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
+        if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
-        Optional<TestEntity> testEntity = testRepository.findByProjectId(projectId);
-        if (testEntity.isEmpty()) {
+
+        TestEntity test = testUtil.getTestIfExists(projectId);
+        if (test == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
         }
-        TestEntity test = testEntity.get();
-        TestJson res  = entityToTestJson(test, projectId);
+        TestJson res  = testUtil.testEntityToTestJson(test, projectId);
         return ResponseEntity.ok(res);
     }
 
 
-    public TestJson entityToTestJson(TestEntity testEntity, long projectId) {
-        return new TestJson(
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId,
-                testEntity.getDockerImage(),
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/dockertest",
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/structuretest"
-        );
-    }
 
     /**
      * Function to get the structure test file of a project
@@ -225,20 +203,17 @@ public class TestController {
     }
 
     public ResponseEntity<?> getTestFileResponseEnity(long projectId, Auth auth, Function<TestEntity, Long> testFileIdGetter) {
-        long userId = auth.getUserEntity().getId();
-        if (!projectRepository.adminOfProject(projectId, userId) && auth.getUserEntity().getRole() != UserRole.admin){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        CheckResult projectCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
+        if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
-        Optional<ProjectEntity> projectEntity = projectRepository.findById(projectId);
-        if (projectEntity.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found with id: " + projectId);
-        }
-        long testId = projectEntity.get().getTestId();
-        Optional<TestEntity> testEntity = testRepository.findById(testId);
-        if (testEntity.isEmpty()) {
+
+        TestEntity testEntity = testUtil.getTestIfExists(projectId);
+        if (testEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
         }
-        long testFileId = testFileIdGetter.apply(testEntity.get());
+
+        long testFileId = testFileIdGetter.apply(testEntity);
         Optional<FileEntity> fileEntity = fileRepository.findById(testFileId);
         if (fileEntity.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No file found for test with id: " + testFileId);
@@ -252,7 +227,7 @@ public class TestController {
 
     /**
      * Function to delete the tests of a project
-     * @param testId the id of the test to delete
+     * @param projectId the id of the test to delete
      * @param auth the authentication object of the requesting user
      * @HttpMethod DELETE
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
@@ -260,28 +235,20 @@ public class TestController {
      * @ApiPath /api/projects/{projectid}/tests
      * @return ResponseEntity
      */
-    @DeleteMapping(ApiRoutes.TEST_BASE_PATH + "/{testId}")
+    @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> deleteTestById(@PathVariable("testId") long testId, Auth auth) {
-        // Get the submission entry from the database
-        TestEntity testEntity = testRepository.findById(testId).orElse(null);
+    public ResponseEntity<?> deleteTestById(@PathVariable("projectid") long projectId, Auth auth) {
+        CheckResult projectCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
+        if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
+        }
+
+        // Get the test entry from the database
+        TestEntity testEntity = testUtil.getTestIfExists(projectId);
         if (testEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project");
         }
-        CourseEntity courseEntity = courseRepository.findCourseEntityByTestId(testId).get(0);
-        if (courseEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
-        }
-        if(auth.getUserEntity().getRole()!= UserRole.admin) {
-            Optional<CourseUserEntity> courseUserEntity = courseUserRepository.findByCourseIdAndUserId(courseEntity.getId(), auth.getUserEntity().getId());
-            if (courseUserEntity.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in course");
-            }
-            Permission permission = PermissionHandler.userIsCourseAdmin(courseUserEntity.get());
-            if (!permission.hasPermission()) {
-                return permission.getResponseEntity();
-            }
-        }
+
         testRepository.delete(testEntity);
         fileController.deleteFileById(testEntity.getStructureTestId());
         fileController.deleteFileById(testEntity.getDockerTestId());
