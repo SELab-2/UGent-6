@@ -13,6 +13,10 @@ public class ProjectUtil {
     @Autowired
     private ProjectRepository projectRepository;
 
+    public boolean userPartOfProject(long projectId, long userId) {
+        return projectRepository.userPartOfProject(projectId, userId);
+    }
+
     public ProjectEntity getProjectIfExists(long projectId) {
         return projectRepository.findById(projectId).orElse(null);
     }

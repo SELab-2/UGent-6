@@ -55,8 +55,6 @@ public class UserController {
     }
 
 
-
-    
     @GetMapping(ApiRoutes.USER_AUTH_PATH)
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<Object> getUserByAzureId(Auth auth) {
