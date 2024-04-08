@@ -9,6 +9,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.CheckResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -176,22 +177,22 @@ public class CourseController {
         // het vak selecteren
         CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
         if (courseEntity == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Course not found");
+            return new CheckResult(HttpStatus.NOT_FOUND, "Course not found", null);
         }
 
         if (user.getRole() != UserRole.admin) {
             // check of de user admin of lesgever is van het vak
             Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, user.getId()));
             if (courseUserEntityOptional.isEmpty()) {
-                return new CheckResult(HttpStatus.FORBIDDEN, "User is not part of the course");
+                return new CheckResult(HttpStatus.FORBIDDEN, "User is not part of the course", null);
             }
             CourseUserEntity courseUserEntity = courseUserEntityOptional.get();
             if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
-                return new CheckResult(HttpStatus.FORBIDDEN, "User is not allowed to update the course");
+                return new CheckResult(HttpStatus.FORBIDDEN, "User is not allowed to update the course", null);
             }
         }
 
-        return new CheckResult(HttpStatus.OK, null);
+        return new CheckResult(HttpStatus.OK, null, null);
     }
 
     private ResponseEntity<?> doCourseUpdate(CourseEntity courseEntity, CourseJson courseJson) {

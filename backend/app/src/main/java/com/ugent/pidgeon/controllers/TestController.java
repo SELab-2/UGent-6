@@ -17,7 +17,6 @@ import java.nio.file.Path;
 
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 @RestController
 public class TestController {
@@ -98,17 +97,15 @@ public class TestController {
             HttpMethod httpMethod
     ) {
 
-        CheckResult checkResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerTest, structureTest, httpMethod);
+        CheckResult<Pair<TestEntity, ProjectEntity>> checkResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerTest, structureTest, httpMethod);
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+        TestEntity testEntity = checkResult.getData().getFirst();
+        ProjectEntity projectEntity = checkResult.getData().getSecond();
 
         try {
-            // Get test entity
-            TestEntity testEntity = testUtil.getTestIfExists(projectId);
-            if (testEntity == null && !httpMethod.equals(HttpMethod.POST)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
-            }
+
             // Save the files on server
             Long dockertestFileEntityId;
             Long structuretestFileEntityId;
@@ -131,7 +128,6 @@ public class TestController {
             // Create/update test entity
             TestEntity test = new TestEntity(dockerImage, dockertestFileEntityId, structuretestFileEntityId);
             test = testRepository.save(test);
-            ProjectEntity projectEntity = projectUtil.getProjectIfExists(projectId);
             projectEntity.setTestId(test.getId());
             projectRepository.save(projectEntity);
             return ResponseEntity.ok(testUtil.testEntityToTestJson(test, projectId));
@@ -249,7 +245,14 @@ public class TestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project");
         }
 
-        testRepository.delete(testEntity);
+        ProjectEntity projectEntity = projectRepository.findById(projectId).orElse(null);
+        if (projectEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
+
+        projectEntity.setTestId(null);
+        projectRepository.save(projectEntity);
+        testRepository.deleteById(testEntity.getId())   ;
         fileController.deleteFileById(testEntity.getStructureTestId());
         fileController.deleteFileById(testEntity.getDockerTestId());
         return  ResponseEntity.ok().build();

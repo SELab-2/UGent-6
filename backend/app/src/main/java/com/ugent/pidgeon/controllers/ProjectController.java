@@ -9,6 +9,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.CheckResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -163,31 +164,31 @@ public class ProjectController {
             projectJson.getMaxScore() == null ||
             projectJson.getGroupClusterId() == null ||
             projectJson.getDeadline() == null) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "name, description, maxScore and deadline are required fields");
+            return new CheckResult(HttpStatus.BAD_REQUEST, "name, description, maxScore and deadline are required fields", null);
         }
 
         if (projectJson.getName().isBlank()) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "name cannot be empty");
+            return new CheckResult(HttpStatus.BAD_REQUEST, "name cannot be empty", null);
         }
 
         // Check of de GroupCluster deel is van het vak
         GroupClusterEntity groupCluster = groupClusterRepository.findById(projectJson.getGroupClusterId()).orElse(null);
         if (groupCluster == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Group cluster does not exist");
+            return new CheckResult(HttpStatus.NOT_FOUND, "Group cluster does not exist", null);
         }
         if (groupCluster.getCourseId() != courseId) {
-            return new CheckResult(HttpStatus.FORBIDDEN, "Group cluster isn't linked to this course");
+            return new CheckResult(HttpStatus.FORBIDDEN, "Group cluster isn't linked to this course", null);
         }
 
         if (projectJson.getDeadline().isBefore(OffsetDateTime.now())) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Deadline is in the past");
+            return new CheckResult(HttpStatus.BAD_REQUEST, "Deadline is in the past", null);
         }
 
         if (projectJson.getMaxScore() < 0) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Max score cannot be negative");
+            return new CheckResult(HttpStatus.BAD_REQUEST, "Max score cannot be negative", null);
         }
 
-        return new CheckResult(HttpStatus.OK, "");
+        return new CheckResult(HttpStatus.OK, "", null);
     }
 
     private CheckResult checkCourseAcces(long courseId, UserEntity user) {
@@ -196,19 +197,19 @@ public class ProjectController {
         // het vak selecteren
         CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
         if (courseEntity == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Course not found");
+            return new CheckResult(HttpStatus.NOT_FOUND, "Course not found", null);
         }
 
         // check of de user admin of lesgever is van het vak
         CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).
                 orElse(null);
         if (courseUserEntity == null) {
-            return new CheckResult(HttpStatus.FORBIDDEN, "User is not part of the course");
+            return new CheckResult(HttpStatus.FORBIDDEN, "User is not part of the course", null);
         }
         if(courseUserEntity.getRelation() == CourseRelation.enrolled){
-            return new CheckResult(HttpStatus.FORBIDDEN, "User is not an admin of the course");
+            return new CheckResult(HttpStatus.FORBIDDEN, "User is not an admin of the course", null);
         }
-        return new CheckResult(HttpStatus.OK, "");
+        return new CheckResult(HttpStatus.OK, "", null);
     }
 
     /**
@@ -265,7 +266,7 @@ public class ProjectController {
     private CheckResult checkProjectUpdateAcces(long projectId, UserEntity user) {
         ProjectEntity project = projectRepository.findById(projectId).orElse(null);
         if (project == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Project not found");
+            return new CheckResult(HttpStatus.NOT_FOUND, "Project not found", null);
         }
         return checkCourseAcces(project.getCourseId(), user);
     }
@@ -284,7 +285,7 @@ public class ProjectController {
      /**
      * Function to update an existing project
      * @param projectId ID of the project to get
-     * @param updateDTO ProjectUpdateDTO object containing the new project's information
+     * @param projectJson ProjectUpdateDTO object containing the new project's information
      * @param auth authentication object of the requesting user
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
      * @HttpMethod Put
@@ -321,7 +322,7 @@ public class ProjectController {
     /**
      * Function to update an existing project
      * @param projectId ID of the project to get
-     * @param updateDTO ProjectUpdateDTO object containing the new project's information
+     * @param projectJson ProjectUpdateDTO object containing the new project's information
      * @param auth authentication object of the requesting user
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
      * @HttpMethod Patch

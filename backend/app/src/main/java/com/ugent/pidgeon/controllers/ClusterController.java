@@ -9,6 +9,7 @@ import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.CheckResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -186,17 +187,17 @@ public class ClusterController {
         long userId = user.getId();
         GroupClusterEntity cluster = groupClusterRepository.findById(clusterId).orElse(null);
         if (cluster == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Cluster not found");
+            return new CheckResult(HttpStatus.NOT_FOUND, "Cluster not found", null);
         }
         if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && user.getRole()!=UserRole.admin) {
-            return new CheckResult(HttpStatus.FORBIDDEN, "User not admin of the course");
+            return new CheckResult(HttpStatus.FORBIDDEN, "User not admin of the course", null);
         }
 
         if (isIndividualCluster(clusterId)) {
-            return new CheckResult(HttpStatus.CONFLICT, "Cannot update individual cluster");
+            return new CheckResult(HttpStatus.CONFLICT, "Cannot update individual cluster", null);
         }
 
-        return new CheckResult(HttpStatus.OK, null);
+        return new CheckResult(HttpStatus.OK, null, null);
     }
 
     /**

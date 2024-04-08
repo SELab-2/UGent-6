@@ -7,6 +7,7 @@ import com.ugent.pidgeon.model.json.UserUpdateJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
+import com.ugent.pidgeon.util.CheckResult;
 import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.List;
 
 @RestController
 public class UserController {
@@ -80,17 +78,13 @@ public class UserController {
     @PutMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
     @Roles({UserRole.admin})
     public ResponseEntity<?> updateUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
-        UserEntity user = userUtil.getUserIfExists(userid);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
 
-        CheckResult checkResult = userUtil.checkUserUpdateJson(userUpdateJson);
+        CheckResult<UserEntity> checkResult = userUtil.checkForUserUpdateJson(userid, userUpdateJson);
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        return doUserUpdate(user, userUpdateJson);
+        return doUserUpdate(checkResult.getData(), userUpdateJson);
     }
 
     @PatchMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
@@ -116,7 +110,7 @@ public class UserController {
             userUpdateJson.setRole(user.getRole().toString());
         }
 
-        CheckResult checkResult = userUtil.checkUserUpdateJson(userUpdateJson);
+        CheckResult<UserEntity> checkResult = userUtil.checkForUserUpdateJson(userid, userUpdateJson);
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }

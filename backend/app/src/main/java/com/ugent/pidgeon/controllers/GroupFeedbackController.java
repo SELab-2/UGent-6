@@ -7,14 +7,11 @@ import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.Permission;
-import com.ugent.pidgeon.util.PermissionHandler;
+import com.ugent.pidgeon.util.CheckResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 
 @RestController
@@ -156,34 +153,34 @@ public class GroupFeedbackController {
     private CheckResult checkGroupFeedback(long groupId, long projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElse(null);
         if (project == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Project not found");
+            return new CheckResult(HttpStatus.NOT_FOUND, "Project not found", null);
         }
         GroupEntity group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Group not found");
+            return new CheckResult(HttpStatus.NOT_FOUND, "Group not found", null);
         }
 
         if (group.getClusterId() != project.getGroupClusterId()) {
-            return new CheckResult(HttpStatus.FORBIDDEN, "Group does not belong to project");
+            return new CheckResult(HttpStatus.FORBIDDEN, "Group does not belong to project", null);
         }
-        return new CheckResult(HttpStatus.OK, "");
+        return new CheckResult(HttpStatus.OK, "", null);
     }
 
     private CheckResult checkGroupFeedbackUpdateJson(UpdateGroupScoreRequest request, Long projectId) {
         Integer maxScore = projectRepository.findById(projectId).get().getMaxScore();
         if (request.getScore() == null || request.getFeedback() == null) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Score and feedback need to be provided");
+            return new CheckResult(HttpStatus.BAD_REQUEST, "Score and feedback need to be provided", null);
         }
 
         if (maxScore != null && request.getScore() < 0) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be lower than 0");
+            return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be lower than 0", null);
         }
 
         if (maxScore != null && request.getScore() > maxScore) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be higher than the defined max score (" + maxScore + ")");
+            return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be higher than the defined max score (" + maxScore + ")", null);
         }
 
-        return new CheckResult(HttpStatus.OK, "");
+        return new CheckResult(HttpStatus.OK, "", null);
     }
 
     private CheckResult checkGroupFeedbackUpdate(long groupId, long projectId, UserEntity user) {
@@ -194,11 +191,11 @@ public class GroupFeedbackController {
 
         if (!user.getRole().equals(UserRole.admin)) {
             if (!groupRepository.isAdminOfGroup(user.getId(), groupId)) {
-                return new CheckResult(HttpStatus.FORBIDDEN, "User does not have access to update this groups feedback");
+                return new CheckResult(HttpStatus.FORBIDDEN, "User does not have access to update this groups feedback", null);
             }
         }
 
-        return new CheckResult(HttpStatus.OK, "");
+        return new CheckResult(HttpStatus.OK, "", null);
     }
 
     /**

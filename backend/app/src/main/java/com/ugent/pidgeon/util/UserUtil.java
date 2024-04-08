@@ -1,6 +1,5 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.CheckResult;
 import com.ugent.pidgeon.model.json.UserUpdateJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
@@ -22,28 +21,32 @@ public class UserUtil {
         return userRepository.findById(userId).orElse(null);
     }
 
-    public CheckResult checkUserUpdateJson(UserUpdateJson json) {
+    public CheckResult<UserEntity> checkForUserUpdateJson(long userId, UserUpdateJson json) {
+        UserEntity user = getUserIfExists(userId);
+        if (user == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "User not found", null);
+        }
         if (json.getName() == null || json.getSurname() == null || json.getEmail() == null || json.getRole() == null) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "name, surname, email and role are required");
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "name, surname, email and role are required", null);
         }
 
         if (json.getRoleAsEnum() == null) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Role is not valid: must be either student, admin or teacher");
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Role is not valid: must be either student, admin or teacher", null);
         }
 
         if (json.getName().isBlank()) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Name cannot be empty");
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Name cannot be empty", null);
         }
 
         if (json.getSurname().isBlank()) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Surname cannot be empty");
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Surname cannot be empty", null);
         }
 
         if (!StringMatcher.isValidEmail(json.getEmail())) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Email is not valid");
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Email is not valid", null);
         }
 
-        return new CheckResult(HttpStatus.OK, "");
+        return new CheckResult<>(HttpStatus.OK, "", user);
     }
 
 }
