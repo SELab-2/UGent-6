@@ -11,10 +11,7 @@ import com.ugent.pidgeon.util.Permission;
 import com.ugent.pidgeon.util.PermissionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
@@ -47,57 +44,103 @@ public class TestController {
      * @param structureTest the structure test file
      * @param projectId the id of the project to update the tests for
      * @param auth the authentication object of the requesting user
-     * @HttpMethod PUT
+     * @HttpMethod POST
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
      * @AllowedRoles teacher
      * @ApiPath /api/projects/{projectid}/tests
      * @return ResponseEntity with the updated tests
      */
-    @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
+    @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<Object> updateTests(
-            @RequestParam("dockerimage") String dockerImage,
-            @RequestParam("dockertest") MultipartFile dockerTest,
-            @RequestParam("structuretest") MultipartFile structureTest,
+    public ResponseEntity<?> updateTests(
+            @RequestParam(name = "dockerimage", required = false) String dockerImage,
+            @RequestParam(name = "dockertest", required = false) MultipartFile dockerTest,
+            @RequestParam(name = "structuretest", required = false) MultipartFile structureTest,
             @PathVariable("projectid") long projectId,
             Auth auth) {
+        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, structureTest, HttpMethod.POST);
+    }
 
-        ProjectEntity projectEntity = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
+    @PatchMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> patchTests(
+            @RequestParam(name = "dockerimage", required = false) String dockerImage,
+            @RequestParam(name = "dockertest", required = false) MultipartFile dockerTest,
+            @RequestParam(name = "structuretest", required = false) MultipartFile structureTest,
+            @PathVariable("projectid") long projectId,
+            Auth auth) {
+        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, structureTest, HttpMethod.PATCH);
+    }
 
-        long userId = auth.getUserEntity().getId();
-        if(!projectRepository.adminOfProject(projectId, userId) && auth.getUserEntity().getRole() != UserRole.admin){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+    @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> putTests(
+            @RequestParam(name = "dockerimage", required = false) String dockerImage,
+            @RequestParam(name = "dockertest", required = false) MultipartFile dockerTest,
+            @RequestParam(name = "structuretest", required = false) MultipartFile structureTest,
+            @PathVariable("projectid") long projectId,
+            Auth auth) {
+        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, structureTest, HttpMethod.PUT);
+    }
+
+
+    private ResponseEntity<?> alterTests(
+            long projectId,
+            UserEntity user,
+            String dockerImage,
+            MultipartFile dockerTest,
+            MultipartFile structureTest,
+            HttpMethod httpMethod
+    ) {
+        ProjectEntity projectEntity = projectRepository.findById(projectId).orElse(null);
+        if (projectEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
         }
+
+        if(!projectRepository.adminOfProject(projectId, user.getId()) && user.getRole() != UserRole.admin){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have acces to update the tests of this project");
+        }
+
+        if (httpMethod.equals(HttpMethod.POST) && projectEntity.getTestId() != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Tests already exist for this project");
+        }
+
+        if (!httpMethod.equals(HttpMethod.PATCH)) {
+            if (dockerImage == null || dockerTest == null || structureTest == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing parameters: dockerimage (string), dockertest (file), structuretest (file) are required");
+            }
+        }
+
         try {
+            // Get test entity
+            Optional<TestEntity> testEntityOptional = testRepository.findByProjectId(projectId);
+            if (testEntityOptional.isEmpty() && !httpMethod.equals(HttpMethod.POST)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
+            }
             // Save the files on server
-            Path dockerTestPath = Filehandler.saveTest(dockerTest, projectId);
-            Path structureTestPath = Filehandler.saveTest(structureTest, projectId);
-
-            // Save file entities to the database
-            FileEntity dockertestFileEntity = saveFileEntity(dockerTestPath, projectId, userId);
-            FileEntity structuretestFileEntity = saveFileEntity(structureTestPath, projectId, userId);
-
-            // Create/update test entity
-            Optional<TestEntity> testEntity = testRepository.findByProjectId(projectId);
-            TestEntity test;
-            if (testEntity.isEmpty()) {
-                TestEntity newTestEntity = new TestEntity(dockerImage, dockertestFileEntity.getId(), structuretestFileEntity.getId());
-
-                test = testRepository.save(newTestEntity);
-                projectEntity.setTestId(test.getId());
-                // Update project entity because first time test is created so id is not set
-                projectRepository.save(projectEntity);
+            Long dockertestFileEntityId;
+            Long structuretestFileEntityId;
+            if (dockerTest != null) {
+                Path dockerTestPath = Filehandler.saveTest(dockerTest, projectId);
+                FileEntity dockertestFileEntity = saveFileEntity(dockerTestPath, projectId, user.getId());
+                dockertestFileEntityId = dockertestFileEntity.getId();
             } else {
-                TestEntity newTestEntity = testEntity.get();
-                newTestEntity.setDockerImage(dockerImage);
-                newTestEntity.setDockerTestId(dockertestFileEntity.getId());
-                newTestEntity.setStructureTestId(structuretestFileEntity.getId());
-                test = testRepository.save(newTestEntity);
+                dockertestFileEntityId = testEntityOptional.get().getDockerTestId();
             }
 
+            if (structureTest != null) {
+                Path structureTestPath = Filehandler.saveTest(structureTest, projectId);
+                FileEntity structuretestFileEntity = saveFileEntity(structureTestPath, projectId, user.getId());
+                structuretestFileEntityId = structuretestFileEntity.getId();
+            } else {
+                structuretestFileEntityId = testEntityOptional.get().getStructureTestId();
+            }
 
-
+            // Create/update test entity
+            TestEntity test = new TestEntity(dockerImage, dockertestFileEntityId, structuretestFileEntityId);
+            test = testRepository.save(test);
+            projectEntity.setTestId(test.getId());
+            projectRepository.save(projectEntity);
             return ResponseEntity.ok(entityToTestJson(test, projectId));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving files: " + e.getMessage());
