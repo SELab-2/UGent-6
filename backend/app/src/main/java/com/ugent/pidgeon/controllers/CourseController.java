@@ -660,20 +660,26 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
 
         // Only teacher and admin can add different users to a course.
         if (hasCourseRights(courseId, auth.getUserEntity())) {
-            if (request.getRelation() == CourseRelation.creator) {
+            if (request.getUserId() == null || request.getRelation() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User id and relation are required");
+            }
+            if (request.getRelationAsEnum() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid relation: must be 'enrolled' or 'course_admin'");
+            }
+            if (request.getRelationAsEnum() == CourseRelation.creator) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add a creator");
             }
             boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
             boolean isCreator = courseUserRepository.getCourseRelation(courseId, auth.getUserEntity().getId()) == CourseRelation.creator;
-            boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
+            boolean creatingAdmin = request.getRelationAsEnum() == CourseRelation.course_admin;
             if (creatingAdmin && (!isCreator && !isAdmin)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can create more course-admins");
             }
             if (courseUserRepository.isCourseMember(courseId, request.getUserId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
             }
-            courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelation()));
-            if (request.getRelation().equals(CourseRelation.enrolled)) {
+            courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelationAsEnum()));
+            if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
                 createNewIndividualClusterGroup(courseId, request.getUserId());
             }
             return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
@@ -706,28 +712,32 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
         if (request.getUserId() == null || request.getRelation() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User id and relation are required");
         }
+
+        if (request.getRelationAsEnum() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid relation: must be 'enrolled' or 'course_admin'");
+        }
         // Only teacher and admin can add different users to a course.
         if (hasCourseRights(courseId, auth.getUserEntity())) {
             if (auth.getUserEntity().getId() == request.getUserId()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change your own role.");
             }
 
-            if (request.getRelation() == CourseRelation.course_admin) {
+            if (request.getRelationAsEnum() == CourseRelation.creator) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change role to creator");
             }
 
             boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
             boolean isCreator = courseUserRepository.getCourseRelation(courseId, auth.getUserEntity().getId()) == CourseRelation.creator;
-            boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
+            boolean creatingAdmin = request.getRelationAsEnum() == CourseRelation.course_admin;
             if (creatingAdmin && (!isCreator && !isAdmin)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can promote to course-admin");
             }
             Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, request.getUserId()));
 
             if (ce.isPresent()) {
-                ce.get().setRelation(request.getRelation());
+                ce.get().setRelation(request.getRelationAsEnum());
                 courseUserRepository.save(ce.get());
-                if (request.getRelation().equals(CourseRelation.enrolled)) {
+                if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
                     createNewIndividualClusterGroup(courseId, request.getUserId());
                 } else {
                     if (!removeIndividualClusterGroup(courseId, request.getUserId())) {
