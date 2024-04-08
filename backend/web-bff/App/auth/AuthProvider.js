@@ -167,9 +167,8 @@ class AuthProvider {
                 logoutUri += `logout?post_logout_redirect_uri=${options.postLogoutRedirectUri}`;
             }
 
-            req.session.destroy(() => {
-                res.redirect(logoutUri);
-            });
+            req.session = null;
+            res.redirect(logoutUri)
         }
     }
 
