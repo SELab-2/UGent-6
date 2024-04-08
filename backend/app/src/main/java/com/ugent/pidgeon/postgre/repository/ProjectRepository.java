@@ -26,7 +26,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
                 INNER JOIN GroupEntity g ON gu.groupId = g.id
                 INNER JOIN GroupClusterEntity gc ON g.clusterId = gc.id
                 INNER JOIN ProjectEntity p ON p.groupClusterId = gc.id
-                WHERE gu.userId = ?1 and p.id = ?2
+                WHERE gu.userId = ?2 and p.id = ?1
             ) THEN true ELSE false END""")
     Boolean userPartOfProject(long projectId, long userId);
 

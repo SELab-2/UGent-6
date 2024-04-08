@@ -5,6 +5,7 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.NameRequest;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
+import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
@@ -23,10 +24,23 @@ public class GroupController {
     @Autowired
     private GroupClusterRepository groupClusterRepository;
 
+    public boolean isIndividualGroup(long groupId) {
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return false;
+        }
+        GroupClusterEntity cluster = groupClusterRepository.findById(group.getClusterId()).orElse(null);
+        return cluster != null && cluster.getGroupAmount() <= 1;
+    }
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
         GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
-
+        GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
+        if (cluster != null && cluster.getGroupAmount() > 1){
+            group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
+        } else {
+            group.setGroupClusterUrl(null);
+        }
         // Get the members of the group
         List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
                 new UserReferenceJson(user.getName(), ApiRoutes.USER_BASE_PATH + "/" + user.getUserId())
@@ -104,6 +118,10 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
+        if (isIndividualGroup(groupid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change name of individual group");
+        }
+
         // Update the group name
         group.setName(nameRequest.getName());
 
@@ -143,19 +161,28 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
+        if (isIndividualGroup(groupid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot delete individual group");
+        }
+
+        removeGroup(groupid);
+        // Return 204
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
+    }
+
+    public boolean removeGroup(long groupId) {
         // Delete the group
-        groupRepository.deleteGroupUsersByGroupId(groupid);
-        groupRepository.deleteSubmissionsByGroupId(groupid);
-        groupRepository.deleteGroupFeedbacksByGroupId(groupid);
-        groupRepository.deleteById(groupid);
+        groupRepository.deleteGroupUsersByGroupId(groupId);
+        groupRepository.deleteSubmissionsByGroupId(groupId);
+        groupRepository.deleteGroupFeedbacksByGroupId(groupId);
+        groupRepository.deleteById(groupId);
 
         // update groupcount in cluster
-        groupClusterRepository.findById(group.getClusterId()).ifPresent(cluster -> {
+        groupClusterRepository.findById(groupId).ifPresent(cluster -> {
             cluster.setGroupAmount(cluster.getGroupAmount() - 1);
             groupClusterRepository.save(cluster);
         });
-        // Return 204
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
+        return true;
     }
 
 }

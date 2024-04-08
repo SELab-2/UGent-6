@@ -1,7 +1,6 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
-import com.ugent.pidgeon.model.json.MemberIdRequest;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.UserJson;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
@@ -34,6 +33,12 @@ public class GroupMemberController {
 
     @Autowired
     private GroupClusterRepository groupClusterRepository;
+    @Autowired
+    private GroupController groupController;
+
+    private boolean isIndividualGroup(long groupId) {
+        return groupController.isIndividualGroup(groupId);
+    }
 
     /**
      * Function to remove a member from a group
@@ -53,6 +58,10 @@ public class GroupMemberController {
         UserEntity user = auth.getUserEntity();
         if (!groupRepository.isAdminOfGroup(groupId, user.getId()) && user.getRole() != UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to the group");
+        }
+
+        if (isIndividualGroup(groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove member from individual group");
         }
 
         if (groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0)
@@ -81,6 +90,10 @@ public class GroupMemberController {
 
         if (!groupRepository.userInGroup(groupId, memberid)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not in the group");
+        }
+
+        if (isIndividualGroup(groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove member from individual group");
         }
 
         if (groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0)
@@ -127,6 +140,10 @@ public class GroupMemberController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is already in the group");
         }
 
+        if (isIndividualGroup(groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add member to individual group");
+        }
+
         try {
             groupMemberRepository.addMemberToGroup(groupId, memberid);
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
@@ -171,6 +188,9 @@ public class GroupMemberController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is already in the group");
         }
 
+        if (isIndividualGroup(groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add member to individual group");
+        }
 
         try {
             groupMemberRepository.addMemberToGroup(groupId,user.getId());

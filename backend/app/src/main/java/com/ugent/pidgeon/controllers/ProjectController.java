@@ -14,12 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static java.util.Arrays.stream;
 
 
 @RestController
@@ -50,6 +48,8 @@ public class ProjectController {
     private GroupController groupController;
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private ClusterController clusterController;
 
     /**
      * Function to get all projects of a user
@@ -108,7 +108,7 @@ public class ProjectController {
                         return ResponseEntity.ok().body(projectEntityToProjectResponseJson(project, course, user));
                     }
                 })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found"));
     }
 
     public ProjectResponseJson projectEntityToProjectResponseJson(ProjectEntity project, CourseEntity course, UserEntity user) {
@@ -156,7 +156,17 @@ public class ProjectController {
         );
     }
 
-    /* Function to add a new project to an existing course */
+    /**
+     * Function to create a new project
+     * @param courseId ID of the course to create the project in
+     * @param projectJson ProjectJson object containing the new project's information
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723877">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/projects
+     * @return ResponseEntity with the created project
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> createProject(
@@ -182,38 +192,42 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to create new projects");
             }
 
-            // Check of de GroupCluster deel is van het vak
-            GroupClusterEntity groupCluster = groupClusterRepository.findById(projectJson.getGroupClusterId()).orElse(null);
-            if(groupCluster == null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster does not exist");
-            }
-            if(groupCluster.getCourseId() != courseId){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Group cluster isn't linked to this course");
-            }
-
-            // Check of de test bestaat
-            if(projectJson.getTestId() != null && !testRepository.existsById(projectJson.getTestId())){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test with this id exists");
+            if (projectJson.getGroupClusterId() != null) {
+                // Check of de GroupCluster deel is van het vak
+                GroupClusterEntity groupCluster = groupClusterRepository.findById(projectJson.getGroupClusterId()).orElse(null);
+                if (groupCluster == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster does not exist");
+                }
+                if (groupCluster.getCourseId() != courseId) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Group cluster isn't linked to this course");
+                }
+            } else {
+                GroupClusterEntity groupCluster = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
+                if (groupCluster == null) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal error while creating project without group, contact an administrator");
+                }
+                projectJson.setGroupClusterId(groupCluster.getId());
             }
 
             // Check of de dealine bestaat en in de toekomst ligt.
-            Timestamp deadline = projectJson.getDeadline();
+            OffsetDateTime deadline = projectJson.getDeadline();
             if(deadline == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No deadline given");
             }
-            if(deadline.before(Timestamp.valueOf(LocalDateTime.now()))){
+            if(deadline.isBefore(OffsetDateTime.now())){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deadline is in the past");
             }
 
             // Create a new ProjectEntity instance
             ProjectEntity project = new ProjectEntity(courseId, projectJson.getName(), projectJson.getDescription(),
-                    projectJson.getGroupClusterId(), projectJson.getTestId(), projectJson.isVisible(),
+                    projectJson.getGroupClusterId(), null, projectJson.isVisible(),
                     projectJson.getMaxScore(), projectJson.getDeadline());
 
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);
             return ResponseEntity.ok(projectEntityToProjectResponseJson(savedProject, courseEntity, user));
         } catch (Exception e){
+            Logger.getGlobal().severe("Error while creating project: " + Arrays.toString(e.getStackTrace()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
         }
     }
@@ -259,7 +273,7 @@ public class ProjectController {
      * @HttpMethod DELETE
      * @AllowedRoles teacher
      * @ApiPath /api/projects/{projectId}
-     * @return ResponseEntity with the deleted project
+     * @return ResponseEntity with the status, no content
      */
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
     @Roles({UserRole.teacher})
@@ -310,6 +324,15 @@ public class ProjectController {
             if (!accesToProject(projectId, user)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to view this project");
             }
+        }
+        ProjectEntity project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
+
+        if (clusterController.isIndividualCluster(project.getGroupClusterId())) {
+            String memberUrl = ApiRoutes.COURSE_BASE_PATH + "/" + project.getCourseId() + "/members";
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No groups for this project: use " + memberUrl + " to get the members of the course");
         }
 
         List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);

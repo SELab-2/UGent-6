@@ -25,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -187,12 +187,24 @@ public class SubmissionController {
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit")
     //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> submitFile(@RequestParam("file") MultipartFile file, @RequestParam("submissionTime") Timestamp time, @PathVariable("projectid") long projectid, Auth auth) {
+    public ResponseEntity<?> submitFile(@RequestParam("file") MultipartFile file, @PathVariable("projectid") long projectid, Auth auth) {
         long userId = auth.getUserEntity().getId();
         Long groupId = groupRepository.groupIdByProjectAndUser(projectid, userId);
 
+        Logger.getGlobal().info("Submitting file for project " + projectid + " and user " + userId);
+
         if (!projectRepository.userPartOfProject(projectid, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You aren't part of this project");
+        }
+
+        ProjectEntity project = projectRepository.findById(projectid).orElse(null);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
+        OffsetDateTime time = OffsetDateTime.now();
+        Logger.getGlobal().info("Time: " + time + " Deadline: " + project.getDeadline());
+        if (time.isAfter(project.getDeadline())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Project deadline has passed");
         }
 
         //TODO: execute the docker tests onces these are implemented
@@ -201,7 +213,7 @@ public class SubmissionController {
             FileEntity fileEntity = new FileEntity("", "", userId);
             long fileid = fileRepository.save(fileEntity).getId();
 
-
+            OffsetDateTime now = OffsetDateTime.now();
             SubmissionEntity submissionEntity = new SubmissionEntity(
                     projectid,
                     groupId,
