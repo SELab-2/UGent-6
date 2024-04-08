@@ -7,6 +7,7 @@ import com.ugent.pidgeon.model.json.NameRequest;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
@@ -103,8 +104,37 @@ public class GroupController {
     @PutMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher})
     public ResponseEntity<?> updateGroupName(@PathVariable("groupid") Long groupid, @RequestBody NameRequest nameRequest, Auth auth) {
+        return doGroupNameUpdate(groupid, nameRequest, auth.getUserEntity());
+    }
+
+    /**
+     * Function to update the name of a group
+     *
+     * @param groupid     identifier of a group
+     * @param nameRequest object containing the new name of the group
+     * @param auth        authentication object of the requesting user
+     * @return ResponseEntity<GroupJson>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723995">apiDog documentation</a>
+     * @HttpMethod Patch
+     * @AllowedRoles teacher
+     * @ApiPath /api/groups/{groupid}
+     */
+    @PatchMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
+    @Roles({UserRole.teacher})
+    public ResponseEntity<?> patchGroupName(@PathVariable("groupid") Long groupid, @RequestBody NameRequest nameRequest, Auth auth) {
+        return doGroupNameUpdate(groupid, nameRequest, auth.getUserEntity());
+    }
+
+    private ResponseEntity<?> doGroupNameUpdate(Long groupid, NameRequest nameRequest, UserEntity user) {
         // Get userId
-        long userId = auth.getUserEntity().getId();
+        long userId = user.getId();
+
+        if (nameRequest.getName() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name needs to be provided");
+        }
+        if (nameRequest.getName().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name cannot be empty");
+        }
 
         // Get the group, return 404 if it does not exist
         GroupEntity group = groupRepository.findById(groupid).orElse(null);
@@ -114,7 +144,7 @@ public class GroupController {
         }
 
         // Return 403 if the user does not have access to the group
-        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
+        if (!groupRepository.userAccessToGroup(userId, groupid) && user.getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
         }
 
