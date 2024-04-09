@@ -1,6 +1,6 @@
 import { Button, Space, Table, TableProps } from "antd"
 import { FC, useMemo } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
 import useAppApi from "../../../hooks/useAppApi"
 import ProjectInfo from "./ProjectInfo"

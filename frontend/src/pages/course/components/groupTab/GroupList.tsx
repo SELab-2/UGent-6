@@ -1,6 +1,6 @@
 import { Button, List, Typography } from "antd"
 import { FC, useMemo, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
 import { useTranslation } from "react-i18next"
 import GroupInfoModal from "./GroupInfoModal"

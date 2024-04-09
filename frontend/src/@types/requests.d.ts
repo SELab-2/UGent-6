@@ -10,6 +10,7 @@ export enum ApiRoutes {
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
 
+  PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
   PROJECT_TESTS = "api/projects/:id/tests",
   PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
@@ -207,4 +208,6 @@ export type GET_Responses = {
   }[],
   //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
   [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.GROUP][] //GET_Responses[ApiRoutes.PROJECT_GROUP][]
+
+  [ApiRoutes.PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
 }

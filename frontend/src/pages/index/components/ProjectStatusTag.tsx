@@ -2,7 +2,7 @@ import { CheckCircleOutlined, CheckOutlined, ClockCircleOutlined, CloseCircleOut
 import { Tag } from "antd"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
-import { ProjectStatus } from "../../../@types/requests"
+import { ProjectStatus } from "../../../@types/requests.d"
 
 
 const ProjectStatusTag: FC<{ status: ProjectStatus,icon?:boolean }> = ({ status,icon }) => {

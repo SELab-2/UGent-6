@@ -1,6 +1,7 @@
 import { Card, Typography } from "antd"
 import { useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
+import apiCall from "../../../util/apiFetch"
 
 export type ScoreType = GET_Responses[ApiRoutes.PROJECT_SCORE]
 
@@ -9,11 +10,16 @@ const ScoreCard = () => {
 
   useEffect(() => {
     // /projects/{projectid}/groups/{groupid}/score
-    setScore({
-      feedback: "Good job on the project!",
-      score: 23,
-      maxScore: 25
+    let ignore = false
+    apiCall.get(ApiRoutes.PROJECT_SCORE).then((response)=> {
+      if (ignore) return
+      setScore( response.data)
+
     })
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   // don't show the card if no score is available

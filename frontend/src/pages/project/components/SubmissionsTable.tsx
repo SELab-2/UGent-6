@@ -5,12 +5,12 @@ import { TableProps } from "antd/lib"
 import { useTranslation } from "react-i18next"
 import { DownloadOutlined } from "@ant-design/icons"
 import useProject from "../../../hooks/useProject"
-import SubmissionStatusTag from "./SubmissionStatusTag"
+import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
 import { Link } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
 
-const GroupMember = ({ name, surname }: ProjectSubmissionsType["group"]["members"][number]) => {
-  return <List.Item>{name + " " + surname}</List.Item>
+const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number]) => {
+  return <List.Item>{name }</List.Item>
 }
 
 const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = ({ submissions }) => {
@@ -35,11 +35,11 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       },
       {
         title: t("project.submission"),
-        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION.replace(":submissionID", s.submissionId+"")}><Button type="link">#{s.submissionId}</Button></Link>,
+        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION.replace(":submissionId", s.submission?.submissionId+"")}><Button type="link">#{s.submission?.submissionId}</Button></Link>,
       },
       {
         title: t("project.status"),
-        render: (s) => <Typography.Text><SubmissionStatusTag docker_accepted={s.docker_accepted} structure_accepted={s.structure_accepted}/> </Typography.Text>,
+        render: (s) => <Typography.Text><SubmissionStatusTag status={createStatusBitVector(s)}/> </Typography.Text>,
       },
       {
         title: t("project.submissionTime"),

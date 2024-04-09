@@ -1,6 +1,6 @@
 import { Card } from "antd"
 import { useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GradesList from "./GradesList"
 import useCourse from "../../../../hooks/useCourse"
 
@@ -10,7 +10,9 @@ export type GroupFeedback = GET_Responses[ApiRoutes.PROJECT_SCORE] & {
     name: string
     url: string
     projectId: number,
-  }
+  },
+  feedback: string
+  score: number
   group: {
     groupId: number
     groupName: string

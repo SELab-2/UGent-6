@@ -80,13 +80,13 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
 
       <ul style={{ listStyleType: 'none' }}>
         <li>
-          <Typography.Text type={submission.structure_accepted ? "success" : "danger"}>
-            {submission.structure_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
+          <Typography.Text type={submission.structureAccepted ? "success" : "danger"}>
+            {submission.structureAccepted ? t("submission.status.accepted") : t("submission.status.failed")}
           </Typography.Text>
-          {submission.structure_accepted ? null : <div>
+          {submission.structureAccepted ? null : <div>
             <Input.TextArea
               readOnly
-              value={submission.structure_feedback}
+              value={submission.structureFeedbackUrl}
               style={{ width: '100%', overflowX: 'auto', overflowY: 'auto', resize: 'none', fontFamily: 'Jetbrains Mono', marginTop: 8 }}
               rows={4}
               autoSize={{ minRows: 4, maxRows: 8 }}
@@ -97,16 +97,16 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
 
       {t("submission.dockertest")}
 
-      {submission.docker_results_available ?
+      {submission.dockerAccepted ?
       <ul style={{ listStyleType: 'none' }}>
         <li>
-          <Typography.Text type={submission.docker_accepted ? "success" : "danger"}>
-            {submission.docker_accepted ? t("submission.status.accepted") : t("submission.status.failed")}
+          <Typography.Text type={submission.dockerAccepted ? "success" : "danger"}>
+            {submission.dockerAccepted ? t("submission.status.accepted") : t("submission.status.failed")}
           </Typography.Text>
-          {submission.docker_accepted ? null : <div>
+          {submission.dockerAccepted ? null : <div>
             <Input.TextArea
               readOnly
-              value={submission.docker_feedback}
+              value={submission.dockerFeedbackUrl}
               style={{ width: '100%', overflowX: 'auto', overflowY: 'auto', resize: 'none', fontFamily: 'Jetbrains Mono', marginTop: 8 }}
               rows={4}
               autoSize={{ minRows: 4, maxRows: 16 }}

@@ -1,5 +1,5 @@
 import { Button, Card, Tabs, TabsProps, Tooltip, theme } from "antd"
-import { ApiRoutes, GET_Responses } from "../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import Markdown from "react-markdown"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"

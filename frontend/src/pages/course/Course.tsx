@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { ApiRoutes, GET_Responses } from "../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import { Space, Tabs, Tag, Typography } from "antd"
 import { TabsProps } from "antd/lib"
 import ProjectCard from "../index/components/ProjectCard"
