@@ -97,6 +97,13 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
     Optional<GroupEntity> groupByClusterAndUser(long clusterId, long userId);
 
 
+    @Query("""
+        SELECT COUNT(*) AS entry_count
+        FROM GroupUserEntity gu
+        WHERE gu.groupId = :groupId
+    """)
+    Integer countUsersInGroup(long groupId);
+
     List<GroupEntity> findAllByClusterId(long CusterId);
 
     Optional<GroupEntity> findByIdAndClusterId(long id, long clusterId);

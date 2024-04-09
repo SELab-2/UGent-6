@@ -10,6 +10,8 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.ProjectUtil;
+import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,16 +53,17 @@ public class CourseController {
     @Autowired
     private GroupController groupController;
 
+    @Autowired
+    private UserUtil userUtil;
+    @Autowired
+    private ProjectUtil projectUtil;
 
-    public UserReferenceJson userEntityToUserReference(UserEntity user) {
-        return new UserReferenceJson(user.getName() + " " + user.getSurname(), user.getEmail(), user.getId());
-    }
     public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course) {
         UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
-        UserReferenceJson teacherJson = userEntityToUserReference(teacher);
+        UserReferenceJson teacherJson = userUtil.userEntityToUserReference(teacher);
 
         List<UserEntity> assistants = courseRepository.findAssistantsByCourseId(course.getId());
-        List<UserReferenceJson> assistantsJson = assistants.stream().map(this::userEntityToUserReference).toList();
+        List<UserReferenceJson> assistantsJson = assistants.stream().map(userUtil::userEntityToUserReference).toList();
 
         return new CourseWithInfoJson(
                 course.getId(),
@@ -379,7 +382,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
         UserEntity user = auth.getUserEntity();
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
         List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
-            projectController.projectEntityToProjectResponseJson(projectEntity, course, user)
+            projectUtil.projectEntityToProjectResponseJson(projectEntity, course, user)
         ).toList();
 
         return ResponseEntity.ok(projectResponseJsons);

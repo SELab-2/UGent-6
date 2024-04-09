@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.util;
 
+import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.model.json.UserUpdateJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
@@ -47,6 +48,10 @@ public class UserUtil {
         }
 
         return new CheckResult<>(HttpStatus.OK, "", user);
+    }
+
+    public UserReferenceJson userEntityToUserReference(UserEntity user) {
+        return new UserReferenceJson(user.getName() + " " + user.getSurname(), user.getEmail(), user.getId());
     }
 
 }

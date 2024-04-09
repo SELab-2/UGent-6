@@ -8,6 +8,9 @@ import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.GroupUtil;
+import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,26 +26,10 @@ public class GroupMemberController {
     private GroupMemberRepository groupMemberRepository;
 
     @Autowired
-    private GroupRepository groupRepository;
+    private GroupUtil groupUtil;
+    @Autowired
+    private UserUtil userUtil;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    ProjectRepository projectController;
-
-    @Autowired
-    private GroupClusterRepository groupClusterRepository;
-    @Autowired
-    private GroupController groupController;
-    @Autowired
-    private CourseController courseController;
-    @Autowired
-    private CourseUserRepository courseUserRepository;
-
-    private boolean isIndividualGroup(long groupId) {
-        return groupController.isIndividualGroup(groupId);
-    }
 
     /**
      * Function to remove a member from a group
@@ -60,12 +47,9 @@ public class GroupMemberController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> removeMemberFromGroup(@PathVariable("groupid") long groupId, @PathVariable("memberid") long memberid, Auth auth) {
         UserEntity user = auth.getUserEntity();
-        if (!groupRepository.isAdminOfGroup(groupId, user.getId()) && user.getRole() != UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to the group");
-        }
-
-        if (isIndividualGroup(groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove member from individual group");
+        CheckResult<Void> check = groupUtil.canRemoveUserFromGroup(groupId, memberid, user);
+        if (check.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(check.getStatus()).body(check.getMessage());
         }
 
         if (groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0)
@@ -73,7 +57,6 @@ public class GroupMemberController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User removed from group");
 
     }
-
 
     /**
      * Function to remove the logged in user from a group
@@ -90,17 +73,12 @@ public class GroupMemberController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<String> removeMemberFromGroupInferred(@PathVariable("groupid") long groupId, Auth auth) {
         UserEntity user = auth.getUserEntity();
-        long memberid = user.getId();
-
-        if (!groupRepository.userInGroup(groupId, memberid)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not in the group");
+        CheckResult<Void> check = groupUtil.canRemoveUserFromGroup(groupId, user.getId(), user);
+        if (check.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(check.getStatus()).body(check.getMessage());
         }
 
-        if (isIndividualGroup(groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove member from individual group");
-        }
-
-        if (groupMemberRepository.removeMemberFromGroup(groupId, memberid) == 0)
+        if (groupMemberRepository.removeMemberFromGroup(groupId, user.getId()) == 0)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove member to group");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User removed from group");
 
@@ -123,39 +101,15 @@ public class GroupMemberController {
     public ResponseEntity<Object> addMemberToGroup(@PathVariable("groupid") long groupId, @PathVariable("memberid") long memberid, Auth auth) {
         UserEntity user = auth.getUserEntity();
 
-        GroupEntity group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
-        }
-
-        if (!userRepository.existsById(memberid)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
-        }
-
-        if (!groupRepository.userAccessToGroup(memberid, groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of the course");
-        }
-
-        if (!groupRepository.isAdminOfGroup(groupId, user.getId()) && user.getRole() != UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to the group");
-        }
-
-        if (groupClusterRepository.userInGroupForCluster(group.getClusterId(), memberid)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is already in a group for this cluster");
-        }
-
-        if (groupRepository.userInGroup(groupId, memberid)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is already in the group");
-        }
-
-        if (isIndividualGroup(groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add member to individual group");
+        CheckResult<Void> checkResult = groupUtil.canAddUserToGroup(groupId, memberid, user);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
         try {
             groupMemberRepository.addMemberToGroup(groupId, memberid);
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserReferenceJson> response = members.stream().map(courseController::userEntityToUserReference).toList();
+            List<UserReferenceJson> response = members.stream().map(userUtil::userEntityToUserReference).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -179,31 +133,15 @@ public class GroupMemberController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> addMemberToGroupInferred(@PathVariable("groupid") long groupId, Auth auth) {
         UserEntity user = auth.getUserEntity();
-        GroupEntity group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
-        }
-
-        if (!groupRepository.userAccessToGroup(user.getId(),groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
-        }
-
-        if (groupClusterRepository.userInGroupForCluster(group.getClusterId(), user.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is already in a group for this cluster");
-        }
-
-        if (groupRepository.userInGroup(groupId, user.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is already in the group");
-        }
-
-        if (isIndividualGroup(groupId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add member to individual group");
+        CheckResult<Void> checkResult = groupUtil.canAddUserToGroup(groupId, user.getId(), user);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
         try {
             groupMemberRepository.addMemberToGroup(groupId,user.getId());
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserReferenceJson> response = members.stream().map(courseController::userEntityToUserReference).toList();
+            List<UserReferenceJson> response = members.stream().map(userUtil::userEntityToUserReference).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -211,9 +149,7 @@ public class GroupMemberController {
         }
     }
 
-
-
-
+    
     /**
      * Function to get all members of a group
      *
@@ -227,11 +163,14 @@ public class GroupMemberController {
     @GetMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<Object> findAllMembersByGroupId(@PathVariable("groupid") long groupId,Auth auth) {
-        if(!groupRepository.userAccessToGroup(auth.getUserEntity().getId(),groupId) && auth.getUserEntity().getRole()!=UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to the group");
+        UserEntity user = auth.getUserEntity();
+        CheckResult<Void> checkResult = groupUtil.canGetGroup(groupId, user);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+
         List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-        List<UserReferenceJson> response = members.stream().map((UserEntity e) -> courseController.userEntityToUserReference(e)).toList();
+        List<UserReferenceJson> response = members.stream().map((UserEntity e) -> userUtil.userEntityToUserReference(e)).toList();
         return ResponseEntity.ok(response);
     }
 }

@@ -27,4 +27,12 @@ public class ClusterUtil {
         }
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
+
+    public CheckResult<GroupClusterEntity> getClusterIfExists(long clusterId) {
+        GroupClusterEntity groupCluster = groupClusterRepository.findById(clusterId).orElse(null);
+        if (groupCluster == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "Group cluster does not exist", null);
+        }
+        return new CheckResult<>(HttpStatus.OK, "", groupCluster);
+    }
 }
