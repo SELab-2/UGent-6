@@ -1,8 +1,10 @@
 package com.ugent.pidgeon.controllers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ugent.pidgeon.CustomObjectMapper;
 import com.ugent.pidgeon.model.json.UserJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,8 +68,11 @@ public class UserControllerTest extends ControllerTest {
         String responseBody = result.getResponse().getContentAsString();
 
         System.out.println("Response body: " + responseBody);
-        UserJson userJson = new ObjectMapper().readValue(responseBody, UserJson.class);
 
+        ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+        UserJson userJson = objectMapper.readValue(responseBody, UserJson.class);
+
+        
         assertEquals(userEntity.getId(), userJson.getId());
         assertEquals(userEntity.getName(), userJson.getName());
         assertEquals(userEntity.getSurname(), userJson.getSurname());

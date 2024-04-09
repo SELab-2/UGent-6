@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -32,6 +32,10 @@ public class ClusterController {
     @Autowired
     GroupController groupController;
 
+    public boolean isIndividualCluster(long clusterId) {
+        GroupClusterEntity cluster = groupClusterRepository.findById(clusterId).orElse(null);
+        return cluster != null && cluster.getGroupAmount() <= 1;
+    }
 
     /**
      * Returns all clusters for a course
@@ -57,7 +61,7 @@ public class ClusterController {
         }
 
         // Get the clusters for the course
-        List<GroupClusterEntity> clusters = groupClusterRepository.findClustersByCourseId(courseid);
+        List<GroupClusterEntity> clusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(courseid);
         List<GroupClusterJson> clusterJsons = clusters.stream().map(
                 this::clusterEntityToClusterJson).toList();
         // Return the clusters
@@ -112,6 +116,10 @@ public class ClusterController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
 
+        if (clusterJson.capacity() <= 1) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Capacity must be greater than 1");
+        }
+
         // Create the cluster
         GroupClusterEntity cluster = new GroupClusterEntity(
                 courseid,
@@ -119,7 +127,7 @@ public class ClusterController {
                 clusterJson.name(),
                 clusterJson.groupCount()
         );
-        cluster.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        cluster.setCreatedAt(OffsetDateTime.now());
         GroupClusterEntity clusterEntity = groupClusterRepository.save(cluster);
 
         for (int i = 0; i < clusterJson.groupCount(); i++) {
@@ -149,7 +157,7 @@ public class ClusterController {
         // Get the user id
         long userId = auth.getUserEntity().getId();
         GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
-        if (cluster == null) {
+        if (cluster == null || cluster.getMaxSize() <= 1) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
         }
         if (courseUserRepository.findByCourseIdAndUserId(cluster.getCourseId(), userId).isEmpty() && auth.getUserEntity().getRole()!=UserRole.admin){
@@ -184,6 +192,11 @@ public class ClusterController {
         if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
         }
+
+        if (isIndividualCluster(clusterid)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot update individual cluster");
+        }
+
         cluster.setName(clusterJson.name());
         cluster.setMaxSize(clusterJson.capacity());
         cluster = groupClusterRepository.save(cluster);
@@ -217,6 +230,9 @@ public class ClusterController {
         if (groupClusterRepository.usedInProject(clusterid)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Cluster is being used in a project");
         }
+        if (isIndividualCluster(clusterid)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete individual cluster");
+        }
         for (GroupEntity group : groupRepository.findAllByClusterId(clusterid)) {
             // Delete all groupUsers
             groupUserRepository.deleteAllByGroupId(group.getId());
@@ -249,6 +265,9 @@ public class ClusterController {
         }
         if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId) && auth.getUserEntity().getRole()!=UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+        }
+        if (isIndividualCluster(clusterid)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot create group in individual cluster");
         }
         GroupEntity group = new GroupEntity(groupJson.name(), clusterid);
         group = groupRepository.save(group);

@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.postgre.repository;
 
+import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
@@ -18,6 +19,20 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
     @Query("SELECT c FROM CourseEntity c WHERE c.joinKey = :courseKey")
 
     CourseEntity findByJoinKey(String courseKey);
+
+    @Query("""
+        SELECT u FROM UserEntity u
+        JOIN CourseUserEntity cu ON u.id = cu.userId
+        WHERE cu.courseId = ?1 AND cu.relation = 'creator'
+        """)
+    UserEntity findTeacherByCourseId(long id);
+
+    @Query("""
+        SELECT u FROM UserEntity u
+        JOIN CourseUserEntity cu ON u.id = cu.userId
+        WHERE cu.courseId = ?1 AND cu.relation = 'course_admin'
+        """)
+    List<UserEntity> findAssistantsByCourseId(long id);
 
     public interface UserWithRelation {
         UserEntity getUser();

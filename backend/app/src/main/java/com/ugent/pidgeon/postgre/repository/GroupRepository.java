@@ -89,6 +89,15 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
             WHERE p.id = ?1 AND gu.userId = ?2""")
     Long groupIdByProjectAndUser(long projectId, long userId);
 
+    @Query(value = """
+            SELECT g FROM GroupEntity g
+            JOIN GroupClusterEntity gc ON g.clusterId = gc.id
+            JOIN GroupUserEntity gu ON g.id = gu.groupId
+            WHERE gc.id = ?1 AND gu.userId = ?2
+    """)
+    Optional<GroupEntity> groupByClusterAndUser(long clusterId, long userId);
+
+
     List<GroupEntity> findAllByClusterId(long CusterId);
 
     Optional<GroupEntity> findByIdAndClusterId(long id, long clusterId);

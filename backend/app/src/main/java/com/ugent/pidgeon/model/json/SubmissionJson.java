@@ -1,6 +1,9 @@
 package com.ugent.pidgeon.model.json;
 
-import java.sql.Timestamp;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ugent.pidgeon.postgre.models.OffsetDateTimeSerializer;
+
+import java.time.OffsetDateTime;
 
 public class SubmissionJson {
     private long submissionId;
@@ -13,7 +16,8 @@ public class SubmissionJson {
     private Boolean structureAccepted;
     private Boolean dockerAccepted;
 
-    private Timestamp submissionTime;
+    @JsonSerialize(using = OffsetDateTimeSerializer.class)
+    private OffsetDateTime submissionTime;
 
     private String structureFeedbackUrl;
 
@@ -32,7 +36,7 @@ public class SubmissionJson {
 
     public SubmissionJson(
             long id, String projectUrl, String groupUrl, Long projectId, Long groupId, String fileUrl,
-            Boolean structureAccepted, Timestamp submissionTime, Boolean dockerAccepted, String structureFeedbackUrl, String dockerFeedbackUrl) {
+            Boolean structureAccepted, OffsetDateTime submissionTime, Boolean dockerAccepted, String structureFeedbackUrl, String dockerFeedbackUrl) {
         this.submissionId = id;
         this.projectUrl = projectUrl;
         this.groupUrl = groupUrl;
@@ -86,11 +90,11 @@ public class SubmissionJson {
         this.structureAccepted = structureAccepted;
     }
 
-    public Timestamp getSubmissionTime() {
+    public OffsetDateTime getSubmissionTime() {
         return submissionTime;
     }
 
-    public void setSubmissionTime(Timestamp submissionTime) {
+    public void setSubmissionTime(OffsetDateTime submissionTime) {
         this.submissionTime = submissionTime;
     }
 

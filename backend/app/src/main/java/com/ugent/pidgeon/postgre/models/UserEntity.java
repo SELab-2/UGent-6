@@ -3,9 +3,8 @@ package com.ugent.pidgeon.postgre.models;
 
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 
 @Entity
@@ -33,7 +32,7 @@ public class UserEntity {
     private String azureId;
 
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private OffsetDateTime createdAt;
 
     public UserEntity(String name, String surname, String email, UserRole role, String azureId) {
         this.name = name;
@@ -104,11 +103,11 @@ public class UserEntity {
         this.azureId = azureId;
     }
 
-    public Timestamp getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }
