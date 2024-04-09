@@ -1,7 +1,6 @@
 package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.controllers.ApiRoutes;
-import com.ugent.pidgeon.controllers.SubmissionController;
 import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.CourseReferenceJson;
 import com.ugent.pidgeon.model.json.ProjectJson;
@@ -26,12 +25,6 @@ public class ProjectUtil {
     private ProjectRepository projectRepository;
     @Autowired
     private ClusterUtil clusterUtil;
-    @Autowired
-    private SubmissionRepository submissionRepository;
-    @Autowired
-    private CourseUserRepository courseUserRepository;
-    @Autowired
-    private GroupRepository groupRepository;
 
     public boolean userPartOfProject(long projectId, long userId) {
         return projectRepository.userPartOfProject(projectId, userId);
@@ -90,51 +83,6 @@ public class ProjectUtil {
         }
 
         return new CheckResult<>(HttpStatus.OK, "", null);
-    }
-
-    public ProjectResponseJson projectEntityToProjectResponseJson(ProjectEntity project, CourseEntity course, UserEntity user) {
-        // Calculate the progress of the project for all groups
-        List<Long> groupIds = projectRepository.findGroupIdsByProjectId(project.getId());
-        Integer total = groupIds.size();
-        Integer completed = groupIds.stream().map(groupId -> {
-            Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId);
-            if (submissionId == null) {
-                return 0;
-            }
-            SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
-            if (submission == null) {
-                return 0;
-            }
-            if (submission.getDockerAccepted() && submission.getStructureAccepted()) return 1;
-            return 0;
-        }).reduce(0, Integer::sum);
-
-        // Get the submissonUrl, depends on if the user is a course_admin or enrolled
-        String submissionUrl = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/submissions";
-        CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(course.getId(), user.getId())).orElse(null);
-        if (courseUserEntity == null) {
-            return null;
-        }
-        if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
-            Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
-            if (groupId == null) {
-                return null;
-            }
-            submissionUrl += "/" + groupId;
-        }
-
-        return new ProjectResponseJson(
-                new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
-                project.getDeadline(),
-                project.getDescription(),
-                project.getId(),
-                project.getName(),
-                submissionUrl,
-                ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
-                project.getMaxScore(),
-                project.isVisible(),
-                new ProjectProgressJson(completed, total)
-        );
     }
 
     public CheckResult<ProjectEntity> canGetProject(long projectId, UserEntity user) {

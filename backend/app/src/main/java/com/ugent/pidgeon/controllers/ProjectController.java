@@ -97,7 +97,7 @@ public class ProjectController {
         }
         CourseEntity course = courceCheck.getData();
 
-        return ResponseEntity.ok().body(projectUtil.projectEntityToProjectResponseJson(project, course, user));
+        return ResponseEntity.ok().body(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
     }
 
     /**
@@ -144,7 +144,7 @@ public class ProjectController {
             // Save the project entity
             ProjectEntity savedProject = projectRepository.save(project);
             CourseEntity courseEntity = checkAcces.getData();
-            return ResponseEntity.ok(projectUtil.projectEntityToProjectResponseJson(savedProject, courseEntity, user));
+            return ResponseEntity.ok(entityToJsonConverter.projectEntityToProjectResponseJson(savedProject, courseEntity, user));
         } catch (Exception e){
             Logger.getGlobal().severe("Error while creating project: " + Arrays.toString(e.getStackTrace()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating project: " + e.getMessage());
@@ -161,7 +161,7 @@ public class ProjectController {
         project.setMaxScore(projectJson.getMaxScore());
         project.setVisible(projectJson.isVisible());
         projectRepository.save(project);
-        return ResponseEntity.ok(projectUtil.projectEntityToProjectResponseJson(project, courseRepository.findById(project.getCourseId()).get(), user));
+        return ResponseEntity.ok(entityToJsonConverter.projectEntityToProjectResponseJson(project, courseRepository.findById(project.getCourseId()).get(), user));
     }
 
      /**

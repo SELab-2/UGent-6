@@ -8,6 +8,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.GroupFeedbackUtil;
 import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ public class GroupFeedbackController {
     private GroupFeedbackUtil groupFeedbackUtil;
     @Autowired
     private GroupUtil groupUtil;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
 
     /**
      * Function to update the score of a group
@@ -107,7 +110,7 @@ public class GroupFeedbackController {
         groupFeedbackEntity.setFeedback(request.getFeedback());
         try {
             groupFeedbackRepository.save(groupFeedbackEntity);
-            return ResponseEntity.status(HttpStatus.OK).body(groupFeedbackUtil.groupFeedbackEntityToJson(groupFeedbackEntity));
+            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not update score of group feedback");
@@ -145,7 +148,7 @@ public class GroupFeedbackController {
 
         try {
             groupFeedbackEntity = groupFeedbackRepository.save(groupFeedbackEntity);
-            return ResponseEntity.status(HttpStatus.CREATED).body(groupFeedbackUtil.groupFeedbackEntityToJson(groupFeedbackEntity));
+            return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not add score to group feedback");
@@ -186,7 +189,9 @@ public class GroupFeedbackController {
         }
         GroupFeedbackEntity groupFeedbackEntity = groupFeedback.getData();
 
-        return ResponseEntity.ok(groupFeedbackUtil.groupFeedbackEntityToJson(groupFeedbackEntity));
+        return ResponseEntity.ok(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
     }
+
+
 
 }

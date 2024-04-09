@@ -5,7 +5,6 @@ import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
-import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -76,12 +75,5 @@ public class TestUtil {
         return new CheckResult<>(HttpStatus.OK, "", testEntity);
     }
 
-    public TestJson testEntityToTestJson(TestEntity testEntity, long projectId) {
-        return new TestJson(
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId,
-                testEntity.getDockerImage(),
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/dockertest",
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/structuretest"
-        );
-    }
+
 }

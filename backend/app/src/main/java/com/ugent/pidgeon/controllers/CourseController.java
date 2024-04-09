@@ -44,6 +44,8 @@ public class CourseController {
     private CourseUtil courseUtil;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
 
 
     /**
@@ -70,7 +72,7 @@ public class CourseController {
                         if (course == null) {
                             return null;
                         }
-                        return courseUtil.courseEntityToCourseWithRelation(course, courseWithRelation.getRelation());
+                        return entityToJsonConverter.courseEntityToCourseWithRelation(course, courseWithRelation.getRelation());
                     }
                     )
                     .filter(Objects::nonNull)
@@ -124,7 +126,7 @@ public class CourseController {
             groupClusterEntity.setCreatedAt(currentTimestamp);
             groupClusterRepository.save(groupClusterEntity);
 
-            return ResponseEntity.ok(courseUtil.courseEntityToCourseWithInfo(courseEntity));
+            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink("" + courseEntity.getId(), null)));
         } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -140,7 +142,7 @@ public class CourseController {
         courseEntity.setName(courseJson.getName());
         courseEntity.setDescription(courseJson.getDescription());
         courseRepository.save(courseEntity);
-        return ResponseEntity.ok(courseUtil.courseEntityToCourseWithInfo(courseEntity));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink("" + courseEntity.getId(), null)));
     }
 
     /**
@@ -225,7 +227,7 @@ public class CourseController {
         }
         CourseEntity course = checkResult.getData().getFirst();
 
-        return ResponseEntity.ok(courseUtil.courseEntityToCourseWithInfo(course));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink("" + course.getId(), null)));
     }
 
 
@@ -306,7 +308,7 @@ public class CourseController {
 
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
         List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
-            projectUtil.projectEntityToProjectResponseJson(projectEntity, course, user)
+            entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, course, user)
         ).toList();
 
         return ResponseEntity.ok(projectResponseJsons);
@@ -322,7 +324,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
         }
         courseUserRepository.save(new CourseUserEntity(courseId, user.getId(), CourseRelation.enrolled));
-        return ResponseEntity.ok(courseUtil.courseEntityToCourseWithInfo(course));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink("" + course.getId(), null)));
     }
 
     private ResponseEntity<?> getJoinLinkGetResponseEntity(long courseId, String courseKey, UserEntity user) {
@@ -557,7 +559,7 @@ public class CourseController {
         List<UserReferenceJson> memberJson = members.stream().
                 map(cue -> userUtil.getUserIfExists(cue.getUserId())).
                 filter(Objects::nonNull).
-                map(userUtil::userEntityToUserReference).toList();
+                map(entityToJsonConverter::userEntityToUserReference).toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(memberJson);
     }

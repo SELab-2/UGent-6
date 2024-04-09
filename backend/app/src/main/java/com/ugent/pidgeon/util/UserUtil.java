@@ -50,8 +50,6 @@ public class UserUtil {
         return new CheckResult<>(HttpStatus.OK, "", user);
     }
 
-    public UserReferenceJson userEntityToUserReference(UserEntity user) {
-        return new UserReferenceJson(user.getName() + " " + user.getSurname(), user.getEmail(), user.getId());
-    }
+
 
 }

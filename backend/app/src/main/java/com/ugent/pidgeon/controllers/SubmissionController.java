@@ -72,23 +72,6 @@ public class SubmissionController {
         return model.checkSubmission(file);
     }
 
-    private SubmissionJson getSubmissionJson(SubmissionEntity submission) {
-        return new SubmissionJson(
-                submission.getId(),
-                ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
-                ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
-                submission.getProjectId(),
-                submission.getGroupId(),
-                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
-                submission.getStructureAccepted(),
-                submission.getSubmissionTime(),
-                submission.getDockerAccepted(),
-                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/structurefeedback",
-                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/dockerfeedback"
-        );
-
-    }
-
     /**
      * Function to get a submission by its ID
      *
@@ -108,7 +91,7 @@ public class SubmissionController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         SubmissionEntity submission = checkResult.getData();
-        SubmissionJson submissionJson = getSubmissionJson(submission);
+        SubmissionJson submissionJson = entityToJsonConverter.getSubmissionJson(submission);
 
         return ResponseEntity.ok(submissionJson);
     }
@@ -157,7 +140,7 @@ public class SubmissionController {
                     throw new RuntimeException("Submission not found");
                 }
 
-                return new LastGroupSubmissionJson(getSubmissionJson(submission), groupjson, groupFeedbackJson);
+                return new LastGroupSubmissionJson(entityToJsonConverter.getSubmissionJson(submission), groupjson, groupFeedbackJson);
 
             }).toList();
             return ResponseEntity.ok(res);
@@ -245,7 +228,7 @@ public class SubmissionController {
             submission.setStructureFeedback(testresult.feedback);
             submissionRepository.save(submission);
 
-            return ResponseEntity.ok(getSubmissionJson(submissionEntity));
+            return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submissionEntity));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
         }
@@ -391,7 +374,7 @@ public class SubmissionController {
         }
 
         List<SubmissionEntity> submissions = submissionRepository.findByProjectIdAndGroupId(projectid, groupid);
-        List<SubmissionJson> res = submissions.stream().map(this::getSubmissionJson).toList();
+        List<SubmissionJson> res = submissions.stream().map(entityToJsonConverter::getSubmissionJson).toList();
         return ResponseEntity.ok(res);
     }
 }

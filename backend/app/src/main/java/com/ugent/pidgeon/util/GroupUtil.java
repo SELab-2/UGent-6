@@ -1,8 +1,5 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.ApiRoutes;
-import com.ugent.pidgeon.model.json.GroupJson;
-import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
@@ -14,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
 public class GroupUtil {
@@ -150,10 +146,5 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User does not have access to the submissions of the group", null);
         }
     }
-
-
-
-
-
 
 }

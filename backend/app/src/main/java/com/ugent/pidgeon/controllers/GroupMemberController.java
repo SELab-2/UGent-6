@@ -9,6 +9,7 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.GroupUtil;
 import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class GroupMemberController {
     private GroupUtil groupUtil;
     @Autowired
     private UserUtil userUtil;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
 
 
     /**
@@ -109,7 +112,7 @@ public class GroupMemberController {
         try {
             groupMemberRepository.addMemberToGroup(groupId, memberid);
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserReferenceJson> response = members.stream().map(userUtil::userEntityToUserReference).toList();
+            List<UserReferenceJson> response = members.stream().map(entityToJsonConverter::userEntityToUserReference).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -141,7 +144,7 @@ public class GroupMemberController {
         try {
             groupMemberRepository.addMemberToGroup(groupId,user.getId());
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserReferenceJson> response = members.stream().map(userUtil::userEntityToUserReference).toList();
+            List<UserReferenceJson> response = members.stream().map(entityToJsonConverter::userEntityToUserReference).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -170,7 +173,7 @@ public class GroupMemberController {
         }
 
         List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-        List<UserReferenceJson> response = members.stream().map((UserEntity e) -> userUtil.userEntityToUserReference(e)).toList();
+        List<UserReferenceJson> response = members.stream().map((UserEntity e) -> entityToJsonConverter.userEntityToUserReference(e)).toList();
         return ResponseEntity.ok(response);
     }
 }

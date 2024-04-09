@@ -9,11 +9,8 @@ import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
 
 @Component
 public class CourseUtil {
@@ -167,8 +164,6 @@ public class CourseUtil {
         }
     }
 
-
-
     public CheckResult<CourseEntity> checkJoinLink(long courseId, String courseKey, UserEntity user) {
         CourseEntity course = courseRepository.findById(courseId).orElse(null);
         if (course == null) {
@@ -193,23 +188,7 @@ public class CourseUtil {
         return new CheckResult<>(HttpStatus.OK, "", course);
     }
 
-    public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course) {
-        UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
-        UserReferenceJson teacherJson = userUtil.userEntityToUserReference(teacher);
 
-        List<UserEntity> assistants = courseRepository.findAssistantsByCourseId(course.getId());
-        List<UserReferenceJson> assistantsJson = assistants.stream().map(userUtil::userEntityToUserReference).toList();
-
-        return new CourseWithInfoJson(
-                course.getId(),
-                course.getName(),
-                course.getDescription(),
-                teacherJson,
-                assistantsJson,
-                ApiRoutes.COURSE_BASE_PATH + "/" + course.getId() + "/members",
-                getJoinLink(course.getJoinKey(), "" + course.getId())
-        );
-    }
 
     public CheckResult<Void> checkCourseJson(CourseJson courseJson) {
         if (courseJson.getName() == null || courseJson.getDescription() == null) {
@@ -222,12 +201,5 @@ public class CourseUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
-    public CourseWithRelationJson courseEntityToCourseWithRelation(CourseEntity course, CourseRelation relation) {
-        return new CourseWithRelationJson(
-                ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
-                relation,
-                course.getName(),
-                course.getId()
-        );
-    }
+
 }

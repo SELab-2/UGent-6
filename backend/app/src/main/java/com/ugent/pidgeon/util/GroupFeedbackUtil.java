@@ -31,15 +31,6 @@ public class GroupFeedbackUtil {
         return new CheckResult<>(HttpStatus.OK, "", groupFeedback);
     }
 
-    public GroupFeedbackJson groupFeedbackEntityToJson(GroupFeedbackEntity groupFeedbackEntity) {
-        return new GroupFeedbackJson(
-                groupFeedbackEntity.getScore(),
-                groupFeedbackEntity.getFeedback(),
-                groupFeedbackEntity.getGroupId(),
-                groupFeedbackEntity.getProjectId()
-        );
-    }
-
     /**
      * Check if a project and group exist and if the group belongs to the project
      * @param groupId id of the group

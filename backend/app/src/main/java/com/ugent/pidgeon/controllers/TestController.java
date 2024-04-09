@@ -34,6 +34,8 @@ public class TestController {
     private FileUtil fileUtil;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
 
     /**
      * Function to update the tests of a project
@@ -124,7 +126,7 @@ public class TestController {
             test = testRepository.save(test);
             projectEntity.setTestId(test.getId());
             projectRepository.save(projectEntity);
-            return ResponseEntity.ok(testUtil.testEntityToTestJson(test, projectId));
+            return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(test, projectId));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving files: " + e.getMessage());
         }
@@ -150,7 +152,7 @@ public class TestController {
             return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
         TestEntity test = projectCheck.getData();
-        TestJson res  = testUtil.testEntityToTestJson(test, projectId);
+        TestJson res  = entityToJsonConverter.testEntityToTestJson(test, projectId);
         return ResponseEntity.ok(res);
     }
 
