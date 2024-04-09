@@ -80,7 +80,7 @@ public class GroupFeedbackUtil {
         GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.findById(new GroupFeedbackId(groupId, projectId)).orElse(null);
         if (httpMethod.equals(HttpMethod.POST) && groupFeedbackEntity != null) {
             return new CheckResult<>(HttpStatus.CONFLICT, "Group feedback already exists", null);
-        } else if (groupFeedbackEntity == null) {
+        } else if (!httpMethod.equals(HttpMethod.POST) && groupFeedbackEntity == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Group feedback not found", null);
         }
 

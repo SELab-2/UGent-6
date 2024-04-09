@@ -67,6 +67,23 @@ public class GroupFeedbackController {
         return doGroupFeedbackUpdate(groupFeedbackEntity, request);
     }
 
+    @DeleteMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> deleteGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, Auth auth) {
+        CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity(), HttpMethod.DELETE);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        try {
+            groupFeedbackRepository.delete(checkResult.getData());
+            return ResponseEntity.status(HttpStatus.OK).body("Group feedback deleted");
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not delete group feedback");
+        }
+    }
+
     @PutMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateGroupScorePut(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
@@ -90,7 +107,7 @@ public class GroupFeedbackController {
         groupFeedbackEntity.setFeedback(request.getFeedback());
         try {
             groupFeedbackRepository.save(groupFeedbackEntity);
-            return ResponseEntity.status(HttpStatus.OK).body(groupFeedbackEntity);
+            return ResponseEntity.status(HttpStatus.OK).body(groupFeedbackUtil.groupFeedbackEntityToJson(groupFeedbackEntity));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not update score of group feedback");
@@ -128,7 +145,7 @@ public class GroupFeedbackController {
 
         try {
             groupFeedbackEntity = groupFeedbackRepository.save(groupFeedbackEntity);
-            return ResponseEntity.status(HttpStatus.CREATED).body(groupFeedbackEntity);
+            return ResponseEntity.status(HttpStatus.CREATED).body(groupFeedbackUtil.groupFeedbackEntityToJson(groupFeedbackEntity));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not add score to group feedback");
