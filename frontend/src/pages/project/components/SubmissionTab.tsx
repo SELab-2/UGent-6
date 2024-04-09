@@ -6,7 +6,7 @@ import { AppRoutes } from "../../../@types/routes"
 import { PlusOutlined } from "@ant-design/icons"
 import { useTranslation } from "react-i18next"
 
-const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmission?:boolean }> = ({ projectId, courseId,allowNewSubmission }) => {
+const SubmissionTab: FC<{ projectId: number; courseId: number, allowNewSubmission?:boolean }> = ({ projectId, courseId,allowNewSubmission }) => {
   const navigate = useNavigate()
   const [submissions, setSubmissions] = useState<SubmissionType[] | null>(null)
   const { t } = useTranslation()
@@ -53,7 +53,6 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
               url:"/api/groups/1/members/1",
               userId: 6
             }],
-            
           }
         },
         {
@@ -94,9 +93,7 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
                 userId: 3
               }
             ],
-            
           }
-
         },
       ]
 
@@ -133,4 +130,4 @@ const SubmissionCard: FC<{ projectId: number; courseId: number, allowNewSubmissi
   )
 }
 
-export default SubmissionCard
+export default SubmissionTab

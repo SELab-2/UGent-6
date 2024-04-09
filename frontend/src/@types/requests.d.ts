@@ -135,13 +135,13 @@ export type GET_Responses = {
     description: string
     projectId: number
     name: string
-    submission_url: string
-    tests_url: string
+    submissionUrl: string
+    testsUrl: string
     maxScore:number
-    state: ProjectStatus
+    visible: boolean
     progress: {
-      usersCompleted: number
-      userCount: number
+      completed: number
+      total: number
     }
   }
   [ApiRoutes.PROJECT_TESTS]: {} // ??

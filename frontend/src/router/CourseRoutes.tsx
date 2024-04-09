@@ -32,7 +32,7 @@ const CourseRoutes: FC = () => {
     const member = courses.find((c) => c.courseId === parseInt(courseId ?? "0"))
     if (!member) return console.error("Member not found") // TODO: handle error
     setMember(member)
-  }, [courses, courseId])
+  }, [courses, course])
 
   useEffect(() => {
     if (!courseId) return

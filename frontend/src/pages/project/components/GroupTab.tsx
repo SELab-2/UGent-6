@@ -6,9 +6,7 @@ import GroupList from "../../course/components/groupTab/GroupList"
 
 export type GroupType = GET_Responses[ApiRoutes.PROJECT_GROUPS][number]
 
-const GroupCard: FC<{}> = () => {
-  const { t } = useTranslation()
-
+const GroupTab: FC<{}> = () => {
   const [groups, setGroups] = useState<null | GroupType[]>(null)
 
   useEffect(() => {
@@ -85,12 +83,8 @@ const GroupCard: FC<{}> = () => {
   }, [])
 
   return (
-    <Card title={t("course.groups")} styles={{body:{
-      padding: 16
-    }}}>
       <GroupList groups={groups} />
-    </Card>
   )
 }
 
-export default GroupCard
+export default GroupTab

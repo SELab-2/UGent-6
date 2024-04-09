@@ -59,22 +59,9 @@ const SubmissionsCard = () => {
   const handleDownloadSubmissions = () => {}
 
   return (
-    <Card
-      title={t("project.submissions")}
-      extra={
-        <Tooltip title={t("project.downloadSubmissions")}>
-          <Button
-            onClick={handleDownloadSubmissions}
-            icon={<DownloadOutlined />}
-          />
-        </Tooltip>
-      }
-      styles={{
-        body: { padding: 0 },
-      }}
-    >
+    <>
       <SubmissionsTable submissions={submissions} />
-    </Card>
+    </>
   )
 }
 

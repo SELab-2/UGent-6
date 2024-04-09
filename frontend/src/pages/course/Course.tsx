@@ -69,7 +69,7 @@ const Course: FC = () => {
   }, [t, isCourseAdmin,course])
 
   return (
-    <div style={{ marginTop: "3rem" }}>
+    <div style={{ margin: "3rem 0" }}>
       <div style={{ padding: "0 2rem" }}>
         <Typography.Title style={{marginBottom:"0.5rem"}} level={1}>{course.name}</Typography.Title>
         <Space direction="horizontal" size="small" style={{marginBottom:"0.5rem"}}>

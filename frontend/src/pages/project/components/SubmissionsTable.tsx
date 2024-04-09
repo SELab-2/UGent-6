@@ -1,6 +1,6 @@
 import { Button, Input, List, Table, Typography } from "antd"
 import { FC, useMemo } from "react"
-import { ProjectSubmissionsType } from "./SubmissionsCard"
+import { ProjectSubmissionsType } from "./SubmissionsTab"
 import { TableProps } from "antd/lib"
 import { useTranslation } from "react-i18next"
 import { DownloadOutlined } from "@ant-design/icons"
