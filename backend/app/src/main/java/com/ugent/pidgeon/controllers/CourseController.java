@@ -53,7 +53,8 @@ public class CourseController {
     private ProjectUtil projectUtil;
     @Autowired
     private CourseUtil courseUtil;
-
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
 
 
     /**
@@ -321,7 +322,7 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseEntity course = checkResult.getData();
-        if (!courseUtil.createNewIndividualClusterGroup(courseId, user.getId())) {
+        if (!commonDatabaseActions.createNewIndividualClusterGroup(courseId, user.getId())) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
         }
         courseUserRepository.save(new CourseUserEntity(courseId, user.getId(), CourseRelation.enrolled));
@@ -434,7 +435,7 @@ public class CourseController {
             // Verwijder de user uit het vak
             courseUserRepository.deleteById(new CourseUserId(courseId, userId));
             if (userRelation.equals(CourseRelation.enrolled)) {
-                if (!courseUtil.removeIndividualClusterGroup(courseId, userId)) {
+                if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId)) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
                 }
             }
@@ -468,7 +469,7 @@ public class CourseController {
 
         courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
         if (userRelation.equals(CourseRelation.enrolled)) {
-            if (!courseUtil.removeIndividualClusterGroup(courseId, userId.getUserId())) {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId.getUserId())) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
         }
@@ -498,7 +499,7 @@ public class CourseController {
 
         courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelationAsEnum()));
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            courseUtil.createNewIndividualClusterGroup(courseId, request.getUserId());
+            commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
         }
         return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
     }
@@ -528,9 +529,9 @@ public class CourseController {
         courseUserEntity.setRelation(request.getRelationAsEnum());
         courseUserRepository.save(courseUserEntity);
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            courseUtil.createNewIndividualClusterGroup(courseId, request.getUserId());
+            commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
         } else {
-            if (!courseUtil.removeIndividualClusterGroup(courseId, request.getUserId())) {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, request.getUserId())) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
         }

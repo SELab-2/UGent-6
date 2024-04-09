@@ -9,6 +9,8 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,10 @@ public class GroupController {
     private GroupRepository groupRepository;
     @Autowired
     private GroupUtil groupUtil;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
 
 
     /**
@@ -50,7 +56,7 @@ public class GroupController {
         }
 
         // Return the group
-        GroupJson groupJson = groupUtil.groupEntityToJson(group);
+        GroupJson groupJson = entityToJsonConverter.groupEntityToJson(group);
         return ResponseEntity.ok(groupJson);
     }
 
@@ -112,7 +118,7 @@ public class GroupController {
         groupRepository.save(group);
 
         // Return the updated group
-        GroupJson groupJson = groupUtil.groupEntityToJson(group);
+        GroupJson groupJson = entityToJsonConverter.groupEntityToJson(group);
         return ResponseEntity.ok(groupJson);
     }
 
@@ -132,7 +138,7 @@ public class GroupController {
     public ResponseEntity<?> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
         CheckResult<GroupEntity> checkResult = groupUtil.canUpdateGroup(groupid, auth.getUserEntity());
 
-        groupUtil.removeGroup(groupid);
+        commonDatabaseActions.removeGroup(groupid);
         // Return 204
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
     }

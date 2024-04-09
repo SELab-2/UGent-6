@@ -54,6 +54,8 @@ public class SubmissionController {
     private GroupUtil groupUtil;
     @Autowired
     private FileUtil fileUtil;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
 
     private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
 
@@ -138,7 +140,7 @@ public class SubmissionController {
                 if (group == null) {
                     throw new RuntimeException("Group not found");
                 }
-                GroupJson groupjson = groupUtil.groupEntityToJson(group);
+                GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group);
                 GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectid);
                 GroupFeedbackJson groupFeedbackJson;
                 if (groupFeedbackEntity == null) {

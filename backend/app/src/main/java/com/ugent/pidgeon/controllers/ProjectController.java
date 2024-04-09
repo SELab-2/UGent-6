@@ -53,6 +53,8 @@ public class ProjectController {
     private CourseUtil courseUtil;
     @Autowired
     private GroupUtil groupUtil;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
 
     /**
      * Function to get all projects of a user
@@ -318,10 +320,8 @@ public class ProjectController {
         List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
         List<GroupJson> groupjsons = groups.stream()
                 .map((Long id) -> {
-                    GroupEntity group = groupRepository.findById(id).orElse(null);
-                    if (group == null) return null;
-                    return groupUtil.groupEntityToJson(group);
-                }).filter(Objects::nonNull).toList();
+                    return  groupRepository.findById(id).orElse(null);
+                }).filter(Objects::nonNull).map(entityToJsonConverter::groupEntityToJson).toList();
         return ResponseEntity.ok(groupjsons);
     }
 

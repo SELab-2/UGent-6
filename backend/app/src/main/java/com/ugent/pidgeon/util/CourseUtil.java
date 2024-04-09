@@ -21,17 +21,10 @@ public class CourseUtil {
     private CourseRepository courseRepository;
     @Autowired
     private CourseUserRepository courseUserRepository;
-    @Autowired
-    private GroupClusterRepository groupClusterRepository;
-    @Autowired
-    private GroupUserRepository groupUserRepository;
-    @Autowired
-    private GroupRepository groupRepository;
+
 
     @Autowired
     private UserUtil userUtil;
-    @Autowired
-    private GroupUtil groupUtil;
 
 
     public CheckResult<CourseEntity> getCourseIfAdmin(long courseId, UserEntity user) {
@@ -174,32 +167,7 @@ public class CourseUtil {
         }
     }
 
-    public boolean createNewIndividualClusterGroup(long courseId, long userId) {
-        GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
-        if (groupClusterEntity == null) {
-            return false;
-        }
-        // Create new group for the cluster
-        GroupEntity groupEntity = new GroupEntity("", groupClusterEntity.getId());
-        groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() + 1);
-        groupClusterRepository.save(groupClusterEntity);
-        groupEntity = groupRepository.save(groupEntity);
 
-        // Add user to the group
-        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), userId);
-        groupUserRepository.save(groupUserEntity);
-        return true;
-    }
-
-    public boolean removeIndividualClusterGroup(long courseId, long userId) {
-        GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
-        if (groupClusterEntity == null) {
-            return false;
-        }
-        // Find the group of the user
-        Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
-        return groupEntityOptional.filter(groupEntity -> groupUtil.removeGroup(groupEntity.getId())).isPresent();
-    }
 
     public CheckResult<CourseEntity> checkJoinLink(long courseId, String courseKey, UserEntity user) {
         CourseEntity course = courseRepository.findById(courseId).orElse(null);

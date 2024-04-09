@@ -151,42 +151,9 @@ public class GroupUtil {
         }
     }
 
-    public GroupJson groupEntityToJson(GroupEntity groupEntity) {
-        GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
-        GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
-        if (cluster != null && cluster.getGroupAmount() > 1){
-            group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
-        } else {
-            group.setGroupClusterUrl(null);
-        }
-        // Get the members of the group
-        List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
-                new UserReferenceJson(user.getName(), user.getEmail(), user.getUserId())
-        ).toList();
 
-        // Return the group with its members
-        group.setMembers(members);
-        return group;
-    }
 
-    public boolean removeGroup(long groupId) {
-        try {
-            // Delete the group
-            groupRepository.deleteGroupUsersByGroupId(groupId);
-            groupRepository.deleteSubmissionsByGroupId(groupId);
-            groupRepository.deleteGroupFeedbacksByGroupId(groupId);
-            groupRepository.deleteById(groupId);
 
-            // update groupcount in cluster
-            groupClusterRepository.findById(groupId).ifPresent(cluster -> {
-                cluster.setGroupAmount(cluster.getGroupAmount() - 1);
-                groupClusterRepository.save(cluster);
-            });
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
 
 }
