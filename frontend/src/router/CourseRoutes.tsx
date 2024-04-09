@@ -11,12 +11,7 @@ export type CourseContextType = {
   course: CourseType
   member: UserCourseType
 }
-export type CourseMemberType = {
-  userId: number
-  relation: "enrolled" | "course_admin" | "creator"
-  name: string
-  surname: string
-}
+
 
 export const CourseContext = createContext<CourseContextType>({} as CourseContextType)
 

@@ -2,7 +2,7 @@ import { Button, List, Typography } from "antd"
 import { FC } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 import { Link } from "react-router-dom"
-import SubmissionStatusTag from "./SubmissionStatusTag"
+import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
 
 export type SubmissionType = GET_Responses[ApiRoutes.PROJECT_SUBMISSIONS][number]
 
@@ -13,18 +13,17 @@ const SubmissionList: FC<{ submissions: SubmissionType[] | null }> = ({ submissi
         actions={[
           <SubmissionStatusTag
             key="status"
-            docker_accepted={submission.docker_accepted}
-            structure_accepted={submission.structure_accepted}
+            status={createStatusBitVector(submission.submission)}
           />,
         ]}
       >
-        <List.Item.Meta
+       {submission.submission && <List.Item.Meta
           title={
-            <Link to={"feedback/" + submission.submissionId}>
-                <Button type="link" size="small" >#{submission.submissionId}</Button>
+            <Link to={"feedback/" + submission.submission?.submissionId}>
+                <Button type="link" size="small" >#{submission.submission.submissionId}</Button>
             </Link>
           }
-        />
+        />}
       </List.Item>
     )
   }

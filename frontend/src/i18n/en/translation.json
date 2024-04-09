@@ -63,9 +63,12 @@
     "structureFailed": "Structure failed",
     "submission": "Submission",
     "passed": "Passed",
+    "notSubmitted": "Not submitted",
     "submissionTime": "Submission time",
     "noSubmissions": "No submissions",
-    "loadingSubmissions": "Loading submissions..."
+    "loadingSubmissions": "Loading submissions...",
+    "options": "Options"
+
 
   },
   "group": {

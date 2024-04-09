@@ -1,8 +1,8 @@
 import { Button, List, Popconfirm, Radio, Select, Tooltip } from "antd"
 import { FC } from "react"
-import { CourseMemberType } from "../../../../router/CourseRoutes"
 import { useTranslation } from "react-i18next"
 import { UserDeleteOutlined } from "@ant-design/icons"
+import { CourseMemberType } from "./MemberCard"
 
 
 const rolesNames = {

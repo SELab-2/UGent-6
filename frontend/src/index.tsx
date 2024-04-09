@@ -26,10 +26,8 @@ msalInstance.initialize().then(() => {
 
   const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
   root.render(
-    <React.StrictMode>
       <BrowserRouter>
       <App pca={msalInstance} />
       </BrowserRouter>
-    </React.StrictMode>
   )
 })

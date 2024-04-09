@@ -1,59 +1,22 @@
-import { DownloadOutlined } from "@ant-design/icons"
-import { Button, Card, Tooltip } from "antd"
 import { useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import SubmissionsTable from "./SubmissionsTable"
+import apiCall from "../../../util/apiFetch"
 
 export type ProjectSubmissionsType = GET_Responses[ApiRoutes.PROJECT_SUBMISSIONS][number]
 
 // Card of all the latests submissions for a project
-const SubmissionsCard = () => {
-  const { t } = useTranslation()
+const SubmissionsTab = () => {
   const [submissions, setSubmissions] = useState<ProjectSubmissionsType[] | null>(null)
 
   useEffect(() => {
     // TODO: make request to /projects/{projectid}/submissions
 
-    setTimeout(() => {
-      setSubmissions([
-        {
-          docker_accepted: true,
-          docker_results_available: true,
+    apiCall.get(ApiRoutes.PROJECT_SUBMISSIONS).then((res) => {
+      console.log(res.data)
+      setSubmissions(res.data)
 
-          docker_feedback: "",
-          file_url: "/api/submissions/1/file",
-          groupUrl: "/api/groups/1",
-          group: {
-            groupId: 1,
-            members: [
-              {
-                name: "Bard",
-                surname: "Carter",
-                url: "/api/groups/1/members/1",
-                userId: 1,
-              },
-              {
-                name: "Bob",
-                surname: "Carter",
-                url: "/api/groups/1/members/2",
-                userId: 2,
-              },
-            ],
-            name: "Groep 1",
-          },
-          project_url: "/api/projects/1",
-          structure_accepted: true,
-          structure_feedback: "",
-          submitted_time: "2024-01-01T00:00:00.000Z",
-          submissionId: 1,
-          feedback: {
-            feedback: null,
-            score: null,
-          },
-        },
-      ])
-    }, 250)
+    })
   }, [])
 
   const handleDownloadSubmissions = () => {}
@@ -65,4 +28,4 @@ const SubmissionsCard = () => {
   )
 }
 
-export default SubmissionsCard
+export default SubmissionsTab

@@ -1,20 +1,49 @@
 import { Tag } from "antd"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
+import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 
 
+export enum SubmissionStatus {
+  STRUCTURE_REJECTED = 0,
+  DOCKER_REJECTED = 1,
+  NOT_SUBMITTED = 3,
+  PASSED = 4
+}
 
-const SubmissionStatusTag:FC<{docker_accepted:boolean, structure_accepted:boolean}> = ({ docker_accepted,structure_accepted }) => {
+export function createStatusBitVector(submission: GET_Responses[ApiRoutes.SUBMISSION] | null) {
+
+  if(submission === null) return SubmissionStatus.NOT_SUBMITTED
+
+  let status = 0
+  if(!submission.structureAccepted){
+    status |= 1 << SubmissionStatus.STRUCTURE_REJECTED
+  }
+  if(!submission.dockerAccepted){
+    status |= 1 << SubmissionStatus.DOCKER_REJECTED
+  }
+  if(status === 0){
+    status |= 1 << SubmissionStatus.PASSED
+  }
+  return status
+}
+
+
+const SubmissionStatusTag:FC<{status:number}> = ({ status }) => {
   const {t} = useTranslation()
-  if(!docker_accepted){
+  if((status & SubmissionStatus.DOCKER_REJECTED) === 0){
     return (
       <Tag color="red">{t("project.testFailed")}</Tag>
     )
-  } else if (!structure_accepted) {
+  } else if (status & SubmissionStatus.STRUCTURE_REJECTED) {
     return (
       <Tag color="red">{t("project.structureFailed")}</Tag>
     )
-  } 
+  } else if (status & SubmissionStatus.NOT_SUBMITTED) {
+    return (
+      <Tag color="gray">{t("project.notSubmitted")}</Tag>
+    )
+  }
 
   return <Tag color="green">{t("project.passed")}</Tag>
 }

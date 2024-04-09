@@ -1,9 +1,10 @@
 import { Card, Collapse, CollapseProps, Spin } from "antd"
 import { FC, useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
 import GroupCollapseItem from "./GroupCollapseItem"
+import apiCall from "../../../../util/apiFetch"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
@@ -13,85 +14,12 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   useEffect(() => {
     // TODO: do the fetch (get all clusters from the course )
     if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
-    setTimeout(() => {
-      setGroups([
-        {
-          capacity: 10,
-          clusterId: 1,
-          courseUrl: "/api/courses/1",
-          groups: [
-            {
-              groupUrl: "/api/groups/1",
-              name: "Groep 1",
-              groupId: 1
-            },
-            {
-              groupUrl: "/api/groups/2",
-              name: "Groep 2",
-              groupId: 2
-            },
-            {
-              groupUrl: "/api/groups/3",
-              name: "Groep 3",
-              groupId: 3
-            },
-          ],
-          created_at: "2022-12-21T16:00:00.000000Z",
-          groupCount: 3,
-          name: "Project 1 groups",
-        },
-        {
-          capacity: 100,
-          clusterId: 2,
-          courseUrl: "/api/courses/2",
-          groups: [
-            {
-              groupUrl: "/api/groups/4",
-              name: "Groep 4",
-              groupId: 4
-            },
-            {
-              groupUrl: "/api/groups/5",
-              name: "Groep 5",
-              groupId: 5
-            },
-            {
-              groupUrl: "/api/groups/6",
-              name: "Groep 6",
-              groupId: 6
-            },
-          ],
-          created_at: "2022-12-21T16:00:00.000000Z",
-          groupCount: 3,
-          name: "Project 2 groups",
-        },
-        {
-          capacity: 120,
-          clusterId: 3,
-          courseUrl: "/api/courses/3",
-          groups: [
-            {
-              groupUrl: "/api/groups/7",
-              name: "Groep 7",
-              groupId: 7
-            },
-            {
-              groupUrl: "/api/groups/8",
-              name: "Groep 8",
-              groupId: 8
-            },
-            {
-              groupUrl: "/api/groups/9",
-              name: "Groep 9",
-              groupId: 9
-            },
-          ],
-          created_at: "2022-12-21T16:00:00.000000Z",
-          groupCount: 3,
-          name: "Project 3 groups",
-        },
-      ])
-    }, 250)
+    
+
+    apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId }).then((res) => {
+      console.log(res.data)
+      setGroups(res.data)
+    })
   }, [courseId])
 
   // if(!groups) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
@@ -99,14 +27,10 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   // </div>
 
   const items: CollapseProps["items"] =
-    groups?.map((group) => ({
-      key: group.clusterId.toString(),
-      label: group.name,
-      children: 
-        <GroupCollapseItem
-          key={group.courseUrl}
-          clustedId={group.clusterId}
-        />
+    groups?.map((cluster) => ({
+      key: cluster.clusterId.toString(),
+      label: cluster.name,
+      children:  <GroupList groups={cluster.groups} capacity={cluster.capacity} />
 
     })) 
     

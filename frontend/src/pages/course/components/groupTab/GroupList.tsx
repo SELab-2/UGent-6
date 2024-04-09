@@ -5,16 +5,16 @@ import useUser from "../../../../hooks/useUser"
 import { useTranslation } from "react-i18next"
 import GroupInfoModal from "./GroupInfoModal"
 
-export type GroupType = GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
+export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
-const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean,onClick:()=>void,onLeave:()=>void, onJoin:()=>void }> = ({ group, canJoin, canLeave,onClick,onJoin,onLeave }) => {
+const Group: FC<{ group: GroupType;capacity:number, canJoin: boolean; canLeave: boolean,onClick:()=>void,onLeave:()=>void, onJoin:()=>void }> = ({ group, canJoin, canLeave,onClick,onJoin,onLeave,capacity }) => {
   const { t } = useTranslation()
   return (
     <List.Item
-    key={group.groupId}
+    key={group.groupid}
       actions={[
         <Typography.Text key="cap">
-          {group.members.length} / {group.capacity}
+          {group.members.length} / {capacity}
         </Typography.Text>,
         canLeave ? (
           <Button  style={{width:"130px"}} size="small" onClick={onLeave} key="leave">{t("course.leaveGroup")}</Button>
@@ -36,14 +36,15 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean,onClick:
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null }> = ({ groups }) => {
+const GroupList: FC<{ groups: GroupType[] | null, capacity:number }> = ({ groups,capacity }) => {
   const { user } = useUser()
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
   const {t} = useTranslation()
 
+  // TODO: fix this
   let ownGroupId: number | null = useMemo(() => {
-    return groups?.find((group) => group.members.some((u) => u.userId === user?.id))?.groupId ?? null
+    return 1 // groups?.find((group) => group.members.some((u) => u.userId === user?.id))?.groupId ?? null
   }, [groups])
 
 
@@ -72,16 +73,17 @@ const GroupList: FC<{ groups: GroupType[] | null }> = ({ groups }) => {
         emptyText: t("course.noGroups") ,
       }}
       loading={groups === null}
-      rowKey="groupId"
+      rowKey="groupid"
       dataSource={groups ?? []}
       renderItem={(g) => (
         <Group
           onClick={()=> handleModalClick(g)}
-          canJoin={g.members.length < g.capacity || ownGroupId !== null}
-          canLeave={ownGroupId === g.groupId}
+          canJoin={g.members.length < capacity || ownGroupId !== null}
+          canLeave={ownGroupId === g.groupid}
           group={g}
           onJoin={() => onJoin(g)}
           onLeave={() => onLeave(g)}
+          capacity={capacity}
         />
       )}
     />

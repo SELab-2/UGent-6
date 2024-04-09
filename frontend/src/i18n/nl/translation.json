@@ -63,10 +63,11 @@
     "testFailed": "Testen gefaalt",
     "structureFailed": "Structuur testen gefaalt",
     "passed": "Geslaagd",
+    "notSubmitted": "Niet ingediend",
     "submissionTime": "Indienings tijd",
     "noSubmissions": "Geen indieningen",
-    "loadingSubmissions": "Indieningen laden..."
-
+    "loadingSubmissions": "Indieningen laden...",
+    "options": "Opties"
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"

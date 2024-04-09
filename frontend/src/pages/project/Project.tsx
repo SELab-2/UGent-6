@@ -1,23 +1,22 @@
-import { Button, Card, Col, Row, Space, Tabs, TabsProps, Tooltip, theme } from "antd"
+import { Button, Card, Tabs, TabsProps, Tooltip, theme } from "antd"
 import { ApiRoutes, GET_Responses } from "../../@types/requests"
 import Markdown from "react-markdown"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import useApp from "../../hooks/useApp"
 import { useTranslation } from "react-i18next"
-import { Link, useParams } from "react-router-dom"
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import SubmissionCard from "./components/SubmissionTab"
 import useCourse from "../../hooks/useCourse"
-import GroupCard from "./components/GroupTab"
 import useProject from "../../hooks/useProject"
-import ScoreCard from "./components/ScoreCard"
-import CourseEnrolledView from "../../hooks/CourseEnrolledView"
+import ScoreCard from "./components/ScoreTab"
 import CourseAdminView from "../../hooks/CourseAdminView"
-import SubmissionsCard from "./components/SubmissionsTab"
-import { DownloadOutlined, EditFilled, SettingFilled } from "@ant-design/icons"
+import { DownloadOutlined, PlusOutlined, SettingFilled } from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
+import { AppRoutes } from "../../@types/routes"
+import SubmissionsTab from "./components/SubmissionsTab"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -30,8 +29,10 @@ const Project = () => {
   const course = useCourse()
   const { projectId } = useParams()
   const project = useProject()
-  const [activeTab, setActiveTab] = useState("description")
   const courseAdmin = useIsCourseAdmin()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.hash.slice(1) || "description")
 
   const CodeBlock = {
     code({ children, className, node, ...rest }: any) {
@@ -76,15 +77,14 @@ const Project = () => {
         children: courseAdmin ? (
           <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
             <span>
-              <SubmissionCard
-                projectId={Number(projectId)}
-                courseId={course.courseId}
-                allowNewSubmission={now < deadline}
-              />
+              <SubmissionsTab />
             </span>
           </Tooltip>
         ) : (
-          <SubmissionsCard />
+          <SubmissionCard
+            projectId={Number(projectId)}
+            courseId={course.courseId}
+          />
         ),
       },
       {
@@ -97,7 +97,12 @@ const Project = () => {
   }, [project, course, courseAdmin])
 
   const changeTab = (key: string) => {
+    navigate(`#${key}`)
     setActiveTab(key)
+  }
+
+  const handleNewSubmission = () => {
+    navigate(AppRoutes.NEW_SUBMISSION.replace(AppRoutes.PROJECT + "/", ""))
   }
 
   return (
@@ -119,22 +124,32 @@ const Project = () => {
         title={project?.name}
         loading={!project}
         extra={
-          <CourseAdminView>
+          courseAdmin ? (
             <Link to="edit">
               <Button
                 type="primary"
                 icon={<SettingFilled />}
               >
-                Options
+                {t("project.options")}
               </Button>
             </Link>
-          </CourseAdminView>
+          ) : (
+            <Button
+              disabled={now < deadline}
+              type="primary"
+              onClick={handleNewSubmission}
+              icon={<PlusOutlined />}
+            >
+              {t("project.newSubmission")}
+            </Button>
+          )
         }
       >
         <Tabs
           activeKey={activeTab}
           onChange={changeTab}
           items={items}
+
           tabBarExtraContent={
             activeTab === "submissions" ? (
               <CourseAdminView>

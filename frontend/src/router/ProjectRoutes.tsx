@@ -18,11 +18,11 @@ const ProjectRoutes = () => {
     // TODO make api call `projectId`
     if (!projectId) return console.error("ProjectId is not defined")
     let ignore = false
-  console.log("Making the request");
+    console.log("Making the request", projectId)
     apiCall
       .get(ApiRoutes.PROJECT, { id: projectId! })
       .then((res) => {
-        console.log("->",res.data)
+        console.log("->", res.data)
         if (!ignore) setProject(res.data)
       })
       .catch((err) => {
