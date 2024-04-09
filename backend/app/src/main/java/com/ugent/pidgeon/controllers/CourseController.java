@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -26,26 +27,14 @@ public class CourseController {
 
     @Autowired
     private CourseRepository courseRepository;
-
-    @Autowired
-    private ProjectController projectController;
-
-
     @Autowired
     private ProjectRepository projectRepository;
-
     @Autowired
     private CourseUserRepository courseUserRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private GroupClusterRepository groupClusterRepository;
-
-    @Autowired
-    private ClusterController groupClusterController;
-
 
     @Autowired
     private UserUtil userUtil;
@@ -254,6 +243,7 @@ public class CourseController {
      */
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
+    @Transactional
     public ResponseEntity<?> deleteCourse(@PathVariable long courseId, Auth auth) {
         try {
             CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
@@ -266,13 +256,19 @@ public class CourseController {
 
             // Delete all projects linked to the course
             for (ProjectEntity project : courseRepository.findAllProjectsByCourseId(courseId)) {
-                projectController.deleteProjectById(project.getId(), auth);
+                CheckResult<Void> deleteResult = commonDatabaseActions.deleteProject(project.getId());
+                if (deleteResult.getStatus() != HttpStatus.OK) {
+                    return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
+                }
             }
 
             // Delete all groupclusters linked to the course
             for (GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)) {
                 // We verwijderen de groepfeedback niet omdat die al verwijderd werd wanneer het project verwijderd werd
-                groupClusterController.deleteCluster(groupCluster.getId(), auth);
+                CheckResult<Void> deleteResult = commonDatabaseActions.deleteClusterById(groupCluster.getId());
+                if (deleteResult.getStatus() != HttpStatus.OK) {
+                    return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
+                }
             }
 
             // Delete all courseusers linked to the course

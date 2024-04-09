@@ -30,9 +30,10 @@ public class TestController {
 
     @Autowired
     private TestUtil testUtil;
-
     @Autowired
     private FileUtil fileUtil;
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
 
     /**
      * Function to update the tests of a project
@@ -224,17 +225,11 @@ public class TestController {
         ProjectEntity projectEntity = updateCheckResult.getData().getSecond();
         TestEntity testEntity = updateCheckResult.getData().getFirst();
 
-        projectEntity.setTestId(null);
-        projectRepository.save(projectEntity);
-        testRepository.deleteById(testEntity.getId())   ;
-        CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
-        if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
-            return ResponseEntity.status(checkAndDeleteRes.getStatus()).body(checkAndDeleteRes.getMessage());
+        CheckResult<Void> deleteResult = commonDatabaseActions.deleteTestById(projectEntity, testEntity);
+        if (!deleteResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
         }
-        CheckResult<Void> checkAndDeleteRes2 = fileUtil.deleteFileById(testEntity.getDockerTestId());
-        if (!checkAndDeleteRes2.getStatus().equals(HttpStatus.OK)) {
-            return ResponseEntity.status(checkAndDeleteRes2.getStatus()).body(checkAndDeleteRes2.getMessage());
-        }
+
         return  ResponseEntity.ok().build();
     }
 }

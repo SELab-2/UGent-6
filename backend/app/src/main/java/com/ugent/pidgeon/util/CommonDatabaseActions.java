@@ -1,14 +1,13 @@
 package com.ugent.pidgeon.util;
 
 
-import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
-import com.ugent.pidgeon.postgre.models.GroupEntity;
-import com.ugent.pidgeon.postgre.models.GroupUserEntity;
-import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
-import com.ugent.pidgeon.postgre.repository.GroupUserRepository;
+import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,6 +20,16 @@ public class CommonDatabaseActions {
     private GroupClusterRepository groupClusterRepository;
     @Autowired
     private GroupUserRepository groupUserRepository;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private GroupFeedbackRepository groupFeedbackRepository;
+    @Autowired
+    private SubmissionRepository submissionRepository;
+    @Autowired
+    private TestRepository testRepository;
+    @Autowired
+    private FileUtil fileUtil;
 
     public boolean removeGroup(long groupId) {
         try {
@@ -66,5 +75,75 @@ public class CommonDatabaseActions {
         // Find the group of the user
         Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
         return groupEntityOptional.filter(groupEntity -> removeGroup(groupEntity.getId())).isPresent();
+    }
+
+    public CheckResult<Void> deleteProject(long projectId) {
+        try {
+            ProjectEntity projectEntity = projectRepository.findById(projectId).orElse(null);
+            if (projectEntity == null) {
+                return new CheckResult<>(HttpStatus.NOT_FOUND, "Project not found", null);
+            }
+
+            groupFeedbackRepository.deleteAll(groupFeedbackRepository.findByProjectId(projectId));
+
+            for (SubmissionEntity submissionEntity : submissionRepository.findByProjectId(projectId)) {
+                CheckResult<Void> checkResult = deleteSubmissionById(submissionEntity.getId());
+                if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                    return checkResult;
+                }
+            }
+
+            projectRepository.delete(projectEntity);
+
+            TestEntity testEntity = testRepository.findById(projectEntity.getTestId()).orElse(null);
+            if (testEntity == null) {
+                return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
+            }
+            return deleteTestById(projectEntity, testEntity);
+        } catch (Exception e) {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting project", null);
+        }
+    }
+
+    public CheckResult<Void> deleteSubmissionById(long submissionId) {
+        try {
+            SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
+            if (submission == null) {
+                return new CheckResult<>(HttpStatus.NOT_FOUND, "Submission not found", null);
+            }
+            submissionRepository.delete(submission);
+            return fileUtil.deleteFileById(submission.getFileId());
+        } catch (Exception e) {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting submission", null);
+        }
+    }
+
+    public CheckResult<Void> deleteTestById(ProjectEntity projectEntity, TestEntity testEntity) {
+        try {
+            projectEntity.setTestId(null);
+            projectRepository.save(projectEntity);
+            testRepository.deleteById(testEntity.getId())   ;
+            CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
+            if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
+                return checkAndDeleteRes;
+            }
+            return fileUtil.deleteFileById(testEntity.getDockerTestId());
+        } catch (Exception e) {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting test", null);
+        }
+    }
+
+    public CheckResult<Void> deleteClusterById(long clusterId) {
+        try {
+            for (GroupEntity group : groupRepository.findAllByClusterId(clusterId)) {
+                // Delete all groupUsers
+                groupUserRepository.deleteAllByGroupId(group.getId());
+                groupRepository.deleteById(group.getId());
+            }
+            groupClusterRepository.deleteById(clusterId);
+            return new CheckResult<>(HttpStatus.OK, "", null);
+        } catch (Exception e) {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting cluster", null);
+        }
     }
 }

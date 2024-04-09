@@ -42,7 +42,6 @@ public class SubmissionController {
     private ProjectRepository projectRepository;
     @Autowired
     private TestRepository testRepository;
-
     @Autowired
     private GroupFeedbackRepository groupFeedbackRepository;
 
@@ -53,12 +52,12 @@ public class SubmissionController {
     @Autowired
     private GroupUtil groupUtil;
     @Autowired
-    private FileUtil fileUtil;
-    @Autowired
     private EntityToJsonConverter entityToJsonConverter;
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
+
 
     private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
-
         // Get the test file from the server
         FileEntity testfileEntity = fileRepository.findById(testEntity.getStructureTestId()).orElse(null);
         if (testfileEntity == null) {
@@ -364,12 +363,9 @@ public class SubmissionController {
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        SubmissionEntity submission = checkResult.getData();
-        submissionRepository.delete(submission);
-        CheckResult<Void> deleteFileIfExists = fileUtil.deleteFileById(submission.getFileId());
-        if (!deleteFileIfExists.getStatus().equals(HttpStatus.OK)) {
-            return ResponseEntity.status(deleteFileIfExists.getStatus()).body(deleteFileIfExists.getMessage());
-        }
+
+        commonDatabaseActions.deleteSubmissionById(submissionid);
+
         return ResponseEntity.ok().build();
     }
 

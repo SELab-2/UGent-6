@@ -23,18 +23,14 @@ import java.util.List;
 
 @RestController
 public class ClusterController {
+
     @Autowired
     GroupClusterRepository groupClusterRepository;
     @Autowired
     GroupRepository groupRepository;
     @Autowired
-    CourseUserRepository courseUserRepository;
-    @Autowired
-    CourseRepository courseRepository;
-    @Autowired
     GroupUserRepository groupUserRepository;
-    @Autowired
-    GroupController groupController;
+
 
     @Autowired
     private ClusterUtil clusterUtil;
@@ -42,6 +38,8 @@ public class ClusterController {
     private EntityToJsonConverter entityToJsonConverter;
     @Autowired
     private CourseUtil courseUtil;
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
 
     /**
      * Returns all clusters for a course
@@ -213,12 +211,12 @@ public class ClusterController {
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        for (GroupEntity group : groupRepository.findAllByClusterId(clusterid)) {
-            // Delete all groupUsers
-            groupUserRepository.deleteAllByGroupId(group.getId());
-            groupRepository.deleteById(group.getId());
+
+        CheckResult<Void> deleteResult = commonDatabaseActions.deleteClusterById(clusterid);
+        if (deleteResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
         }
-        groupClusterRepository.deleteById(clusterid);
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

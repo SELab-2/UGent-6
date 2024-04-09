@@ -25,21 +25,9 @@ public class ProjectController {
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
-    private SubmissionRepository submissionRepository;
-    @Autowired
-    private GroupFeedbackRepository groupFeedbackRepository;
-    @Autowired
     private CourseRepository courseRepository;
     @Autowired
     private GroupClusterRepository groupClusterRepository;
-
-    //controllers
-    @Autowired
-    private SubmissionController filesubmissiontestController;
-    @Autowired
-    private TestController testController;
-    @Autowired
-    private GroupController groupController;
     @Autowired
     private GroupRepository groupRepository;
 
@@ -52,9 +40,9 @@ public class ProjectController {
     @Autowired
     private CourseUtil courseUtil;
     @Autowired
-    private GroupUtil groupUtil;
-    @Autowired
     private EntityToJsonConverter entityToJsonConverter;
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
 
     /**
      * Function to get all projects of a user
@@ -278,18 +266,11 @@ public class ProjectController {
             if (projectCheck.getStatus() != HttpStatus.OK) {
                 return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
             }
-            ProjectEntity projectEntity = projectCheck.getData();
 
-
-            groupFeedbackRepository.deleteAll(groupFeedbackRepository.findByProjectId(projectId));
-
-            for (SubmissionEntity submissionEntity : submissionRepository.findByProjectId(projectId)) {
-                filesubmissiontestController.deleteSubmissionById(submissionEntity.getId(), auth);
+            CheckResult<Void> deleteResult = commonDatabaseActions.deleteProject(projectId);
+            if (deleteResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
             }
-
-            projectRepository.delete(projectEntity);
-
-            testController.deleteTestById(projectEntity.getTestId(), auth);
 
             return ResponseEntity.ok().build();
     }
