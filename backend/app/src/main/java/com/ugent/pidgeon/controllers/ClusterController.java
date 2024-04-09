@@ -11,6 +11,7 @@ import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
 import com.ugent.pidgeon.util.ClusterUtil;
+import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,8 @@ public class ClusterController {
 
     @Autowired
     private ClusterUtil clusterUtil;
+    @Autowired
+    private GroupUtil groupUtil;
 
     /**
      * Returns all clusters for a course
@@ -80,7 +83,7 @@ public class ClusterController {
 
     private GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster) {
         List<GroupJson> groups = groupRepository.findAllByClusterId(cluster.getId()).stream().map(
-                group -> groupController.groupEntityToJson(group)
+                group -> groupUtil.groupEntityToJson(group)
         ).toList();
         return new GroupClusterJson(
                 cluster.getId(),
@@ -338,6 +341,6 @@ public class ClusterController {
 
         cluster.setGroupAmount(cluster.getGroupAmount() + 1);
         groupClusterRepository.save(cluster);
-        return ResponseEntity.status(HttpStatus.CREATED).body(groupController.groupEntityToJson(group));
+        return ResponseEntity.status(HttpStatus.CREATED).body(groupUtil.groupEntityToJson(group));
     }
 }

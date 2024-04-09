@@ -20,8 +20,7 @@ public class GroupFeedbackUtil {
     private GroupUtil groupUtil;
     @Autowired
     private GroupFeedbackRepository groupFeedbackRepository;
-    @Autowired
-    private GroupRepository groupRepository;
+
 
     public CheckResult<GroupFeedbackEntity> getGroupFeedbackIfExists(long groupId, long projectId) {
         GroupFeedbackId id = new GroupFeedbackId(groupId, projectId);

@@ -1,5 +1,8 @@
 package com.ugent.pidgeon.util;
 
+import com.ugent.pidgeon.controllers.ApiRoutes;
+import com.ugent.pidgeon.model.json.GroupJson;
+import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
@@ -10,6 +13,8 @@ import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class GroupUtil {
@@ -50,6 +55,22 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not an admin of this group", null);
         }
         return new CheckResult<>(HttpStatus.OK, "", null);
+    }
+
+    public CheckResult<GroupEntity> canUpdateGroup(long groupId, UserEntity user) {
+        CheckResult<GroupEntity> groupCheck = getGroupIfExists(groupId);
+        if (groupCheck.getStatus() != HttpStatus.OK) {
+            return groupCheck;
+        }
+        GroupEntity group = groupCheck.getData();
+        CheckResult<Void> adminCheck = isAdminOfGroup(groupId, user);
+        if (adminCheck.getStatus() != HttpStatus.OK) {
+            return new CheckResult<>(adminCheck.getStatus(), adminCheck.getMessage(), null);
+        }
+        if (clusterUtil.isIndividualCluster(group.getClusterId())) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot update individual group", null);
+        }
+        return new CheckResult<>(HttpStatus.OK, "", groupCheck.getData());
     }
 
 
@@ -127,6 +148,43 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.OK, "", null);
         } else {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User does not have access to the submissions of the group", null);
+        }
+    }
+
+    public GroupJson groupEntityToJson(GroupEntity groupEntity) {
+        GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
+        GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
+        if (cluster != null && cluster.getGroupAmount() > 1){
+            group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
+        } else {
+            group.setGroupClusterUrl(null);
+        }
+        // Get the members of the group
+        List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
+                new UserReferenceJson(user.getName(), user.getEmail(), user.getUserId())
+        ).toList();
+
+        // Return the group with its members
+        group.setMembers(members);
+        return group;
+    }
+
+    public boolean removeGroup(long groupId) {
+        try {
+            // Delete the group
+            groupRepository.deleteGroupUsersByGroupId(groupId);
+            groupRepository.deleteSubmissionsByGroupId(groupId);
+            groupRepository.deleteGroupFeedbacksByGroupId(groupId);
+            groupRepository.deleteById(groupId);
+
+            // update groupcount in cluster
+            groupClusterRepository.findById(groupId).ifPresent(cluster -> {
+                cluster.setGroupAmount(cluster.getGroupAmount() - 1);
+                groupClusterRepository.save(cluster);
+            });
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

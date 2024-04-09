@@ -10,6 +10,7 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.GroupUtil;
 import com.ugent.pidgeon.util.ProjectUtil;
 import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,8 @@ public class CourseController {
     private UserUtil userUtil;
     @Autowired
     private ProjectUtil projectUtil;
+    @Autowired
+    private GroupUtil groupUtil;
 
     public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course) {
         UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
@@ -444,7 +447,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
         }
         // Find the group of the user
         Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
-        return groupEntityOptional.filter(groupEntity -> groupController.removeGroup(groupEntity.getId())).isPresent();
+        return groupEntityOptional.filter(groupEntity -> groupUtil.removeGroup(groupEntity.getId())).isPresent();
     }
 
     /**

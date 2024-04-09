@@ -4,54 +4,24 @@ import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.NameRequest;
-import com.ugent.pidgeon.model.json.UserReferenceJson;
-import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 public class GroupController {
     @Autowired
     private GroupRepository groupRepository;
     @Autowired
-    private GroupClusterRepository groupClusterRepository;
-
-
-    public boolean isIndividualGroup(long groupId) {
-        GroupEntity group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            return false;
-        }
-        GroupClusterEntity cluster = groupClusterRepository.findById(group.getClusterId()).orElse(null);
-        return cluster != null && cluster.getGroupAmount() <= 1;
-    }
-
-    public GroupJson groupEntityToJson(GroupEntity groupEntity) {
-        GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
-        GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
-        if (cluster != null && cluster.getGroupAmount() > 1){
-            group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
-        } else {
-            group.setGroupClusterUrl(null);
-        }
-        // Get the members of the group
-        List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
-                new UserReferenceJson(user.getName(), user.getEmail(), user.getUserId())
-        ).toList();
-
-        // Return the group with its members
-        group.setMembers(members);
-        return group;
-    }
+    private GroupUtil groupUtil;
 
 
     /**
@@ -69,24 +39,18 @@ public class GroupController {
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> getGroupById(@PathVariable("groupid") Long groupid, Auth auth) {
 
-
-        // Get userId
-        long userId = auth.getUserEntity().getId();
-
-        // Get the group, return 404 if it does not exist
-        GroupEntity group = groupRepository.findById(groupid).orElse(null);
-
-        if (group == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
+        CheckResult<GroupEntity> checkResult = groupUtil.getGroupIfExists(groupid);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-
-        // Return 403 if the user does not have access to the group
-        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
+        GroupEntity group = checkResult.getData();
+        CheckResult<Void> checkResult1 = groupUtil.canGetGroup(groupid, auth.getUserEntity());
+        if (checkResult1.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult1.getStatus()).body(checkResult1.getMessage());
         }
 
         // Return the group
-        GroupJson groupJson = groupEntityToJson(group);
+        GroupJson groupJson = groupUtil.groupEntityToJson(group);
         return ResponseEntity.ok(groupJson);
     }
 
@@ -127,8 +91,6 @@ public class GroupController {
     }
 
     private ResponseEntity<?> doGroupNameUpdate(Long groupid, NameRequest nameRequest, UserEntity user) {
-        // Get userId
-        long userId = user.getId();
 
         if (nameRequest.getName() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name needs to be provided");
@@ -137,21 +99,11 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name cannot be empty");
         }
 
-        // Get the group, return 404 if it does not exist
-        GroupEntity group = groupRepository.findById(groupid).orElse(null);
-        if (group == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
-
+        CheckResult<GroupEntity> checkResult = groupUtil.canUpdateGroup(groupid, user);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-
-        // Return 403 if the user does not have access to the group
-        if (!groupRepository.userAccessToGroup(userId, groupid) && user.getRole()!=UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
-        }
-
-        if (isIndividualGroup(groupid)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change name of individual group");
-        }
+        GroupEntity group = checkResult.getData();
 
         // Update the group name
         group.setName(nameRequest.getName());
@@ -160,7 +112,7 @@ public class GroupController {
         groupRepository.save(group);
 
         // Return the updated group
-        GroupJson groupJson = groupEntityToJson(group);
+        GroupJson groupJson = groupUtil.groupEntityToJson(group);
         return ResponseEntity.ok(groupJson);
     }
 
@@ -178,42 +130,11 @@ public class GroupController {
     @DeleteMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
-        // Get userId
-        long userId = auth.getUserEntity().getId();
+        CheckResult<GroupEntity> checkResult = groupUtil.canUpdateGroup(groupid, auth.getUserEntity());
 
-        // Get the group, return 404 if it does not exist
-        GroupEntity group = groupRepository.findById(groupid).orElse(null);
-        if (group == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
-        }
-
-        // Return 403 if the user does not have access to the group
-        if (!groupRepository.userAccessToGroup(userId, groupid) && auth.getUserEntity().getRole()!=UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
-        }
-
-        if (isIndividualGroup(groupid)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot delete individual group");
-        }
-
-        removeGroup(groupid);
+        groupUtil.removeGroup(groupid);
         // Return 204
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
-    }
-
-    public boolean removeGroup(long groupId) {
-        // Delete the group
-        groupRepository.deleteGroupUsersByGroupId(groupId);
-        groupRepository.deleteSubmissionsByGroupId(groupId);
-        groupRepository.deleteGroupFeedbacksByGroupId(groupId);
-        groupRepository.deleteById(groupId);
-
-        // update groupcount in cluster
-        groupClusterRepository.findById(groupId).ifPresent(cluster -> {
-            cluster.setGroupAmount(cluster.getGroupAmount() - 1);
-            groupClusterRepository.save(cluster);
-        });
-        return true;
     }
 
 }

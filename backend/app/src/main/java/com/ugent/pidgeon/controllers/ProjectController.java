@@ -7,10 +7,7 @@ import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.CheckResult;
-import com.ugent.pidgeon.util.ClusterUtil;
-import com.ugent.pidgeon.util.CourseUtil;
-import com.ugent.pidgeon.util.ProjectUtil;
+import com.ugent.pidgeon.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +51,8 @@ public class ProjectController {
     private ClusterUtil clusterUtil;
     @Autowired
     private CourseUtil courseUtil;
+    @Autowired
+    private GroupUtil groupUtil;
 
     /**
      * Function to get all projects of a user
@@ -320,8 +319,9 @@ public class ProjectController {
         List<GroupJson> groupjsons = groups.stream()
                 .map((Long id) -> {
                     GroupEntity group = groupRepository.findById(id).orElse(null);
-                    return groupController.groupEntityToJson(group);
-                }).toList();
+                    if (group == null) return null;
+                    return groupUtil.groupEntityToJson(group);
+                }).filter(Objects::nonNull).toList();
         return ResponseEntity.ok(groupjsons);
     }
 

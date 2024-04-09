@@ -76,7 +76,6 @@ public class GroupMembersControllerTest extends ControllerTest {
         when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupClusterRepository.userInGroupForCluster(anyLong(), anyLong())).thenReturn(false);
-        when(groupController.isIndividualGroup(anyLong())).thenReturn(false);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}", "1") + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"memberId\": 1}"))
