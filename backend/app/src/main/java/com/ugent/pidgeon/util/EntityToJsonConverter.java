@@ -8,11 +8,14 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+
+/**
+ * Class that converts entities to json objects
+ */
 @Component
 public class EntityToJsonConverter {
 

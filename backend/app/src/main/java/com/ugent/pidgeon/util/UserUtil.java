@@ -14,14 +14,29 @@ public class UserUtil {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Check if a user exists
+     * @param userId id of the user
+     * @return true if the user exists
+     */
     public boolean userExists(long userId) {
         return userRepository.existsById(userId);
     }
 
+    /**
+     * @param userId id of the user
+     * @return UserEntity if the user exists, null otherwise
+     */
     public UserEntity getUserIfExists(long userId) {
         return userRepository.findById(userId).orElse(null);
     }
 
+    /**
+     * Check userUpdateJson for user update
+     * @param userId id of the user
+     * @param json UserUpdateJson
+     * @return CheckResult with the status of the check and the user
+     */
     public CheckResult<UserEntity> checkForUserUpdateJson(long userId, UserUpdateJson json) {
         UserEntity user = getUserIfExists(userId);
         if (user == null) {

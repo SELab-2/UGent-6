@@ -1,11 +1,8 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.model.json.UpdateGroupScoreRequest;
 import com.ugent.pidgeon.postgre.models.*;
-import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupFeedbackRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -22,6 +19,12 @@ public class GroupFeedbackUtil {
     private GroupFeedbackRepository groupFeedbackRepository;
 
 
+    /**
+     * Check if a group feedback exists
+     * @param groupId id of the group
+     * @param projectId id of the project
+     * @return CheckResult with the status of the check and the group feedback
+     */
     public CheckResult<GroupFeedbackEntity> getGroupFeedbackIfExists(long groupId, long projectId) {
         GroupFeedbackId id = new GroupFeedbackId(groupId, projectId);
         GroupFeedbackEntity groupFeedback = groupFeedbackRepository.findById(id).orElse(null);
@@ -56,6 +59,14 @@ public class GroupFeedbackUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    /**
+     * Check if a user can update a group feedback
+     * @param groupId id of the group
+     * @param projectId id of the project
+     * @param user user that wants to update the group feedback
+     * @param httpMethod http method of the request
+     * @return CheckResult with the status of the check and the group feedback
+     */
     public CheckResult<GroupFeedbackEntity> checkGroupFeedbackUpdate(long groupId, long projectId, UserEntity user, HttpMethod httpMethod) {
         CheckResult<Void> checkGroupFeedback = checkGroupFeedback(groupId, projectId);
         if (checkGroupFeedback.getStatus() != HttpStatus.OK) {
@@ -77,6 +88,12 @@ public class GroupFeedbackUtil {
         return new CheckResult<>(HttpStatus.OK, "", groupFeedbackEntity);
     }
 
+    /**
+     * Check if the json for updating a group feedback is valid
+     * @param request json for updating a group feedback
+     * @param projectId id of the project
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> checkGroupFeedbackUpdateJson(UpdateGroupScoreRequest request, Long projectId) {
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
         if (projectCheck.getStatus() != HttpStatus.OK) {

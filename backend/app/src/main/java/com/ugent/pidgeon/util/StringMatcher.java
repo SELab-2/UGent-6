@@ -10,6 +10,11 @@ public class StringMatcher {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
+    /**
+     * Check if an email is valid
+     * @param email email to check
+     * @return true if the email is valid
+     */
     public static boolean isValidEmail(String email) {
         Matcher matcher = EMAIL_PATTERN.matcher(email);
         return matcher.matches();

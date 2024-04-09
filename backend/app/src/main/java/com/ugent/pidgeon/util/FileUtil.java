@@ -16,7 +16,14 @@ public class FileUtil {
     @Autowired
     private FileRepository fileRepository;
 
-    // Hulpfunction to save the file entity to the database
+    /**
+     * Save the file entity to the database
+     * @param filePath path of the file
+     * @param projectId id of the project
+     * @param userId id of the user
+     * @return the saved file entity
+     * @throws IOException if an error occurs while saving the file
+     */
     public FileEntity saveFileEntity(Path filePath, long projectId, long userId) throws IOException {
         // Save the file entity to the database
         Logger.getGlobal().info("file path: " + filePath.toString());
@@ -25,6 +32,11 @@ public class FileUtil {
         return fileRepository.save(fileEntity);
     }
 
+    /**
+     * Delete a file by id from the database and server
+     * @param fileId id of the file
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> deleteFileById(long fileId) {
         FileEntity fileEntity = fileRepository.findById(fileId).orElse(null);
         if (fileEntity == null) {

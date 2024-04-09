@@ -24,6 +24,12 @@ public class CourseUtil {
     private UserUtil userUtil;
 
 
+    /**
+     * Get a course if the user is an admin of the course
+     * @param courseId id of the course
+     * @param user user that wants to get the course
+     * @return CheckResult with the status of the check and the course entity
+     */
     public CheckResult<CourseEntity> getCourseIfAdmin(long courseId, UserEntity user) {
         CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = getCourseIfUserInCourse(courseId, user);
         if (courseCheck.getStatus() != HttpStatus.OK) {
@@ -38,6 +44,12 @@ public class CourseUtil {
         return new CheckResult<>(HttpStatus.OK, "", courseEntity);
     }
 
+    /**
+     * Get a course if the user is part of the course
+     * @param courseId id of the course
+     * @param user user that wants to get the course
+     * @return CheckResult with the status of the check and pair of the course entity and the relation of the user with the course
+     */
     public CheckResult<Pair<CourseEntity, CourseRelation>> getCourseIfUserInCourse(long courseId, UserEntity user) {
         CheckResult<CourseEntity> courseCheck = getCourseIfExists(courseId);
         if (courseCheck.getStatus() != HttpStatus.OK) {
@@ -51,6 +63,12 @@ public class CourseUtil {
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, courseUserEntity.getRelation()));
     }
 
+
+    /**
+     * Get a course if it exists
+     * @param courseId id of the course
+     * @return CheckResult with the status of the check and the course entity
+     */
     public CheckResult<CourseEntity> getCourseIfExists(long courseId) {
         CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
         if (courseEntity == null) {
@@ -59,6 +77,15 @@ public class CourseUtil {
         return new CheckResult<>(HttpStatus.OK, "", courseEntity);
     }
 
+
+    /**
+     * Check if a user can update/create the relation of a user with a course
+     * @param courseId id of the course
+     * @param request json with the new course data
+     * @param user user that wants to update/create the course
+     * @param method http method used to update/create the course
+     * @return CheckResult with the status of the check and the course entity
+     */
     public CheckResult<CourseUserEntity> canUpdateUserInCourse(long courseId, CourseMemberRequestJson request, UserEntity user, HttpMethod method) {
         CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = getCourseIfUserInCourse(courseId, user);
         if (courseCheck.getStatus() != HttpStatus.OK) {
@@ -110,6 +137,12 @@ public class CourseUtil {
         return new CheckResult<>(HttpStatus.OK, "", courseUserEntity);
     }
 
+    /**
+     * Check if a user can leave a course
+     * @param courseId id of the course
+     * @param user user that wants to leave the course
+     * @return CheckResult with the status of the check and the relation of the user with the course
+     */
     public CheckResult<CourseRelation> canLeaveCourse(long courseId, UserEntity user) {
         CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = getCourseIfUserInCourse(courseId, user);
         if (courseCheck.getStatus() != HttpStatus.OK) {
@@ -122,6 +155,13 @@ public class CourseUtil {
         return new CheckResult<>(HttpStatus.OK, "", relation);
     }
 
+    /**
+     * Check if a user can delete another user from a course
+     * @param courseId id of the course
+     * @param userIdJson json with the id of the user to delete
+     * @param user user that wants to delete the other user
+     * @return CheckResult with the status of the check and the relation of the user with the course
+     */
     public CheckResult<CourseRelation> canDeleteUser(long courseId, UserIdJson userIdJson, UserEntity user) {
         if (userIdJson == null || userIdJson.getUserId() == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "userid is required", null);
@@ -156,6 +196,12 @@ public class CourseUtil {
     }
 
 
+    /**
+     * Get the join link of a course
+     * @param courseKey key to join the course (null if course doesn't use a key)
+     * @param courseId id of the course
+     * @return join link of the course
+     */
     public String getJoinLink(String courseKey, String courseId) {
         if (courseKey != null) {
             return ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}".replace("{courseId}", courseId).replace("{courseKey}", courseKey);
@@ -164,6 +210,13 @@ public class CourseUtil {
         }
     }
 
+    /**
+     * Check if a join link is valid
+     * @param courseId id of the course
+     * @param courseKey key to join the course (null if course doesn't use a key)
+     * @param user user that wants to join the course
+     * @return CheckResult with the status of the check and the course entity
+     */
     public CheckResult<CourseEntity> checkJoinLink(long courseId, String courseKey, UserEntity user) {
         CourseEntity course = courseRepository.findById(courseId).orElse(null);
         if (course == null) {
@@ -189,7 +242,11 @@ public class CourseUtil {
     }
 
 
-
+    /**
+     * Check if a course json is valid
+     * @param courseJson json with the course data
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> checkCourseJson(CourseJson courseJson) {
         if (courseJson.getName() == null || courseJson.getDescription() == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "name and description are required", null);

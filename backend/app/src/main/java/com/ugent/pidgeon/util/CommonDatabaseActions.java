@@ -31,6 +31,12 @@ public class CommonDatabaseActions {
     @Autowired
     private FileUtil fileUtil;
 
+
+    /**
+     * Remove a group from the database
+     * @param groupId id of the group
+     * @return true if the group was removed successfully
+     */
     public boolean removeGroup(long groupId) {
         try {
             // Delete the group
@@ -50,6 +56,13 @@ public class CommonDatabaseActions {
         }
     }
 
+
+    /**
+     * Create a new individual cluster group for course
+     * @param courseId id of the course
+     * @param userId id of the user
+     * @return true if the group was created successfully
+     */
     public boolean createNewIndividualClusterGroup(long courseId, long userId) {
         GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
         if (groupClusterEntity == null) {
@@ -67,6 +80,12 @@ public class CommonDatabaseActions {
         return true;
     }
 
+    /**
+     * Remove an individual cluster group of a course
+     * @param courseId id of the course
+     * @param userId id of the user
+     * @return true if the group was removed successfully
+     */
     public boolean removeIndividualClusterGroup(long courseId, long userId) {
         GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
         if (groupClusterEntity == null) {
@@ -77,6 +96,11 @@ public class CommonDatabaseActions {
         return groupEntityOptional.filter(groupEntity -> removeGroup(groupEntity.getId())).isPresent();
     }
 
+    /**
+     * Delete a project and all its related data
+     * @param projectId id of the project
+     * @return CheckResult with the status of the deletion
+     */
     public CheckResult<Void> deleteProject(long projectId) {
         try {
             ProjectEntity projectEntity = projectRepository.findById(projectId).orElse(null);
@@ -105,6 +129,11 @@ public class CommonDatabaseActions {
         }
     }
 
+    /**
+     * Delete a submission and its related data
+     * @param submissionId id of the submission
+     * @return CheckResult with the status of the deletion
+     */
     public CheckResult<Void> deleteSubmissionById(long submissionId) {
         try {
             SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
@@ -118,6 +147,13 @@ public class CommonDatabaseActions {
         }
     }
 
+
+    /**
+     * Delete a test and its related data
+     * @param projectEntity project that the test is linked to
+     * @param testEntity test to delete
+     * @return CheckResult with the status of the deletion
+     */
     public CheckResult<Void> deleteTestById(ProjectEntity projectEntity, TestEntity testEntity) {
         try {
             projectEntity.setTestId(null);
@@ -133,6 +169,11 @@ public class CommonDatabaseActions {
         }
     }
 
+    /**
+     * Delete a cluster and all its related data
+     * @param clusterId id of the cluster
+     * @return CheckResult with the status of the deletion
+     */
     public CheckResult<Void> deleteClusterById(long clusterId) {
         try {
             for (GroupEntity group : groupRepository.findAllByClusterId(clusterId)) {

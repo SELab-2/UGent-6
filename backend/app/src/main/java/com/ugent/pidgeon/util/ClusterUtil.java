@@ -18,11 +18,21 @@ public class ClusterUtil {
     @Autowired
     private CourseUtil courseUtil;
 
-
+    /**
+     * Check if a cluster is an individual cluster. This means that it only contains one group
+     * @param cluster cluster to check
+     * @return true if the cluster is an individual cluster
+     */
     public boolean isIndividualCluster(GroupClusterEntity cluster) {
         return cluster != null && cluster.getGroupAmount() <= 1;
     }
 
+    /**
+     * Check if a user can delete a cluster
+     * @param clusterId id of the cluster
+     * @param user user that wants to delete the cluster
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> canDeleteCluster(long clusterId, UserEntity user) {
         CheckResult<GroupClusterEntity> clusterCheck = getGroupClusterEntityIfAdminAndNotIndividual(clusterId, user);
         if (!clusterCheck.getStatus().equals(HttpStatus.OK)) {
@@ -34,6 +44,13 @@ public class ClusterUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+
+    /**
+     * Get group cluster entity if it is not an individual cluster and user has access to the course
+     * @param clusterId id of the cluster
+     * @param user user that wants to get the cluster
+     * @return CheckResult with the status of the check and the group cluster entity
+     */
     public CheckResult<GroupClusterEntity> getGroupClusterEntityIfNotIndividual(long clusterId, UserEntity user) {
         GroupClusterEntity groupCluster = groupClusterRepository.findById(clusterId).orElse(null);
         if (groupCluster == null) {
@@ -49,6 +66,14 @@ public class ClusterUtil {
         }
         return new CheckResult<>(HttpStatus.OK, "", groupCluster);
     }
+
+
+    /**
+     * Get group cluster entity if user is admin of the course and the cluster is not an individual cluster
+     * @param clusterId id of the cluster
+     * @param user user that wants to get the cluster
+     * @return CheckResult with the status of the check and the group cluster entity
+     */
     public CheckResult<GroupClusterEntity> getGroupClusterEntityIfAdminAndNotIndividual(long clusterId, UserEntity user) {
         CheckResult<GroupClusterEntity> groupClusterCheck = getGroupClusterEntityIfNotIndividual(clusterId, user);
         if (!groupClusterCheck.getStatus().equals(HttpStatus.OK)) {
@@ -63,11 +88,23 @@ public class ClusterUtil {
         return new CheckResult<>(HttpStatus.OK, "", groupCluster);
     }
 
+
+    /**
+     * Check if a cluster is an individual cluster. This means that it only contains one group
+     * @param clusterId id of the cluster
+     * @return true if the cluster is an individual cluster
+     */
     public boolean isIndividualCluster(long clusterId) {
         GroupClusterEntity cluster = groupClusterRepository.findById(clusterId).orElse(null);
         return isIndividualCluster(cluster);
     }
 
+    /**
+     * Check if a cluster is part of a course
+     * @param clusterId id of the cluster
+     * @param courseId id of the course
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> partOfCourse(long clusterId, long courseId) {
         // Check of de GroupCluster deel is van het vak
         GroupClusterEntity groupCluster = groupClusterRepository.findById(clusterId).orElse(null);
@@ -80,6 +117,11 @@ public class ClusterUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    /**
+     * Get a group cluster entity if it exists
+     * @param clusterId id of the cluster
+     * @return CheckResult with the status of the check and the group cluster entity
+     */
     public CheckResult<GroupClusterEntity> getClusterIfExists(long clusterId) {
         GroupClusterEntity groupCluster = groupClusterRepository.findById(clusterId).orElse(null);
         if (groupCluster == null) {
@@ -88,6 +130,11 @@ public class ClusterUtil {
         return new CheckResult<>(HttpStatus.OK, "", groupCluster);
     }
 
+    /**
+     * Check if a group cluster update json is valid
+     * @param clusterJson json to check
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> checkGroupClusterUpdateJson(GroupClusterUpdateJson clusterJson) {
         if (clusterJson.getCapacity() == null || clusterJson.getName() == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "capacity and name must be provided", null);
@@ -101,6 +148,11 @@ public class ClusterUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    /**
+     * Check if a group cluster create json is valid
+     * @param clusterJson json to check
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> checkGroupClusterCreateJson(GroupClusterCreateJson clusterJson) {
         if (clusterJson.capacity() == null || clusterJson.name() == null || clusterJson.groupCount() == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "capacity, name and groupCount must be provided", null);

@@ -25,6 +25,11 @@ public class GroupUtil {
     private ProjectUtil projectUtil;
 
 
+    /**
+     * Check if a group exists
+     * @param groupId id of the group
+     * @return CheckResult with the status of the check and the group
+     */
     public CheckResult<GroupEntity> getGroupIfExists(long groupId) {
         GroupEntity group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
@@ -46,6 +51,12 @@ public class GroupUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    /**
+     * Check if a user is an admin of a group
+     * @param groupId id of the group
+     * @param user user that wants to get the group
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> isAdminOfGroup(long groupId, UserEntity user) {
         if (!groupRepository.isAdminOfGroup(groupId, user.getId()) && !user.getRole().equals(UserRole.admin)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not an admin of this group", null);
@@ -53,6 +64,12 @@ public class GroupUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    /**
+     * Check if a user can update a group
+     * @param groupId id of the group
+     * @param user user that wants to update the group
+     * @return CheckResult with the status of the check and the group
+     */
     public CheckResult<GroupEntity> canUpdateGroup(long groupId, UserEntity user) {
         CheckResult<GroupEntity> groupCheck = getGroupIfExists(groupId);
         if (groupCheck.getStatus() != HttpStatus.OK) {
@@ -70,6 +87,13 @@ public class GroupUtil {
     }
 
 
+    /**
+     * Check if a user can add a user to a group
+     * @param groupId  id of the group
+     * @param userId id of the user to add
+     * @param user user that wants to add the user
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> canAddUserToGroup(long groupId, long userId, UserEntity user) {
         GroupEntity group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
@@ -107,6 +131,13 @@ public class GroupUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    /**
+     * Check if a user can remove a user from a group
+     * @param groupId id of the group
+     * @param userId id of the user to remove
+     * @param user user that wants to remove the user
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> canRemoveUserFromGroup(long groupId, long userId, UserEntity user) {
         GroupEntity group = groupRepository.findById(groupId).orElse(null);
         if (group == null) {
@@ -129,6 +160,13 @@ public class GroupUtil {
         return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
+    /**
+     * Check if a user can get the submissions or data of a group
+     * @param groupId id of the group
+     * @param projectId id of the project
+     * @param user user that wants to get the submissions
+     * @return CheckResult with the status of the check
+     */
     public CheckResult<Void> canGetProjectGroupData(long groupId, long projectId, UserEntity user) {
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
         if (projectCheck.getStatus() != HttpStatus.OK) {

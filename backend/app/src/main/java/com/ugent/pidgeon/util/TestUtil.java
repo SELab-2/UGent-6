@@ -21,10 +21,25 @@ public class TestUtil {
     @Autowired
     private ProjectUtil projectUtil;
 
+    /**
+     * Check if a test exists for a project
+     * @param projectId id of the project
+     * @return the test if it exists, null otherwise
+     */
     public TestEntity getTestIfExists(long projectId) {
         return testRepository.findByProjectId(projectId).orElse(null);
     }
 
+    /**
+     * Check if a user can get update a test
+     * @param projectId id of the project
+     * @param user user that wants to update the test
+     * @param dockerImage docker image for the test
+     * @param dockerTest docker test file
+     * @param structureTest structure test file
+     * @param httpMethod http method used to update the test
+     * @return CheckResult with the status of the check and the test and project
+     */
     public CheckResult<Pair<TestEntity, ProjectEntity>> checkForTestUpdate(
             long projectId,
             UserEntity user,
@@ -61,6 +76,12 @@ public class TestUtil {
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, projectEntity));
     }
 
+    /**
+     * Check if a user can get a test (only project admins can get tests)
+     * @param projectId id of the project
+     * @param user user that wants to get the test
+     * @return CheckResult with the status of the check and the test
+     */
     public CheckResult<TestEntity> getTestIfAdmin(long projectId, UserEntity user) {
         TestEntity testEntity = getTestIfExists(projectId);
         if (testEntity == null) {

@@ -26,7 +26,12 @@ public class SubmissionUtil {
     private GroupUtil groupUtil;
 
 
-
+    /**
+     * Check if a user can get a submission
+     * @param submissionId id of the submission
+     * @param user user that wants to get the submission
+     * @return CheckResult with the status of the check and the submission
+     */
     public CheckResult<SubmissionEntity> canGetSubmission(long submissionId, UserEntity user) {
         SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {
@@ -39,6 +44,12 @@ public class SubmissionUtil {
         }
     }
 
+    /**
+     * Check if a user can delete a submission
+     * @param submissionId id of the submission
+     * @param user user that wants to delete the submission
+     * @return CheckResult with the status of the check and the submission
+     */
     public CheckResult<SubmissionEntity> canDeleteSubmission(long submissionId, UserEntity user) {
         SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
         if (submission == null) {
@@ -51,6 +62,12 @@ public class SubmissionUtil {
         }
     }
 
+    /**
+     * Check if a user can submit a submission
+     * @param projectId id of the project
+     * @param user user that wants to submit the submission
+     * @return CheckResult with the status of the check and the group id
+     */
     public CheckResult<Long> checkOnSubmit(long projectId, UserEntity user) {
         Long groupId = groupRepository.groupIdByProjectAndUser(projectId, user.getId());
 

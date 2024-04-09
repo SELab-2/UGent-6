@@ -1,5 +1,11 @@
 package com.ugent.pidgeon.util;
 
+
+/**
+ * Class that represents a pair of objects
+ * @param <S> First object type
+ * @param <T> Second object type
+ */
 public class Pair<S, T> {
     private final S first;
     private final T second;

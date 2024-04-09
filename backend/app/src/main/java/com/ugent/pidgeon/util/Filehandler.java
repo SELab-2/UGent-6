@@ -22,6 +22,13 @@ public class Filehandler {
     static String BASEPATH = "data";
     public static String SUBMISSION_FILENAME = "files.zip";
 
+    /**
+     * Save a submission to the server
+     * @param directory directory to save the submission to
+     * @param file file to save
+     * @return the saved file
+     * @throws IOException if an error occurs while saving the file
+     */
     public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
@@ -59,11 +66,20 @@ public class Filehandler {
     }
 
 
-
+    /**
+     * Delete a submission from the server
+     * @param directory directory of the submission to delete
+     * @throws IOException if an error occurs while deleting the submission
+     */
     public static void deleteSubmission(Path directory) throws IOException {
         deleteLocation(directory);
     }
 
+    /**
+     * Delete a directory and all its contents
+     * @param directory directory to delete
+     * @throws IOException if an error occurs while deleting the directory
+     */
     public static void deleteLocation(Path directory) throws IOException {
         try {
             File uploadDirectory = new File(directory.toString());
@@ -78,6 +94,10 @@ public class Filehandler {
         }
     }
 
+    /**
+     * Delete empty parent directories of a directory
+     * @param directory directory to delete
+     */
     private static void deleteEmptyParentDirectories(File directory) {
         if (directory != null && directory.isDirectory()) {
             File[] files = directory.listFiles();
@@ -92,36 +112,42 @@ public class Filehandler {
     }
 
 
+    /**
+     * Get the path were a submission is stored
+     * @param projectid id of the project
+     * @param groupid id of the group
+     * @param submissionid id of the submission
+     * @return the path of the submission
+     */
     static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
+    /**
+     * Get the path were a test is stored
+     * @param projectid id of the project
+     * @return the path of the test
+     */
     static public Path getTestPath(long projectid) {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
     }
 
-    static public void deleteTest(long projectid) throws IOException {
-        try {
-            File uploadDirectory = new File(getTestPath(projectid).toString());
-            if (uploadDirectory.exists()) {
-                if(!uploadDirectory.delete()) {
-                    throw new IOException("Error while deleting directory");
-                }
-            }
-        } catch (IOException e) {
-            throw new IOException(e.getMessage());
-        }
-    }
-    
-    public static File getFile(Path path) {
-        return path.toFile();
-    }
-
+    /**
+     * Get a file as a resource
+     * @param path path of the file
+     * @return the file as a resource
+     */
     public static Resource getFileAsResource(Path path) {
         File file =  path.toFile();
         return new FileSystemResource(file);
     }
 
+    /**
+     * Check if a file is a ZIP file
+     * @param file file to check
+     * @return true if the file is a ZIP file, false otherwise
+     * @throws IOException if an error occurs while checking the file
+     */
     public static boolean isZipFile(File file) throws IOException {
         // Create a Tika instance
         Tika tika = new Tika();
@@ -135,11 +161,23 @@ public class Filehandler {
 
     }
 
+    /**
+     * Get a submission as a resource
+     * @param path path of the submission
+     * @return the submission as a resource
+     * @throws IOException if an error occurs while getting the submission
+     */
     public static Resource getSubmissionAsResource(Path path) throws IOException {
         return new InputStreamResource(new FileInputStream(path.toFile()));
     }
 
-    // helper function to save a file to the server
+    /**
+     * Save a file to the server
+     * @param file file to save
+     * @param projectId id of the project
+     * @return the path of the saved file
+     * @throws IOException if an error occurs while saving the file
+     */
     public static Path saveTest(MultipartFile file, long projectId) throws IOException {
         // Check if the file is empty
         if (file.isEmpty()) {
@@ -159,6 +197,12 @@ public class Filehandler {
         return filePath;
     }
 
+    /**
+     * Get the structure test file contents as string
+     * @param path path of the structure test file
+     * @return the structure test file contents as string
+     * @throws IOException if an error occurs while reading the file
+     */
     public static String getStructureTestString(Path path) throws IOException {
         try {
             return Files.readString(path);
