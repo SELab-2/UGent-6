@@ -11,7 +11,6 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
-import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -55,6 +54,8 @@ public class SubmissionController {
     private SubmissionUtil submissionUtil;
     @Autowired
     private ProjectUtil projectUtil;
+    @Autowired
+    private GroupUtil groupUtil;
 
     private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
 
@@ -385,7 +386,7 @@ public class SubmissionController {
     //Route to get all submissions for a project
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getSubmissionsForGroup(@PathVariable("projectid") long projectid, @PathVariable("groupid") long groupid, Auth auth) {
-        CheckResult<Void> accesCheck = submissionUtil.hasAccesToGroupSubmissions(groupid, projectid, auth.getUserEntity());
+        CheckResult<Void> accesCheck = groupUtil.canGetProjectGroupData(groupid, projectid, auth.getUserEntity());
         if (!accesCheck.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(accesCheck.getStatus()).body(accesCheck.getMessage());
         }

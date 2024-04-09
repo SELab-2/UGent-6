@@ -149,7 +149,7 @@ public class GroupMemberController {
         }
     }
 
-    
+
     /**
      * Function to get all members of a group
      *

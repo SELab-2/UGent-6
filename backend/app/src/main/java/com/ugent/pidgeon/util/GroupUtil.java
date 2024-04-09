@@ -2,6 +2,7 @@ package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
@@ -9,8 +10,6 @@ import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-
-import java.util.logging.Logger;
 
 @Component
 public class GroupUtil {
@@ -21,6 +20,17 @@ public class GroupUtil {
     private GroupClusterRepository groupClusterRepository;
     @Autowired
     private ClusterUtil clusterUtil;
+    @Autowired
+    private ProjectUtil projectUtil;
+
+
+    public CheckResult<GroupEntity> getGroupIfExists(long groupId) {
+        GroupEntity group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not found", null);
+        }
+        return new CheckResult<>(HttpStatus.OK, "", group);
+    }
 
     /**
      * Check if a user can get a group, this is equivalent to user being in the same course of the group
@@ -100,6 +110,24 @@ public class GroupUtil {
         }
 
         return new CheckResult<>(HttpStatus.OK, "", null);
+    }
+
+    public CheckResult<Void> canGetProjectGroupData(long groupId, long projectId, UserEntity user) {
+        CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
+        if (projectCheck.getStatus() != HttpStatus.OK) {
+            return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);
+        }
+        ProjectEntity project = projectCheck.getData();
+        if (groupRepository.findByIdAndClusterId(groupId, project.getGroupClusterId()).isEmpty()) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not part of the project", null);
+        }
+        boolean inGroup = groupRepository.userInGroup(groupId, user.getId());
+        boolean isAdmin = user.getRole().equals(UserRole.admin) || projectUtil.isProjectAdmin(projectId, user).getStatus() == HttpStatus.OK;
+        if (inGroup || isAdmin) {
+            return new CheckResult<>(HttpStatus.OK, "", null);
+        } else {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "User does not have access to the submissions of the group", null);
+        }
     }
 
 

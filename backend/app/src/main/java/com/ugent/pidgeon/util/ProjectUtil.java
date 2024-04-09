@@ -37,8 +37,12 @@ public class ProjectUtil {
         return projectRepository.userPartOfProject(projectId, userId);
     }
 
-    public ProjectEntity getProjectIfExists(long projectId) {
-        return projectRepository.findById(projectId).orElse(null);
+    public CheckResult<ProjectEntity> getProjectIfExists(long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "Project not found", null);
+        }
+        return new CheckResult<>(HttpStatus.OK, "", project);
     }
 
     public CheckResult<Void> isProjectAdmin(long projectId, UserEntity user) {
@@ -49,14 +53,14 @@ public class ProjectUtil {
     }
 
     public CheckResult<ProjectEntity> getProjectIfAdmin(long projectId, UserEntity user) {
-        ProjectEntity project = getProjectIfExists(projectId);
-        if (project == null) {
-            return new CheckResult<>(HttpStatus.NOT_FOUND, "Project not found", null);
+        CheckResult<ProjectEntity> projectCheck = getProjectIfExists(projectId);
+        if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
+            return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
         if (!projectRepository.adminOfProject(projectId, user.getId()) && !user.getRole().equals(UserRole.admin)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "You are not an admin of this project", null);
         }
-        return new CheckResult<>(HttpStatus.OK, "", project);
+        return new CheckResult<>(HttpStatus.OK, "", projectCheck.getData());
     }
 
     public CheckResult<Void> checkProjectJson(ProjectJson projectJson, long courseId) {
