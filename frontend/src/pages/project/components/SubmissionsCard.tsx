@@ -23,7 +23,7 @@ const SubmissionsCard = () => {
 
           docker_feedback: "",
           file_url: "/api/submissions/1/file",
-          group_url: "/api/groups/1",
+          groupUrl: "/api/groups/1",
           group: {
             groupId: 1,
             members: [

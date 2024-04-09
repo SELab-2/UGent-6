@@ -34,7 +34,6 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       let response = await apiCall.get(ApiRoutes.USER_COURSES, {
         id: data.data.id,
       })
-      console.log("------------", response.data);
       setCourses(response.data)
     } catch (err) {
       console.log(err)

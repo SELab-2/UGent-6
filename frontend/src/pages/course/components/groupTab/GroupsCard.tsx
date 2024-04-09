@@ -18,20 +18,20 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
         {
           capacity: 10,
           clusterId: 1,
-          course_url: "/api/courses/1",
+          courseUrl: "/api/courses/1",
           groups: [
             {
-              group_url: "/api/groups/1",
+              groupUrl: "/api/groups/1",
               name: "Groep 1",
               groupId: 1
             },
             {
-              group_url: "/api/groups/2",
+              groupUrl: "/api/groups/2",
               name: "Groep 2",
               groupId: 2
             },
             {
-              group_url: "/api/groups/3",
+              groupUrl: "/api/groups/3",
               name: "Groep 3",
               groupId: 3
             },
@@ -43,20 +43,20 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
         {
           capacity: 100,
           clusterId: 2,
-          course_url: "/api/courses/2",
+          courseUrl: "/api/courses/2",
           groups: [
             {
-              group_url: "/api/groups/4",
+              groupUrl: "/api/groups/4",
               name: "Groep 4",
               groupId: 4
             },
             {
-              group_url: "/api/groups/5",
+              groupUrl: "/api/groups/5",
               name: "Groep 5",
               groupId: 5
             },
             {
-              group_url: "/api/groups/6",
+              groupUrl: "/api/groups/6",
               name: "Groep 6",
               groupId: 6
             },
@@ -68,20 +68,20 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
         {
           capacity: 120,
           clusterId: 3,
-          course_url: "/api/courses/3",
+          courseUrl: "/api/courses/3",
           groups: [
             {
-              group_url: "/api/groups/7",
+              groupUrl: "/api/groups/7",
               name: "Groep 7",
               groupId: 7
             },
             {
-              group_url: "/api/groups/8",
+              groupUrl: "/api/groups/8",
               name: "Groep 8",
               groupId: 8
             },
             {
-              group_url: "/api/groups/9",
+              groupUrl: "/api/groups/9",
               name: "Groep 9",
               groupId: 9
             },
@@ -104,7 +104,7 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
       label: group.name,
       children: 
         <GroupCollapseItem
-          key={group.course_url}
+          key={group.courseUrl}
           clustedId={group.clusterId}
         />
 

@@ -15,7 +15,6 @@ import CourseEnrolledView from "../../hooks/CourseEnrolledView"
 import CourseAdminView from "../../hooks/CourseAdminView"
 import SubmissionsCard from "./components/SubmissionsCard"
 import { EditFilled } from "@ant-design/icons"
-import { AppRoutes } from "../../@types/routes"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 

@@ -80,7 +80,7 @@ type CourseTeacher = {
 }
 
 type Course = {
-  course_url: string
+  courseUrl: string
   name: string
 }
 
@@ -105,7 +105,7 @@ export type GET_Responses = {
     submissionId: number
     project_url: string
     file_url: string
-    group_url: string
+    groupUrl: string
     group: {
       name:string;
       groupId:number;
@@ -149,7 +149,7 @@ export type GET_Responses = {
     capacity: number
     groupId: string
     members_amount: number
-    members_url: string
+    membersUrl: string
     name: string
   }
   [ApiRoutes.CLUSTER_GROUPS]: {
@@ -182,22 +182,23 @@ export type GET_Responses = {
     capacity: number;
     groupCount: number;
     created_at: Timestamp;
-    groups: { name: string; group_url: string, groupId: number }[]
-    course_url: string
+    groups: { name: string; groupUrl: string, groupId: number }[]
+    courseUrl: string
   }
   [ApiRoutes.COURSE]: {
     description: string
     courseId: number
-    members_url: string
+    membersUrl: string
     name: string
     teacher: CourseTeacher
     assistents: CourseTeacher[]
-    members_url: string
+    membersUrl: string
+    joinKey: string
   }
   [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER]
   [ApiRoutes.COURSE_MEMBER]: GET_Responses[ApiRoutes.GROUP_MEMBER]
   [ApiRoutes.USER]: {
-    course_url: string
+    courseUrl: string
     projects_url: string
     url: string
     role: "teacher" | "student" | "admin"

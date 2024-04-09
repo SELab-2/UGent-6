@@ -19,7 +19,7 @@ const ProjectRoutes = () => {
         course: {
           courseId: 2,
           name: "course",
-          url: "course_url",
+          url: "courseUrl",
         },
         deadline: "2024-03-29T17:00:00",
         description:

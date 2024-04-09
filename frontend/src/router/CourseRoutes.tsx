@@ -1,4 +1,4 @@
-import { FC, createContext, useEffect, useMemo, useState } from "react"
+import { FC, createContext, useEffect,  useState } from "react"
 import { Outlet, useParams } from "react-router-dom"
 import { CourseType } from "../pages/course/Course"
 import { Flex, Spin } from "antd"
@@ -23,8 +23,9 @@ export const CourseContext = createContext<CourseContextType>({} as CourseContex
 const CourseRoutes: FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const [course, setCourse] = useState<CourseType | null>(null)
-  const { courses } = useUser()
   const [member, setMember] = useState<UserCourseType | null>(null)
+  const { courses } = useUser()
+
 
   useEffect(() => {
     if (!courses?.length || !course) return
@@ -34,9 +35,10 @@ const CourseRoutes: FC = () => {
   }, [courses, courseId])
 
   useEffect(() => {
+    if (!courseId) return
+
     let ignore = false
-    // TODO: fetch course data: /api/courses/1
-    console.log(courseId);
+    console.log(courseId)
     apiCall
       .get(ApiRoutes.COURSE, { courseId: courseId! })
       .then((res) => {
