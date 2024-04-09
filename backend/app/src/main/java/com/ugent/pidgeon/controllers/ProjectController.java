@@ -128,7 +128,7 @@ public class ProjectController {
         try {
             // De user vinden
             UserEntity user = auth.getUserEntity();
-            CheckResult<CourseEntity> checkAcces = courseUtil.checkCourseAcces(courseId, user);
+            CheckResult<CourseEntity> checkAcces = courseUtil.getCourseIfAdmin(courseId, user);
             if (checkAcces.getStatus() != HttpStatus.OK) {
                 return ResponseEntity.status(checkAcces.getStatus()).body(checkAcces.getMessage());
             }
