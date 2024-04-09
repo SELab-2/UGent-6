@@ -1,20 +1,15 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.ApiRoutes;
 import com.ugent.pidgeon.model.json.GroupClusterCreateJson;
-import com.ugent.pidgeon.model.json.GroupClusterJson;
 import com.ugent.pidgeon.model.json.GroupClusterUpdateJson;
-import com.ugent.pidgeon.model.json.GroupJson;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class ClusterUtil {
@@ -44,6 +39,11 @@ public class ClusterUtil {
         if (groupCluster == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Group cluster does not exist", null);
         }
+        CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = courseUtil.getCourseIfUserInCourse(groupCluster.getCourseId(), user);
+        if (!courseCheck.getStatus().equals(HttpStatus.OK)) {
+            return new CheckResult<>(courseCheck.getStatus(), courseCheck.getMessage(), null);
+        }
+
         if (isIndividualCluster(groupCluster)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Individual clusters cannot be accesed", null);
         }

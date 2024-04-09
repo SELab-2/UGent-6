@@ -32,7 +32,7 @@ public class SubmissionUtil {
         if (submission == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Submission not found", null);
         }
-        if (groupUtil.canGetProjectGroupData(submission.getGroupId(), submission.getProjectId(), user).getStatus() == HttpStatus.OK) {
+        if (groupUtil.canGetProjectGroupData(submission.getGroupId(), submission.getProjectId(), user).getStatus().equals(HttpStatus.OK)) {
             return new CheckResult<>(HttpStatus.OK, "", submission);
         } else {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User does not have access to this submission", null);
@@ -44,7 +44,7 @@ public class SubmissionUtil {
         if (submission == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Submission not found", null);
         }
-        if (projectUtil.isProjectAdmin(submission.getProjectId(), user).getStatus() == HttpStatus.OK) {
+        if (projectUtil.isProjectAdmin(submission.getProjectId(), user).getStatus().equals(HttpStatus.OK)) {
             return new CheckResult<>(HttpStatus.OK, "", submission);
         } else {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User does not have access to delete this submission", null);

@@ -31,15 +31,10 @@ public class GroupController {
 
 
     /**
-     * Function to add a new project to an existing course
-     *
-     * @param groupid identifier of a group
-     * @param auth    authentication object of the requesting user
-     * @return ResponseEntity<GroupJson>
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723981">apiDog documentation</a>
-     * @HttpMethod Get
-     * @AllowedRoles student, teacher
-     * @ApiPath /api/groups/{groupid}
+     * Function to get a group by its identifier
+     * @param groupid
+     * @param auth
+     * @return
      */
     @GetMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.student, UserRole.teacher})
@@ -137,6 +132,9 @@ public class GroupController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteGroup(@PathVariable("groupid") Long groupid, Auth auth) {
         CheckResult<GroupEntity> checkResult = groupUtil.canUpdateGroup(groupid, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
 
         commonDatabaseActions.removeGroup(groupid);
         // Return 204

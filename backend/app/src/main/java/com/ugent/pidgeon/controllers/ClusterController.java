@@ -7,7 +7,6 @@ import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
-import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
@@ -56,7 +55,9 @@ public class ClusterController {
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> getClustersForCourse(@PathVariable("courseid") Long courseid, Auth auth) {
         CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseid, auth.getUserEntity());
-
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
         // Get the clusters for the course
         List<GroupClusterEntity> clusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(courseid);
         List<GroupClusterJson> clusterJsons = clusters.stream().map(

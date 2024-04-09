@@ -139,7 +139,7 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not part of the project", null);
         }
         boolean inGroup = groupRepository.userInGroup(groupId, user.getId());
-        boolean isAdmin = user.getRole().equals(UserRole.admin) || projectUtil.isProjectAdmin(projectId, user).getStatus() == HttpStatus.OK;
+        boolean isAdmin = user.getRole().equals(UserRole.admin) || projectUtil.isProjectAdmin(projectId, user).getStatus().equals(HttpStatus.OK);
         if (inGroup || isAdmin) {
             return new CheckResult<>(HttpStatus.OK, "", null);
         } else {

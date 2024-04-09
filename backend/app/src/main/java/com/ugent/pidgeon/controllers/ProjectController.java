@@ -63,7 +63,7 @@ public class ProjectController {
         for (ProjectEntity project : allProjects) {
             Map<String, String> projectInfo = new HashMap<>();
             projectInfo.put("name", project.getName());
-            projectInfo.put("url", "/api/projects/" + project.getId());
+            projectInfo.put("url", ApiRoutes.PROJECT_BASE_PATH + project.getId());
             projectsWithUrls.add(projectInfo);
         }
 
@@ -91,11 +91,11 @@ public class ProjectController {
         }
         ProjectEntity project = checkResult.getData();
 
-        CheckResult<CourseEntity> courceCheck = courseUtil.getCourseIfExists(project.getCourseId());
-        if (courceCheck.getStatus() != HttpStatus.OK) {
-            return ResponseEntity.status(courceCheck.getStatus()).body(courceCheck.getMessage());
+        CheckResult<CourseEntity> courseCheck = courseUtil.getCourseIfExists(project.getCourseId());
+        if (courseCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
         }
-        CourseEntity course = courceCheck.getData();
+        CourseEntity course = courseCheck.getData();
 
         return ResponseEntity.ok().body(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
     }

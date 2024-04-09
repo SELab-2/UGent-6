@@ -39,8 +39,6 @@ public class CourseController {
     @Autowired
     private UserUtil userUtil;
     @Autowired
-    private ProjectUtil projectUtil;
-    @Autowired
     private CourseUtil courseUtil;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
@@ -126,7 +124,7 @@ public class CourseController {
             groupClusterEntity.setCreatedAt(currentTimestamp);
             groupClusterRepository.save(groupClusterEntity);
 
-            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink("" + courseEntity.getId(), null)));
+            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId())));
         } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -142,7 +140,7 @@ public class CourseController {
         courseEntity.setName(courseJson.getName());
         courseEntity.setDescription(courseJson.getDescription());
         courseRepository.save(courseEntity);
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink("" + courseEntity.getId(), null)));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId())));
     }
 
     /**
@@ -180,7 +178,6 @@ public class CourseController {
     public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth) {
         try {
             UserEntity user = auth.getUserEntity();
-            long userId = user.getId();
 
             CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, user);
             if (checkResult.getStatus() != HttpStatus.OK) {
@@ -205,8 +202,6 @@ public class CourseController {
         }
     }
 
-
-
     /**
      * Function to retrieve a course by its ID
      *
@@ -227,7 +222,7 @@ public class CourseController {
         }
         CourseEntity course = checkResult.getData().getFirst();
 
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink("" + course.getId(), null)));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId())));
     }
 
 
@@ -266,7 +261,7 @@ public class CourseController {
 
             // Delete all groupclusters linked to the course
             for (GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)) {
-                // We verwijderen de groepfeedback niet omdat die al verwijderd werd wanneer het project verwijderd werd
+                // We don't delete groupfeedback as these have been deleted with the projects
                 CheckResult<Void> deleteResult = commonDatabaseActions.deleteClusterById(groupCluster.getId());
                 if (deleteResult.getStatus() != HttpStatus.OK) {
                     return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
@@ -324,7 +319,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
         }
         courseUserRepository.save(new CourseUserEntity(courseId, user.getId(), CourseRelation.enrolled));
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink("" + course.getId(), null)));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(),"" + course.getId())));
     }
 
     private ResponseEntity<?> getJoinLinkGetResponseEntity(long courseId, String courseKey, UserEntity user) {
@@ -430,7 +425,7 @@ public class CourseController {
             }
             CourseRelation userRelation = checkResult.getData();
 
-            // Verwijder de user uit het vak
+            // Delete the user from the course
             courseUserRepository.deleteById(new CourseUserId(courseId, userId));
             if (userRelation.equals(CourseRelation.enrolled)) {
                 if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId)) {
@@ -472,7 +467,6 @@ public class CourseController {
             }
         }
         return ResponseEntity.ok().build(); // Successfully removed
-
     }
 
     /**
@@ -501,8 +495,6 @@ public class CourseController {
         }
         return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
     }
-
-
 
     /**
      * Function to update the relation of a user in a course

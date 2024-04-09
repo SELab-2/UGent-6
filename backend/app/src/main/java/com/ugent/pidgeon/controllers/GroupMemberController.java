@@ -25,11 +25,8 @@ public class GroupMemberController {
 
     @Autowired
     private GroupMemberRepository groupMemberRepository;
-
     @Autowired
     private GroupUtil groupUtil;
-    @Autowired
-    private UserUtil userUtil;
     @Autowired
     private EntityToJsonConverter entityToJsonConverter;
 

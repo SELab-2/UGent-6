@@ -170,7 +170,7 @@ public class CourseUtil {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Course not found", null);
         }
 
-        String correctJoinLink = getJoinLink(course.getJoinKey(), "{courseKey}");
+        String correctJoinLink = getJoinLink("{courseKey}",""+courseId);
         if (courseKey == null && course.getJoinKey() != null) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Course requires a join key. Use " + correctJoinLink, null);
         }
