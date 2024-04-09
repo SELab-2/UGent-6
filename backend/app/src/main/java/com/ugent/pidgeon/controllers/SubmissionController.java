@@ -42,10 +42,6 @@ public class SubmissionController {
     private ProjectRepository projectRepository;
     @Autowired
     private TestRepository testRepository;
-    @Autowired
-    private FileController fileController;
-    @Autowired
-    private GroupController groupController;
 
     @Autowired
     private GroupFeedbackRepository groupFeedbackRepository;
@@ -56,6 +52,8 @@ public class SubmissionController {
     private ProjectUtil projectUtil;
     @Autowired
     private GroupUtil groupUtil;
+    @Autowired
+    private FileUtil fileUtil;
 
     private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
 
@@ -366,7 +364,10 @@ public class SubmissionController {
         }
         SubmissionEntity submission = checkResult.getData();
         submissionRepository.delete(submission);
-        fileController.deleteFileById(submission.getFileId());
+        CheckResult<Void> deleteFileIfExists = fileUtil.deleteFileById(submission.getFileId());
+        if (!deleteFileIfExists.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(deleteFileIfExists.getStatus()).body(deleteFileIfExists.getMessage());
+        }
         return ResponseEntity.ok().build();
     }
 

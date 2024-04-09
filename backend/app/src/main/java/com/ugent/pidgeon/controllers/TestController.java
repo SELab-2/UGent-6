@@ -27,8 +27,6 @@ public class TestController {
     private FileRepository fileRepository;
     @Autowired
     private TestRepository testRepository;
-    @Autowired
-    private FileController fileController;
 
     @Autowired
     private TestUtil testUtil;
@@ -229,8 +227,14 @@ public class TestController {
         projectEntity.setTestId(null);
         projectRepository.save(projectEntity);
         testRepository.deleteById(testEntity.getId())   ;
-        fileController.deleteFileById(testEntity.getStructureTestId());
-        fileController.deleteFileById(testEntity.getDockerTestId());
+        CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
+        if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkAndDeleteRes.getStatus()).body(checkAndDeleteRes.getMessage());
+        }
+        CheckResult<Void> checkAndDeleteRes2 = fileUtil.deleteFileById(testEntity.getDockerTestId());
+        if (!checkAndDeleteRes2.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkAndDeleteRes2.getStatus()).body(checkAndDeleteRes2.getMessage());
+        }
         return  ResponseEntity.ok().build();
     }
 }
