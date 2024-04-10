@@ -8,6 +8,7 @@ import com.ugent.pidgeon.postgre.repository.CourseRepository;
 import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,9 @@ public class CourseControllerTest extends ControllerTest {
     @Mock
     private ProjectController projectController;
 
+    @Mock
+    private EntityToJsonConverter entityToJsonConverter;
+
     @InjectMocks
     private CourseController courseController;
 
@@ -81,7 +85,7 @@ public class CourseControllerTest extends ControllerTest {
         when(courseRepository.findById(anyLong())).thenReturn(Optional.of(new CourseEntity()));
         when(projectRepository.findByCourseId(anyLong())).thenReturn(projects);
         when(courseUserRepository.findByCourseIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(new CourseUserEntity()));
-        when(projectController.projectEntityToProjectResponseJson(any(ProjectEntity.class), any(CourseEntity.class), any(UserEntity.class))).thenReturn(new ProjectResponseJson(
+        when(entityToJsonConverter.projectEntityToProjectResponseJson(any(ProjectEntity.class), any(CourseEntity.class), any(UserEntity.class))).thenReturn(new ProjectResponseJson(
                 new CourseReferenceJson("", "Test Course", 1L),
                 OffsetDateTime.MIN,
                 "",
