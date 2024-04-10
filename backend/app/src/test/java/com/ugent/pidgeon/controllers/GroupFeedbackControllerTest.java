@@ -52,15 +52,19 @@ public class GroupFeedbackControllerTest extends ControllerTest {
 
     @Test
     public void updateGroupScoreReturnsOkWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
-        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(new ProjectEntity()));
-        when(groupFeedbackRepository.updateGroupScore(anyFloat(), anyLong(), anyLong(), anyString())).thenReturn(1);
         CourseEntity mockedCourse = new CourseEntity();
         mockedCourse.setId(1L);
-        when(courseRepository.findCourseEntityByGroupId(anyLong())).thenReturn(List.of(mockedCourse));
         CourseUserEntity mockedCourseUser = new CourseUserEntity();
         mockedCourseUser.setRelation(CourseRelation.course_admin);
-        when(courseUserRepository.findByCourseIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(mockedCourseUser));
+        ProjectEntity projectEntity = new ProjectEntity();
+        projectEntity.setGroupClusterId(1L);
+        projectEntity.setMaxScore(10);
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(projectEntity));
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setClusterId(1L);
+        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(groupEntity));
+        when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
+        when(groupFeedbackRepository.findById(any(GroupFeedbackId.class))).thenReturn(Optional.of(new GroupFeedbackEntity()));
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.GROUP_FEEDBACK_PATH.replace("{groupid}", "1").replace("{projectid}", "1"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"score\": 5, \"feedback\": \"Good work\"}"))
@@ -69,19 +73,23 @@ public class GroupFeedbackControllerTest extends ControllerTest {
 
     @Test
     public void addGroupScoreReturnsOkWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
-        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(new ProjectEntity()));
-        when(groupFeedbackRepository.addGroupScore(anyFloat(), anyLong(), anyLong(), anyString())).thenReturn(1);
+
         CourseEntity mockedCourse = new CourseEntity();
         mockedCourse.setId(1L);
-        when(courseRepository.findCourseEntityByGroupId(anyLong())).thenReturn(List.of(mockedCourse));
         CourseUserEntity mockedCourseUser = new CourseUserEntity();
         mockedCourseUser.setRelation(CourseRelation.course_admin);
-        when(courseUserRepository.findByCourseIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(mockedCourseUser));
+        ProjectEntity projectEntity = new ProjectEntity();
+        projectEntity.setGroupClusterId(1L);
+        projectEntity.setMaxScore(10);
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(projectEntity));
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setClusterId(1L);
+        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(groupEntity));
+        when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.GROUP_FEEDBACK_PATH.replace("{groupid}", "1").replace("{projectid}", "1"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"score\": 5, \"feedback\": \"Good work\"}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -94,7 +102,12 @@ public class GroupFeedbackControllerTest extends ControllerTest {
 
         when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupFeedbackRepository.getGroupFeedback(anyLong(), anyLong())).thenReturn(groupFeedbackEntity);
-
+        ProjectEntity projectEntity = new ProjectEntity();
+        projectEntity.setGroupClusterId(1L);
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(projectEntity));
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setClusterId(1L);
+        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(groupEntity));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_FEEDBACK_PATH.replace("{groupid}", "1").replace("{projectid}", "1")))
                 .andExpect(status().isOk());
     }

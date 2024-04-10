@@ -1,4 +1,4 @@
 package com.ugent.pidgeon.model.json;
 
-public record GroupCreateJson(String name, long clusterId) {
+public record GroupCreateJson(String name) {
 }
