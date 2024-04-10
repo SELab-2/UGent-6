@@ -1,18 +1,20 @@
 package com.ugent.pidgeon.model.submissionTesting;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
+import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
-import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.ugent.pidgeon.util.DockerClientInstance;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,6 @@ public class SubmissionTestModel {
     private String localMountFolder;
     private final DockerClient dockerClient;
     private CreateContainerCmd container;
-    private String containerID;
 
     public SubmissionTestModel(String dockerImage) {
         dockerClient = DockerClientInstance.getInstance();
@@ -40,16 +41,18 @@ public class SubmissionTestModel {
 
         // Create Container Response to get the Container ID
         CreateContainerResponse response = container.exec();
-        containerID = response.getId();
+        String containerID = response.getId();
 
         // Setup volume and mount folder
         String containerOutputFolder = "/output/";
         Volume sharedVolume = new Volume(containerOutputFolder);
-        String localMountFolderPrefix = "/tmp/output";
+
+        // Get temp folder of project, for mounting the container output
+        String localMountFolderPrefix = System.getProperty("user.dir") + "/tmp/dockerTestOutput";
+
         localMountFolder = localMountFolderPrefix + containerID + "/";
 
-        createFolder(); // Create the folder after we have the container ID
-
+        createFolder(); // Create the folder after we// generate tmp folder of project
         // Configure container with volume bindings
         container.withHostConfig(new HostConfig().withBinds(new Bind(localMountFolder, sharedVolume)));
     }
@@ -74,19 +77,23 @@ public class SubmissionTestModel {
         dockerClient.startContainerCmd(executionContainerID).exec();
 
         List<String> consoleLogs = new ArrayList<>();
-        // Fetch logs
-        dockerClient.logContainerCmd(executionContainerID)
-                .withStdOut(true)
-                .withStdErr(true)
-                .withFollowStream(true)
-                .withTailAll()
-                .exec(new LogContainerResultCallback() {
-                    @Override
-                    public void onNext(com.github.dockerjava.api.model.Frame item) {
-                        consoleLogs.add(new String(item.getPayload()));
-                    }
-                })
-                .awaitCompletion();
+
+        try (ResultCallback.Adapter<Frame> callback = new ResultCallback.Adapter<>() {
+            @Override
+            public void onNext(Frame item) {
+                consoleLogs.add(new String(item.getPayload()));
+            }
+        }) {
+            dockerClient.logContainerCmd(executionContainerID)
+                    .withStdOut(true)
+                    .withStdErr(true)
+                    .withFollowStream(true)
+                    .withTailAll()
+                    .exec(callback)
+                    .awaitCompletion();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         boolean allowPush = false;
 

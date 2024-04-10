@@ -4,8 +4,7 @@ import com.ugent.pidgeon.model.submissionTesting.AddDockerModel;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTestModel;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SubmissionTestTest {
 
@@ -33,9 +32,26 @@ public class SubmissionTestTest {
         // Load docker container
         SubmissionTestModel stm = new SubmissionTestModel("fedora");
         // Run script
+        // Example for running a bash script correctly
         String[] script = {"bash", "-c", "echo 'PUSH DENIED' > /output/testOutput"};
         SubmissionTestModel.TestOutput to = stm.runSubmission(script);
         assertFalse(to.allowed);
+    }
+    @Test
+    void catchesConsoleLogs() throws InterruptedException {
+
+        AddDockerModel adm = new AddDockerModel();
+        // Install docker image if not already installed
+        adm.addDocker("fedora:latest");
+        // Load docker container
+        SubmissionTestModel stm = new SubmissionTestModel("fedora");
+        // Run script
+        // Example for running a bash script correctly
+        String[] script = {"bash", "-c", "echo 'Woopdie Woop Scoop! ~ KW'; echo 'PUSH ALLOWED' > /output/testOutput"};
+        SubmissionTestModel.TestOutput to = stm.runSubmission(script);
+
+        assertTrue(to.allowed);
+        assertEquals(to.logs.get(0), "Woopdie Woop Scoop! ~ KW\n");
     }
 
 
