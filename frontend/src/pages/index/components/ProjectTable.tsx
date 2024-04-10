@@ -67,17 +67,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
               usersCompleted={Math.floor(Math.random() * 121)}
               userCount={121}
             />
-          ) : Math.random() > 0.5 ? (
-            <ProjectStatusTag
-              icon
-              status="completed"
-            />
-          ) : (
-            <ProjectStatusTag
-              icon
-              status="notStarted"
-            />
-          ),
+          ) : <ProjectStatusTag status="completed" />, // TODO: get status from project
       },
       {
         key: "action",

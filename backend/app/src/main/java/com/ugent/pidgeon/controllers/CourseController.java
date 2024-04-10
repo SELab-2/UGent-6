@@ -242,7 +242,7 @@ public class CourseController {
         }
         CourseEntity course = courseopt.get();
         if (courseUserRepository.findByCourseIdAndUserId(courseId, auth.getUserEntity().getId()).isEmpty() && auth.getUserEntity().getRole() != UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to acces this course");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to access this course");
         }
 
         return ResponseEntity.ok(courseEntityToCourseWithInfo(course));

@@ -12,7 +12,7 @@ const Home = () => {
   const [open, setOpen] = useState(false)
   const { courses } = useUser()
 
-  console.log(courses);
+  console.log(courses)
   return (
     <div>
       <div>
@@ -65,6 +65,8 @@ const Home = () => {
           setOpen={setOpen}
         />
       </div>
+      <br />
+      <br />
     </div>
   )
 }

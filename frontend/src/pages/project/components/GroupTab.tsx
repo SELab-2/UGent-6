@@ -21,7 +21,7 @@ const GroupTab: FC<{}> = () => {
   }, [])
 
   return (
-      <GroupList groups={groups} />
+      <GroupList groups={groups}  capacity={10}/>
   )
 }
 

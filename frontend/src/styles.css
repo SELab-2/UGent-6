@@ -194,10 +194,7 @@ html {
 
 /* if window width is smaller than 1000 px */
 @media screen and (max-width: 1200px) {
-  .landing-page-btn {
-    padding: 12px 25px;
-    font-size: 1.4rem;
-  }
+
 
   .ugent-logo,.code-logo,.js-logo,.docker-logo,.py-logo,.c-logo    {
     display: none;
