@@ -7,14 +7,15 @@ import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.Permission;
-import com.ugent.pidgeon.util.PermissionHandler;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.GroupFeedbackUtil;
+import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 
 @RestController
@@ -22,17 +23,12 @@ public class GroupFeedbackController {
 
     @Autowired
     private GroupFeedbackRepository groupFeedbackRepository;
-
     @Autowired
-    private GroupRepository groupRepository;
-
+    private GroupFeedbackUtil groupFeedbackUtil;
     @Autowired
-    private ProjectRepository projectRepository;
-
+    private GroupUtil groupUtil;
     @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
-    private CourseUserRepository courseUserRepository;
+    private EntityToJsonConverter entityToJsonConverter;
 
     /**
      * Function to update the score of a group
@@ -51,15 +47,12 @@ public class GroupFeedbackController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
 
-        CheckResult checkResult = checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity());
+        CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity(), HttpMethod.PATCH);
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.findById(new GroupFeedbackId(groupId, projectId)).orElse(null);
-        if (groupFeedbackEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group feedback not found");
-        }
+        GroupFeedbackEntity groupFeedbackEntity = checkResult.getData();
 
         if (request.getScore() == null) {
             request.setScore(groupFeedbackEntity.getScore());
@@ -69,7 +62,7 @@ public class GroupFeedbackController {
             request.setFeedback(groupFeedbackEntity.getFeedback());
         }
 
-        CheckResult checkResultJson = checkGroupFeedbackUpdateJson(request, projectId);
+        CheckResult<Void> checkResultJson = groupFeedbackUtil.checkGroupFeedbackUpdateJson(request, projectId);
         if (checkResultJson.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResultJson.getStatus()).body(checkResultJson.getMessage());
         }
@@ -77,23 +70,36 @@ public class GroupFeedbackController {
         return doGroupFeedbackUpdate(groupFeedbackEntity, request);
     }
 
-    @PutMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
+    @DeleteMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> updateGroupScorePut(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
-
-        CheckResult checkResult = checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity());
+    public ResponseEntity<?> deleteGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, Auth auth) {
+        CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity(), HttpMethod.DELETE);
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
+        try {
+            groupFeedbackRepository.delete(checkResult.getData());
+            return ResponseEntity.status(HttpStatus.OK).body("Group feedback deleted");
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not delete group feedback");
+        }
+    }
 
-        CheckResult checkResultJson = checkGroupFeedbackUpdateJson(request, projectId);
+    @PutMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> updateGroupScorePut(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
+
+        CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity(), HttpMethod.PUT);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        GroupFeedbackEntity groupFeedbackEntity = checkResult.getData();
+
+        CheckResult<Void> checkResultJson = groupFeedbackUtil.checkGroupFeedbackUpdateJson(request, projectId);
         if (checkResultJson.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResultJson.getStatus()).body(checkResultJson.getMessage());
-        }
-        GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.findById(new GroupFeedbackId(groupId, projectId)).orElse(null);
-        if (groupFeedbackEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group feedback not found");
         }
 
         return doGroupFeedbackUpdate(groupFeedbackEntity, request);
@@ -104,7 +110,7 @@ public class GroupFeedbackController {
         groupFeedbackEntity.setFeedback(request.getFeedback());
         try {
             groupFeedbackRepository.save(groupFeedbackEntity);
-            return ResponseEntity.status(HttpStatus.OK).body(groupFeedbackEntity);
+            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not update score of group feedback");
@@ -128,78 +134,27 @@ public class GroupFeedbackController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> addGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
 
-        CheckResult checkResult = checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity());
-        if (checkResult.getStatus() != HttpStatus.OK) {
-            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        CheckResult<GroupFeedbackEntity> groupFeedback = groupFeedbackUtil.checkGroupFeedbackUpdate(groupId, projectId, auth.getUserEntity(), HttpMethod.POST);
+        if (groupFeedback.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(groupFeedback.getStatus()).body(groupFeedback.getMessage());
         }
 
-        CheckResult checkResultJson = checkGroupFeedbackUpdateJson(request, projectId);
+        CheckResult<Void> checkResultJson = groupFeedbackUtil.checkGroupFeedbackUpdateJson(request, projectId);
         if (checkResultJson.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResultJson.getStatus()).body(checkResultJson.getMessage());
-        }
-
-        if (groupFeedbackRepository.findById(new GroupFeedbackId(groupId, projectId)).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Group feedback already exists");
         }
 
         GroupFeedbackEntity groupFeedbackEntity = new GroupFeedbackEntity(groupId, projectId, request.getScore(), request.getFeedback());
 
         try {
             groupFeedbackEntity = groupFeedbackRepository.save(groupFeedbackEntity);
-            return ResponseEntity.status(HttpStatus.CREATED).body(groupFeedbackEntity);
+            return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not add score to group feedback");
         }
     }
 
-    private CheckResult checkGroupFeedback(long groupId, long projectId) {
-        ProjectEntity project = projectRepository.findById(projectId).orElse(null);
-        if (project == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Project not found");
-        }
-        GroupEntity group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            return new CheckResult(HttpStatus.NOT_FOUND, "Group not found");
-        }
-
-        if (group.getClusterId() != project.getGroupClusterId()) {
-            return new CheckResult(HttpStatus.FORBIDDEN, "Group does not belong to project");
-        }
-        return new CheckResult(HttpStatus.OK, "");
-    }
-
-    private CheckResult checkGroupFeedbackUpdateJson(UpdateGroupScoreRequest request, Long projectId) {
-        Integer maxScore = projectRepository.findById(projectId).get().getMaxScore();
-        if (request.getScore() == null || request.getFeedback() == null) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Score and feedback need to be provided");
-        }
-
-        if (maxScore != null && request.getScore() < 0) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be lower than 0");
-        }
-
-        if (maxScore != null && request.getScore() > maxScore) {
-            return new CheckResult(HttpStatus.BAD_REQUEST, "Score can't be higher than the defined max score (" + maxScore + ")");
-        }
-
-        return new CheckResult(HttpStatus.OK, "");
-    }
-
-    private CheckResult checkGroupFeedbackUpdate(long groupId, long projectId, UserEntity user) {
-        CheckResult checkResult = checkGroupFeedback(groupId, projectId);
-        if (checkResult.getStatus() != HttpStatus.OK) {
-            return checkResult;
-        }
-
-        if (!user.getRole().equals(UserRole.admin)) {
-            if (!groupRepository.isAdminOfGroup(user.getId(), groupId)) {
-                return new CheckResult(HttpStatus.FORBIDDEN, "User does not have access to update this groups feedback");
-            }
-        }
-
-        return new CheckResult(HttpStatus.OK, "");
-    }
 
     /**
      * Function to get the score of a group
@@ -218,22 +173,25 @@ public class GroupFeedbackController {
     public ResponseEntity<Object> getGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, Auth auth) {
         UserEntity user = auth.getUserEntity();
 
-        if (checkGroupFeedback(groupId, projectId).getStatus() != HttpStatus.OK) {
-            return ResponseEntity.status(checkGroupFeedback(groupId, projectId).getStatus()).body(checkGroupFeedback(groupId, projectId).getMessage());
+        CheckResult<Void> checkResult = groupFeedbackUtil.checkGroupFeedback(groupId, projectId);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        if (!user.getRole().equals(UserRole.admin)) {
-            if (!groupRepository.userInGroup(groupId, user.getId()) && !groupRepository.isAdminOfGroup(user.getId(), groupId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this group");
-            }
+        CheckResult<Void> canGetFeedback = groupUtil.canGetProjectGroupData(groupId, projectId, user);
+        if (canGetFeedback.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(canGetFeedback.getStatus()).body(canGetFeedback.getMessage());
         }
 
-        GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectId);
-        if (groupFeedbackEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group feedback not found");
+        CheckResult<GroupFeedbackEntity> groupFeedback = groupFeedbackUtil.getGroupFeedbackIfExists(groupId, projectId);
+        if (groupFeedback.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(groupFeedback.getStatus()).body(groupFeedback.getMessage());
         }
+        GroupFeedbackEntity groupFeedbackEntity = groupFeedback.getData();
 
-        return ResponseEntity.ok(new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId()));
+        return ResponseEntity.ok(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
     }
+
+
 
 }

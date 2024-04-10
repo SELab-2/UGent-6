@@ -96,20 +96,6 @@ VALUES
     (5, 5, 'Literature Analysis', 'Analyze text', 5, 10, '2024-03-24 10:00');
 
 
-
-
-
--- Inserting into `solutions`
--- Linking solutions to projects and groups
-INSERT INTO projects (course_id, test_id, project_name, description, group_cluster_id, max_score, deadline)
-VALUES
-    (1, 1, 'Math project 1', 'Solve equations', 1, 20, '2024-03-20 09:00:00+02'),
-    (2, 2, 'Science Lab 1', 'Conduct experiment', 2, 20, '2024-03-21 15:30:00+02'),
-    (3, 3, 'History Essay 1', 'Discuss historical event', 3, NULL, '2024-03-22 12:00:00+02'),
-    (4, 4, 'Programming Assignment 1', 'Write code', 4, 4, '2024-03-23 14:45:00+02'),
-    (5, 5, 'Literature Analysis', 'Analyze text', 5, 10, '2024-03-24 10:00:00+02');
-
-
 -- Inserting into `group_grades`
 -- Assign grades to group solutions
 INSERT INTO group_feedback(group_id, project_id, grade, feedback) VALUES
