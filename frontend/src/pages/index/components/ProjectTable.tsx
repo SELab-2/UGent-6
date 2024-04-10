@@ -76,10 +76,10 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
             <Button
               onClick={() =>
                 modal.info({
+                  width: "1000px",
+                  
                   styles: {
-                    content: {
-                      width: "600px",
-                    },
+                   
                   },
                   title: e.name,
                   content: <ProjectInfo project={e} />,

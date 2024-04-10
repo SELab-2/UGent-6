@@ -28,6 +28,7 @@ const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
             <AuthNav />
           </AuthenticatedTemplate>
 
+
           <LanguageDropdown/>
         </AntLayout.Header>
       <AntLayout style={{ height: "calc(100vh - 48px)", overflow: "auto" }}>
@@ -40,7 +41,7 @@ const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
             }}
             justify="center"
           >
-            <div style={{ maxWidth: "1200px", width: "100%", height: "100%",margin: "1rem 0" }}>{children}</div>
+            <div style={{ maxWidth: "1200px", width: "100%", height: "100%",margin: "0 1rem" }}>{children}</div>
           </Flex>
           {/* <AntLayout.Footer style={{ height: "2rem", width: "100%", bottom: 0 }}></AntLayout.Footer> */}
         </AntLayout.Content>

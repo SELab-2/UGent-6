@@ -12,7 +12,6 @@ const Home = () => {
   const [open, setOpen] = useState(false)
   const { courses } = useUser()
 
-  console.log(courses)
   return (
     <div>
       <div>
@@ -26,6 +25,7 @@ const Home = () => {
           <Button
             onClick={() => setOpen(true)}
             type="text"
+            style={{marginLeft: "1rem" }}
             icon={<PlusOutlined />}
           />
           {/* </TeacherView> */}

@@ -1,9 +1,5 @@
 import { Button, Card, Tabs, TabsProps, Tooltip, theme } from "antd"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
-import Markdown from "react-markdown"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
-import useApp from "../../hooks/useApp"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import SubmissionCard from "./components/SubmissionTab"
@@ -17,6 +13,7 @@ import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
 import { AppRoutes } from "../../@types/routes"
 import SubmissionsTab from "./components/SubmissionsTab"
+import MarkdownTextfield from "../../components/input/MarkdownTextfield"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -25,7 +22,6 @@ export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 const Project = () => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
-  const app = useApp()
   const course = useCourse()
   const { projectId } = useParams()
   const project = useProject()
@@ -34,27 +30,6 @@ const Project = () => {
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(location.hash.slice(1) || "description")
 
-  const CodeBlock = {
-    code({ children, className, node, ...rest }: any) {
-      const match = /language-(\w+)/.exec(className || "")
-      return match ? (
-        <SyntaxHighlighter
-          {...rest}
-          PreTag="div"
-          children={String(children).replace(/\n$/, "")}
-          language={match[1]}
-          style={app.theme === "light" ? oneLight : oneDark}
-        />
-      ) : (
-        <code
-          {...rest}
-          className={className}
-        >
-          {children}
-        </code>
-      )
-    },
-  }
 
   const now = Date.now()
   const deadline = new Date(project?.deadline ?? "").getTime()
@@ -64,7 +39,11 @@ const Project = () => {
       {
         key: "description",
         label: t("home.projects.description"),
-        children: project && <Markdown components={CodeBlock}>{project.description}</Markdown>,
+        children: project && (
+          <div style={{ padding: "0 8rem" }}>
+           <MarkdownTextfield content={project.description} />
+          </div>
+        ),
       },
       {
         key: "groups",
@@ -75,11 +54,9 @@ const Project = () => {
         key: "submissions",
         label: t("project.submissions"),
         children: courseAdmin ? (
-          <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
-            <span>
-              <SubmissionsTab />
-            </span>
-          </Tooltip>
+          <span>
+            <SubmissionsTab />
+          </span>
         ) : (
           <SubmissionCard
             projectId={Number(projectId)}
@@ -134,14 +111,18 @@ const Project = () => {
               </Button>
             </Link>
           ) : (
-            <Button
-              disabled={now < deadline}
-              type="primary"
-              onClick={handleNewSubmission}
-              icon={<PlusOutlined />}
-            >
-              {t("project.newSubmission")}
-            </Button>
+            <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
+              <span>
+                <Button
+                  disabled={now < deadline}
+                  type="primary"
+                  onClick={handleNewSubmission}
+                  icon={<PlusOutlined />}
+                >
+                  {t("project.newSubmission")}
+                </Button>
+              </span>
+            </Tooltip>
           )
         }
       >
@@ -149,7 +130,6 @@ const Project = () => {
           activeKey={activeTab}
           onChange={changeTab}
           items={items}
-
           tabBarExtraContent={
             activeTab === "submissions" ? (
               <CourseAdminView>
