@@ -2,15 +2,13 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.CourseReferenceJson;
-import com.ugent.pidgeon.model.json.CourseWithInfoJson;
-import com.ugent.pidgeon.model.json.ProjectProgressJson;
-import com.ugent.pidgeon.model.json.UserReferenceJson;
+import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.logging.Logger;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -32,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @ExtendWith(MockitoExtension.class)
 public class CourseControllerTest extends ControllerTest {
 
@@ -46,6 +46,9 @@ public class CourseControllerTest extends ControllerTest {
 
     @Mock
     private ProjectController projectController;
+
+    @Mock
+    private GroupClusterRepository groupClusterRepository;
 
     @Mock
     private CourseUtil courseUtil;
@@ -63,12 +66,15 @@ public class CourseControllerTest extends ControllerTest {
     public void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(courseController)
                 .defaultRequest(MockMvcRequestBuilders.get("/**")
-                        .with(request -> { request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication()); return request; }))
+                        .with(request -> {
+                            request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication());
+                            return request;
+                        }))
                 .build();
     }
 
     @Test
-    public void testGetUserCourses() throws Exception{
+    public void testGetUserCourses() throws Exception {
         Auth auth = mock(Auth.class);
         UserEntity user = mock(UserEntity.class);
         CourseEntity course = mock(CourseEntity.class);
@@ -102,6 +108,115 @@ public class CourseControllerTest extends ControllerTest {
     }
 
 
+    @Test
+    public void testCreateCourse() throws Exception {
+        Auth auth = mock(Auth.class);
+        UserEntity user = mock(UserEntity.class);
+        Logger logger = mock(Logger.class);
+        String courseJson = "{\"name\": \"test\", \"description\": \"description\"}";
+        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(courseRepository.save(any())).thenReturn(null);
+        when(courseUserRepository.save(any())).thenReturn(null);
+        when(groupClusterRepository.save(any())).thenReturn(null);
+        when(courseUtil.getJoinLink(any(), any())).thenReturn("");
+        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any())).
+                thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
+                        new ArrayList<>(), "", ""));
+
+        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isOk());
+
+        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isIAmATeapot());
+
+        when(courseUtil.checkCourseJson(any())).thenThrow(new RuntimeException());
+        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isInternalServerError());
+    }
+
+
+    // This function also tests all lines of doCourseUpdate
+    @Test
+    public void testUpdateCourse() throws Exception{
+        Auth auth = mock(Auth.class);
+        UserEntity user = mock(UserEntity.class);
+        CourseEntity courseEntity = new CourseEntity();
+        String courseJson = "{\"name\": \"test\", \"description\": \"description\"}";
+        when(courseUtil.getCourseIfAdmin(anyLong(), any())).
+                thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseEntity()));
+        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(courseRepository.save(any())).thenReturn(null);
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isOk());
+
+        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isIAmATeapot());
+
+        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isForbidden());
+
+        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenThrow(new RuntimeException());
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void testPatchCourse() throws Exception{
+        Auth auth = mock(Auth.class);
+        UserEntity user = mock(UserEntity.class);
+        CourseEntity courseEntity = new CourseEntity();
+        String courseJson = "{\"name\": null, \"description\": \"description\"}";
+        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseEntity()));
+        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(courseRepository.save(any())).thenReturn(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isOk());
+
+        courseJson = "{\"name\": \"name\", \"description\": null}";
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isOk());
+
+        courseJson = "{\"name\": null, \"description\": null}";
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isBadRequest());
+
+        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isForbidden());
+        
+        when(courseUtil.getCourseIfAdmin(anyLong(),any())).thenThrow(new RuntimeException());
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(courseJson))
+                .andExpect(status().isInternalServerError());
+
+    }
 
 
     @Test
@@ -121,15 +236,6 @@ public class CourseControllerTest extends ControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))
                 .andExpect(status().isNotFound());
     }
-
-
-    @Test
-    public void testCreateCourse() throws Exception{
-        Auth auth = mock(Auth.class);
-        UserEntity user = mock(UserEntity.class);
-        
-    }
-
 
 
     @Test
