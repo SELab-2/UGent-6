@@ -13,13 +13,13 @@ public class ProjectJson {
     private String name;
     private String description;
     private Long groupClusterId;
-    private boolean visible;
+    private Boolean visible;
     private Integer maxScore;
 
     @JsonSerialize(using = OffsetDateTimeSerializer.class)
     private OffsetDateTime deadline;
 
-    public ProjectJson(String name, String description, Long groupClusterId, Long testId, boolean visible, Integer maxScore, OffsetDateTime deadline) {
+    public ProjectJson(String name, String description, Long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
         this.name = name;
         this.description = description;
         this.groupClusterId = groupClusterId;
@@ -61,11 +61,11 @@ public class ProjectJson {
     }
 
 
-    public boolean isVisible() {
+    public Boolean isVisible() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisible(Boolean visible) {
         this.visible = visible;
     }
 

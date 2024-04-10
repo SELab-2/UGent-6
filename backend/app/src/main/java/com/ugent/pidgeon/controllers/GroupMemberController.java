@@ -35,6 +35,10 @@ public class GroupMemberController {
     private GroupClusterRepository groupClusterRepository;
     @Autowired
     private GroupController groupController;
+    @Autowired
+    private CourseController courseController;
+    @Autowired
+    private CourseUserRepository courseUserRepository;
 
     private boolean isIndividualGroup(long groupId) {
         return groupController.isIndividualGroup(groupId);
@@ -128,6 +132,10 @@ public class GroupMemberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
         }
 
+        if (!groupRepository.userAccessToGroup(memberid, groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of the course");
+        }
+
         if (!groupRepository.isAdminOfGroup(groupId, user.getId()) && user.getRole() != UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to the group");
         }
@@ -147,7 +155,7 @@ public class GroupMemberController {
         try {
             groupMemberRepository.addMemberToGroup(groupId, memberid);
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserJson> response = members.stream().map(UserJson::new).toList();
+            List<UserReferenceJson> response = members.stream().map(courseController::userEntityToUserReference).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -176,8 +184,8 @@ public class GroupMemberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
         }
 
-        if (groupRepository.userAccessToGroup(user.getId(),groupId) && user.getRole()!=UserRole.admin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to the group");
+        if (!groupRepository.userAccessToGroup(user.getId(),groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
         }
 
         if (groupClusterRepository.userInGroupForCluster(group.getClusterId(), user.getId())) {
@@ -195,7 +203,7 @@ public class GroupMemberController {
         try {
             groupMemberRepository.addMemberToGroup(groupId,user.getId());
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserJson> response = members.stream().map(UserJson::new).toList();
+            List<UserReferenceJson> response = members.stream().map(courseController::userEntityToUserReference).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -223,8 +231,7 @@ public class GroupMemberController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to the group");
         }
         List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-        List<UserReferenceJson> response = members.stream().map((UserEntity e) -> new UserReferenceJson(e.getName(), ApiRoutes.USER_BASE_PATH + "/" + e.getId())).toList();
-
+        List<UserReferenceJson> response = members.stream().map((UserEntity e) -> courseController.userEntityToUserReference(e)).toList();
         return ResponseEntity.ok(response);
     }
 }

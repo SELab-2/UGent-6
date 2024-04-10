@@ -1,12 +1,11 @@
 package com.ugent.pidgeon.model.json;
 
 public class UpdateGroupScoreRequest {
-    private float score;
+    private Float score;
     private String feedback;
 
-    // Getters and setters (omitted for brevity)
 
-    public float getScore() {
+    public Float getScore() {
         return score;
     }
 
@@ -16,5 +15,9 @@ public class UpdateGroupScoreRequest {
 
     public String getFeedback() {
         return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
     }
 }
