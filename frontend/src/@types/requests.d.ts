@@ -87,7 +87,7 @@ type Course = {
 
 export type ProjectStatus = "completed" | "failed" | "notStarted"
 export type CourseRelation = "enrolled" | "course_admin" | "creator"
-
+export type UserRole = "student" | "teacher" | "admin"
 
 /**
  * The response you get from the GET request
@@ -158,7 +158,7 @@ export type GET_Responses = {
     userId: string
     name: string
     surname: string
-    role: "student" | "teacher" | "admin"
+    role: UserRole
     url:  ApiRoutes.GROUP_MEMBER
   }
   [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
@@ -195,7 +195,7 @@ export type GET_Responses = {
     courseUrl: string
     projects_url: string
     url: string
-    role: "teacher" | "student" | "admin"
+    role: UserRole
     email: string
     id: number
     name: string
