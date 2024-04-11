@@ -9,7 +9,7 @@ public class UpdateGroupScoreRequest {
         return score;
     }
 
-    public void setScore(float score) {
+    public void setScore(Float score) {
         this.score = score;
     }
 
