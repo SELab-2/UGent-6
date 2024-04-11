@@ -1,6 +1,5 @@
 package com.ugent.pidgeon.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.ProjectResponseJson;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.time.OffsetDateTime;
 
@@ -292,7 +290,7 @@ public class CourseController {
      */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getProjectByCourseId(@PathVariable Long courseId, Auth auth) {
+    public ResponseEntity<?> getProjectsByCourseId(@PathVariable Long courseId, Auth auth) {
         UserEntity user = auth.getUserEntity();
 
         CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
