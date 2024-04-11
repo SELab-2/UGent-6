@@ -63,7 +63,7 @@ public class ProjectController {
         for (ProjectEntity project : allProjects) {
             Map<String, String> projectInfo = new HashMap<>();
             projectInfo.put("name", project.getName());
-            projectInfo.put("url", ApiRoutes.PROJECT_BASE_PATH + project.getId());
+            projectInfo.put("url", ApiRoutes.PROJECT_BASE_PATH + '/' + project.getId());
             projectsWithUrls.add(projectInfo);
         }
 
