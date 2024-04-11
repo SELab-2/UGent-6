@@ -15,11 +15,11 @@ const ProfileContent = () => {
       if(!users) return;
       const updatedUsers = users.map((u) => {
         if (u.userId === user.userId) {
-          u.role = role;
+         return { ...u, role: role };
         }
         return u;
       });
-      setUsers([...updatedUsers]);
+      setUsers(updatedUsers);
     }
 
     useEffect(() => {
