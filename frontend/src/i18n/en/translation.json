@@ -40,7 +40,15 @@
   "profile": {
     "student": "Student at Ghent University",
     "teacher": "Teacher at Ghent University",
-    "admin": "Admin at Ghent University"
+    "admin": "Admin at Ghent University",
+    "editRole": "Edit a user's role"
+  },
+  "editRole": {
+    "student": "Student",
+    "teacher": "Teacher",
+    "admin": "Admin",
+    "confirmation": "Confirmation",
+    "confirmationText": "Are you sure you want to change the role of {{name}} to {{role}}?"
   },
   "project": {
     "submissions": "Submissions",

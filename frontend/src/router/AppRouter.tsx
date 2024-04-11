@@ -7,6 +7,7 @@ import Course from "../pages/course/Course"
 import CourseRoutes from "./CourseRoutes"
 import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 import Project from "../pages/project/Project"
+import EditRole from "../pages/editRole/EditRole"
 import Submit from "../pages/submit/Submit"
 import Submission from "../pages/submission/Submission"
 import Feedback from "../pages/feedback/Feedback"
@@ -42,6 +43,10 @@ const AppRouter = () => {
       <Route
         path={AppRoutes.PROFILE}
         element={<Profile />}
+      />
+      <Route
+        path={AppRoutes.EDIT_ROLE}
+        element={<EditRole />}
       />
       <Route
         path={AppRoutes.COURSE}

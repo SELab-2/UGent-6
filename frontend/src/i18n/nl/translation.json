@@ -40,7 +40,16 @@
   "profile": {
     "student": "Student aan Universiteit Gent",
     "teacher": "Professor aan Universiteit Gent",
-    "admin": "Admin aan Universiteit Gent"
+    "admin": "Admin aan Universiteit Gent",
+    "editRole": "Pas de rol van een gebruiker aan"
+  },
+
+  "editRole": {
+    "student": "Student",
+    "teacher": "Professor",
+    "admin": "Admin",
+    "confirmation": "Bevestiging",
+    "confirmationText": "Bent u zeker dat u de rol van {{name}} wilt aanpassen naar {{role}}?"
   },
 
   "project": {

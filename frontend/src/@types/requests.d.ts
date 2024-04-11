@@ -30,6 +30,7 @@ export enum ApiRoutes {
 
   TEST = "api/test",
   USER = "api/users/:id",
+  USERS = "api/users",
   USER_AUTH = "api/auth",
 }
 
@@ -157,6 +158,7 @@ export type GET_Responses = {
     userId: string
     name: string
     surname: string
+    role: "student" | "teacher" | "admin"
     url:  ApiRoutes.GROUP_MEMBER
   }
   [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
