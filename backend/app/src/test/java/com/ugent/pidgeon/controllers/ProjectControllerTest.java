@@ -6,6 +6,10 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CourseUtil;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.ProjectUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -45,15 +49,25 @@ public class ProjectControllerTest {
     private TestRepository testRepository;
 
     @Mock
+    private CourseUtil courseUtil;
+
+    @Mock
+    private ProjectUtil projectUtil;
+
+    @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    EntityToJsonConverter entityToJsonConverter;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+
     @Test
-    void getProjects_ReturnsProjects_WhenCalled() {
+    void test_getProjects() {
         // Arrange
         Auth auth = mock(Auth.class);
         ProjectEntity project = new ProjectEntity();
@@ -68,7 +82,7 @@ public class ProjectControllerTest {
 
         // Act
         ResponseEntity<?> response = projectController.getProjects(auth);
-
+        System.out.println(response.getBody());
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -81,14 +95,15 @@ public class ProjectControllerTest {
 
         // Simplifying the response a bit but the point stands
         assertEquals("{name=Project 1, url=/api/projects/1}", responseBody.get(0).toString());
+
     }
 
     @Test
-    public void testCreateProject() {
+    public void test_createProject() {
         // Mock data
         long courseId = 1L;
         ProjectJson projectJson = new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX);
-
+        ProjectEntity projectEntity = new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX);
         Auth auth = mock(Auth.class);
         UserEntity user = new UserEntity();
         user.setId(1L);
@@ -97,7 +112,15 @@ public class ProjectControllerTest {
         CourseEntity courseEntity = new CourseEntity();
         courseEntity.setId(courseId);
 
+        CheckResult<CourseEntity> checkAcces = new CheckResult<>(HttpStatus.OK, "TestIsAdmin", courseEntity);
+
+        CheckResult<Void> checkResult = new CheckResult<>(HttpStatus.OK, "TestProjectJson", null);
+
         // Mock repository behavior
+        when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
+
+        when(courseUtil.getCourseIfAdmin(courseId, user)).thenReturn(checkAcces);
+        when(projectUtil.checkProjectJson(projectJson, courseId)).thenReturn(checkResult);
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(courseEntity));
         when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
         when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
