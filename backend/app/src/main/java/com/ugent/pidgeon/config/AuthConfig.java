@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@DependsOn("secretsFileCheckConfiguration")
 public class AuthConfig {
 
     @Value("${azure.activedirectory.tenant-id}")
@@ -24,8 +26,6 @@ public class AuthConfig {
 
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> filterRegistrationBean() {
-        System.out.println("tenantId: " + tenantId);
-
         FilterRegistrationBean<JwtAuthenticationFilter> filter = new FilterRegistrationBean<>();
         filter.setFilter(new JwtAuthenticationFilter(tenantId));
         filter.addUrlPatterns("/api/*");
