@@ -19,12 +19,14 @@ import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
+@ExtendWith(MockitoExtension.class)
 public class CourseUtilTest {
 
   @Mock
@@ -52,8 +54,6 @@ public class CourseUtilTest {
     cuEnrolled = new CourseUserEntity(1L, 1L, CourseRelation.enrolled);
     cuAdmin = new CourseUserEntity(1L, 2L, CourseRelation.course_admin);
     cuCreator = new CourseUserEntity(1L, 3L, CourseRelation.creator);
-
-    MockitoAnnotations.initMocks(this);
   }
 
   @Test
