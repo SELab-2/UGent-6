@@ -411,7 +411,7 @@ public class ProjectController {
     /**
      * Function to get all groups of a project
      * @param projectId ID of the project to get the groups of
-     * @ApiDog <a href="https://app.apidog.com/project/467959/apis/api-6343073">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6343073">apiDog documentation</a>
      * @HttpMethod GET
      * @ApiPath /api/projects/{projectId}/groups
      * @return ResponseEntity with groups as specified in the apidog

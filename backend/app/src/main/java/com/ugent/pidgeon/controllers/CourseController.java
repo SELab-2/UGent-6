@@ -709,7 +709,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
      * @param courseId ID of the course to update the user in
      * @param request JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883731">apiDog documentation</a>
      * @HttpMethod PATCH
      * @AllowedRoles teacher, admin
      * @ApiPath /api/courses/{courseId}/members
@@ -814,7 +814,7 @@ public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVa
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to get the join link from
      * @return ResponseEntity with the join link of the course
-     * @ApiDog TODO
+     * @ApiDog TODO (met juiste link)
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/joinLink

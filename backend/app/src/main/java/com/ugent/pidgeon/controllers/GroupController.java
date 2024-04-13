@@ -115,7 +115,7 @@ public class GroupController {
      * @param nameRequest object containing the new name of the group
      * @param auth        authentication object of the requesting user
      * @return ResponseEntity<GroupJson>
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723995">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883691">apiDog documentation</a>
      * @HttpMethod Patch
      * @AllowedRoles teacher
      * @ApiPath /api/groups/{groupid}
