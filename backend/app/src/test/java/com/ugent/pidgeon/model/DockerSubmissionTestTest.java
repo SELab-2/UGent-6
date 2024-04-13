@@ -34,7 +34,7 @@ public class DockerSubmissionTestTest {
         // Load docker container
         DockerSubmissionTestModel stm = new DockerSubmissionTestModel("fedora");
         // Run script
-        DockerTestOutput to = stm.runSubmission("echo 'PUSH ALLOWED' > /output/testOutput");
+        DockerTestOutput to = stm.runSubmission("echo 'PUSH ALLOWED' > /shared//output/testOutput");
         assertTrue(to.allowed);
     }
 
@@ -46,7 +46,7 @@ public class DockerSubmissionTestTest {
         DockerSubmissionTestModel stm = new DockerSubmissionTestModel("fedora");
         // Run script
         // Example for running a bash script correctly
-        DockerTestOutput to = stm.runSubmission("echo 'PUSH DENIED' > /output/testOutput");
+        DockerTestOutput to = stm.runSubmission("echo 'PUSH DENIED' > /shared/output/testOutput");
         assertFalse(to.allowed);
     }
 
@@ -57,7 +57,7 @@ public class DockerSubmissionTestTest {
         DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
         // Run script
         // Example for running a bash script correctly
-        DockerTestOutput to = stm.runSubmission("echo 'Woopdie Woop Scoop! ~ KW'; echo 'PUSH ALLOWED' > /output/testOutput");
+        DockerTestOutput to = stm.runSubmission("echo 'Woopdie Woop Scoop! ~ KW'; echo 'PUSH ALLOWED' > /shared/output/testOutput");
 
         assertTrue(to.allowed);
         assertEquals(to.logs.get(0), "Woopdie Woop Scoop! ~ KW\n");
