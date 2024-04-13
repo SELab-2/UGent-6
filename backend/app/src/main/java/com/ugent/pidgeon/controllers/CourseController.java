@@ -449,20 +449,20 @@ public class CourseController {
      * @ApiDog TODO
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
-     * @ApiPath /api/courses/{courseId}/members
+     * @ApiPath /api/courses/{courseId}/members/{userId}
      */
-    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
-    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody UserIdJson userId) {
+    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @PathVariable long userId) {
         CheckResult<CourseRelation> checkResult = courseUtil.canDeleteUser(courseId, userId, auth.getUserEntity());
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseRelation userRelation = checkResult.getData();
 
-        courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
+        courseUserRepository.deleteById(new CourseUserId(courseId, userId));
         if (userRelation.equals(CourseRelation.enrolled)) {
-            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId.getUserId())) {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId)) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
         }
@@ -483,6 +483,7 @@ public class CourseController {
      */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
+    @Transactional
     public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
         CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, request, auth.getUserEntity(), HttpMethod.POST);
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
@@ -491,7 +492,10 @@ public class CourseController {
 
         courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelationAsEnum()));
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
+            boolean succesful = commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
+            if (!succesful) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
+            }
         }
         return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
     }
@@ -506,12 +510,16 @@ public class CourseController {
      * @ApiDog TODO
      * @HttpMethod PATCH
      * @AllowedRoles teacher, admin
-     * @ApiPath /api/courses/{courseId}/members
+     * @ApiPath /api/courses/{courseId}/members/{userId}
      */
-    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
+    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
-        CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, request, auth.getUserEntity(), HttpMethod.PATCH);
+    public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody RelationRequest request, @PathVariable long userId) {
+        CourseMemberRequestJson requestwithid = new CourseMemberRequestJson();
+        requestwithid.setUserId(userId);
+        requestwithid.setRelation(request.getRelation());
+
+        CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, requestwithid, auth.getUserEntity(), HttpMethod.PATCH);
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
@@ -519,9 +527,9 @@ public class CourseController {
         courseUserEntity.setRelation(request.getRelationAsEnum());
         courseUserRepository.save(courseUserEntity);
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
+            commonDatabaseActions.createNewIndividualClusterGroup(courseId, requestwithid.getUserId());
         } else {
-            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, request.getUserId())) {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, requestwithid.getUserId())) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
         }
@@ -548,10 +556,15 @@ public class CourseController {
         }
 
         List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
-        List<UserReferenceJson> memberJson = members.stream().
-                map(cue -> userUtil.getUserIfExists(cue.getUserId())).
-                filter(Objects::nonNull).
-                map(entityToJsonConverter::userEntityToUserReference).toList();
+        List<UserReferenceWithRelation> memberJson = members.stream().
+                map(cue -> {
+                    UserEntity user = userUtil.getUserIfExists(cue.getUserId());
+                    if (user == null) {
+                        return null;
+                    }
+                    return entityToJsonConverter.userEntityToUserReferenceWithRelation(user, cue.getRelation());
+                }).
+                filter(Objects::nonNull).toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(memberJson);
     }

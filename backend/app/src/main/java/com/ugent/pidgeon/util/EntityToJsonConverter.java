@@ -34,8 +34,8 @@ public class EntityToJsonConverter {
 
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
-        GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
         GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
+        GroupJson group = new GroupJson(cluster.getMaxSize(), groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
         if (cluster != null && cluster.getGroupAmount() > 1){
             group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
         } else {
@@ -50,6 +50,7 @@ public class EntityToJsonConverter {
         group.setMembers(members);
         return group;
     }
+
 
     public GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster) {
         List<GroupJson> groups = groupRepository.findAllByClusterId(cluster.getId()).stream().map(
@@ -68,6 +69,10 @@ public class EntityToJsonConverter {
 
     public UserReferenceJson userEntityToUserReference(UserEntity user) {
         return new UserReferenceJson(user.getName() + " " + user.getSurname(), user.getEmail(), user.getId());
+    }
+
+    public UserReferenceWithRelation userEntityToUserReferenceWithRelation(UserEntity user, CourseRelation relation) {
+        return new UserReferenceWithRelation(userEntityToUserReference(user), relation.toString());
     }
 
     public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course, String joinLink) {
@@ -103,6 +108,14 @@ public class EntityToJsonConverter {
                 groupFeedbackEntity.getFeedback(),
                 groupFeedbackEntity.getGroupId(),
                 groupFeedbackEntity.getProjectId()
+        );
+    }
+
+    public GroupFeedbackJsonWithProject groupFeedbackEntityToJsonWithProject(GroupFeedbackEntity groupFeedbackEntity, ProjectEntity project) {
+        return new GroupFeedbackJsonWithProject(
+                project.getName(),
+                ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId(),
+                groupFeedbackEntity == null ? null : groupFeedbackEntityToJson(groupFeedbackEntity)
         );
     }
 
