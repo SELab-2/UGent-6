@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class DockerSubmissionTestModel {
@@ -64,7 +65,12 @@ public class DockerSubmissionTestModel {
         return runSubmission(script, new File[0]);
     }
 
-    private void copyInput(File[] inputFiles){
+    private void initFiles(File[] inputFiles){
+
+        // init directories in the shared folder
+        new File(localMountFolder + "input/").mkdirs();
+        new File(localMountFolder + "output/").mkdirs();
+
         for(File file : inputFiles){
             try {
                 FileUtils.copyFileToDirectory(file, new File(localMountFolder + "input/"));
@@ -76,7 +82,7 @@ public class DockerSubmissionTestModel {
 
     public DockerTestOutput runSubmission(String script, File[] inputFiles) throws InterruptedException {
 
-        copyInput(inputFiles);
+        initFiles(inputFiles);
 
         // Configure and start the container
         container.withCmd("/bin/sh", "-c", script);
@@ -112,7 +118,8 @@ public class DockerSubmissionTestModel {
             allowPush = "PUSH ALLOWED".equalsIgnoreCase(currentLine);
             reader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Failed to read output file. Push is denied.");
+            allowPush = false;
         }
 
         // Cleanup
@@ -123,7 +130,7 @@ public class DockerSubmissionTestModel {
 
     public List<DockerSubtestResult> runSubmissionWithTemplate(String script, String template, File[] inputFiles) throws InterruptedException {
 
-        copyInput(inputFiles);
+        initFiles(inputFiles);
 
         // Configure and start the container
         container.withCmd("/bin/sh", "-c", script);
@@ -131,44 +138,61 @@ public class DockerSubmissionTestModel {
         String executionContainerID = responseContainer.getId(); // Use correct ID for operations
         dockerClient.startContainerCmd(executionContainerID).exec();
 
-        try (ResultCallback.Adapter<Frame> callback = new ResultCallback.Adapter<>() {}) {
-            dockerClient.logContainerCmd(executionContainerID)
-                    .exec(callback)
-                    .awaitCompletion();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // execute dockerClient and await
+        dockerClient.logContainerCmd(executionContainerID)
+                .withStdOut(true)
+                .withStdErr(true)
+                .withFollowStream(true)
+                .withTailAll()
+                .exec(new ResultCallback.Adapter<>())
+                .awaitCompletion();
 
         List<DockerSubtestResult> results = new ArrayList<>();
 
         // Parse template and check output
-        String[] templateEntries = template.split("^@"); // start of a new line with the @ sign
+        String[] templateEntries = template.split("@");
+        /// remove first entry (empty string)
+        templateEntries = Arrays.copyOfRange(templateEntries, 1, templateEntries.length);
+
+        // start of a new line with the @ sign
+
         for(String entry : templateEntries){
 
             DockerSubtestResult templateEntry = new DockerSubtestResult();
-            String[] options = entry.split("\n");
-            templateEntry.setTestName(options[0]);
-            int i = 1;
-            for(;i < options.length; i++){
-                if(options[i].charAt(0) != '>') {
-                    break;
-                }
-                switch(options[i]){
-                    case "Description":
-                        templateEntry.setTestDescription(options[i].split("=\"")[1].split("\"")[0]);
-                        break;
-                    case "Required":
-                        templateEntry.setRequired(true);
-                        break;
-                    case "Optional":
-                        templateEntry.setRequired(false);
-                        break;
+
+            List<String> options = new ArrayList<>();
+            int lineIterator = 0;
+            // parse name
+            while(entry.charAt(lineIterator) != '\n'){
+                lineIterator++;
+            }
+            // parse lines as long as there are options ( lines starting with a > )
+            templateEntry.setTestName(entry.substring(0, lineIterator));
+            lineIterator++;
+            StringBuilder currentLine = new StringBuilder(entry.charAt(lineIterator) + "");
+            while(currentLine.charAt(0) == '>'){
+                lineIterator++;
+                if(entry.charAt(lineIterator) == '\n'){
+                    options.add(currentLine.toString());
+                    lineIterator++;
+                    currentLine = new StringBuilder(entry.charAt(lineIterator) + "");
+                }else{
+                    currentLine.append(entry.charAt(lineIterator));
                 }
             }
-            String[] remainingStrings = new String[options.length - i];
-            System.arraycopy(options, i, remainingStrings, 0, options.length - i);
-            String remaining = String.join("\n", remainingStrings);
-            templateEntry.setCorrect(remaining);
+            for(String currentOption : options){
+                if(currentOption.charAt(0) != '>') {
+                    break;
+                }
+                if (currentOption.equalsIgnoreCase(">Required")){
+                    templateEntry.setRequired(true);
+                } else if (currentOption.equalsIgnoreCase(">Optional")){
+                    templateEntry.setRequired(false);
+                } else if(currentOption.substring(0, 12).equalsIgnoreCase(">Description")){
+                    templateEntry.setTestDescription(currentOption.split("=\"")[1].split("\"")[0]);
+                }
+            }
+            templateEntry.setCorrect(entry.substring(lineIterator));
             results.add(templateEntry);
         }
 
@@ -182,24 +206,12 @@ public class DockerSubmissionTestModel {
             }
         }
 
-        try {
-            String outputFileName = "testOutput";
-            BufferedReader reader = new BufferedReader(new FileReader(localMountFolder + "output/" + outputFileName));
-            reader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         // Cleanup
         removeFolder();
         dockerClient.removeContainerCmd(executionContainerID).exec();
 
-        return new ArrayList<>();
+        return results;
     }
-
-
-
-
 
     public static void addDocker(String imageName){
         DockerClient dockerClient = DockerClientInstance.getInstance();

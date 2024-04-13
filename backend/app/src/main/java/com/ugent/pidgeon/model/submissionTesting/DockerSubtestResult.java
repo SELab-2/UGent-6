@@ -4,8 +4,8 @@ public class DockerSubtestResult {
     private String correct;
     private String output;
     private String testName;
-    private String testDescription;
-    private boolean required;
+    private String testDescription = "";
+    private boolean required = true;
 
     public DockerSubtestResult() {
     }
@@ -32,6 +32,7 @@ public class DockerSubtestResult {
     }
 
     public void setOutput(String output) {
+
         this.output = output;
     }
 
