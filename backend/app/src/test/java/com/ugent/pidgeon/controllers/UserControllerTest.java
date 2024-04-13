@@ -1,89 +1,107 @@
 package com.ugent.pidgeon.controllers;
 
-import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.User;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ugent.pidgeon.CustomObjectMapper;
+import com.ugent.pidgeon.model.json.UserJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
-import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.UserRepository;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * This class is used to test the UserController.
- * It uses the Spring Boot Test framework to provide an application context for the tests.
- * The UserRepository is mocked to isolate the UserController from the database.
- * The authFilter is disabled, meaning we only do checks for roles.
- */
-@SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
-public class UserControllerTest {
+@ExtendWith(MockitoExtension.class)
+public class UserControllerTest extends ControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @InjectMocks
+    private UserController userController;
 
-    @MockBean
-    private UserRepository userRepository;
 
-    private UserEntity mockUser(){
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(1L);
-        userEntity.setRole(UserRole.student);
-        return userEntity;
-    }
-
-    /**
-     * This method is executed before each test.
-     * It sets up the SecurityContextHolder with a User and Auth object.
-     * It also mocks the UserRepository to return a UserEntity when findUserByAzureId is called (which gets called while checking the role).
-     */
     @BeforeEach
-    public void setUp() {
-        User user = new User("displayName", "firstName", "lastName", "email", "test");
-        Auth authUser = new Auth(user, new ArrayList<>());
-        SecurityContextHolder.getContext().setAuthentication(authUser);
-        UserEntity userEntity = mockUser();
-        when(userRepository.findUserByAzureId(anyString())).thenReturn(userEntity);
+    public void setup() {
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .defaultRequest(MockMvcRequestBuilders.get("/**")
+                        .with(request -> { request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication()); return request; }))
+                .build();
     }
 
-    /**
-     * This test method tests the getUserById method of the UserController.
-     * It performs a GET request to the getUserById endpoint and asserts that the response status is OK.
-     * @throws Exception - if any error occurs during the request
-     */
-    @Test
+    /*@Test
     public void testGetUserById() throws Exception {
-
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser())); // mocks the UserRepository to return a UserEntity when findById is called
-        when(userRepository.findCourseIdsByUserId(anyLong())).thenReturn(new ArrayList<>()); // mocks the UserRepository to return an (empty) list of course ids when findCourseIdsByUserId is called
-
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser()));
+        when(userRepository.findCourseIdsByUserId(anyLong())).thenReturn(new ArrayList<>());
 
         long userId = 1L;
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USER_BASE_PATH + "/" + userId))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(Matchers.not(Matchers.emptyString()))) // If body is empty, it means it returned null
+                .andExpect(status().isOk())
+                .andExpect(content().string(Matchers.not(Matchers.emptyString())))
                 .andReturn();
-
 
         String responseBody = result.getResponse().getContentAsString();
         System.out.println("Response body: " + responseBody);
-        // Maybe add more tests here for the response body
+        // Add more tests here for the response body if needed
+    }*/
+
+
+    @Test
+    public void getUserByIdReturnsUserWhenUserExistsAndHasAccess() throws Exception {
+        UserEntity userEntity = mockUser();
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(userEntity));
+
+        MvcResult result = mockMvc.perform(get(ApiRoutes.USER_BASE_PATH + "/1"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+
+        System.out.println("Response body: " + responseBody);
+
+        ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+        UserJson userJson = objectMapper.readValue(responseBody, UserJson.class);
+
+        
+        assertEquals(userEntity.getId(), userJson.getId());
+        assertEquals(userEntity.getName(), userJson.getName());
+        assertEquals(userEntity.getSurname(), userJson.getSurname());
+        assertEquals(userEntity.getEmail(), userJson.getEmail());
+        assertEquals(userEntity.getRole(), userJson.getRole());
     }
 
+    @Test
+    public void getUserByIdReturnsForbiddenWhenUserExistsButNoAccess() throws Exception {
+
+        mockMvc.perform(get(ApiRoutes.USER_BASE_PATH + "/2"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void getUserByIdReturnsNotFoundWhenUserDoesNotExist() throws Exception {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get(ApiRoutes.USER_BASE_PATH + "/1"))
+                .andExpect(status().isNotFound());
+    }
+
+
+
+    @Test
+    public void getUserByAzureIdReturnsUserWhenUserExists() throws Exception {
+        //when(userRepository.findUserByAzureId(anyString())).thenReturn(Optional.of(mockUser()));
+
+        mockMvc.perform(get(ApiRoutes.USER_AUTH_PATH))
+                .andExpect(status().isOk());
+    }
 }

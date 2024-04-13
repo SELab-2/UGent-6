@@ -4,7 +4,8 @@ package com.ugent.pidgeon.postgre.models;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import jakarta.persistence.*;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+
 
 @Entity
 @Table(name = "users")
@@ -24,21 +25,20 @@ public class UserEntity {
     @Column(name = "email", nullable=false)
     private String email;
 
-    @Column(name = "role", columnDefinition = "user_role")
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    @Column(name = "role")
+    private String role;
 
     @Column(name = "azure_id")
     private String azureId;
 
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private OffsetDateTime createdAt;
 
     public UserEntity(String name, String surname, String email, UserRole role, String azureId) {
         this.name = name;
         this.surname = surname;
         this.email = email;
-        this.role = role;
+        this.role = role.toString();
         this.azureId = azureId;
     }
 
@@ -82,26 +82,32 @@ public class UserEntity {
     }
 
     public UserRole getRole() {
-        return role;
+        return switch (role) {
+            case "student" -> UserRole.student;
+            case "teacher" -> UserRole.teacher;
+            case "admin" -> UserRole.admin;
+            default -> throw new IllegalStateException("Unexpected value: " + role);
+        };
     }
 
     public void setRole(UserRole role) {
-        this.role = role;
+        this.role = role.toString();
     }
 
-    public String getMicrosoftToken() {
+    public String getAzureId() {
         return azureId;
     }
 
-    public void setMicrosoftToken(String microsoftToken) {
-        this.azureId = microsoftToken;
+
+    public void setAzureId(String azureId) {
+        this.azureId = azureId;
     }
 
-    public Timestamp getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

@@ -6,9 +6,9 @@ import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AuthTestController {
@@ -17,24 +17,24 @@ public class AuthTestController {
 
 
     @GetMapping("/api/test")
-    @Roles({UserRole.student, UserRole.teacher})
+    @Roles({ UserRole.teacher})
     public User testApi(HttpServletRequest request, Auth auth) {
         return auth.getUser();
     }
 
-    @PostMapping("/api/test2")
-    public String postTest(){
-        return "Post test succeeded!";
+    @DeleteMapping("/api/test")
+    public Object postTest(@RequestBody Object requestBody){
+        return requestBody;
     }
 
     @GetMapping("/ping")
-    public String ping() {
-        return "Pong";
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.status(HttpStatus.OK).body("Pong");
     }
 
     @GetMapping("/")
-    public String index() {
-        return "Running...";
+    public ResponseEntity<String> index() {
+        return ResponseEntity.status(HttpStatus.OK).body("Running...");
     }
 
 }

@@ -2,10 +2,8 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
-import java.io.Serializable;
-
 @Entity
-@IdClass(GroupFeedBackId.class)
+@IdClass(GroupFeedbackId.class)
 @Table(name = "group_feedback")
 public class GroupFeedbackEntity {
 
@@ -49,16 +47,17 @@ public class GroupFeedbackEntity {
         this.projectId = projectId;
     }
 
-    public Float getGrade() {
+    public String getFeedback() {
+        return feedback;
+    }
+
+
+    public float getScore() {
         return grade;
     }
 
-    public void setGrade(Float grade) {
-        this.grade = grade;
-    }
-
-    public String getFeedback() {
-        return feedback;
+    public void setScore(float score) {
+        this.grade = score;
     }
 
     public void setFeedback(String feedback) {
@@ -66,7 +65,3 @@ public class GroupFeedbackEntity {
     }
 }
 
-class GroupFeedBackId implements Serializable {
-    private long groupId;
-    private long projectId;
-}

@@ -76,15 +76,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
                 algorithm.verify(jwt);// if the token signature is invalid, the method will throw SignatureVerificationException
 
-                // get the data from the token
-                String displayName = jwt.getClaim("name").asString();
-                String firstName = jwt.getClaim("given_name").asString();
-                String lastName = jwt.getClaim("family_name").asString();
-                String email = jwt.getClaim("unique_name").asString();
-                String oid = jwt.getClaim("oid").asString();
 
+                // get the data from the token
+                String displayName;
+                String firstName;
+                String lastName;
+                String email;
+                String oid;
+
+                String version = jwt.getClaim("ver").asString();
+
+                if (version.startsWith("1.0")) {
+                    displayName = jwt.getClaim("name").asString();
+                    firstName = jwt.getClaim("given_name").asString();
+                    lastName = jwt.getClaim("family_name").asString();
+                    email = jwt.getClaim("unique_name").asString();
+                    oid = jwt.getClaim("oid").asString();
+                } else if (version.startsWith("2.0")) {
+                    displayName = jwt.getClaim("name").asString();
+                    lastName = jwt.getClaim("surname").asString();
+                    firstName = displayName.replace(lastName, "").strip();
+                    email = jwt.getClaim("mail").asString();
+                    oid = jwt.getClaim("oid").asString();
+                } else {
+                    throw new JwkException("Invalid OAuth version");
+                }
                 // print full object
                 // logger.info(jwt.getClaims());
+
 
 
                 User user = new User(displayName, firstName,lastName, email, oid);

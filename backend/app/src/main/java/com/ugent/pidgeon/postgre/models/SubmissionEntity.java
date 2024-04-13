@@ -2,7 +2,7 @@ package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name="submissions")
@@ -22,20 +22,30 @@ public class SubmissionEntity {
     private long fileId;
 
     @Column(name="submission_time", nullable=false)
-    private Timestamp submissionTime;
+    private OffsetDateTime submissionTime;
 
-    @Column(name="accepted", nullable=false)
-    private Boolean accepted;
+    @Column(name="structure_accepted", nullable=false)
+    private Boolean structureAccepted;
+
+    @Column(name="docker_accepted", nullable = false)
+    private Boolean dockerAccepted;
+
+    @Column(name="structure_feedback")
+    private String structureFeedback;
+
+    @Column(name="docker_feedback")
+    private String dockerFeedback;
 
     public SubmissionEntity() {
     }
 
-    public SubmissionEntity(long projectId, long groupId, long fileId, Timestamp submissionTime, Boolean accepted) {
+    public SubmissionEntity(long projectId, long groupId, Long fileId, OffsetDateTime submissionTime, Boolean structureAccepted, Boolean dockerAccepted) {
         this.projectId = projectId;
         this.groupId = groupId;
         this.fileId = fileId;
         this.submissionTime = submissionTime;
-        this.accepted = accepted;
+        this.structureAccepted = structureAccepted;
+        this.dockerAccepted = dockerAccepted;
     }
 
     public long getGroupId() {
@@ -50,20 +60,20 @@ public class SubmissionEntity {
         this.fileId = fileId;
     }
 
-    public Timestamp getSubmissionTime() {
+    public OffsetDateTime getSubmissionTime() {
         return submissionTime;
     }
 
-    public void setSubmissionTime(Timestamp submissionTime) {
+    public void setSubmissionTime(OffsetDateTime submissionTime) {
         this.submissionTime = submissionTime;
     }
 
-    public Boolean getAccepted() {
-        return accepted;
+    public Boolean getStructureAccepted() {
+        return structureAccepted;
     }
 
-    public void setAccepted(Boolean accepted) {
-        this.accepted = accepted;
+    public void setStructureAccepted(Boolean accepted) {
+        this.structureAccepted = accepted;
     }
 
 
@@ -81,5 +91,29 @@ public class SubmissionEntity {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Boolean getDockerAccepted() {
+        return dockerAccepted;
+    }
+
+    public void setDockerAccepted(Boolean dockerAccepted) {
+        this.dockerAccepted = dockerAccepted;
+    }
+
+    public String getStructureFeedback() {
+        return structureFeedback;
+    }
+
+    public void setStructureFeedback(String structureFeedbackFileId) {
+        this.structureFeedback = structureFeedbackFileId;
+    }
+
+    public String getDockerFeedback() {
+        return dockerFeedback;
+    }
+
+    public void setDockerFeedback(String dockerFeedbackFileId) {
+        this.dockerFeedback = dockerFeedbackFileId;
     }
 }
