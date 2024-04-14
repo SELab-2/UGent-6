@@ -220,6 +220,7 @@ public class GroupFeedbackController {
 
 
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
+        projects = projects.stream().filter(ProjectEntity::isVisible).toList();
 
         List<GroupFeedbackJsonWithProject> grades = new ArrayList<>();
         for (ProjectEntity project : projects) {

@@ -45,8 +45,6 @@ public class ProjectController {
     private EntityToJsonConverter entityToJsonConverter;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
-  @Autowired
-  private SubmissionRepository submissionRepository;
 
     /**
      * Function to get all projects of a user
@@ -76,7 +74,9 @@ public class ProjectController {
           CourseRelation relation = courseCheck.getData().getSecond();
 
           if (relation.equals(CourseRelation.enrolled)) {
-            enrolledProjects.add(entityToJsonConverter.projectEntityToProjectResponseJsonWithStatus(project, course, user));
+            if (project.isVisible()) {
+              enrolledProjects.add(entityToJsonConverter.projectEntityToProjectResponseJsonWithStatus(project, course, user));
+            }
           } else {
             adminProjects.add(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
           }
@@ -106,11 +106,16 @@ public class ProjectController {
         }
         ProjectEntity project = checkResult.getData();
 
-        CheckResult<CourseEntity> courseCheck = courseUtil.getCourseIfExists(project.getCourseId());
+
+        CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = courseUtil.getCourseIfUserInCourse(project.getCourseId(), user);
         if (courseCheck.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
         }
-        CourseEntity course = courseCheck.getData();
+        CourseEntity course = courseCheck.getData().getFirst();
+        CourseRelation relation = courseCheck.getData().getSecond();
+        if (!project.isVisible() && relation.equals(CourseRelation.enrolled)) {
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
 
         return ResponseEntity.ok().body(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
     }

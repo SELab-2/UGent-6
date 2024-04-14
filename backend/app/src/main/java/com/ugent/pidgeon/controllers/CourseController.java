@@ -300,11 +300,16 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseEntity course = checkResult.getData().getFirst();
+        CourseRelation relation = checkResult.getData().getSecond();
 
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
+        if (relation.equals(CourseRelation.enrolled)) {
+            projects = projects.stream().filter(ProjectEntity::isVisible).toList();
+        }
         List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
             entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, course, user)
         ).toList();
+
 
         return ResponseEntity.ok(projectResponseJsons);
     }
