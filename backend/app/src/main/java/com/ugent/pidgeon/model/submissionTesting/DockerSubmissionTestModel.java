@@ -2,6 +2,7 @@ package com.ugent.pidgeon.model.submissionTesting;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.async.ResultCallback.Adapter;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
@@ -66,7 +67,7 @@ public class DockerSubmissionTestModel {
     return runSubmission(script, new File[0]);
   }
 
-  private String initContainer(String script, File[] inputFiles) {
+  private void runContainer(String script, File[] inputFiles, ResultCallback.Adapter<Frame> callback) {
 
     // Init directories in the shared folder
     new File(localMountFolder + "input/").mkdirs();
@@ -86,22 +87,7 @@ public class DockerSubmissionTestModel {
     CreateContainerResponse responseContainer = container.exec();
     String executionContainerID = responseContainer.getId(); // Use correct ID for operations
     dockerClient.startContainerCmd(executionContainerID).exec();
-    return executionContainerID;
-  }
-
-  public DockerTestOutput runSubmission(String script, File[] inputFiles)
-      throws InterruptedException {
-
-    String executionContainerID = initContainer(script, inputFiles);
-
-    List<String> consoleLogs = new ArrayList<>();
-
-    try (ResultCallback.Adapter<Frame> callback = new ResultCallback.Adapter<>() {
-      @Override
-      public void onNext(Frame item) {
-        consoleLogs.add(new String(item.getPayload()));
-      }
-    }) {
+    try{
       dockerClient.logContainerCmd(executionContainerID)
           .withStdOut(true)
           .withStdErr(true)
@@ -109,9 +95,29 @@ public class DockerSubmissionTestModel {
           .withTailAll()
           .exec(callback)
           .awaitCompletion();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    }catch (InterruptedException e){
+      System.err.println("Failed to read output file. Push is denied.");
     }
+
+    // Cleanup the container
+    dockerClient.removeContainerCmd(executionContainerID)
+        .withForce(true)
+        .withRemoveVolumes(true)
+        .exec();
+
+  }
+
+  public DockerTestOutput runSubmission(String script, File[] inputFiles)
+      {
+
+    List<String> consoleLogs = new ArrayList<>();
+    ResultCallback.Adapter<Frame> callback = new ResultCallback.Adapter<>() {
+      @Override
+      public void onNext(Frame item) {
+        consoleLogs.add(new String(item.getPayload()));
+      }
+    };
+    runContainer(script, inputFiles, callback);
 
     boolean allowPush;
 
@@ -129,23 +135,15 @@ public class DockerSubmissionTestModel {
 
     // Cleanup
     removeFolder();
-    dockerClient.removeContainerCmd(executionContainerID).exec();
     return new DockerTestOutput(consoleLogs, allowPush);
   }
 
   public DockerTemplateTestResult runSubmissionWithTemplate(String script, String template,
       File[] inputFiles) throws InterruptedException {
 
-    String executionContainerID = initContainer(script, inputFiles);
+    runContainer(script, inputFiles, new Adapter<>());
 
     // execute dockerClient and await
-    dockerClient.logContainerCmd(executionContainerID)
-        .withStdOut(true)
-        .withStdErr(true)
-        .withFollowStream(true)
-        .withTailAll()
-        .exec(new ResultCallback.Adapter<>())
-        .awaitCompletion();
 
     List<DockerSubtestResult> results = new ArrayList<>();
 
@@ -175,13 +173,9 @@ public class DockerSubmissionTestModel {
 
     // Cleanup
     removeFolder();
-    dockerClient.removeContainerCmd(executionContainerID)
-        .withForce(true)
-        .withRemoveVolumes(true)
-        .exec();
+
     // Check if allowed
     boolean allowed = true;
-
     for (DockerSubtestResult result : results) {
       if (result.isRequired() && !result.getCorrect().equals(result.getOutput())) {
         allowed = false;
