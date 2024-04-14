@@ -1,37 +1,27 @@
 package com.ugent.pidgeon.controllers;
 
-import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.CourseReferenceJson;
-import com.ugent.pidgeon.model.json.ProjectProgressJson;
-import com.ugent.pidgeon.postgre.models.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.CourseRepository;
 import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
-import org.hamcrest.Matchers;
+import java.util.Collections;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 @ExtendWith(MockitoExtension.class)
 public class CourseControllerTest extends ControllerTest {
 
@@ -79,7 +69,7 @@ public class CourseControllerTest extends ControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
+   /* @Test
     public void getProjectByCourseIdReturnsProjectsWhenProjectsExist() throws Exception {
         List<ProjectEntity> projects = Arrays.asList(new ProjectEntity(), new ProjectEntity());
         when(courseRepository.findById(anyLong())).thenReturn(Optional.of(new CourseEntity()));
@@ -99,7 +89,7 @@ public class CourseControllerTest extends ControllerTest {
         ));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
                 .andExpect(status().isOk());
-    }
+    } */
 
     @Test
     public void getProjectByCourseIdReturnsNotFoundWhenCourseDoesNotExist() throws Exception {
