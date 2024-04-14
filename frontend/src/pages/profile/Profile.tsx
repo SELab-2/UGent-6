@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 
-import { MsalAuthenticationTemplate, useMsal,MsalAuthenticationResult } from "@azure/msal-react";
-import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
+import {  useMsal } from "@azure/msal-react";
+import { InteractionStatus,  InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
 import { loginRequest } from "../../auth/AuthConfig";
 import { callMsGraph } from "../../auth/MsGraphApiCall";
 import { Spin } from "antd";
 import ProfileCard from "./components/ProfileCard"
 import useUser from "../../hooks/useUser";
 
-const ErrorComponent: React.FC<MsalAuthenticationResult> = ({error}) => {
-  return <h6>An Error Occurred: {error ? error.errorCode : "unknown error"}</h6>;
-}
 
 
 const ProfileContent = () => {
@@ -37,7 +34,6 @@ const ProfileContent = () => {
             }).catch(err => {
                 console.log(err);
             });
-            console.log(id);
         }
     }, [inProgress, id, instance]);
 
@@ -60,18 +56,10 @@ const ProfileContent = () => {
 };
 
 export function Profile() {
-    const authRequest = {
-        ...loginRequest
-    };
+ 
     return (
-        <MsalAuthenticationTemplate 
-            interactionType={InteractionType.Redirect} 
-            authenticationRequest={authRequest} 
-            errorComponent={ErrorComponent} 
-            loadingComponent={() => <h6>Authentication in progress...</h6>}
-        >
+       
             <ProfileContent />
-        </MsalAuthenticationTemplate>
       )
 };
 

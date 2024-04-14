@@ -2,13 +2,15 @@
  * Routes used to make API calls
  */
 export enum ApiRoutes {
+  USER_COURSES = "api/courses", 
   COURSES = "api/courses",
-  COURSE = "api/courses/:id",
-  COURSE_MEMBERS = "api/courses/:id/users",
-  COURSE_MEMBER = "api/courses/:id/users/:userId",
+  
+  COURSE = "api/courses/:courseId",
+  COURSE_MEMBERS = "api/courses/:courseId/members",
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
 
+  PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
   PROJECT_CREATE = "api/courses/:courseId/create",
   PROJECT_TESTS = "api/projects/:id/tests",
@@ -21,7 +23,6 @@ export enum ApiRoutes {
   SUBMISSION_FILE = "api/submissions/:id/file",
 
   CLUSTER = "api/clusters/:id",
-  CLUSTER_GROUPS = "api/clusters/:id/groups",
 
   GROUP = "api/groups/:id",
   GROUP_MEMBERS = "api/groups/:id/members", 
@@ -31,7 +32,6 @@ export enum ApiRoutes {
   TEST = "api/test",
   USER = "api/users/:id",
   USER_AUTH = "api/auth",
-  USER_COURSES = "api/users/:id/courses",
 }
 
 export type Timestamp = string
@@ -74,26 +74,26 @@ export type PUT_Requests = {
 }
 
 
-type Teacher = {
+type CourseTeacher = {
   name: string
   surname: string
-  url: string
+  url: string,
 }
 
 type Course = {
-  course_url: string
+  courseUrl: string
   name: string
 }
+
+export type ProjectStatus = "completed" | "failed" | "notStarted"
+export type CourseRelation = "enrolled" | "course_admin" | "creator"
+
 
 /**
  * The response you get from the GET request
  */
 export type GET_Responses = {
-  [ApiRoutes.COURSES]: {
-    courseId: number
-    name: string
-    url: string
-  }[]
+
   [ApiRoutes.TEST]: {
     name: string
     firstName: string
@@ -101,18 +101,24 @@ export type GET_Responses = {
     email: string
     oid: string
   }
-  [ApiRoutes.PROJECT_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
+  [ApiRoutes.PROJECT_SUBMISSIONS]: {
+    feedback: GET_Responses[ApiRoutes.PROJECT_SCORE], 
+    group: GET_Responses[ApiRoutes.GROUP], 
+    submission:  GET_Responses[ApiRoutes.SUBMISSION] | null // null if no submission yet
+  }[],
+  [ApiRoutes.GROUP_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION]
   [ApiRoutes.SUBMISSION]: {
-    submittionId: number
-    project_url: string
-    file_url: string
-    group_url: string
-    structure_accepted: boolean
-    docker_accepted: boolean
-    structure_feedback: string
-    docker_feedback: string
-    submitted_time: Timestamp
-
+    submissionId: number
+    projectId: number
+    groupId: number
+    structureAccepted: boolean
+    dockerAccepted: boolean
+    submissionTime: Timestamp
+    projectUrl: string
+    groupUrl: string
+    fileUrl: string
+    structureFeedbackUrl: string
+    dockerFeedbackUrl: string
   }
   [ApiRoutes.SUBMISSION_FILE]: FormData
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
@@ -126,62 +132,70 @@ export type GET_Responses = {
     description: string
     projectId: number
     name: string
-    submission_url: string
-    tests_url: string
+    submissionUrl: string
+    testsUrl: string
+    maxScore:number
+    visible: boolean
+    progress: {
+      completed: number
+      total: number
+    }
   }
   [ApiRoutes.PROJECT_TESTS]: {} // ??
   [ApiRoutes.GROUP]: {
-    capacity: number
-    groupId: string
-    members_amount: number
-    members_url: string
-    name: string
-  }
-  [ApiRoutes.CLUSTER_GROUPS]: {
     groupid: number
     name: string
-    capacity: number
-    groupcluster_url: string
-    members: { userid: number; name:string, surname:string, url:string }[]
-  }[]
+    groupClusterUrl: ApiRoutes.CLUSTER
+    members: { name:string, url:string }[]
+  }
   [ApiRoutes.PROJECT_SCORE]: {
     score: number
-    feedback:string
-  }
-
+    feedback:string,
+    projectId: number,
+    groupId: number
+  }, 
   [ApiRoutes.GROUP_MEMBER]: {
-    id: string
+    email: string
     name: string
-    surname: string
-    url: string
+    id:  number
   }
   [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
 
-  [ApiRoutes.COURSE_CLUSTERS]: {
-    clusterid: number
-    name: string
-    capacity: number
-    course_url: string
-    groups: { name: string; group_url: string }[]
-  }[]
+  [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][]
   
-  [ApiRoutes.CLUSTER]: GET_Responses[ApiRoutes.CLUSTER_GROUPS]
+  [ApiRoutes.CLUSTER]: {
+    clusterId: number;
+    name: string;
+    capacity: number;
+    groupCount: number;
+    created_at: Timestamp;
+    groups: GET_Responses[ApiRoutes.GROUP][]
+    courseUrl: ApiRoutes.COURSE
+  }
   [ApiRoutes.COURSE]: {
     description: string
     courseId: number
-    members_url: string
+    memberUrl: ApiRoutes.COURSE_MEMBERS
     name: string
-    teachers: Teacher[] // Changed this
+    teacher: CourseTeacher
+    assistents: CourseTeacher[]
+    joinKey: string
   }
-  [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER]
+  [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
+  [ApiRoutes.COURSE_MEMBER]: {
+    email: string
+    name: string
+    surname: string
+    userId: number
+  }
   [ApiRoutes.USER]: {
-    course_url: string
+    courseUrl: string
     projects_url: string
     url: string
     role: "teacher" | "student" | "admin"
     email: string
-    id: int
+    id: number
     name: string
     surname: string
   },
@@ -189,9 +203,11 @@ export type GET_Responses = {
   [ApiRoutes.USER_COURSES]: {
     courseId:number, 
     name:string, 
-    relation: "enrolled" | "course_admin" | "creator",
+    relation: CourseRelation,
     url:string
   }[],
-  [ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
-  [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.PROJECT_GROUP][]
+  //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
+  [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.GROUP][] //GET_Responses[ApiRoutes.PROJECT_GROUP][]
+
+  [ApiRoutes.PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
 }

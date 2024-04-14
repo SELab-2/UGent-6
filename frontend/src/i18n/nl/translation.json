@@ -46,6 +46,8 @@
   "project": {
     "submissions": "Indieningen",
     "newSubmission": "Nieuwe indiening",
+    "files": "Bestanden",
+    "back": "Annuleren",
     "submission": "Indiening",
     "structure": "Structuur",
     "addFiles": "Bestanden toevoegen",
@@ -53,6 +55,19 @@
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
     "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
     "deadlinePassed": "Deadline is verstreken",
+    "downloadSubmissions": "Download alle indieningen",
+    "group": "Groep",
+    "status": "Status",
+    "feedback": "Feedback",
+    "groupEmpty": "Geen leden in deze groep",
+    "testFailed": "Testen gefaalt",
+    "structureFailed": "Structuur testen gefaalt",
+    "passed": "Geslaagd",
+    "notSubmitted": "Niet ingediend",
+    "submissionTime": "Indienings tijd",
+    "noSubmissions": "Geen indieningen",
+    "loadingSubmissions": "Indieningen laden...",
+    "options": "Opties",
     "change": {
       "name": "Naam",
       "nameMessage": "Vul de naam van het project in asljeblieft",
@@ -75,9 +90,22 @@
   "landingPage":{
     "title-1": "Officiële",
     "title-2": "indien platform",
-    "subtitle": "Eenvoudig cursussen en projecten beheren, automatisch code testen en beoordelen.",
+    "subtitle-1": "Eenvoudig cursussen en projecten beheren,",
+    "subtitle-2": "automatisch code testen en beoordelen.",
     "getStarted": "Aan de slag"
   },
+  
+  "submission": {
+    "submission": "Indiening",
+    "submittedFiles": "Ingediende bestanden:",
+    "structuretest": "Resultaten structuurtest:",
+    "dockertest": "Resultaten dockertest:",
+    "status": {
+      "accepted": "Alle testen geslaagd.",
+      "failed": "Sommige testen niet geslaagd."
+    }
+  },
+
   "course": {
     "projects": "Projecten",
     "groups": "Groepen",
@@ -95,7 +123,9 @@
     "save": "Opslaan",
     "courseSaved": "Aanpassingen opgeslagen",
     "archived": "Gearchiveerd",
-    "score": "Score"
+    "score": "Score",
+    "noGroups": "Geen groepen beschikbaar",
+    "searchMember": "Zoek lid"
   },
   "error": {
     "title": "Fout",

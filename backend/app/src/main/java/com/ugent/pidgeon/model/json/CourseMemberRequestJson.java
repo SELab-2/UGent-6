@@ -4,7 +4,7 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 
 public class CourseMemberRequestJson {
     private Long userId;
-    private CourseRelation relation;
+    private String relation;
 
     // Constructor
     public CourseMemberRequestJson() {}
@@ -18,11 +18,18 @@ public class CourseMemberRequestJson {
         this.userId = userId;
     }
 
-    public CourseRelation getRelation() {
-        return relation;
+    public CourseRelation getRelationAsEnum() {
+        try {
+            return CourseRelation.valueOf(relation);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
-    public void setRelation(CourseRelation relation) {
+    public void setRelation(String relation) {
         this.relation = relation;
+    }
+    public String getRelation() {
+        return relation;
     }
 }

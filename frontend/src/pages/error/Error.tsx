@@ -2,6 +2,7 @@ import React  from "react";
 import { AppRoutes } from "../../@types/routes"
 import {useTranslation} from "react-i18next";
 import {Button, Result, Space, Typography} from "antd";
+import { Link } from "react-router-dom";
 
 
 interface ErrorPageProps {
@@ -51,7 +52,9 @@ const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
             <Space direction="vertical">
                 <Title>{title}</Title>
                 <Text>{errorMessage}</Text>
-                <Button type="primary" href={AppRoutes.HOME}>{t("error.homepage")}</Button>
+                <Link to={AppRoutes.HOME}>
+                <Button type="primary" >{t("error.homepage")}</Button>
+                </Link>
             </Space>
         </Result>
     );

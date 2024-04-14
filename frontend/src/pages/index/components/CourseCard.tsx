@@ -1,7 +1,7 @@
 import { ContainerOutlined, TeamOutlined } from "@ant-design/icons"
 import { Card, List, Statistic, Tooltip, theme } from "antd"
 import { FC } from "react"
-import ProjectStatusTag, { ProjectStatus } from "./ProjectStatusTag"
+import ProjectStatusTag from "./ProjectStatusTag"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
@@ -52,11 +52,11 @@ const CourseCard: FC<{ course: UserCourseType }> = ({ course }) => {
       ]}
     >
       <List>
-        <List.Item actions={[<ProjectStatusTag icon status={["failed", "completed", "notStarted"][Math.floor(Math.random() * 3)] as ProjectStatus} />]}>
+        <List.Item actions={[<ProjectStatusTag key="status" icon status={"failed"} />]}>
           <List.Item.Meta title={"Opdracht " + Math.floor(Math.random() * 100 + 1)} />
         </List.Item>
 
-        <List.Item actions={[<ProjectStatusTag icon status={["failed", "completed", "notStarted"][Math.floor(Math.random() * 3)] as ProjectStatus} />]}>
+        <List.Item actions={[<ProjectStatusTag key="status" icon status={"notStarted"}/>]}>
           <List.Item.Meta title={"Opdracht " + Math.floor(Math.random() * 100 + 1)} />
         </List.Item>
       </List>

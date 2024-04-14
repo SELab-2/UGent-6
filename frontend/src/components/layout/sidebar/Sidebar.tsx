@@ -13,7 +13,6 @@ const Sidebar: FC = () => {
   const navigate = useNavigate()
 
   const onClick: MenuProps["onClick"] = (menu) => {
-    console.log(menu)
 
     navigate(AppRoutes.COURSE.replace(":courseId", menu.key as string))
     setOpen(false)

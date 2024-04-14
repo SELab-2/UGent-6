@@ -1,6 +1,6 @@
 import { Button, Space, Table, TableProps } from "antd"
 import { FC, useMemo } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
 import useAppApi from "../../../hooks/useAppApi"
 import ProjectInfo from "./ProjectInfo"
@@ -67,17 +67,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
               usersCompleted={Math.floor(Math.random() * 121)}
               userCount={121}
             />
-          ) : Math.random() > 0.5 ? (
-            <ProjectStatusTag
-              icon
-              status="completed"
-            />
-          ) : (
-            <ProjectStatusTag
-              icon
-              status="notStarted"
-            />
-          ),
+          ) : <ProjectStatusTag status="completed" />, // TODO: get status from project
       },
       {
         key: "action",
@@ -86,10 +76,10 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
             <Button
               onClick={() =>
                 modal.info({
+                  width: "1000px",
+                  
                   styles: {
-                    content: {
-                      width: "600px",
-                    },
+                   
                   },
                   title: e.name,
                   content: <ProjectInfo project={e} />,

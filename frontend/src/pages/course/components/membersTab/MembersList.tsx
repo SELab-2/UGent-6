@@ -1,9 +1,26 @@
-import { Button, List, Popconfirm, Radio, Select, Tooltip } from "antd"
+import { Button, Dropdown, List, Popconfirm, Radio, Select, Space, Tooltip } from "antd"
 import { FC } from "react"
-import { CourseMemberType } from "../../../../router/CourseRoutes"
 import { useTranslation } from "react-i18next"
-import { UserDeleteOutlined } from "@ant-design/icons"
+import { DownOutlined, UserDeleteOutlined } from "@ant-design/icons"
+import { CourseMemberType } from "./MemberCard"
+import useIsCourseAdmin from "../../../../hooks/useIsCourseAdmin"
+import { MenuProps } from "antd/lib"
+import { CourseRelation } from "../../../../@types/requests"
 
+const items: MenuProps["items"] = [
+  {
+    key: "creator",
+    label: "Admin",
+  },
+  {
+    key: "course_admin",
+    label: "Teacher",
+  },
+  {
+    key: "enrolled",
+    label: "Student",
+  },
+]
 
 const rolesNames = {
   course_admin: "Teacher",
@@ -11,48 +28,44 @@ const rolesNames = {
   creator: "Admin",
 }
 
-const MembersList: FC<{ members: CourseMemberType[]|null }> = ({ members }) => {
+const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) => {
   const { t } = useTranslation()
+  const isCourseAdmin = useIsCourseAdmin()
 
   const removeUserFromCourse = (userId: number) => {
     //TODO: make request
   }
 
-  const onRoleChange = (userId: number, role: string) => {
+  const onRoleChange = (userId: number, role: CourseRelation) => {
     // TODO: make request
-
   }
 
+  const rel = "course_admin"
   return (
     <List
-    loading={members === null}
-      dataSource={members??[]}
+      loading={members === null}
+      dataSource={members ?? []}
       renderItem={(user) => (
         <List.Item
-          className="show-actions-on-hover"
           actions={[
-            <Radio.Group onChange={(e) => onRoleChange(user.userId, e.target.value)} key="role" value={user.relation} buttonStyle="solid">
-              <Radio.Button value="creator">Admin</Radio.Button>
-              <Radio.Button value="course_admin">Teacher</Radio.Button>
-              <Radio.Button value="enrolled">Student</Radio.Button>
-            </Radio.Group>,
-
+         
 
             <Popconfirm
               title={t("course.removeUserConfirmTitle")}
-              description={t("course.removeUserConfirm",{
-                name: user.name
-              
+              description={t("course.removeUserConfirm", {
+                name: user.name,
               })}
-              onConfirm={() => removeUserFromCourse(user.userId)}
+              onConfirm={() => removeUserFromCourse(user.id)}
               okText={t("course.yes")}
               cancelText={t("course.cancel")}
               key="remove"
             >
-              <Tooltip placement="left" title={t("course.removeFromCourse", { name: user.name })}>
+              <Tooltip
+                placement="left"
+                title={t("course.removeFromCourse", { name: user.name })}
+              >
                 <Button
                   danger
-                  type="primary"
                   key="remove"
                   icon={<UserDeleteOutlined />}
                 />
@@ -60,7 +73,23 @@ const MembersList: FC<{ members: CourseMemberType[]|null }> = ({ members }) => {
             </Popconfirm>,
           ]}
         >
-          <List.Item.Meta title={`${user.name} ${user.surname}`} description={rolesNames[user.relation]} />
+          <List.Item.Meta
+            title={user.name}
+            description={
+              isCourseAdmin ? (
+                <Dropdown menu={{ items,onClick:(e) => onRoleChange(user.id, e.key as CourseRelation), defaultSelectedKeys:[rel] }}>
+                  <a onClick={(e) => e.preventDefault()}>
+                    <Space>
+                      {rolesNames[rel]}
+                      <DownOutlined />
+                    </Space>
+                  </a>
+                </Dropdown>
+              ) : (
+                rolesNames[rel]
+              )
+            }
+          />
         </List.Item>
       )}
     />

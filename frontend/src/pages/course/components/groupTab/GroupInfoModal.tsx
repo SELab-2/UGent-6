@@ -35,7 +35,7 @@ const GroupInfoModal: FC<{ group: GroupType | null; open: boolean; setOpen: (b: 
               </CourseAdminView>,
             ]}
           >
-            {m.name} {m.surname}
+            {m.name}
           </List.Item>
         )}
       />

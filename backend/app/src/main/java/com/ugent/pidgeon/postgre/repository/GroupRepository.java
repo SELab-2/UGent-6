@@ -32,9 +32,10 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
     public interface UserReference {
         Long getUserId();
         String getName();
+        String getEmail();
     }
     @Query(value= """
-            SELECT gu.userId as userId, u.name, CONCAT(u.name, ' ', u.surname) as name
+            SELECT gu.userId as userId, u.name, CONCAT(u.name, ' ', u.surname) as name, u.email as email
             FROM GroupUserEntity gu JOIN UserEntity u ON u.id = gu.userId
             WHERE gu.groupId = ?1""")
     List<UserReference> findGroupUsersReferencesByGroupId(long id);
@@ -52,8 +53,7 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
         SELECT CASE WHEN EXISTS (
             SELECT g FROM GroupEntity g
             JOIN GroupClusterEntity gc ON g.clusterId = gc.id
-            JOIN ProjectEntity p ON p.groupClusterId = gc.id
-            JOIN CourseEntity c ON p.courseId = c.id
+            JOIN CourseEntity c ON gc.courseId = c.id
             JOIN CourseUserEntity cu ON cu.courseId = c.id
             WHERE cu.userId = ?1 AND g.id = ?2
         ) THEN true ELSE false END
@@ -64,8 +64,7 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
         SELECT CASE WHEN EXISTS (
             SELECT g FROM GroupEntity g
             JOIN GroupClusterEntity gc ON g.clusterId = gc.id
-            JOIN ProjectEntity p ON p.groupClusterId = gc.id
-            JOIN CourseEntity c ON p.courseId = c.id
+            JOIN CourseEntity c ON gc.courseId = c.id
             JOIN CourseUserEntity cu ON cu.courseId = c.id and (cu.relation = 'course_admin' or cu.relation = 'creator')
             WHERE cu.userId = ?1 AND g.id = ?2
         ) THEN true ELSE false END
@@ -88,6 +87,22 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
             JOIN ProjectEntity p ON p.groupClusterId = gc.id
             WHERE p.id = ?1 AND gu.userId = ?2""")
     Long groupIdByProjectAndUser(long projectId, long userId);
+
+    @Query(value = """
+            SELECT g FROM GroupEntity g
+            JOIN GroupClusterEntity gc ON g.clusterId = gc.id
+            JOIN GroupUserEntity gu ON g.id = gu.groupId
+            WHERE gc.id = ?1 AND gu.userId = ?2
+    """)
+    Optional<GroupEntity> groupByClusterAndUser(long clusterId, long userId);
+
+
+    @Query("""
+        SELECT COUNT(*) AS entry_count
+        FROM GroupUserEntity gu
+        WHERE gu.groupId = :groupId
+    """)
+    Integer countUsersInGroup(long groupId);
 
     List<GroupEntity> findAllByClusterId(long CusterId);
 

@@ -2,25 +2,27 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.CourseWithRelationJson;
 import com.ugent.pidgeon.model.json.UserJson;
+import com.ugent.pidgeon.model.json.UserUpdateJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.logging.Logger;
 
 @RestController
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserUtil userUtil;
 
     /**
      * Function to get a user by id
@@ -36,22 +38,22 @@ public class UserController {
     @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
     @Roles({UserRole.student})
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
-        UserEntity user = auth.getUserEntity();
-        if (user.getId() != userid) {
+        UserEntity requester = auth.getUserEntity();
+        if (requester.getId() != userid) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to this user");
         }
 
-        UserJson res = userRepository.findById(userid).map(UserJson::new).orElse(null);
-        if (res == null) {
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        UserEntity user = userUtil.getUserIfExists(userid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+
+        UserJson res = new UserJson(user);
 
         return ResponseEntity.ok().body(res);
     }
 
 
-
-    
     @GetMapping(ApiRoutes.USER_AUTH_PATH)
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<Object> getUserByAzureId(Auth auth) {
@@ -60,5 +62,57 @@ public class UserController {
         return ResponseEntity.ok().body(userJson);
     }
 
+
+    private ResponseEntity<?> doUserUpdate(UserEntity user, UserUpdateJson json) {
+        user.setName(json.getName());
+        user.setSurname(json.getSurname());
+        user.setEmail(json.getEmail());
+        user.setRole(json.getRoleAsEnum());
+        userRepository.save(user);
+        return ResponseEntity.ok().body(new UserJson(user));
+    }
+
+    @PutMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
+    @Roles({UserRole.admin})
+    public ResponseEntity<?> updateUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
+
+        CheckResult<UserEntity> checkResult = userUtil.checkForUserUpdateJson(userid, userUpdateJson);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        return doUserUpdate(checkResult.getData(), userUpdateJson);
+    }
+
+    @PatchMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
+    @Roles({UserRole.admin})
+    public ResponseEntity<?> patchUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
+        UserEntity user = userUtil.getUserIfExists(userid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        if (userUpdateJson.getName() == null) {
+            userUpdateJson.setName(user.getName());
+        }
+        if (userUpdateJson.getSurname() == null) {
+            userUpdateJson.setSurname(user.getSurname());
+        }
+        if (userUpdateJson.getEmail() == null) {
+            userUpdateJson.setEmail(user.getEmail());
+        }
+
+        Logger.getGlobal().info(userUpdateJson.getRole());
+        if (userUpdateJson.getRole() == null) {
+            userUpdateJson.setRole(user.getRole().toString());
+        }
+
+        CheckResult<UserEntity> checkResult = userUtil.checkForUserUpdateJson(userid, userUpdateJson);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        return doUserUpdate(user, userUpdateJson);
+    }
 
 }

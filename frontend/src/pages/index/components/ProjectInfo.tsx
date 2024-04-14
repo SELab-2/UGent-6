@@ -4,6 +4,7 @@ import { Descriptions, DescriptionsProps } from "antd"
 import { useTranslation } from "react-i18next"
 import ProjectStatusTag from "./ProjectStatusTag"
 import GroupProgress from "./GroupProgress"
+import MarkdownTextfield from "../../../components/input/MarkdownTextfield"
 
 
 
@@ -30,22 +31,26 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     },
     {
       label: t("home.projects.description"),
-      children: project.description,
+      children: <MarkdownTextfield  content={project.description}/>,
       span: 24
     },
     {
       label: t("home.projects.projectStatus"),
-      children: <ProjectStatusTag status={Math.random() > 0.5? "completed": "notStarted"} />,
+      children: <ProjectStatusTag status={project.state} />,
       span: 24
     },
     {
       label: t("home.projects.groupProgress"),
-      children: <GroupProgress usersCompleted={Math.floor(Math.random() * 121)} userCount={121} />,
+      children: <GroupProgress usersCompleted={project.progress.completed} userCount={project.progress.total} />,
       span: 24
     }
   ],[project, t])
 
-  return <Descriptions column={24} bordered items={items} />
+  return <div>
+
+
+<Descriptions column={24}  items={items} />
+  </div>
 }
 
 export default ProjectInfo

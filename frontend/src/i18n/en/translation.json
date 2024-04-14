@@ -43,13 +43,29 @@
   "project": {
     "submissions": "Submissions",
     "newSubmission": "New submission",
+    "files": "Files",
     "submition": "Submition",
     "structure": "Structure",
     "addFiles": "Add files",
     "submit": "Submit",
+    "back": "Cancel",
     "uploadAreaTitle": "Click or drag file to this area to upload",
     "uploadAreaSubtitle": "Maximum file size is 10MB",
     "deadlinePassed": "Deadline passed",
+    "downloadSubmissions": "Download all submissions",
+    "group": "Group",
+    "status": "Status",
+    "feedback": "Feedback",
+    "groupEmpty": "No members in this group",
+    "testFailed": "Tests failed",
+    "structureFailed": "Structure failed",
+    "submission": "Submission",
+    "passed": "Passed",
+    "notSubmitted": "Not submitted",
+    "submissionTime": "Submission time",
+    "noSubmissions": "No submissions",
+    "loadingSubmissions": "Loading submissions...",
+    "options": "Options",
     "change": {
       "name": "Name",
       "nameMessage": "Please enter Project Name",
@@ -72,9 +88,22 @@
   "landingPage": {
     "title-1": "Official",
     "title-2": "submission platform",
-    "subtitle": "Effortlessly manage courses and projects, automatically test and assess code.",
+    "subtitle-1": "Effortlessly manage courses and projects,",
+    "subtitle-2": "automatically test and assess code.",
     "getStarted": "Get started"
   },
+
+  "submission": {
+    "submission": "Submission",
+    "submittedFiles": "Submitted files:",
+    "structuretest": "Structure test results:",
+    "dockertest": "Docker test results:",
+    "status": {
+      "accepted": "All tests succeeded.",
+      "failed": "Some tests failed."
+    }
+  },
+
   "course": {
     "projects": "Projects",
     "groups": "Groups",
@@ -92,7 +121,9 @@
     "save": "Save",
     "changesSaved": "Changes saved",
     "archived": "Archived",
-    "score": "Score"
+    "score": "Score",
+    "noGroups": "No groups available",
+    "searchMember": "Search member"
   },
   "error": {
     "title": "Error",
