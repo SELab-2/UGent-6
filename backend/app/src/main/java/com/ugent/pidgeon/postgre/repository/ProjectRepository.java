@@ -12,11 +12,10 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
 
     @Query(value = """
-          SELECT p FROM ProjectEntity p
-            JOIN GroupClusterEntity gc ON p.groupClusterId = gc.id
-            JOIN GroupEntity g on gc.id = g.clusterId
-            JOIN GroupUserEntity gu on gu.groupId = g.id
-            WHERE gu.userId = ?1""")
+        SELECT p FROM CourseUserEntity cu
+          	JOIN CourseEntity c ON cu.courseId = c.id
+          	JOIN ProjectEntity p ON p.courseId = c.id
+          	WHERE cu.userId = ?1""")
     List<ProjectEntity> findProjectsByUserId(long userId);
 
     @Query(value = """
@@ -50,5 +49,6 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             JOIN ProjectEntity p ON p.groupClusterId = gc.id
             WHERE p.id = ?1""")
     List<Long> findGroupIdsByProjectId(long projectId);
+
 
 }

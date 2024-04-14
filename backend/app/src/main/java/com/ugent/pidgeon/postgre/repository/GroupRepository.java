@@ -29,6 +29,9 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
     @Query(value= "SELECT u FROM UserEntity u JOIN GroupUserEntity gu ON u.id = gu.userId WHERE gu.groupId = ?1")
     List<UserEntity> findGroupUsersByGroupId(long id);
 
+
+
+
     public interface UserReference {
         Long getUserId();
         String getName();
