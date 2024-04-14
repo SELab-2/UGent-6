@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { Spin } from "antd";
 import UserList from "./components/UserList"
-import { ApiRoutes, GET_Responses } from "../../@types/requests.d";
+import { ApiRoutes, GET_Responses, UserRole } from "../../@types/requests.d";
 
-export type Users = GET_Responses[ApiRoutes.USERS]
-type User = GET_Responses[ApiRoutes.GROUP_MEMBER]
+export type UserType = GET_Responses[ApiRoutes.USERS][number]
 
 const ProfileContent = () => {
-    const [users, setUsers] = useState<Users | null>(null);
+    const [users, setUsers] = useState<UserType[] | null>(null);
 
-    function updateRole(user: User, role: String) {
+    function updateRole(user: UserType, role: UserRole) {
       //TODO: PUT of PATCH call
       console.log("User: ", user);
       console.log("Role: ", role);
-      const updatedUsers = users?.map((u) => {
+      if(!users) return;
+      const updatedUsers = users.map((u) => {
         if (u.userId === user.userId) {
-          return { ...u, role: role };
+         return { ...u, role: role };
         }
         return u;
       });

@@ -1,6 +1,7 @@
 import { Form, FormInstance, Input } from "antd"
 import { FC, PropsWithChildren } from "react"
 import { useTranslation } from "react-i18next"
+import MarkdownEditor from "../input/MarkdownEditor"
 
 
 
@@ -23,7 +24,7 @@ const CourseForm:FC<{form:FormInstance} & PropsWithChildren> = ({form,children})
         label={t("home.courseDescription")}
         name="description"
       >
-        <Input.TextArea
+        <MarkdownEditor
           maxLength={500}
           placeholder={t("home.courseDescription")}
         />
