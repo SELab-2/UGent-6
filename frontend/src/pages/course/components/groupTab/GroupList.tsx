@@ -11,7 +11,7 @@ const Group: FC<{ group: GroupType;capacity:number, canJoin: boolean; canLeave: 
   const { t } = useTranslation()
   return (
     <List.Item
-    key={group.groupid}
+    key={group.groupId}
       actions={[
         <Typography.Text key="cap">
           {group.members.length} / {capacity}
@@ -37,7 +37,6 @@ const Group: FC<{ group: GroupType;capacity:number, canJoin: boolean; canLeave: 
 }
 
 const GroupList: FC<{ groups: GroupType[] | null, capacity:number }> = ({ groups,capacity }) => {
-  const { user } = useUser()
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
   const {t} = useTranslation()
@@ -73,13 +72,13 @@ const GroupList: FC<{ groups: GroupType[] | null, capacity:number }> = ({ groups
         emptyText: t("course.noGroups") ,
       }}
       loading={groups === null}
-      rowKey="groupid"
+      rowKey="groupId"
       dataSource={groups ?? []}
       renderItem={(g) => (
         <Group
           onClick={()=> handleModalClick(g)}
           canJoin={g.members.length < capacity || ownGroupId !== null}
-          canLeave={ownGroupId === g.groupid}
+          canLeave={ownGroupId === g.groupId}
           group={g}
           onJoin={() => onJoin(g)}
           onLeave={() => onLeave(g)}

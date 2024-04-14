@@ -5,10 +5,10 @@ import ProjectStatusTag from "./ProjectStatusTag"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
-import { UserCourseType } from "../../../providers/UserProvider"
+import { CourseProjectsType } from "./HorizontalCourseScroll"
+import GroupProgress from "./GroupProgress"
 
-
-const CourseCard: FC<{ course: UserCourseType }> = ({ course }) => {
+const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:boolean }> = ({ courseProjects,adminView }) => {
   const { t } = useTranslation()
   const { token } = theme.useToken()
   const navigate = useNavigate()
@@ -25,9 +25,9 @@ const CourseCard: FC<{ course: UserCourseType }> = ({ course }) => {
       }}
       bordered={false}
       hoverable
-      onClick={() => navigate(AppRoutes.COURSE.replace(":courseId", course.courseId.toString()))}
+      onClick={() => navigate(AppRoutes.COURSE.replace(":courseId", courseProjects.course.courseId.toString()))}
       type="inner"
-      title={course.name}
+      title={courseProjects.course.name}
       style={{ width: 300 }}
       actions={[
         <Tooltip title={t("home.projects.userCourseCount", { count: 2 })}>
@@ -40,26 +40,40 @@ const CourseCard: FC<{ course: UserCourseType }> = ({ course }) => {
           </span>
         </Tooltip>,
 
-        <Tooltip title={t("home.projects.activeProjects_plural", { count: 2 })}>
+        <Tooltip title={t("home.projects.activeProjects_plural", { count:courseProjects.projects.length })}>
           <span>
             <Statistic
               valueStyle={{ fontSize: "1em", color: token.colorTextLabel }}
               prefix={<ContainerOutlined />}
-              value={2}
+              value={courseProjects.projects.length}
             />
           </span>
         </Tooltip>,
       ]}
     >
-      <List>
-        <List.Item actions={[<ProjectStatusTag key="status" icon status={"failed"} />]}>
-          <List.Item.Meta title={"Opdracht " + Math.floor(Math.random() * 100 + 1)} />
-        </List.Item>
-
-        <List.Item actions={[<ProjectStatusTag key="status" icon status={"notStarted"}/>]}>
-          <List.Item.Meta title={"Opdracht " + Math.floor(Math.random() * 100 + 1)} />
-        </List.Item>
-      </List>
+      <List
+        dataSource={courseProjects.projects}
+        locale={{ emptyText: t("home.projects.noProjects") }}
+        rowKey="projectId"
+        renderItem={(project) => (
+          <List.Item
+            actions={[
+              project.status ? (
+                <ProjectStatusTag
+                  key="status"
+                  icon
+                  status={project.status}
+                />
+              ): <GroupProgress
+              usersCompleted={project.progress.completed}
+              userCount={project.progress.total}
+            />,
+            ]}
+          >
+            <List.Item.Meta title={project.name} />
+          </List.Item>
+        )}
+      ></List>
     </Card>
   )
 }

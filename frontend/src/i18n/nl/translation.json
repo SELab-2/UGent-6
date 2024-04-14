@@ -10,6 +10,7 @@
   },
   "home": {
     "yourCourses": "Vakken",
+    "myCourses": "Mijn vakken",
     "createCourse": "Vak aanmaken",
     "courseName": "Vak naam",
     "courseDescription": "Beschrijving",

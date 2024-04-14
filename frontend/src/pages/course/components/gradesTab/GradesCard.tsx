@@ -3,86 +3,22 @@ import { useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GradesList from "./GradesList"
 import useCourse from "../../../../hooks/useCourse"
+import apiCall from "../../../../util/apiFetch"
 
-export type GroupFeedback = GET_Responses[ApiRoutes.PROJECT_SCORE] & {
-  maxScore:number
-  project: {
-    name: string
-    url: string
-    projectId: number,
-  },
-  feedback: string
-  score: number
-  group: {
-    groupId: number
-    groupName: string
-    groupUrl: string
-  },
-  updatedOn: string
-}
-
+export type CourseGradesType = GET_Responses[ApiRoutes.COURSE_GRADES][number]
 const GradesCard = () => {
-  const [feedback, setFeedback] = useState<GroupFeedback[] | null>(null)
+  const [feedback, setFeedback] = useState<CourseGradesType[] | null>(null)
   const course = useCourse()
 
 
   useEffect(() => {
     // TODO: do this fetch, (atm there's no way to get all the grades in a single request, maybe add new api route that gives all the grades of a course)
-
-    setTimeout(() => {
-      setFeedback([
-        {
-          group: {
-            groupId: 1,
-            groupName: "Group 1",
-            groupUrl: "/group-1"
-          },
-          score: 85,
-          feedback: "Good job on the project!",
-          project: {
-            name: "Project 1",
-            url: "/project-1",
-            projectId: 1,
-          },
-          maxScore: 100,
-          updatedOn: "2021-09-01"
-        },
-        {
-     
-          group: {
-            groupId: 2,
-            groupName: "Group 2",
-            groupUrl: "/group-2"
-          },
-          score: 90,
-          feedback: "Excellent work!",
-          project: {
-            name: "Project 2",
-            url: "/project-2",
-            projectId: 2,
-          },
-          maxScore: 100,
-          updatedOn: "2025-09-01"
-        },
-        {
-     
-          group: {
-            groupId: 2,
-            groupName: "Group 2",
-            groupUrl: "/group-2"
-          },
-          score: 10,
-          feedback: "Bad algo",
-          project: {
-            name: "Project 2",
-            url: "/api/projects/3",
-            projectId: 3,
-          },
-          maxScore: 20,
-          updatedOn: "2023-09-01"
-        },
-      ])
-    }, 250)
+    
+    apiCall.get(ApiRoutes.COURSE_GRADES, { id: course.courseId }).then((res) => {
+      console.log(res.data);
+      setFeedback(res.data)
+    })
+    
   }, [])
   if (feedback === null) return <Card loading />
 

@@ -3,70 +3,61 @@ import { useTranslation } from "react-i18next"
 import CourseCard from "./components/CourseCard"
 import { PlusOutlined } from "@ant-design/icons"
 import CreateCourseModal from "./components/CreateCourseModal"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import ProjectCard from "./components/ProjectCard"
 import useUser from "../../hooks/useUser"
+import HorizontalCourseScroll from "./components/HorizontalCourseScroll"
+import apiCall from "../../util/apiFetch"
+import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
+import ProjectTable from "./components/ProjectTable"
+
+export type ProjectsType = GET_Responses[ApiRoutes.COURSE_PROJECTS]
 
 const Home = () => {
   const { t } = useTranslation()
+  const [projects, setProjects] = useState<ProjectsType | null>(null)
   const [open, setOpen] = useState(false)
-  const { courses } = useUser()
+
+  useEffect(() => {
+    apiCall.get(ApiRoutes.PROJECTS).then((res) => {
+      const projects = res.data.adminProjects.concat(res.data.enrolledProjects)
+      setProjects(projects)
+    })
+  }, [])
 
   return (
     <div>
       <div>
-        <Typography.Title
-          level={3}
-          style={{
-            paddingLeft: "2rem",
-          }}
-        >
-          {t("home.yourCourses")}
-          <Button
-            onClick={() => setOpen(true)}
-            type="text"
-            style={{marginLeft: "1rem" }}
-            icon={<PlusOutlined />}
-          />
-          {/* </TeacherView> */}
-        </Typography.Title>
+       
 
-        <Space
-          className="small-scroll-bar"
-          style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem" }}
-        >
-          {courses
-            ? courses.map((c) => (
-                <CourseCard
-                  key={c.courseId}
-                  course={c}
-                />
-              ))
-            : Array(3)
-                .fill(0)
-                .map((_, i) => (
-                  <Card
-                    key={i}
-                    loading
-                    style={{ width: 300, height: 235 }}
-                  />
-                ))}
-        </Space>
+        <HorizontalCourseScroll projects={projects} onOpenNew={()=> setOpen(true)} />
       </div>
       <br />
       <br />
       <div style={{ position: "relative", padding: "0 2rem" }}>
         <Typography.Title level={3}>{t("home.yourProjects")}</Typography.Title>
 
-        <ProjectCard />
-
-        <CreateCourseModal
-          open={open}
-          setOpen={setOpen}
-        />
+        <Card
+          style={{
+            width: "100%",
+            overflow: "auto",
+          }}
+          styles={{
+            body: {
+              padding: "0",
+            },
+          }}
+        >
+          <ProjectTable projects={projects} />
+        </Card>
       </div>
       <br />
       <br />
+
+      <CreateCourseModal
+        open={open}
+        setOpen={setOpen}
+      />
     </div>
   )
 }

@@ -9,6 +9,7 @@ export enum ApiRoutes {
   COURSE_MEMBERS = "api/courses/:courseId/members",
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
+  COURSE_GRADES = '/api/courses/:id/grades',
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -84,7 +85,7 @@ type Course = {
   name: string
 }
 
-export type ProjectStatus = "completed" | "failed" | "notStarted"
+export type ProjectStatus = "correct" | "incorrect" | "not started"
 export type CourseRelation = "enrolled" | "course_admin" | "creator"
 
 
@@ -135,28 +136,31 @@ export type GET_Responses = {
     testsUrl: string
     maxScore:number
     visible: boolean
+    status?: ProjectStatus
     progress: {
       completed: number
       total: number
-    }
+    },
+    groupId: number | null //  null if not in a group
   }
   [ApiRoutes.PROJECT_TESTS]: {} // ??
   [ApiRoutes.GROUP]: {
-    groupid: number
+    groupId: number,
+    capacity: number,
     name: string
     groupClusterUrl: ApiRoutes.CLUSTER
-    members: { name:string, url:string }[]
+    members: GET_Responses[ApiRoutes.GROUP_MEMBER][]
   }
   [ApiRoutes.PROJECT_SCORE]: {
-    score: number
-    feedback:string,
+    score: number | null, 
+    feedback:string | null,
     projectId: number,
     groupId: number
   }, 
   [ApiRoutes.GROUP_MEMBER]: {
     email: string
     name: string
-    id:  number
+    userId:  number
   }
   [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
@@ -183,10 +187,8 @@ export type GET_Responses = {
   }
   [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
   [ApiRoutes.COURSE_MEMBER]: {
-    email: string
-    name: string
-    surname: string
-    userId: number
+    relation: CourseRelation,
+    user: GET_Responses[ApiRoutes.GROUP_MEMBER]
   }
   [ApiRoutes.USER]: {
     courseUrl: string
@@ -208,5 +210,16 @@ export type GET_Responses = {
   //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
   [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.GROUP][] //GET_Responses[ApiRoutes.PROJECT_GROUP][]
 
-  [ApiRoutes.PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
+  [ApiRoutes.PROJECTS]: {
+    enrolledProjects: GET_Responses[ApiRoutes.PROJECT][],
+    adminProjects: Omit<GET_Responses[ApiRoutes.PROJECT], "status">[] 
+  },
+
+  [ApiRoutes.COURSE_GRADES]: {
+    projectName: string, 
+    projectUrl: string,
+    projectId: number,
+    maxScore: number,
+    groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE]
+  }[]
 }

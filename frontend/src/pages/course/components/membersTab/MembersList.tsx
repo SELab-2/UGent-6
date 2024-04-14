@@ -55,7 +55,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
               description={t("course.removeUserConfirm", {
                 name: user.name,
               })}
-              onConfirm={() => removeUserFromCourse(user.id)}
+              onConfirm={() => removeUserFromCourse(user.userId)}
               okText={t("course.yes")}
               cancelText={t("course.cancel")}
               key="remove"
@@ -77,7 +77,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
             title={user.name}
             description={
               isCourseAdmin ? (
-                <Dropdown menu={{ items,onClick:(e) => onRoleChange(user.id, e.key as CourseRelation), defaultSelectedKeys:[rel] }}>
+                <Dropdown menu={{ items,onClick:(e) => onRoleChange(user.userId, e.key as CourseRelation), defaultSelectedKeys:[rel] }}>
                   <a onClick={(e) => e.preventDefault()}>
                     <Space>
                       {rolesNames[rel]}
