@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -18,7 +19,7 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
 
 
     @Query(value = """
-    SELECT s.id
+    SELECT s
     FROM SubmissionEntity s
     WHERE s.groupId = :groupId
     AND s.submissionTime = (
@@ -28,7 +29,7 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
         AND s2.projectId = :projectId
     ) ORDER BY s.id DESC LIMIT 1
     """)
-    Long findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
+    Optional<SubmissionEntity> findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
 
     List<SubmissionEntity> findByProjectIdAndGroupId(long projectid, long groupid);
 }

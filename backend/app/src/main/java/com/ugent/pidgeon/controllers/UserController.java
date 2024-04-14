@@ -72,6 +72,17 @@ public class UserController {
         return ResponseEntity.ok().body(new UserJson(user));
     }
 
+    /**
+     * Function to edit a user by id
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod PUT
+     * @ApiPath /api/user/{userid}
+     * @AllowedRoles admin
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693479">apiDog documentation</a>
+     * @return string
+     */
     @PutMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
     @Roles({UserRole.admin})
     public ResponseEntity<?> updateUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
@@ -84,6 +95,17 @@ public class UserController {
         return doUserUpdate(checkResult.getData(), userUpdateJson);
     }
 
+    /**
+     * Function to edit a user by id
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod PATCH
+     * @ApiPath /api/user/{userid}
+     * @AllowedRoles admin
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693481">apiDog documentation</a>
+     * @return string
+     */
     @PatchMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
     @Roles({UserRole.admin})
     public ResponseEntity<?> patchUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {

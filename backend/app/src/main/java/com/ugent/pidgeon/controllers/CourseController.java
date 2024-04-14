@@ -300,11 +300,16 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseEntity course = checkResult.getData().getFirst();
+        CourseRelation relation = checkResult.getData().getSecond();
 
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
+        if (relation.equals(CourseRelation.enrolled)) {
+            projects = projects.stream().filter(ProjectEntity::isVisible).toList();
+        }
         List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
             entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, course, user)
         ).toList();
+
 
         return ResponseEntity.ok(projectResponseJsons);
     }
@@ -340,7 +345,7 @@ public class CourseController {
      * @param courseId ID of the course to join
      * @param courseKey key of the course to join
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698810">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join/{courseKey}
@@ -358,7 +363,7 @@ public class CourseController {
      * @param courseId ID of the course to get the join key from
      * @param courseKey key of the course to get the join key from
      * @return ResponseEntity with a statuscode and a JSON object containing the course information
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698818">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join/{courseKey}
@@ -375,7 +380,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to join
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698821">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join
@@ -392,7 +397,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to get the join key from
      * @return ResponseEntity with a statuscode and a JSON object containing the course information
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698822">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join
@@ -409,7 +414,7 @@ public class CourseController {
      * @param courseId ID of the course to leave
      * @param auth authentication object of the requesting user
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698775">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/leave
@@ -446,23 +451,23 @@ public class CourseController {
      * @param courseId ID of the course to leave
      * @param userId JSON object containing the user id
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883724">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
-     * @ApiPath /api/courses/{courseId}/members
+     * @ApiPath /api/courses/{courseId}/members/{userId}
      */
-    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
-    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody UserIdJson userId) {
+    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @PathVariable long userId) {
         CheckResult<CourseRelation> checkResult = courseUtil.canDeleteUser(courseId, userId, auth.getUserEntity());
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseRelation userRelation = checkResult.getData();
 
-        courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
+        courseUserRepository.deleteById(new CourseUserId(courseId, userId));
         if (userRelation.equals(CourseRelation.enrolled)) {
-            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId.getUserId())) {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId)) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
         }
@@ -476,13 +481,14 @@ public class CourseController {
      * @param courseId ID of the course to add the user to
      * @param request JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883723">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, admin, student
      * @ApiPath /api/courses/{courseId}/members
      */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
+    @Transactional
     public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
         CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, request, auth.getUserEntity(), HttpMethod.POST);
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
@@ -491,7 +497,10 @@ public class CourseController {
 
         courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelationAsEnum()));
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
+            boolean succesful = commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
+            if (!succesful) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
+            }
         }
         return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
     }
@@ -503,15 +512,19 @@ public class CourseController {
      * @param courseId ID of the course to update the user in
      * @param request JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883731">apiDog documentation</a>
      * @HttpMethod PATCH
      * @AllowedRoles teacher, admin
-     * @ApiPath /api/courses/{courseId}/members
+     * @ApiPath /api/courses/{courseId}/members/{userId}
      */
-    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
+    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
-        CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, request, auth.getUserEntity(), HttpMethod.PATCH);
+    public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody RelationRequest request, @PathVariable long userId) {
+        CourseMemberRequestJson requestwithid = new CourseMemberRequestJson();
+        requestwithid.setUserId(userId);
+        requestwithid.setRelation(request.getRelation());
+
+        CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, requestwithid, auth.getUserEntity(), HttpMethod.PATCH);
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
@@ -519,9 +532,9 @@ public class CourseController {
         courseUserEntity.setRelation(request.getRelationAsEnum());
         courseUserRepository.save(courseUserEntity);
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
+            commonDatabaseActions.createNewIndividualClusterGroup(courseId, requestwithid.getUserId());
         } else {
-            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, request.getUserId())) {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, requestwithid.getUserId())) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
         }
@@ -534,7 +547,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to get the members from
      * @return ResponseEntity with a JSON object containing the members of the course
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724006">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/members
@@ -548,10 +561,15 @@ public class CourseController {
         }
 
         List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
-        List<UserReferenceJson> memberJson = members.stream().
-                map(cue -> userUtil.getUserIfExists(cue.getUserId())).
-                filter(Objects::nonNull).
-                map(entityToJsonConverter::userEntityToUserReference).toList();
+        List<UserReferenceWithRelation> memberJson = members.stream().
+                map(cue -> {
+                    UserEntity user = userUtil.getUserIfExists(cue.getUserId());
+                    if (user == null) {
+                        return null;
+                    }
+                    return entityToJsonConverter.userEntityToUserReferenceWithRelation(user, cue.getRelation());
+                }).
+                filter(Objects::nonNull).toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(memberJson);
     }
@@ -562,7 +580,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to get the join link from
      * @return ResponseEntity with the join link of the course
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698763">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/joinLink
@@ -577,14 +595,14 @@ public class CourseController {
         return ResponseEntity.ok(courseUtil.getJoinLink(checkResult.getData().getJoinKey(), courseId.toString()));
     }
 
-    // Function for invalidating the previous key and generating a new one, can be useful when staring a new year.
+    // Function for invalidating the previous key and generating a new one, can be useful when starting a new year.
     /**
      * Function to generate a new join link for a course
      *
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to generate the join link for
      * @return ResponseEntity with the new join link of the course
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6691656">apiDog documentation</a>
      * @HttpMethod PUT
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/joinLink
@@ -610,7 +628,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to remove the join link from
      * @return ResponseEntity with the new join link of the course (without the key)
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698823">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/joinLink

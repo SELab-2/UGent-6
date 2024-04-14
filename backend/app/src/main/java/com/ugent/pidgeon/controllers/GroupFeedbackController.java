@@ -1,16 +1,23 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.model.json.GroupFeedbackJsonWithProject;
 import com.ugent.pidgeon.model.json.UpdateGroupScoreRequest;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CourseUtil;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.GroupFeedbackUtil;
 import com.ugent.pidgeon.util.GroupUtil;
+import com.ugent.pidgeon.util.Pair;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,6 +36,12 @@ public class GroupFeedbackController {
     private GroupUtil groupUtil;
     @Autowired
     private EntityToJsonConverter entityToJsonConverter;
+  @Autowired
+  private ProjectRepository projectRepository;
+  @Autowired
+  private GroupRepository groupRepository;
+  @Autowired
+  private CourseUtil courseUtil;
 
     /**
      * Function to update the score of a group
@@ -190,6 +203,41 @@ public class GroupFeedbackController {
         GroupFeedbackEntity groupFeedbackEntity = groupFeedback.getData();
 
         return ResponseEntity.ok(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
+    }
+
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/grades")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getCourseGrades(@PathVariable("courseId") long courseId, Auth auth) {
+        UserEntity user = auth.getUserEntity();
+        CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = courseUtil.getCourseIfUserInCourse(courseId, user);
+        if (courseCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
+        }
+        CourseRelation relation = courseCheck.getData().getSecond();
+        if (!relation.equals(CourseRelation.enrolled)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You are a admin of this course so no grades are available");
+        }
+
+
+        List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
+        projects = projects.stream().filter(ProjectEntity::isVisible).toList();
+
+        List<GroupFeedbackJsonWithProject> grades = new ArrayList<>();
+        for (ProjectEntity project : projects) {
+            Long GroupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+            if (GroupId == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not part of this course");
+            }
+            CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.getGroupFeedbackIfExists(GroupId, project.getId());
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                grades.add(entityToJsonConverter.groupFeedbackEntityToJsonWithProject(null, project));
+            } else {
+                GroupFeedbackEntity groupFeedbackEntity = checkResult.getData();
+                grades.add(entityToJsonConverter.groupFeedbackEntityToJsonWithProject(groupFeedbackEntity, project));
+            }
+        }
+
+        return ResponseEntity.ok(grades);
     }
 
 
