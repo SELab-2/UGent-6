@@ -10,32 +10,8 @@ import useUser from "../../hooks/useUser";
 import { User } from "../../providers/UserProvider";
 
 const ProfileContent = () => {
-    const { instance, inProgress } = useMsal();
-    const [id, setId] = useState<String | null>(null);
     const { user } = useUser()
     const [tmpUser, setTmpUser] = useState<User | null>(null);
-
-    useEffect(() => {
-        if (!id && inProgress === InteractionStatus.None) {
-            callMsGraph().then(response => {
-                    if (response) {
-                        setId(response.id);
-                    } else {
-                        throw("User not found");
-                    }
-                }).catch((e) => {
-                if (e instanceof InteractionRequiredAuthError) {
-
-                    instance.acquireTokenRedirect({
-                        ...loginRequest,
-                        account: instance.getActiveAccount() as AccountInfo
-                    });
-                }
-            }).catch(err => {
-                console.log(err);
-            });
-        }
-    }, [inProgress, id, instance]);
 
     useEffect(() => {
         setTmpUser({
