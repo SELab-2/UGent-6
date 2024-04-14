@@ -185,7 +185,7 @@ export type GET_Responses = {
     assistents: CourseTeacher[]
     joinKey: string
   }
-  [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
+  [ApiRoutes.COURSE_MEMBERS]: GET_Responses[ApiRoutes.COURSE_MEMBER][]
   [ApiRoutes.COURSE_MEMBER]: {
     relation: CourseRelation,
     user: GET_Responses[ApiRoutes.GROUP_MEMBER]

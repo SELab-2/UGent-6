@@ -40,7 +40,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
     // TODO: make request
   }
 
-  const rel = "course_admin"
+
   return (
     <List
       loading={members === null}
@@ -53,16 +53,16 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
             <Popconfirm
               title={t("course.removeUserConfirmTitle")}
               description={t("course.removeUserConfirm", {
-                name: user.name,
+                name: user.user.name,
               })}
-              onConfirm={() => removeUserFromCourse(user.userId)}
+              onConfirm={() => removeUserFromCourse(user.user.userId)}
               okText={t("course.yes")}
               cancelText={t("course.cancel")}
               key="remove"
             >
               <Tooltip
                 placement="left"
-                title={t("course.removeFromCourse", { name: user.name })}
+                title={t("course.removeFromCourse", { name: user.user.name })}
               >
                 <Button
                   danger
@@ -74,19 +74,19 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
           ]}
         >
           <List.Item.Meta
-            title={user.name}
+            title={user.user.name}
             description={
               isCourseAdmin ? (
-                <Dropdown menu={{ items,onClick:(e) => onRoleChange(user.userId, e.key as CourseRelation), defaultSelectedKeys:[rel] }}>
+                <Dropdown menu={{ items,onClick:(e) => onRoleChange(user.user.userId, e.key as CourseRelation), defaultSelectedKeys:[user.relation] }}>
                   <a onClick={(e) => e.preventDefault()}>
                     <Space>
-                      {rolesNames[rel]}
+                      {rolesNames[user.relation]}
                       <DownOutlined />
                     </Space>
                   </a>
                 </Dropdown>
               ) : (
-                rolesNames[rel]
+                rolesNames[user.relation]
               )
             }
           />

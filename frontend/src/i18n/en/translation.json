@@ -15,7 +15,7 @@
     "courseDescription": "Description",
     "yourProjects": "Projects",
     "myCourses": "My courses",
-    
+    "noCourses": "You're not in any courses yet, you can joined a course by opening a course join link.",
     "projects": {
       "noProjects": "No projects",
       "name": "Name",
