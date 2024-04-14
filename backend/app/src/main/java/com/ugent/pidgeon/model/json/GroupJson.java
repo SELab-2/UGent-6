@@ -4,7 +4,8 @@ import java.util.List;
 
 public class GroupJson {
 
-    private Long groupid;
+    private Integer capacity;
+    private Long groupId;
     private String name;
     private String groupClusterUrl;
 
@@ -13,8 +14,9 @@ public class GroupJson {
     public GroupJson() {
     }
 
-    public GroupJson(Long groupid, String name, String groupClusterUrl) {
-        this.groupid = groupid;
+    public GroupJson(Integer capacity, Long groupId, String name, String groupClusterUrl) {
+      this.capacity = capacity;
+      this.groupId = groupId;
         this.name = name;
         this.groupClusterUrl = groupClusterUrl;
     }
@@ -29,12 +31,12 @@ public class GroupJson {
     }
 
 
-    public Long getGroupid() {
-        return groupid;
+    public Long getGroupId() {
+        return groupId;
     }
 
-    public void setGroupid(Long groupid) {
-        this.groupid = groupid;
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 
     public List<UserReferenceJson> getMembers() {
@@ -51,5 +53,13 @@ public class GroupJson {
 
     public void setGroupClusterUrl(String groupClusterUrl) {
         this.groupClusterUrl = groupClusterUrl;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
     }
 }

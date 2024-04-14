@@ -158,16 +158,11 @@ public class CourseUtil {
     /**
      * Check if a user can delete another user from a course
      * @param courseId id of the course
-     * @param userIdJson json with the id of the user to delete
+     * @param userId id of the user to delete
      * @param user user that wants to delete the other user
      * @return CheckResult with the status of the check and the relation of the user with the course
      */
-    public CheckResult<CourseRelation> canDeleteUser(long courseId, UserIdJson userIdJson, UserEntity user) {
-        if (userIdJson == null || userIdJson.getUserId() == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "userid is required", null);
-        }
-
-        long userId = userIdJson.getUserId();
+    public CheckResult<CourseRelation> canDeleteUser(long courseId, long userId, UserEntity user) {
 
         CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = getCourseIfUserInCourse(courseId, user);
         if (courseCheck.getStatus() != HttpStatus.OK) {

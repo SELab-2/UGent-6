@@ -2,9 +2,11 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.*;
 
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
@@ -56,18 +58,31 @@ public class ProjectController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getProjects(Auth auth) {
-        long userid = auth.getUserEntity().getId();
-        List<ProjectEntity> allProjects = projectRepository.findProjectsByUserId(userid);
-        List<Map<String, String>> projectsWithUrls = new ArrayList<>();
+        UserEntity user = auth.getUserEntity();
+        List<ProjectEntity> allProjects = projectRepository.findProjectsByUserId(user.getId());
+        List<ProjectResponseJsonWithStatus> enrolledProjects = new ArrayList<>();
+        List<ProjectResponseJson> adminProjects = new ArrayList<>();
 
         for (ProjectEntity project : allProjects) {
-            Map<String, String> projectInfo = new HashMap<>();
-            projectInfo.put("name", project.getName());
-            projectInfo.put("url", ApiRoutes.PROJECT_BASE_PATH + project.getId());
-            projectsWithUrls.add(projectInfo);
+          // Get course
+          CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = courseUtil.getCourseIfUserInCourse(project.getCourseId(), user);
+          if (courseCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
+          }
+
+          CourseEntity course = courseCheck.getData().getFirst();
+          CourseRelation relation = courseCheck.getData().getSecond();
+
+          if (relation.equals(CourseRelation.enrolled)) {
+            if (project.isVisible()) {
+              enrolledProjects.add(entityToJsonConverter.projectEntityToProjectResponseJsonWithStatus(project, course, user));
+            }
+          } else {
+            adminProjects.add(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
+          }
         }
 
-        return ResponseEntity.ok().body(projectsWithUrls);
+        return ResponseEntity.ok().body(new userProjectsJson(enrolledProjects, adminProjects));
     }
 
 
@@ -91,11 +106,16 @@ public class ProjectController {
         }
         ProjectEntity project = checkResult.getData();
 
-        CheckResult<CourseEntity> courseCheck = courseUtil.getCourseIfExists(project.getCourseId());
+
+        CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = courseUtil.getCourseIfUserInCourse(project.getCourseId(), user);
         if (courseCheck.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
         }
-        CourseEntity course = courseCheck.getData();
+        CourseEntity course = courseCheck.getData().getFirst();
+        CourseRelation relation = courseCheck.getData().getSecond();
+        if (!project.isVisible() && relation.equals(CourseRelation.enrolled)) {
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+        }
 
         return ResponseEntity.ok().body(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
     }
