@@ -344,7 +344,7 @@ public class CourseController {
      * @param courseId ID of the course to join
      * @param courseKey key of the course to join
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698810">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join/{courseKey}
@@ -362,7 +362,7 @@ public class CourseController {
      * @param courseId ID of the course to get the join key from
      * @param courseKey key of the course to get the join key from
      * @return ResponseEntity with a statuscode and a JSON object containing the course information
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698818">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join/{courseKey}
@@ -379,7 +379,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to join
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698821">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join
@@ -396,7 +396,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to get the join key from
      * @return ResponseEntity with a statuscode and a JSON object containing the course information
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698822">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join
@@ -413,7 +413,7 @@ public class CourseController {
      * @param courseId ID of the course to leave
      * @param auth authentication object of the requesting user
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698775">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/leave
@@ -450,7 +450,7 @@ public class CourseController {
      * @param courseId ID of the course to leave
      * @param userId JSON object containing the user id
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883724">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/members/{userId}
@@ -480,7 +480,7 @@ public class CourseController {
      * @param courseId ID of the course to add the user to
      * @param request JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883723">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, admin, student
      * @ApiPath /api/courses/{courseId}/members
@@ -511,7 +511,7 @@ public class CourseController {
      * @param courseId ID of the course to update the user in
      * @param request JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883731">apiDog documentation</a>
      * @HttpMethod PATCH
      * @AllowedRoles teacher, admin
      * @ApiPath /api/courses/{courseId}/members/{userId}
@@ -546,7 +546,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to get the members from
      * @return ResponseEntity with a JSON object containing the members of the course
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724006">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/members
@@ -579,7 +579,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to get the join link from
      * @return ResponseEntity with the join link of the course
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698763">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/joinLink
@@ -594,14 +594,14 @@ public class CourseController {
         return ResponseEntity.ok(courseUtil.getJoinLink(checkResult.getData().getJoinKey(), courseId.toString()));
     }
 
-    // Function for invalidating the previous key and generating a new one, can be useful when staring a new year.
+    // Function for invalidating the previous key and generating a new one, can be useful when starting a new year.
     /**
      * Function to generate a new join link for a course
      *
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to generate the join link for
      * @return ResponseEntity with the new join link of the course
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6691656">apiDog documentation</a>
      * @HttpMethod PUT
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/joinLink
@@ -627,7 +627,7 @@ public class CourseController {
      * @param auth authentication object of the requesting user
      * @param courseId ID of the course to remove the join link from
      * @return ResponseEntity with the new join link of the course (without the key)
-     * @ApiDog TODO
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698823">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/joinLink
