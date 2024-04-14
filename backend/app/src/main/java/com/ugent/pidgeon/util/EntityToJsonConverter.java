@@ -8,6 +8,8 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -119,19 +121,36 @@ public class EntityToJsonConverter {
         );
     }
 
+    public ProjectResponseJsonWithStatus projectEntityToProjectResponseJsonWithStatus(ProjectEntity project, CourseEntity course, UserEntity user) {
+        // Get status
+        Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+        SubmissionEntity sub = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
+        String status;
+        if (sub == null) {
+            status = "not started";
+        } else if (sub.getStructureAccepted() && sub.getStructureAccepted()) {
+            status = "correct";
+        } else {
+            status = "incorrect";
+        }
+
+
+        return new ProjectResponseJsonWithStatus(
+                projectEntityToProjectResponseJson(project, course, user),
+                status
+        );
+    }
+
     public ProjectResponseJson projectEntityToProjectResponseJson(ProjectEntity project, CourseEntity course, UserEntity user) {
         // Calculate the progress of the project for all groups
         List<Long> groupIds = projectRepository.findGroupIdsByProjectId(project.getId());
         Integer total = groupIds.size();
         Integer completed = groupIds.stream().map(groupId -> {
-            Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId);
-            if (submissionId == null) {
-                return 0;
-            }
-            SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
+            SubmissionEntity submission = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
             if (submission == null) {
                 return 0;
             }
+
             if (submission.getDockerAccepted() && submission.getStructureAccepted()) return 1;
             return 0;
         }).reduce(0, Integer::sum);
