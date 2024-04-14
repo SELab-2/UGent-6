@@ -16,5 +16,4 @@ export enum AppRoutes {
   PROFILE = "/profile",
   ERROR = "/error",
   NOT_FOUND = "/not-found"
-  }
 }
