@@ -128,7 +128,7 @@ public class DockerSubmissionTestModel {
         return new DockerTestOutput(consoleLogs, allowPush);
     }
 
-    public List<DockerSubtestResult> runSubmissionWithTemplate(String script, String template, File[] inputFiles) throws InterruptedException {
+    public DockerTemplateTestResult runSubmissionWithTemplate(String script, String template, File[] inputFiles) throws InterruptedException {
 
         initFiles(inputFiles);
 
@@ -210,7 +210,17 @@ public class DockerSubmissionTestModel {
         removeFolder();
         dockerClient.removeContainerCmd(executionContainerID).exec();
 
-        return results;
+        // Check if allowed
+        boolean allowed = true;
+
+        for(DockerSubtestResult result : results){
+            if(result.isRequired() && !result.getCorrect().equals(result.getOutput())){
+                allowed = false;
+                break;
+            }
+        }
+
+        return new DockerTemplateTestResult(results, allowed);
     }
 
     public static void addDocker(String imageName){

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubtestResult;
+import com.ugent.pidgeon.model.submissionTesting.DockerTemplateTestResult;
 import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
 import java.io.File;
 import java.util.List;
@@ -101,9 +102,12 @@ public class DockerSubmissionTestTest {
        // DockerSubmissionTestModel.addDocker("alpine:latest");
         // Load docker container
         DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
-        List<DockerSubtestResult> results = stm.runSubmissionWithTemplate(script, template, files);
+        DockerTemplateTestResult result = stm.runSubmissionWithTemplate(script, template, files);
 
-        // Template parser testing
+        // Extract subtests
+        List<DockerSubtestResult> results = result.getSubtestResults();
+
+        // Testing for the template parser capabilities
         assertEquals(results.size(), 2);
 
         assertTrue(results.get(0).isRequired());
@@ -115,9 +119,11 @@ public class DockerSubmissionTestTest {
         assertEquals(results.get(0).getTestDescription(), "Test for hello world!");
         assertEquals(results.get(1).getTestDescription(), "");
 
-        // docker output testing
+        // Test  the docker output
         assertEquals(results.get(0).getOutput(), "HelloWorld!\n");
         assertEquals(results.get(1).getOutput(), "HelloWorld2!\n");
+
+        assertTrue(result.isAllowed());
 
     }
 
