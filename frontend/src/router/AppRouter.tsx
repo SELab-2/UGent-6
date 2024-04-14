@@ -13,7 +13,7 @@ import Submission from "../pages/submission/Submission"
 import Feedback from "../pages/feedback/Feedback"
 import ProjectRoutes from "./ProjectRoutes"
 import Error from "../pages/error/Error";
-import CourseAdminView from "../hooks/CourseAdminView"
+import AdminView from "../hooks/AdminView"
 
 
 
@@ -45,12 +45,10 @@ const AppRouter = () => {
         path={AppRoutes.PROFILE}
         element={<Profile />}
       />
-      {/*<CourseAdminView>*/}
         <Route
           path={AppRoutes.EDIT_ROLE}
-          element={<EditRole />}
+          element={<AdminView><EditRole /></AdminView>}
         />
-      {/*</CourseAdminView>*/}
       <Route
         path={AppRoutes.COURSE}
         element={<CourseRoutes />}

@@ -4,7 +4,7 @@ import { UserOutlined } from '@ant-design/icons';
 import { useTranslation } from "react-i18next"
 import { User } from "../../../providers/UserProvider"
 import { AppRoutes } from "../../../@types/routes";
-import CourseAdminView from "../../../hooks/CourseAdminView";
+import AdminView from "../../../hooks/AdminView";
 
 const ProfileCard: React.FC<{ user: User }> = ({ user }) => {
   const { token } = theme.useToken()
@@ -32,11 +32,11 @@ const ProfileCard: React.FC<{ user: User }> = ({ user }) => {
     >
       {t("profile." + user.role)}
       <Link to={AppRoutes.EDIT_ROLE}>
-        {/*<CourseAdminView>*/}
+        <AdminView>
           <Button type="primary" style={{ float: "right" }}>
-          {t("profile.editRole")}
+            {t("profile.editRole")}
           </Button>
-        {/*</CourseAdminView>*/}
+        </AdminView>
       </Link>
     </Card>
   )
