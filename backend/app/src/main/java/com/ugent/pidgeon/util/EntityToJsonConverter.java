@@ -169,6 +169,8 @@ public class EntityToJsonConverter {
             submissionUrl += "/" + groupId;
         }
 
+        // GroupId is null if the user is a course_admin/creator
+        Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
         return new ProjectResponseJson(
                 new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
                 project.getDeadline(),
@@ -179,7 +181,8 @@ public class EntityToJsonConverter {
                 ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
                 project.getMaxScore(),
                 project.isVisible(),
-                new ProjectProgressJson(completed, total)
+                new ProjectProgressJson(completed, total),
+                groupId
         );
     }
 
