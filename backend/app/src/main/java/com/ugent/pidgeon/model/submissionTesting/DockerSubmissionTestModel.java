@@ -66,12 +66,13 @@ public class DockerSubmissionTestModel {
     return runSubmission(script, new File[0]);
   }
 
-  private void initFiles(File[] inputFiles) {
+  private String initContainer(String script, File[] inputFiles) {
 
-    // init directories in the shared folder
+    // Init directories in the shared folder
     new File(localMountFolder + "input/").mkdirs();
     new File(localMountFolder + "output/").mkdirs();
 
+    // Copy input files to the shared folder
     for (File file : inputFiles) {
       try {
         FileUtils.copyFileToDirectory(file, new File(localMountFolder + "input/"));
@@ -79,18 +80,19 @@ public class DockerSubmissionTestModel {
         e.printStackTrace();
       }
     }
-  }
-
-  public DockerTestOutput runSubmission(String script, File[] inputFiles)
-      throws InterruptedException {
-
-    initFiles(inputFiles);
 
     // Configure and start the container
     container.withCmd("/bin/sh", "-c", script);
     CreateContainerResponse responseContainer = container.exec();
     String executionContainerID = responseContainer.getId(); // Use correct ID for operations
     dockerClient.startContainerCmd(executionContainerID).exec();
+    return executionContainerID;
+  }
+
+  public DockerTestOutput runSubmission(String script, File[] inputFiles)
+      throws InterruptedException {
+
+    String executionContainerID = initContainer(script, inputFiles);
 
     List<String> consoleLogs = new ArrayList<>();
 
@@ -111,7 +113,7 @@ public class DockerSubmissionTestModel {
       throw new RuntimeException(e);
     }
 
-    boolean allowPush = false;
+    boolean allowPush;
 
     try {
       String outputFileName = "testOutput";
@@ -134,13 +136,7 @@ public class DockerSubmissionTestModel {
   public DockerTemplateTestResult runSubmissionWithTemplate(String script, String template,
       File[] inputFiles) throws InterruptedException {
 
-    initFiles(inputFiles);
-
-    // Configure and start the container
-    container.withCmd("/bin/sh", "-c", script);
-    CreateContainerResponse responseContainer = container.exec();
-    String executionContainerID = responseContainer.getId(); // Use correct ID for operations
-    dockerClient.startContainerCmd(executionContainerID).exec();
+    String executionContainerID = initContainer(script, inputFiles);
 
     // execute dockerClient and await
     dockerClient.logContainerCmd(executionContainerID)
