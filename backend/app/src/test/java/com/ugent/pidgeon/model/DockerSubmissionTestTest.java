@@ -99,7 +99,7 @@ public class DockerSubmissionTestTest {
                 "/shared/input/HelloWorld.sh > /shared/output/HelloWorld;" +
                 "/shared/input/HelloWorld2.sh > /shared/output/HelloWorld2";
 
-       // DockerSubmissionTestModel.addDocker("alpine:latest");
+        DockerSubmissionTestModel.addDocker("alpine:latest");
         // Load docker container
         DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
         DockerTemplateTestResult result = stm.runSubmissionWithTemplate(script, template, files);
