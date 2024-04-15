@@ -1,5 +1,5 @@
 import { Button, Card, Form, Popconfirm, Space, Switch } from "antd"
-import { FC, useEffect, useState } from "react"
+import { FC, useContext, useEffect, useState } from "react"
 import CourseForm from "../../../../components/forms/CourseForm"
 import { useTranslation } from "react-i18next"
 import useCourse from "../../../../hooks/useCourse"
@@ -10,6 +10,7 @@ import { ApiRoutes } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../../@types/routes"
+import { CourseContext } from "../../../../router/CourseRoutes"
 
 const SettingsCard: FC = () => {
   const course = useCourse()
@@ -17,29 +18,35 @@ const SettingsCard: FC = () => {
   const [loading, setLoading] = useState(false)
   const { t } = useTranslation()
   const { message } = useAppApi()
-  const {updateCourses} = useUser()
+  const { updateCourses } = useUser()
   const navigate = useNavigate()
+  const {setCourse} = useContext(CourseContext)
 
   useEffect(() => {
     form.setFieldsValue(course)
   }, [course])
 
-  const saveCourse = (values: any) => {
-    console.log(values)
+  const saveCourse = async () => {
 
+    await form.validateFields()
+    
+    const values:{name:string, description:string} = form.getFieldsValue()
+    console.log(values);
+    values.description ??= ""
     setLoading(true)
-
-    // TODO: do api call to update course
-
-    setTimeout(() => {
-      setLoading(false)
-
+    try {
+      const res = await apiCall.patch(ApiRoutes.COURSE, values, { courseId: course.courseId })
       message.success(t("course.changesSaved"))
-    }, 1000)
+      setCourse(res.data)
+      await updateCourses()
+    } catch(err){
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const deleteCourse = async () => {
-    
     setLoading(true)
     try {
       await apiCall.delete(ApiRoutes.COURSE, undefined, { courseId: course.courseId })
@@ -47,14 +54,11 @@ const SettingsCard: FC = () => {
       await updateCourses()
       setLoading(false)
       navigate(AppRoutes.HOME)
-    } catch(err){
-      console.log(err);
+    } catch (err) {
+      console.log(err)
       //TODO: handle error
       setLoading(false)
     }
-
-    
-
   }
 
   return (
@@ -72,9 +76,10 @@ const SettingsCard: FC = () => {
             <Switch />
           </Form.Item>
         </CourseForm>
-        <Space style={{ width: "100%", textAlign: "center" }} align="center">
- 
-
+        <Space
+          style={{ width: "100%", textAlign: "center" }}
+          align="center"
+        >
           <Button
             loading={loading}
             type="primary"
@@ -91,9 +96,14 @@ const SettingsCard: FC = () => {
             okText={t("course.confirmDelete")}
             okButtonProps={{ danger: true }}
             cancelText={t("course.cancel")}
-            style={{maxWidth:"100px"}}
+            style={{ maxWidth: "100px" }}
           >
-            <Button danger  icon={<DeleteOutlined />}>{t("course.deleteCourse")}</Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+            >
+              {t("course.deleteCourse")}
+            </Button>
           </Popconfirm>
         </Space>
       </div>

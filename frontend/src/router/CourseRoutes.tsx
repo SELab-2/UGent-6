@@ -9,6 +9,7 @@ import { ApiRoutes } from "../@types/requests.d"
 
 export type CourseContextType = {
   course: CourseType
+  setCourse: (course: CourseType) => void
   member: UserCourseType
 }
 
@@ -61,7 +62,7 @@ const CourseRoutes: FC = () => {
     )
 
   return (
-    <CourseContext.Provider value={{ course: course!, member: member! }}>
+    <CourseContext.Provider value={{ setCourse,course: course!, member: member! }}>
       <Outlet />
     </CourseContext.Provider>
   )

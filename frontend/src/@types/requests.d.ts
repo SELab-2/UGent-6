@@ -66,9 +66,14 @@ export type DELETE_Requests = {
  * the body of the PUT requests
  */
 export type PUT_Requests = {
-  [ApiRoutes.COURSES]: {
-    name: string
-  }
+  [ApiRoutes.COURSE]: POST_Requests[ApiRoutes.COURSE]
+
+}
+
+
+
+export type PUT_Responses = {
+  [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
 }
 
 
