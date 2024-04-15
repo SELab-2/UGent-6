@@ -8,6 +8,8 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,8 +36,8 @@ public class EntityToJsonConverter {
 
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
-        GroupJson group = new GroupJson(groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
         GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
+        GroupJson group = new GroupJson(cluster.getMaxSize(), groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
         if (cluster != null && cluster.getGroupAmount() > 1){
             group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
         } else {
@@ -50,6 +52,7 @@ public class EntityToJsonConverter {
         group.setMembers(members);
         return group;
     }
+
 
     public GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster) {
         List<GroupJson> groups = groupRepository.findAllByClusterId(cluster.getId()).stream().map(
@@ -68,6 +71,10 @@ public class EntityToJsonConverter {
 
     public UserReferenceJson userEntityToUserReference(UserEntity user) {
         return new UserReferenceJson(user.getName() + " " + user.getSurname(), user.getEmail(), user.getId());
+    }
+
+    public UserReferenceWithRelation userEntityToUserReferenceWithRelation(UserEntity user, CourseRelation relation) {
+        return new UserReferenceWithRelation(userEntityToUserReference(user), relation.toString());
     }
 
     public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course, String joinLink) {
@@ -106,19 +113,46 @@ public class EntityToJsonConverter {
         );
     }
 
+    public GroupFeedbackJsonWithProject groupFeedbackEntityToJsonWithProject(GroupFeedbackEntity groupFeedbackEntity, ProjectEntity project) {
+        return new GroupFeedbackJsonWithProject(
+                project.getName(),
+                ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId(),
+                project.getId(),
+                groupFeedbackEntity == null ? null : groupFeedbackEntityToJson(groupFeedbackEntity),
+                project.getMaxScore()
+        );
+    }
+
+    public ProjectResponseJsonWithStatus projectEntityToProjectResponseJsonWithStatus(ProjectEntity project, CourseEntity course, UserEntity user) {
+        // Get status
+        Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+        SubmissionEntity sub = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
+        String status;
+        if (sub == null) {
+            status = "not started";
+        } else if (sub.getStructureAccepted() && sub.getStructureAccepted()) {
+            status = "correct";
+        } else {
+            status = "incorrect";
+        }
+
+
+        return new ProjectResponseJsonWithStatus(
+                projectEntityToProjectResponseJson(project, course, user),
+                status
+        );
+    }
+
     public ProjectResponseJson projectEntityToProjectResponseJson(ProjectEntity project, CourseEntity course, UserEntity user) {
         // Calculate the progress of the project for all groups
         List<Long> groupIds = projectRepository.findGroupIdsByProjectId(project.getId());
         Integer total = groupIds.size();
         Integer completed = groupIds.stream().map(groupId -> {
-            Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId);
-            if (submissionId == null) {
-                return 0;
-            }
-            SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
+            SubmissionEntity submission = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
             if (submission == null) {
                 return 0;
             }
+
             if (submission.getDockerAccepted() && submission.getStructureAccepted()) return 1;
             return 0;
         }).reduce(0, Integer::sum);
@@ -137,6 +171,8 @@ public class EntityToJsonConverter {
             submissionUrl += "/" + groupId;
         }
 
+        // GroupId is null if the user is a course_admin/creator
+        Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
         return new ProjectResponseJson(
                 new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
                 project.getDeadline(),
@@ -147,7 +183,8 @@ public class EntityToJsonConverter {
                 ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
                 project.getMaxScore(),
                 project.isVisible(),
-                new ProjectProgressJson(completed, total)
+                new ProjectProgressJson(completed, total),
+                groupId
         );
     }
 

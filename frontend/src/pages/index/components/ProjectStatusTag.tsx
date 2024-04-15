@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, CheckOutlined, ClockCircleOutlined, CloseCircleOutlined, LoadingOutlined, MinusCircleOutlined } from "@ant-design/icons"
+import { CheckCircleOutlined, CloseCircleOutlined, MinusCircleOutlined } from "@ant-design/icons"
 import { Tag } from "antd"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
@@ -9,20 +9,20 @@ const ProjectStatusTag: FC<{ status: ProjectStatus,icon?:boolean }> = ({ status,
   const { t } = useTranslation()
 
   if(icon){
-    if (status === "completed") {
+    if (status === "correct") {
       return <Tag icon={<CheckCircleOutlined />} color="green">{t("home.projects.status.completed")}</Tag>
-    } else if (status === "failed") {
+    } else if (status === "incorrect") {
       return <Tag icon={<CloseCircleOutlined />} color="volcano">{t("home.projects.status.failed")}</Tag>
-    } else if (status === "notStarted") {
+    } else if (status === "not started") {
       return <Tag icon={<MinusCircleOutlined />} color="default">{t("home.projects.status.notStarted")}</Tag>
     } else return null
   }
 
-  if (status === "completed") {
+  if (status === "correct") {
     return <Tag color="green">{t("home.projects.status.completed")}</Tag>
-  } else if (status === "failed") {
+  } else if (status === "incorrect") {
     return <Tag color="volcano">{t("home.projects.status.failed")}</Tag>
-  } else if (status === "notStarted") {
+  } else if (status === "not started") {
     return <Tag color="default">{t("home.projects.status.notStarted")}</Tag>
   } else return null
 }

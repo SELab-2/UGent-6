@@ -130,14 +130,9 @@ public class SubmissionController {
                 } else {
                     groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId());
                 }
-                Long submissionId = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId);
-                if (submissionId == null) {
-                    return new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson);
-                }
-
-                SubmissionEntity submission = submissionRepository.findById(submissionId).orElse(null);
+                SubmissionEntity submission = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId).orElse(null);
                 if (submission == null) {
-                    throw new RuntimeException("Submission not found");
+                    return new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson);
                 }
 
                 return new LastGroupSubmissionJson(entityToJsonConverter.getSubmissionJson(submission), groupjson, groupFeedbackJson);
