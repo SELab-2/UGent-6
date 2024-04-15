@@ -1,3 +1,5 @@
+import {ProjectFormData} from "../pages/projectCreate/components/ProjectCreateService";
+
 /**
  * Routes used to make API calls
  */
@@ -12,7 +14,7 @@ export enum ApiRoutes {
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
-  PROJECT_CREATE = "api/courses/:courseId/create",
+  PROJECT_CREATE = "api/courses/:courseId/projects",
   PROJECT_TESTS = "api/projects/:id/tests",
   PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
   PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",
@@ -43,6 +45,8 @@ export type POST_Requests = {
   [ApiRoutes.COURSES]: {
     name: string
   }
+  [ApiRoutes.PROJECT_CREATE]:
+      ProjectFormData
 }
 
 /**
@@ -50,6 +54,9 @@ export type POST_Requests = {
  */
 export type POST_Responses = {
   [ApiRoutes.COURSES]: {
+    id: string
+  },
+  [ApiRoutes.PROJECT_CREATE]: {
     id: string
   }
 }

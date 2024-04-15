@@ -1,3 +1,7 @@
+import apiCall from "../../../util/apiFetch";
+import {ApiRoutes, Timestamp} from "../../../@types/requests.d";
+
+
 export interface ProjectFormData {
     name: string;
     description: string;
@@ -15,31 +19,23 @@ export interface ProjectError {
 
 class ProjectCreateService {
     static async createProject(courseId: string, formData: ProjectFormData): Promise<ProjectError | void> {
-        return;
-        // const route = `api/courses/${courseId}/create`
-        // try {
-        //     const response = await fetch(route, {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify(formData)
-        //     });
-        //
-        //     if (!response.ok) {
-        //         // Handle error response
-        //         const errorData = await response.json(); // Assuming the error response contains JSON data
-        //         return {
-        //             code: response.status,
-        //             message: errorData.message || "Something went wrong" // Assuming there is a 'message' field in the error response
-        //         };
-        //     }
-        // } catch (error: any) {
-        //     return {
-        //         code: 500,
-        //         message: "Something went wrong"
-        //     };
-        // }
+        try {
+            const response = await apiCall.post(ApiRoutes.PROJECT_CREATE, formData, {courseId: courseId!});
+
+            if (!response.data || response.status !== 200) {
+                // Handle error response
+                const errorData = response.data || {};
+                return {
+                    code: response.status,
+                    message: errorData.id || "Something went wrong"
+                };
+            }
+        } catch (error: any) {
+            return {
+                code: 500,
+                message: "Something went wrong"
+            };
+        }
     }
 }
 
