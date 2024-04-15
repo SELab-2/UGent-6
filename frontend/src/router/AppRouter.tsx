@@ -14,6 +14,7 @@ import Feedback from "../pages/feedback/Feedback"
 import ProjectRoutes from "./ProjectRoutes"
 import Error from "../pages/error/Error";
 import AdminView from "../hooks/AdminView"
+import CourseInvite from "../pages/courseInvite/CourseInvite"
 
 
 
@@ -30,7 +31,11 @@ const AppRouter = () => {
         element={<AuthenticatedRoute />}
       >
 
+      <Route
+        path={AppRoutes.COURSE_INVITE}
+        element={<CourseInvite />}
 
+        />
    
 
        <Route
