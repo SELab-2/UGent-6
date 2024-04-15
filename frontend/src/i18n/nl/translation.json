@@ -131,8 +131,10 @@
     "inviteLink": "Inschrijvings link",
     "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak.",
     "deleteCourse": "Vak verwijderen",
-    "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen? Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
-    "confirmDelete": "Bevestig verwijdering"
+    "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen?\n Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
+    "confirmDelete": "Bevestig verwijdering",
+    "courseDeleted": "Vak succesvol verwijderd",
+    "createCourse":"Vak aanmaken"
   },
   "cancel": "Annuleren",
   "ok": "Ok",

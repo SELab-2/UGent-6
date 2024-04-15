@@ -72,6 +72,11 @@ html {
   src: url('\theme\fonts\JetBrainsMono-Regular.ttf') format('truetype');
 }
 
+
+.ant-popconfirm-description {
+  max-width: 250px;
+}
+
 /* *************************** Landing page *************************** */
 
 .landing-page * {

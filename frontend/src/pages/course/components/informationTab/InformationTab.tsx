@@ -11,7 +11,9 @@ const InformationTab = () => {
   return (
     <Row gutter={8}>
       <Col span={18}>
-        <Card style={{ width: "100%" }}>
+        <Card style={{ height:"100%" }} styles={{body: {
+          padding: "0 2rem"
+        }}}>
           <MarkdownTextfield content={course.description} />
         </Card>
       </Col>

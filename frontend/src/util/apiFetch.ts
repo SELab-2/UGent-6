@@ -65,7 +65,7 @@ async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", rou
   return axios(config)
 }
 
-export type POST_Error =  AxiosError<POST_Responses[keyof POST_Requests]>
+export type POST_Error<T extends keyof POST_Requests> =  AxiosError<POST_Responses[T], POST_Responses[T]>
 
 const apiCall = {
   get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues)                                  => apiFetch("GET", route,undefined,pathValues) as Promise<AxiosResponse<GET_Responses[T]>>,

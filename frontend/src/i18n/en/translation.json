@@ -132,7 +132,9 @@
     "inviteLinkInfo": "With this link, students can join your course",
     "deleteCourse": "Delete course",
     "deleteCourseDescription": "Are you sure you want to delete this course? All projects and submissions will be deleted as well. This action cannot be undone.",
-    "confirmDelete": "Confirm delete"
+    "confirmDelete": "Confirm delete",
+    "courseDeleted": "Course successfully deleted",
+    "createCourse": "Create course"
   },
   "cancel": "Cancel",
   "ok": "OK",

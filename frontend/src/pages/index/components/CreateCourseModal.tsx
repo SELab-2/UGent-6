@@ -51,7 +51,7 @@ const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ op
       title={t("home.createCourse")}
       onCancel={() => setOpen(false)}
       onOk={onFinish}
-      okText={t("ok")}
+      okText={t("course.createCourse")}
       okButtonProps={{ loading }}
       cancelText={t("cancel")}
       

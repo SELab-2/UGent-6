@@ -58,9 +58,7 @@ export type POST_Responses = {
  *  the body of the DELETE requests
  */
 export type DELETE_Requests = {
-  [ApiRoutes.COURSES]: {
-      name: string //TODO: 
-  }
+  [ApiRoutes.COURSE]: undefined
 }
 
 
