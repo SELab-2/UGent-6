@@ -48,7 +48,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       },
       {
         title: `Score (${project?.maxScore ?? ""})`,
-        render: (s: ProjectSubmissionsType) => <Typography.Text editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}>{s.feedback.score ?? "-"}</Typography.Text>,
+        render: (s: ProjectSubmissionsType) => <Typography.Text editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}>{s.feedback?.score ?? "-"}</Typography.Text>,
       },
       {
         title: "Download",
@@ -81,7 +81,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
                 onChange: (value)=> updateFeedback(g, value),
               }}
               >
-              {g.feedback.feedback || "-"}
+              {g.feedback?.feedback || "-"}
             </Typography.Paragraph>
               </div>
            
