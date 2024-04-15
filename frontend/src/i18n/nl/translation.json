@@ -71,17 +71,18 @@
     "loadingSubmissions": "Indieningen laden...",
     "options": "Opties",
     "change": {
+      "title": "Maak project aan",
       "name": "Naam",
       "nameMessage": "Vul de naam van het project in asljeblieft",
       "description": "Beschrijving",
       "descriptionMessage": "Vul de beschrijving van het project in alsjeblieft",
       "groupClusterId": "Groep Cluster ID",
-      "groupClusterIdMessage": "Vul de Groep Cluster ID in alsjeblieft (Getal)",
+      "groupClusterIdMessage": "Vul de Groep Cluster ID in alsjeblieft",
       "testId": "Test Id",
-      "testIdMessage": "Vul de Test ID in alsjeblieft (Getal)",
+      "testIdMessage": "Vul de Test ID in alsjeblieft",
       "visible": "Project zichtbaar maken",
       "maxScore": "Maximum score",
-      "maxScoreMessage": "Vul alsjeblieft de maximum score van het project in (Getal)",
+      "maxScoreMessage": "Vul alsjeblieft de maximum score van het project in)",
       "deadline": "Deadline",
       "create": "Project Aanmaken"
     }

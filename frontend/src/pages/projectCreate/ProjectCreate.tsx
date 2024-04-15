@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import {useParams, useNavigate, useNavigation} from 'react-router-dom';
-import {Button, Form, Input, Switch, DatePicker, theme, Checkbox} from 'antd';
+import {Button, Form, Input, Switch, DatePicker, theme, Checkbox, Typography} from 'antd';
 import {useTranslation} from "react-i18next";
 import useApp from "../../hooks/useApp";
 import useCourse from "../../hooks/useCourse";
 import  { ProjectFormData,ProjectError } from './components/ProjectCreateService';
 import Error from "../error/Error";
 import ProjectCreateService from "./components/ProjectCreateService";
-import {AppRoutes} from "../../@types/routes";
+import GroupClusterDropdown from "./components/GroupClusterDropdown";
 
 
 const ProjectCreate: React.FC = () => {
+    const { Title } = Typography;
     const [form] = Form.useForm();
     const { token } = theme.useToken()
     const { t } = useTranslation()
@@ -20,6 +21,7 @@ const ProjectCreate: React.FC = () => {
     const { courseId } = useParams<{ courseId: string }>();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<ProjectError | null>(null); // Gebruik ProjectError type voor error state
+    const [clusterChosen, setClusterChosen] = useState<boolean>(false);
     const [formData, setFormData] = useState<ProjectFormData>({
         name: '',
         description: '',
@@ -33,7 +35,6 @@ const ProjectCreate: React.FC = () => {
         setLoading(true);
         try {
             if (courseId !== undefined) {
-
                 // Roep createProject aan en controleer op fouten
                 const result = await ProjectCreateService.createProject(courseId, formData);
                 if (result instanceof Object && 'code' in result) { // Controleer of result een ProjectError object is
@@ -56,6 +57,9 @@ const ProjectCreate: React.FC = () => {
     };
 
     const handleInputChange = (fieldName: keyof ProjectFormData, value: any) => {
+        if(fieldName === "groupClusterId"){
+            setClusterChosen(true);
+        }
         setFormData(prevState => ({
             ...prevState,
             [fieldName]: value
@@ -66,6 +70,9 @@ const ProjectCreate: React.FC = () => {
     return (
         <>
             {error && <Error errorCode={error.code} errorMessage={error.message} />} {/* Toon Error-pagina als er een fout is */}
+            <Title>
+                {t("project.change.title")}
+            </Title>
             <Form form={form} onFinish={handleCreation} layout="vertical">
                 <Form.Item label={t("project.change.name")} name="name" rules={[{ required: true, message: t("project.change.nameMessage") }]}>
                     <Input value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} />
@@ -73,8 +80,17 @@ const ProjectCreate: React.FC = () => {
                 <Form.Item label={t("project.change.description")} name="description" rules={[{ required: true, message: t("project.change.descriptionMessage") }]}>
                     <Input.TextArea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} />
                 </Form.Item>
-                <Form.Item label={t("project.change.groupClusterId")} name="groupClusterId" rules={[{ required: true, message: t("project.change.groupClusterIdMessage") }]}>
-                    <Input type="number" value={formData.groupClusterId} onChange={(e) => handleInputChange('groupClusterId', e.target.value)} />
+                <Form.Item
+                    label={t("project.change.groupClusterId")}
+                    name="groupClusterId"
+                    rules={[{
+                        required: !clusterChosen, // Alleen verplicht als er geen cluster is gekozen
+                        message: t("project.change.groupClusterIdMessage")
+                    }]}
+                >
+                    <GroupClusterDropdown courseId={courseId || ''} onSelect={(value) => {
+                        handleInputChange('groupClusterId', value);
+                    }} />
                 </Form.Item>
                 <Form.Item label={t("project.change.testId")} name="testId">
                     <Input type="number" value={formData.testId || -1} onChange={(e) => handleInputChange('testId', e.target.value)} />
@@ -85,7 +101,7 @@ const ProjectCreate: React.FC = () => {
                 <Form.Item label={t("project.change.maxScore")} name="maxScore" rules={[{ required: true, message: t("project.change.maxScoreMessage") }]}>
                     <Input type="number" value={formData.maxScore} onChange={(e) => handleInputChange('maxScore', e.target.value)} />
                 </Form.Item>
-                <Form.Item label={t("project.change.deadline")} name="deadline">
+                <Form.Item label={t("project.change.deadline")} name="deadline" rules={[{required: true}]}>
                     <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" value={formData.deadline} onChange={(date) => handleInputChange('deadline', date)} />
                 </Form.Item>
                 <Form.Item>
