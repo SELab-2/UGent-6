@@ -14,10 +14,8 @@ public interface CourseUserRepository extends JpaRepository<CourseUserEntity, Co
 
     @Query(value = """
           SELECT cue FROM CourseUserEntity cue
-            JOIN UserEntity ue ON ue.id = cue.userId
-            JOIN GroupEntity ge on ge.id = cue.courseId
-            WHERE cue.courseId = ?1
-            """)
+          WHERE cue.courseId = ?1
+    """)
     List<CourseUserEntity> findAllMembers(Long courseId);
     @Query(value = """
         SELECT CASE WHEN EXISTS (

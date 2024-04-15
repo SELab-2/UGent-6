@@ -496,4 +496,3 @@ public class CourseControllerTest extends ControllerTest {
                 .andExpect(status().isIAmATeapot());
     }
 }
-

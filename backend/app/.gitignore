@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### secrets ###
+src/main/resources/application-secrets.properties

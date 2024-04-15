@@ -19,5 +19,6 @@ public record ProjectResponseJson(
         String testUrl, //url to -> test of group for student, all tests for teacher
         Integer maxScore,
         boolean visible,
-        ProjectProgressJson progress
+        ProjectProgressJson progress,
+        Long groupId
 ) {}

@@ -2,9 +2,11 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.*;
 
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
@@ -43,34 +45,46 @@ public class ProjectController {
   @Autowired
   private CommonDatabaseActions commonDatabaseActions;
 
-  /**
-   * Function to get all projects of a user
-   *
-   * @param auth authentication object of the requesting user
-   * @return ResponseEntity with a list of projects
-   * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883808">apiDog
-   * documentation</a>
-   * @HttpMethod GET
-   * @AllowedRoles teacher, student
-   * @ApiPath /api/projects
-   */
-  @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
-  @Roles({UserRole.teacher, UserRole.student})
-  public ResponseEntity<?> getProjects(Auth auth) {
-    long userid = auth.getUserEntity().getId();
-    List<ProjectEntity> allProjects = projectRepository.findProjectsByUserId(userid);
-    List<Map<String, String>> projectsWithUrls = new ArrayList<>();
+    /**
+     * Function to get all projects of a user
+     * @param auth authentication object of the requesting user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883808">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects
+     * @return ResponseEntity with a list of projects
+     */
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH)
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getProjects(Auth auth) {
+        UserEntity user = auth.getUserEntity();
+        List<ProjectEntity> allProjects = projectRepository.findProjectsByUserId(user.getId());
+        List<ProjectResponseJsonWithStatus> enrolledProjects = new ArrayList<>();
+        List<ProjectResponseJson> adminProjects = new ArrayList<>();
 
-    for (ProjectEntity project : allProjects) {
-      Map<String, String> projectInfo = new HashMap<>();
-      projectInfo.put("name", project.getName());
-      projectInfo.put("url", ApiRoutes.PROJECT_BASE_PATH + '/' + project.getId());
-      projectsWithUrls.add(projectInfo);
+        for (ProjectEntity project : allProjects) {
+          // Get course
+          CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = courseUtil.getCourseIfUserInCourse(project.getCourseId(), user);
+          if (courseCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
+          }
+
+          CourseEntity course = courseCheck.getData().getFirst();
+          CourseRelation relation = courseCheck.getData().getSecond();
+
+          if (relation.equals(CourseRelation.enrolled)) {
+            if (project.isVisible()) {
+              enrolledProjects.add(entityToJsonConverter.projectEntityToProjectResponseJsonWithStatus(project, course, user));
+            }
+          } else {
+            adminProjects.add(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
+          }
+        }
+
+        return ResponseEntity.ok().body(new userProjectsJson(enrolledProjects, adminProjects));
     }
 
-    return ResponseEntity.ok().body(projectsWithUrls);
-  }
-
+  
 
   /**
    * Function to get a project by its ID
@@ -94,11 +108,16 @@ public class ProjectController {
     }
     ProjectEntity project = checkResult.getData();
 
-    CheckResult<CourseEntity> courseCheck = courseUtil.getCourseIfExists(project.getCourseId());
+    CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = courseUtil.getCourseIfUserInCourse(project.getCourseId(), user);
+    
     if (courseCheck.getStatus() != HttpStatus.OK) {
-      return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
+        return ResponseEntity.status(courseCheck.getStatus()).body(courseCheck.getMessage());
     }
-    CourseEntity course = courseCheck.getData();
+    CourseEntity course = courseCheck.getData().getFirst();
+    CourseRelation relation = courseCheck.getData().getSecond();
+    if (!project.isVisible() && relation.equals(CourseRelation.enrolled)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+    }
 
     return ResponseEntity.ok()
         .body(entityToJsonConverter.projectEntityToProjectResponseJson(project, course, user));
@@ -143,6 +162,7 @@ public class ProjectController {
       if (checkResult.getStatus() != HttpStatus.OK) {
         return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
       }
+
 
       // Create a new ProjectEntity instance
       ProjectEntity project = new ProjectEntity(courseId, projectJson.getName(),
@@ -272,8 +292,23 @@ public class ProjectController {
       return ResponseEntity.status(checkProject.getStatus()).body(checkProject.getMessage());
     }
 
-    return doProjectUpdate(project, projectJson, auth.getUserEntity());
-  }
+    /**
+     * Function to get all groups of a project
+     * @param projectId ID of the project to get the groups of
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6343073">apiDog documentation</a>
+     * @HttpMethod GET
+     * @ApiPath /api/projects/{projectId}/groups
+     * @return ResponseEntity with groups as specified in the apidog
+     */
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}/groups")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getGroupsOfProject(@PathVariable Long projectId, Auth auth) {
+        // Check if the user is an admin of the project
+        CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, auth.getUserEntity());
+        if (projectCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
+        }
+        ProjectEntity project = projectCheck.getData();
 
   /**
    * Function to delete a project by its ID
