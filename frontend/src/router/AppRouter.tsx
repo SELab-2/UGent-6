@@ -30,7 +30,7 @@ const AppRouter = () => {
       <Route
         path="/"
         element={<AuthenticatedRoute />}
-      >
+      />
 
       <Route
         path={AppRoutes.COURSE_INVITE}
