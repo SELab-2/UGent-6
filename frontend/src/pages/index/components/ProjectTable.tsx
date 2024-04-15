@@ -59,15 +59,14 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
 
       {
         // volcano, geekblue,green
-        title: isTeacher ? t("home.projects.groupProgress") : t("home.projects.projectStatus"),
-        key: "status",
-        render: () =>
-          isTeacher ? (
+        title: t("home.projects.projectStatus"),
+        render: (project:ProjectType) =>
+          !project.status ? (
             <GroupProgress
-              usersCompleted={Math.floor(Math.random() * 121)}
-              userCount={121}
+              usersCompleted={project.progress.completed}
+              userCount={project.progress.total}
             />
-          ) : <ProjectStatusTag status="completed" />, // TODO: get status from project
+          ) : <ProjectStatusTag status={project.status} />, 
       },
       {
         key: "action",

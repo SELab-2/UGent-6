@@ -1,16 +1,14 @@
 package com.ugent.pidgeon.model.json;
 
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
-
 public class UserReferenceJson {
     private String name;
     private String email;
-    private Long id;
+    private Long userId;
 
-    public UserReferenceJson(String name, String email, Long id) {
+    public UserReferenceJson(String name, String email, Long userId) {
         this.name = name;
         this.email = email;
-        this.id = id;
+        this.userId = userId;
     }
 
     public String getEmail() {
@@ -21,12 +19,12 @@ public class UserReferenceJson {
         this.email = email;
     }
 
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public UserReferenceJson() {

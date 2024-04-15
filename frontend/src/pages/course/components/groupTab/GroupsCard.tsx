@@ -3,7 +3,6 @@ import { FC, useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
-import GroupCollapseItem from "./GroupCollapseItem"
 import apiCall from "../../../../util/apiFetch"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
@@ -14,7 +13,6 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   useEffect(() => {
     // TODO: do the fetch (get all clusters from the course )
     if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
-    
 
     apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId }).then((res) => {
       console.log(res.data)
@@ -26,20 +24,20 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   //   <Spin tip="Loading"></Spin>
   // </div>
 
-  const items: CollapseProps["items"] =
-    groups?.map((cluster) => ({
-      key: cluster.clusterId.toString(),
-      label: cluster.name,
-      children:  <GroupList groups={cluster.groups} capacity={cluster.capacity} />
+  const items: CollapseProps["items"] = groups?.map((cluster) => ({
+    key: cluster.clusterId.toString(),
+    label: cluster.name,
+    children: (
+      <GroupList
+        groups={cluster.groups}
+        capacity={cluster.capacity}
+      />
+    ),
+  }))
 
-    })) 
-    
-
-
-    return (
+  return (
     <Card
       {...cardProps}
-
       styles={{
         body: {
           padding: "0",

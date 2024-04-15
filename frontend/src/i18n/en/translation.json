@@ -9,11 +9,13 @@
     "light": "Light"
   },
   "home": {
-    "yourCourses": "Your courses",
+    "yourCourses": "Courses",
     "createCourse": "Create course",
     "courseName": "Course name",
     "courseDescription": "Description",
-    "yourProjects": "Your projects",
+    "yourProjects": "Projects",
+    "myCourses": "My courses",
+    "noCourses": "You're not in any courses yet, you can joined a course by opening a course join link.",
     "projects": {
       "noProjects": "No projects",
       "name": "Name",

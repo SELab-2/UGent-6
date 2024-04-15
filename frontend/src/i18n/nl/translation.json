@@ -10,10 +10,12 @@
   },
   "home": {
     "yourCourses": "Vakken",
+    "myCourses": "Mijn vakken",
     "createCourse": "Vak aanmaken",
     "courseName": "Vak naam",
     "courseDescription": "Beschrijving",
     "yourProjects": "Projecten",
+    "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",
     "projects": {
       "noProjects": "Geen projecten",
       "name": "Naam",
