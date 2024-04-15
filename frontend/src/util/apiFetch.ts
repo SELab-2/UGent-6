@@ -1,5 +1,5 @@
 import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Responses, PUT_Requests } from "../@types/requests"
-import axios, { AxiosResponse } from "axios"
+import axios, { AxiosError, AxiosResponse } from "axios"
 import { msalInstance } from "../index"
 import { AxiosRequestConfig } from "axios"
 import { msalConfig } from "../auth/AuthConfig"
@@ -64,6 +64,8 @@ async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", rou
 
   return axios(config)
 }
+
+export type POST_Error =  AxiosError<POST_Responses[keyof POST_Requests]>
 
 const apiCall = {
   get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues)                                  => apiFetch("GET", route,undefined,pathValues) as Promise<AxiosResponse<GET_Responses[T]>>,
