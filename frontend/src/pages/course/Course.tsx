@@ -32,7 +32,7 @@ const Course: FC = () => {
       {
         key: "1",
         label: t("course.projects"),
-        children: <ProjectCard courseId={course.courseId} />,
+        children: <ProjectCard courseId={course.courseId!} />,
       },
       {
         key: "2",
