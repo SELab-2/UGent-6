@@ -110,7 +110,7 @@ export type GET_Responses = {
     oid: string
   }
   [ApiRoutes.PROJECT_SUBMISSIONS]: {
-    feedback: GET_Responses[ApiRoutes.PROJECT_SCORE], 
+    feedback: GET_Responses[ApiRoutes.PROJECT_SCORE] | null, 
     group: GET_Responses[ApiRoutes.GROUP], 
     submission:  GET_Responses[ApiRoutes.SUBMISSION] | null // null if no submission yet
   }[],
