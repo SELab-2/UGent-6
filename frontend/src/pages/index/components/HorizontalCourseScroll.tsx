@@ -111,13 +111,14 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
           >
             {t("home.myCourses")}
 
-            {courseProjects && courseProjectsArray.length === 0 && (
+            {courseProjects && courseProjectsArray.length === 0 && (<TeacherView>
               <Button
                 onClick={onOpenNew}
                 type="text"
                 style={{ marginLeft: "1rem" }}
                 icon={<PlusOutlined />}
               />
+              </TeacherView>
             )}
           </Typography.Title>
           <Space

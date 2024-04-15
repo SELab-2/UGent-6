@@ -1,4 +1,4 @@
-import { Card, Collapse, CollapseProps, Spin } from "antd"
+import { Card, Collapse, CollapseProps, Spin, Typography } from "antd"
 import { FC, useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
@@ -35,6 +35,9 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     ),
   }))
 
+  if(!items?.length) return <div style={{textAlign:"center"}}>
+     <Typography.Text type="secondary">No groups found</Typography.Text>
+  </div>
   return (
     <Card
       {...cardProps}
@@ -44,7 +47,7 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
         },
       }}
     >
-      <Collapse items={items} />
+       <Collapse items={items} />
     </Card>
   )
 }

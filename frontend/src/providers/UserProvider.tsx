@@ -5,7 +5,8 @@ import { useIsAuthenticated } from "@azure/msal-react"
 
 type UserContextProps = {
   user: User | null
-  updateUser: () => void
+  updateUser: () => Promise<void>
+  updateCourses: (userId?:number|undefined) => Promise<void>
   courses: UserCourseType[] | null
 }
 
@@ -25,22 +26,30 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [isAuthenticated])
 
+  const updateCourses =  async (userId:number|undefined = user?.id) => {
+    if(!userId) return console.error("No user id provided")
+    try {
+      const res = await apiCall.get(ApiRoutes.USER_COURSES,{id:userId})
+      setCourses(res.data)
+
+    } catch(err){
+      // TODO: handle error
+    }
+  }
+
   const updateUser = async () => {
     try {
       let data = await apiCall.get(ApiRoutes.USER_AUTH)
 
       setUser(data.data)
 
-      let response = await apiCall.get(ApiRoutes.USER_COURSES, {
-        id: data.data.id,
-      })
-      setCourses(response.data)
+      await updateCourses(data.data.id)
     } catch (err) {
       console.log(err)
     }
   }
 
-  return <UserContext.Provider value={{ updateUser, user, courses }}>{children}</UserContext.Provider>
+  return <UserContext.Provider value={{ updateUser,updateCourses, user, courses }}>{children}</UserContext.Provider>
 }
 
 export { UserProvider, UserContext }

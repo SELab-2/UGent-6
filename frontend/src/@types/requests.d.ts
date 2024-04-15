@@ -34,6 +34,7 @@ export enum ApiRoutes {
 
   TEST = "api/test",
   USER = "api/users/:id",
+  USERS = "api/users",
   USER_AUTH = "api/auth",
 }
 
@@ -45,6 +46,7 @@ export type Timestamp = string
 export type POST_Requests = {
   [ApiRoutes.COURSES]: {
     name: string
+    description:string
   }
   [ApiRoutes.PROJECT_CREATE]:
       ProjectFormData
@@ -54,21 +56,19 @@ export type POST_Requests = {
  * The response you get from the POST request
  */
 export type POST_Responses = {
-  [ApiRoutes.COURSES]: {
-    id: string
-  },
+
+  [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE],
   [ApiRoutes.PROJECT_CREATE]: {
     id: string
   }
+
 }
 
 /**
  *  the body of the DELETE requests
  */
 export type DELETE_Requests = {
-  [ApiRoutes.COURSES]: {
-      name: string //TODO: 
-  }
+  [ApiRoutes.COURSE]: undefined
 }
 
 
@@ -76,9 +76,14 @@ export type DELETE_Requests = {
  * the body of the PUT requests
  */
 export type PUT_Requests = {
-  [ApiRoutes.COURSES]: {
-    name: string
-  }
+  [ApiRoutes.COURSE]: POST_Requests[ApiRoutes.COURSE]
+
+}
+
+
+
+export type PUT_Responses = {
+  [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
 }
 
 
@@ -95,7 +100,7 @@ type Course = {
 
 export type ProjectStatus = "correct" | "incorrect" | "not started"
 export type CourseRelation = "enrolled" | "course_admin" | "creator"
-
+export type UserRole = "student" | "teacher" | "admin"
 
 /**
  * The response you get from the GET request
@@ -168,9 +173,15 @@ export type GET_Responses = {
   [ApiRoutes.GROUP_MEMBER]: {
     email: string
     name: string
-    userId:  number
+    id: number
   }
-  [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
+  [ApiRoutes.USERS]: {
+    name: string
+    userId: number
+    url: string
+    email: string
+    role: UserRole
+  }
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
 
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][]
@@ -191,7 +202,7 @@ export type GET_Responses = {
     name: string
     teacher: CourseTeacher
     assistents: CourseTeacher[]
-    joinKey: string
+    joinUrl: string
   }
   [ApiRoutes.COURSE_MEMBERS]: {
     relation: CourseRelation,
@@ -201,7 +212,7 @@ export type GET_Responses = {
     courseUrl: string
     projects_url: string
     url: string
-    role: "teacher" | "student" | "admin"
+    role: UserRole
     email: string
     id: number
     name: string

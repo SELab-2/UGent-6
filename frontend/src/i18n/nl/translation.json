@@ -16,6 +16,11 @@
     "courseDescription": "Beschrijving",
     "yourProjects": "Projecten",
     "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",
+    "courseNameMaxLength": "Vak naam mag maximaal 50 karakters bevatten",
+    "courseNameRequired": "Vak naam is verplicht",
+    "courseNameMinLength": "Vak naam moet minimaal 3 karakters bevatten",
+    "courseDescriptionMaxLength": "Beschrijving mag maximaal 2000 karakters bevatten",
+    "courseCreated": "Vak aangemaakt",
     "projects": {
       "noProjects": "Geen projecten",
       "name": "Naam",
@@ -42,7 +47,16 @@
   "profile": {
     "student": "Student aan Universiteit Gent",
     "teacher": "Professor aan Universiteit Gent",
-    "admin": "Admin aan Universiteit Gent"
+    "admin": "Admin aan Universiteit Gent",
+    "editRole": "Pas de rol van een gebruiker aan"
+  },
+
+  "editRole": {
+    "student": "Student",
+    "teacher": "Professor",
+    "admin": "Admin",
+    "confirmation": "Bevestiging",
+    "confirmationText": "Bent u zeker dat u de rol van {{name}} wilt aanpassen naar {{role}}?"
   },
 
   "project": {
@@ -70,6 +84,7 @@
     "noSubmissions": "Geen indieningen",
     "loadingSubmissions": "Indieningen laden...",
     "options": "Opties",
+    "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
     "change": {
       "title": "Maak project aan",
@@ -129,8 +144,19 @@
     "archived": "Gearchiveerd",
     "score": "Score",
     "noGroups": "Geen groepen beschikbaar",
-    "searchMember": "Zoek lid"
+    "searchMember": "Zoek lid",
+    "inviteLink": "Inschrijvings link",
+    "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak.",
+    "deleteCourse": "Vak verwijderen",
+    "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen? Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
+    "confirmDelete": "Bevestig verwijdering",
+    "courseDeleted": "Vak succesvol verwijderd",
+    "createCourse":"Vak aanmaken",
+    "changesSaved": "Aanpassingen opgeslagen"
   },
+  "cancel": "Annuleren",
+  "ok": "Ok",
+  "woops": "Oeps er ging iets mis",
   "error": {
     "title": "Fout",
     "subtitle": "Er ging iets mis, probeer het later opnieuw.",
