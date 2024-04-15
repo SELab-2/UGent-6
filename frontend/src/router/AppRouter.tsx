@@ -7,11 +7,13 @@ import Course from "../pages/course/Course"
 import CourseRoutes from "./CourseRoutes"
 import HomeAuthCheck from "../pages/index/HomeAuthCheck"
 import Project from "../pages/project/Project"
+import EditRole from "../pages/editRole/EditRole"
 import Submit from "../pages/submit/Submit"
 import Submission from "../pages/submission/Submission"
 import Feedback from "../pages/feedback/Feedback"
 import ProjectRoutes from "./ProjectRoutes"
 import Error from "../pages/error/Error";
+import AdminView from "../hooks/AdminView"
 
 
 
@@ -43,6 +45,10 @@ const AppRouter = () => {
         path={AppRoutes.PROFILE}
         element={<Profile />}
       />
+        <Route
+          path={AppRoutes.EDIT_ROLE}
+          element={<AdminView><EditRole /></AdminView>}
+        />
       <Route
         path={AppRoutes.COURSE}
         element={<CourseRoutes />}

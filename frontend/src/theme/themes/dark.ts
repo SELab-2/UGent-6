@@ -16,6 +16,9 @@ export const darkTheme: ThemeConfig = {
     headerBg: "#002766", //#1b1b1B
     headerHeight: 48,
 
+   },
+   Dropdown: {
+    colorPrimary: "#eee"
    }
   }
 };

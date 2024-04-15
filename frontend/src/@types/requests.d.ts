@@ -31,6 +31,7 @@ export enum ApiRoutes {
 
   TEST = "api/test",
   USER = "api/users/:id",
+  USERS = "api/users",
   USER_AUTH = "api/auth",
 }
 
@@ -87,7 +88,7 @@ type Course = {
 
 export type ProjectStatus = "correct" | "incorrect" | "not started"
 export type CourseRelation = "enrolled" | "course_admin" | "creator"
-
+export type UserRole = "student" | "teacher" | "admin"
 
 /**
  * The response you get from the GET request
@@ -160,7 +161,7 @@ export type GET_Responses = {
   [ApiRoutes.GROUP_MEMBER]: {
     email: string
     name: string
-    userId:  number
+    id: number
   }
   [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
@@ -193,7 +194,7 @@ export type GET_Responses = {
     courseUrl: string
     projects_url: string
     url: string
-    role: "teacher" | "student" | "admin"
+    role: UserRole
     email: string
     id: number
     name: string
