@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { DownloadOutlined } from "@ant-design/icons"
 import useProject from "../../../hooks/useProject"
 import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
 
 const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number]) => {
@@ -16,6 +16,7 @@ const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number
 const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = ({ submissions }) => {
   const { t } = useTranslation()
   const project = useProject()
+  const {courseId} = useParams()
 
   const updateScore = (s: ProjectSubmissionsType, score: string) => {
     // TODO: update score
@@ -35,16 +36,17 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       },
       {
         title: t("project.submission"),
-        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION.replace(":submissionId", s.submission?.submissionId+"")}><Button type="link">#{s.submission?.submissionId}</Button></Link>,
+        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION.replace(":submissionId", s.submission?.submissionId+"").replace(":projectId", s.submission?.projectId+"").replace(":courseId", courseId!)}><Button type="link">#{s.submission?.submissionId}</Button></Link>,
       },
       {
         title: t("project.status"),
+        dataIndex: "submission",
         render: (s) => <Typography.Text><SubmissionStatusTag status={createStatusBitVector(s)}/> </Typography.Text>,
       },
       {
         title: t("project.submissionTime"),
-        dataIndex: "submitted_time",
-        render: (time) => <Typography.Text>{new Date(time).toLocaleString()}</Typography.Text>,
+        dataIndex: "submission",
+        render: (time:ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
       },
       {
         title: `Score (${project?.maxScore ?? ""})`,
@@ -85,7 +87,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
             </Typography.Paragraph>
               </div>
            
-            <Typography.Text strong>Group members:</Typography.Text>
+            <Typography.Text strong>{t("project.groupMembers")}</Typography.Text>
             <List
               locale={{ emptyText: t("project.groupEmpty") }}
               dataSource={g.group.members ?? []}

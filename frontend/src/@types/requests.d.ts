@@ -43,6 +43,7 @@ export type Timestamp = string
 export type POST_Requests = {
   [ApiRoutes.COURSES]: {
     name: string
+    description:string
   }
 }
 
@@ -50,9 +51,7 @@ export type POST_Requests = {
  * The response you get from the POST request
  */
 export type POST_Responses = {
-  [ApiRoutes.COURSES]: {
-    id: string
-  }
+  [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE]
 }
 
 /**
@@ -190,7 +189,7 @@ export type GET_Responses = {
     name: string
     teacher: CourseTeacher
     assistents: CourseTeacher[]
-    joinKey: string
+    joinUrl: string
   }
   [ApiRoutes.COURSE_MEMBERS]: {
     relation: CourseRelation,

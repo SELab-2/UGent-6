@@ -11,6 +11,8 @@ import MembersCard from "./components/membersTab/MemberCard"
 import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
+import InformationTab from "./components/informationTab/InformationTab"
+import { InfoOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined, UsergroupAddOutlined } from "@ant-design/icons"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -24,42 +26,47 @@ const Course: FC = () => {
 
   const items: TabsProps["items"] = useMemo(() => {
     let tabs: TabsProps["items"] = [
-      // {
-      //   key: "1",
-      //   label: t("course.info"),
-      //   children: "Content of Tab Pane 3",
-      // },
       {
-        key: "1",
+        key: "info",
+        label: t("course.info"),
+        icon: <InfoOutlined />,
+        children: <InformationTab />,
+      },
+      {
+        key: "projects",
         label: t("course.projects"),
+        icon: <UnorderedListOutlined />,
         children: <ProjectCard courseId={course.courseId} />,
       },
       {
-        key: "2",
+        key: "groups",
         label: t("course.groups"),
+        icon: <TeamOutlined />,
         children: <GroupsCard courseId={course.courseId!} />,
       }
     ]
-
     if (isCourseAdmin) {
 
       tabs = tabs.concat([
         {
-          key: "5",
+          key: "members",
           label: t("course.members"),
+          icon: <UserOutlined />,
           children: <MembersCard />
         },
         {
-          key: "6",
+          key: "settings",
           label: t("course.settings"),
+          icon: <SettingOutlined />,
           children: <SettingsCard />,
         },
       ])
     } else {
       tabs = tabs.concat([
         {
-          key: "4",
+          key: "grades",
           label: t("course.grades"),
+          icon: <ScheduleOutlined />,
           children: <GradesCard />
         },
       ])
