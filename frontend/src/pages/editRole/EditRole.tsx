@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Spin } from "antd";
 import UserList from "./components/UserList"
 import { ApiRoutes, GET_Responses, UserRole } from "../../@types/requests.d";
+import apiCall from "../../util/apiFetch";
 
-export type UserType = GET_Responses[ApiRoutes.USERS][number]
+export type UsersType = GET_Responses[ApiRoutes.USERS]
 
 const ProfileContent = () => {
-    const [users, setUsers] = useState<UserType[] | null>(null);
+    const [users, setUsers] = useState<UsersType[] | null>(null);
 
-    function updateRole(user: UserType, role: UserRole) {
+    function updateRole(user: UsersType, role: UserRole) {
       //TODO: PUT of PATCH call
       console.log("User: ", user);
       console.log("Role: ", role);
@@ -24,27 +25,31 @@ const ProfileContent = () => {
 
     useEffect(() => {
       //TODO: moet met GET call
+        /*apiCall.get(ApiRoutes.USERS).then((res) => {
+          console.log(res.data)
+          setUsers(res.data)
+        })*/
       setUsers([
         {
-          userId: "1",
-          name: "Alice",
-          surname: "Kornelis",
+          userId: 1,
+          name: "Alice Kornelis",
           role: "student",
-          url:  ApiRoutes.GROUP_MEMBER
+          email: "test@test.test",
+          url: "test"
         },
         {
-          userId: "2",
-          name: "Bob",
-          surname: "Kornelis",
+          userId: 2,
+          name: "Bob Kornelis",
           role: "teacher",
-          url:  ApiRoutes.GROUP_MEMBER
+          email: "test@test.test",
+          url: "test"
         },
         {
-          userId: "3",
-          name: "Charlie",
-          surname: "Kornelis",
+          userId: 3,
+          name: "Charlie Kornelis",
           role: "admin",
-          url:  ApiRoutes.GROUP_MEMBER
+          email: "test@test.test",
+          url: "test"
         }
       ]);
       }, []);

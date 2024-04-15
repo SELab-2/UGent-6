@@ -163,7 +163,13 @@ export type GET_Responses = {
     name: string
     id: number
   }
-  [ApiRoutes.USERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
+  [ApiRoutes.USERS]: {
+    name: string
+    userId: number
+    url: string
+    email: string
+    role: UserRole
+  }
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
 
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][]

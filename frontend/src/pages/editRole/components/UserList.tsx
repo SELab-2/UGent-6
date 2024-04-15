@@ -3,15 +3,15 @@ import { DownOutlined } from "@ant-design/icons"
 import { useTranslation } from "react-i18next"
 import { UserRole } from "../../../@types/requests"
 import { useState } from "react"
-import { UserType } from "../EditRole"
+import { UsersType } from "../EditRole"
 
-const UserList: React.FC<{ users: UserType[]; updateRole: (user: UserType, role: UserRole) => void }> = ({ users, updateRole }) => {
+const UserList: React.FC<{ users: UsersType[]; updateRole: (user: UsersType, role: UserRole) => void }> = ({ users, updateRole }) => {
   const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<UserType | null>(null)
+  const [selectedUser, setSelectedUser] = useState<UsersType | null>(null)
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
 
-  const handleMenuClick = (user: UserType, role: UserRole) => {
+  const handleMenuClick = (user: UsersType, role: UserRole) => {
     setSelectedUser(user)
     setSelectedRole(role)
     setVisible(true)
@@ -27,7 +27,7 @@ const UserList: React.FC<{ users: UserType[]; updateRole: (user: UserType, role:
     setVisible(false)
   }
 
-  const renderUserItem = (user: UserType) => (
+  const renderUserItem = (user: UsersType) => (
     <List.Item>
       <List.Item.Meta title={user.name + " " + user.surname} />
       <Dropdown

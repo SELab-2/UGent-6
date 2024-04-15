@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
-
 import { Spin } from "antd";
 import ProfileCard from "./components/ProfileCard"
 import useUser from "../../hooks/useUser";
-import { User } from "../../providers/UserProvider";
 
 const ProfileContent = () => {
     const { user } = useUser()
