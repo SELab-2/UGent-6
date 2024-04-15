@@ -31,10 +31,7 @@ const AppRouter = () => {
       >
 
 
-      <Route
-        path={AppRoutes.SUBMISSION}
-        element={<Submission />}
-      />
+   
 
        <Route
          path={AppRoutes.NEW_SUBMISSION}
@@ -68,15 +65,22 @@ const AppRouter = () => {
             element={<Project />}
           />
 
-          <Route
+          {/* <Route
             path={AppRoutes.SUBMISSION_FEEDBACK}
             element={<Feedback />}
-            />
+            /> */}
 
             <Route
               path={AppRoutes.NEW_SUBMISSION}
               element={<Submit />}
             />
+
+            <Route
+              path={AppRoutes.SUBMISSION}
+              element={<Submission />}
+            />
+
+
           </Route>
         </Route>
 

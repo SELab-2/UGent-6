@@ -122,7 +122,9 @@
     "archived": "Archived",
     "score": "Score",
     "noGroups": "No groups available",
-    "searchMember": "Search member"
+    "searchMember": "Search member",
+    "inviteLink": "Invite link",
+    "inviteLinkInfo": "With this link, students can join your course"
   },
   "cancel": "Cancel",
   "ok": "OK",

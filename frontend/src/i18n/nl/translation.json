@@ -122,7 +122,9 @@
     "archived": "Gearchiveerd",
     "score": "Score",
     "noGroups": "Geen groepen beschikbaar",
-    "searchMember": "Zoek lid"
+    "searchMember": "Zoek lid",
+    "inviteLink": "Inschrijvings link",
+    "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak."
   },
   "cancel": "Annuleren",
   "ok": "Ok",
