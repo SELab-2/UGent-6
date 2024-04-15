@@ -4,7 +4,7 @@ import { Card } from "antd"
 import apiCall from "../../../util/apiFetch"
 import { ApiRoutes } from "../../../@types/requests.d"
 
-const ProjectCard: FC<{ courseId?: string }> = ({ courseId }) => {
+const ProjectCard: FC<{ courseId?: number }> = ({ courseId }) => {
   const [projects, setProjects] = useState<ProjectType[] | null>(null)
 
   useEffect(() => {

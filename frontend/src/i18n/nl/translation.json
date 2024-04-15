@@ -78,7 +78,8 @@
     "submissionTime": "Indienings tijd",
     "noSubmissions": "Geen indieningen",
     "loadingSubmissions": "Indieningen laden...",
-    "options": "Opties"
+    "options": "Opties",
+    "groupMembers": "Groepsleden"
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"

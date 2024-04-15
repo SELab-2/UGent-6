@@ -30,7 +30,6 @@ const Project = () => {
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(location.hash.slice(1) || "description")
 
-
   const now = Date.now()
   const deadline = new Date(project?.deadline ?? "").getTime()
 
@@ -41,7 +40,7 @@ const Project = () => {
         label: t("home.projects.description"),
         children: project && (
           <div style={{ padding: "0 8rem" }}>
-           <MarkdownTextfield content={project.description} />
+            <MarkdownTextfield content={project.description} />
           </div>
         ),
       },
@@ -64,12 +63,16 @@ const Project = () => {
           />
         ),
       },
-      {
+    ]
+
+    if (!courseAdmin) {
+      items.push({
         key: "score",
         label: t("course.score"),
         children: <ScoreCard />,
-      },
-    ]
+      })
+    }
+
     return items
   }, [project, course, courseAdmin])
 

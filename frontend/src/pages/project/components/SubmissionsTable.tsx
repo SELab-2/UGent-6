@@ -43,8 +43,8 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       },
       {
         title: t("project.submissionTime"),
-        dataIndex: "submitted_time",
-        render: (time) => <Typography.Text>{new Date(time).toLocaleString()}</Typography.Text>,
+        dataIndex: "submission",
+        render: (time:ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
       },
       {
         title: `Score (${project?.maxScore ?? ""})`,
@@ -85,7 +85,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
             </Typography.Paragraph>
               </div>
            
-            <Typography.Text strong>Group members:</Typography.Text>
+            <Typography.Text strong>{t("project.groupMembers")}</Typography.Text>
             <List
               locale={{ emptyText: t("project.groupEmpty") }}
               dataSource={g.group.members ?? []}

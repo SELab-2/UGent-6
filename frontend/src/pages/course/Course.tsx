@@ -40,7 +40,6 @@ const Course: FC = () => {
         children: <GroupsCard courseId={course.courseId!} />,
       }
     ]
-
     if (isCourseAdmin) {
 
       tabs = tabs.concat([

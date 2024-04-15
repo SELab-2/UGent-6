@@ -76,8 +76,9 @@
     "submissionTime": "Submission time",
     "noSubmissions": "No submissions",
     "loadingSubmissions": "Loading submissions...",
-    "options": "Options"
-
+    "options": "Options",
+    "groupMembers": "Group members"
+    
 
   },
   "group": {
