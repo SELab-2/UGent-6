@@ -31,6 +31,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       {
         title: t("project.group"),
         dataIndex: "group",
+        key:"group",
         render: (g) => <Typography.Text>{g.name}</Typography.Text>,
         description: "test",
       },
@@ -41,19 +42,23 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       {
         title: t("project.status"),
         dataIndex: "submission",
+        key:"submissionStatus",
         render: (s) => <Typography.Text><SubmissionStatusTag status={createStatusBitVector(s)}/> </Typography.Text>,
       },
       {
         title: t("project.submissionTime"),
         dataIndex: "submission",
+        key:"submission",
         render: (time:ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
       },
       {
         title: `Score (${project?.maxScore ?? ""})`,
+        key:"score",
         render: (s: ProjectSubmissionsType) => <Typography.Text editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}>{s.feedback?.score ?? "-"}</Typography.Text>,
       },
       {
         title: "Download",
+        key:"download",
         render: () => (
           <Button
             type="text"

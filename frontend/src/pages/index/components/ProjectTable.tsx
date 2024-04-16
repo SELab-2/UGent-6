@@ -58,6 +58,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
       {
         // volcano, geekblue,green
         title: t("home.projects.projectStatus"),
+        key:"status",
         render: (project:ProjectType) =>
           !project.status ? (
             <GroupProgress

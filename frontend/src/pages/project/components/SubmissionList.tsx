@@ -35,6 +35,7 @@ const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null }> = ({ sub
     },
     {
       title: t("project.status"),
+      key:"status",
       render: (submission: GroupSubmissionType) => (
         <SubmissionStatusTag status={createStatusBitVector(submission)} />
       ),
