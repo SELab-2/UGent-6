@@ -113,7 +113,7 @@ public class CourseUtilTest {
     when(courseRepository.findById(anyLong())).thenReturn(Optional.of(course));
     when(courseUserRepository.findById(any())).thenReturn(Optional.of(cuAdmin));
     CheckResult<CourseRelation> checkResult = courseUtil.canDeleteUser(
-        1L, request, user
+        1L, user.getId(), user
     );
     assertEquals(HttpStatus.OK, checkResult.getStatus());
     assertEquals(CourseRelation.course_admin, checkResult.getData());

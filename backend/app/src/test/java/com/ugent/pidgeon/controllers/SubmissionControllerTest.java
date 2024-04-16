@@ -86,7 +86,7 @@ public class SubmissionControllerTest extends ControllerTest {
         submissionJson = new SubmissionJson(1L, "projecturl", "groupurl", 1L,
                 1L, "fileurl", true, OffsetDateTime.MIN, true,
                 "structurefeedbackurl", "dockerfeedbackurl");
-        groupJson = new GroupJson(1L, "groupname", "groupclusterurl");
+        groupJson = new GroupJson(1, 1L, "groupname", "groupclusterurl");
         groupFeedbackJson = new GroupFeedbackJson(0F, "feedback", 1L, 1L);
         groupEntity = new GroupEntity("groupname", 1L);
         groupFeedbackEntity = new GroupFeedbackEntity(1L, 1L, 0F, "feedback");
@@ -114,7 +114,7 @@ public class SubmissionControllerTest extends ControllerTest {
         when(groupRepository.findById(anyLong())).thenReturn(Optional.of(groupEntity));
         when(entityToJsonConverter.groupEntityToJson(any())).thenReturn(groupJson);
         when(groupFeedbackRepository.getGroupFeedback(anyLong(), anyLong())).thenReturn(groupFeedbackEntity);
-        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(1L);
+        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(Optional.of(submission));
         when(submissionRepository.findById(anyLong())).thenReturn(Optional.of(submission));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
                 .andExpect(status().isOk());

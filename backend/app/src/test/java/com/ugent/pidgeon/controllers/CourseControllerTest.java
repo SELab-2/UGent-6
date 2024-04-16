@@ -285,7 +285,8 @@ public class CourseControllerTest extends ControllerTest {
                 "",
                 1,
                 true,
-                new ProjectProgressJson(1, 1)
+                new ProjectProgressJson(1, 1),
+                1L
         ));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
                 .andExpect(status().isOk());

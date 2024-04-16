@@ -186,7 +186,8 @@ public class ProjectControllerTest {
         user)).thenReturn(new ProjectResponseJson(
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
         OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0)));
+        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
+        1L));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjectById(2L, auth);
@@ -239,7 +240,8 @@ public class ProjectControllerTest {
         user)).thenReturn(new ProjectResponseJson(
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
         OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0)));
+        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
+        1L));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjectById(2L, auth);
@@ -290,7 +292,8 @@ public class ProjectControllerTest {
         user)).thenReturn(new ProjectResponseJson(
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
         OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0)));
+        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
+        1L));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjectById(2L, auth);
@@ -535,21 +538,26 @@ public class ProjectControllerTest {
     ProjectEntity newProjectEntity = new ProjectEntity(1, "Test Project", "new description", 1L, 1L,
         true, 100, OffsetDateTime.MAX);
 
-    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject", projectEntity);
+    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
+        projectEntity);
     CheckResult<Void> checkProject = new CheckResult<>(HttpStatus.OK, "TestProjectJson", null);
 
     // Mock behavior
     when(auth.getUserEntity()).thenReturn(user);
     when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(checkResult);
-    when(projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId())).thenReturn(checkProject);
+    when(projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId())).thenReturn(
+        checkProject);
     when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
     when(courseRepository.findById(projectId)).thenReturn(Optional.of(courseEntity));
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
-        OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0)));
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(
+        new ProjectResponseJson(
+            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
+            OffsetDateTime.MAX,
+            "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
+            1L));
     // Call controller method
-    ResponseEntity<?> responseEntity = projectController.putProjectById(projectId, projectJson, auth);
+    ResponseEntity<?> responseEntity = projectController.putProjectById(projectId, projectJson,
+        auth);
 
     // Verify response
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -558,7 +566,7 @@ public class ProjectControllerTest {
   }
 
   @Test
-  void testPatchProjectByIdShouldUpdateProject(){
+  void testPatchProjectByIdShouldUpdateProject() {
     // Mock data
     long projectId = 1L;
     long userId = 1L;
@@ -570,27 +578,33 @@ public class ProjectControllerTest {
         false, 100, OffsetDateTime.MAX);
     CourseEntity courseEntity = new CourseEntity();
     courseEntity.setId(courseId);
-    ProjectJson projectJson = new ProjectJson("Test Project", "new description", null, 1L, true, 100,
+    ProjectJson projectJson = new ProjectJson("Test Project", "new description", null, 1L, true,
+        100,
         OffsetDateTime.MAX);
 
     ProjectEntity newProjectEntity = new ProjectEntity(1, "Test Project", "new description", 1L, 1L,
         true, 100, OffsetDateTime.MAX);
 
-    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject", projectEntity);
+    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
+        projectEntity);
     CheckResult<Void> checkProject = new CheckResult<>(HttpStatus.OK, "TestProjectJson", null);
 
     // Mock behavior
     when(auth.getUserEntity()).thenReturn(user);
     when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(checkResult);
-    when(projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId())).thenReturn(checkProject);
+    when(projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId())).thenReturn(
+        checkProject);
     when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
     when(courseRepository.findById(projectId)).thenReturn(Optional.of(courseEntity));
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
-        OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0)));
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(
+        new ProjectResponseJson(
+            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
+            OffsetDateTime.MAX,
+            "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
+            1L));
     // Call controller method
-    ResponseEntity<?> responseEntity = projectController.patchProjectById(projectId, projectJson, auth);
+    ResponseEntity<?> responseEntity = projectController.patchProjectById(projectId, projectJson,
+        auth);
 
     // Verify response
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -611,7 +625,8 @@ public class ProjectControllerTest {
     CourseEntity courseEntity = new CourseEntity();
     courseEntity.setId(courseId);
 
-    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.OK, "TestProject", projectEntity);
+    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.OK, "TestProject",
+        projectEntity);
     CheckResult<Void> deleteResult = new CheckResult<>(HttpStatus.OK, "TestDelete", null);
     // Mock behavior
     when(auth.getUserEntity()).thenReturn(user);
@@ -639,7 +654,8 @@ public class ProjectControllerTest {
     CourseEntity courseEntity = new CourseEntity();
     courseEntity.setId(courseId);
 
-    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.FORBIDDEN, "TestProject", projectEntity);
+    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.FORBIDDEN, "TestProject",
+        projectEntity);
     CheckResult<Void> deleteResult = new CheckResult<>(HttpStatus.OK, "TestDelete", null);
     // Mock behavior
     when(auth.getUserEntity()).thenReturn(user);
@@ -674,8 +690,10 @@ public class ProjectControllerTest {
     groupEntity.setId(groupId);
     groups.add(groupEntity);
 
-    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.OK, "TestProject", projectEntity);
-    CheckResult<List<GroupEntity>> groupCheck = new CheckResult<>(HttpStatus.OK, "TestGroups", groups);
+    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.OK, "TestProject",
+        projectEntity);
+    CheckResult<List<GroupEntity>> groupCheck = new CheckResult<>(HttpStatus.OK, "TestGroups",
+        groups);
     // Mock behavior
     when(auth.getUserEntity()).thenReturn(user);
     when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(projectCheck);
@@ -688,8 +706,6 @@ public class ProjectControllerTest {
     // Verify response
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
   }
-
-
 
 
 }
