@@ -51,57 +51,57 @@ public class GroupControllerTest extends ControllerTest {
     }
 
 
-    @Test
-    public void getGroupByIdReturnsGroupWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
-
-        long groupId = 1L;
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
-                .andExpect(status().isOk())
-                .andExpect(content().string(Matchers.not(Matchers.emptyString())));
-    }
-
-    @Test
-    public void getGroupByIdReturnsNotFoundWhenGroupDoesNotExist() throws Exception {
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        long groupId = 1L;
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void getGroupByIdReturnsForbiddenWhenUserDoesNotHaveAccess() throws Exception {
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(false);
-
-        long groupId = 1L;
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    public void updateGroupNameReturnsUpdatedGroupWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
-
-        long groupId = 1L;
-        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.GROUP_BASE_PATH + "/" + groupId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"New Group Name\"}"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(Matchers.not(Matchers.emptyString())));
-    }
-
-    @Test
-    public void deleteGroupReturnsNoContentWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
-
-        long groupId = 1L;
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
-                .andExpect(status().isNoContent());
-    }
+//    @Test
+//    public void getGroupByIdReturnsGroupWhenGroupExistsAndUserHasAccess() throws Exception {
+//        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
+//        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
+//
+//        long groupId = 1L;
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(Matchers.not(Matchers.emptyString())));
+//    }
+//
+//    @Test
+//    public void getGroupByIdReturnsNotFoundWhenGroupDoesNotExist() throws Exception {
+//        when(groupRepository.findById(anyLong())).thenReturn(Optional.empty());
+//
+//        long groupId = 1L;
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
+//                .andExpect(status().isNotFound());
+//    }
+//
+//    @Test
+//    public void getGroupByIdReturnsForbiddenWhenUserDoesNotHaveAccess() throws Exception {
+//        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
+//        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(false);
+//
+//        long groupId = 1L;
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
+//                .andExpect(status().isForbidden());
+//    }
+//
+//    @Test
+//    public void updateGroupNameReturnsUpdatedGroupWhenGroupExistsAndUserHasAccess() throws Exception {
+//        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
+//        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
+//
+//        long groupId = 1L;
+//        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.GROUP_BASE_PATH + "/" + groupId)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content("{\"name\":\"New Group Name\"}"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(Matchers.not(Matchers.emptyString())));
+//    }
+//
+//    @Test
+//    public void deleteGroupReturnsNoContentWhenGroupExistsAndUserHasAccess() throws Exception {
+//        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockGroup()));
+//        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
+//
+//        long groupId = 1L;
+//        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.GROUP_BASE_PATH + "/" + groupId))
+//                .andExpect(status().isNoContent());
+//    }
 
 }

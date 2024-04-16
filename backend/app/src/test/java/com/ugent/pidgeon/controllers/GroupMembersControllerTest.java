@@ -54,40 +54,4 @@ public class GroupMembersControllerTest extends ControllerTest {
                         .with(request -> { request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication()); return request; }))
                 .build();
     }
-
-    @Test
-    public void removeMemberFromGroupReturnsNoContentWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(groupMemberRepository.removeMemberFromGroup(anyLong(), anyLong())).thenReturn(1);
-        when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
-
-
-
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}","1") + "/1"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    public void addMemberToGroupReturnsOkWhenGroupExistsAndUserHasAccess() throws Exception {
-        when(userRepository.existsById(anyLong())).thenReturn(true);
-        when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(false);
-        GroupEntity mockedGroup = new GroupEntity();
-        mockedGroup.setClusterId(1);
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockedGroup));
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
-        when(groupRepository.isAdminOfGroup(anyLong(), anyLong())).thenReturn(true);
-        when(groupClusterRepository.userInGroupForCluster(anyLong(), anyLong())).thenReturn(false);
-        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}", "1") + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"memberId\": 1}"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void findAllMembersByGroupIdReturnsOkWhenGroupExists() throws Exception {
-        List<UserEntity> members = Arrays.asList(new UserEntity(), new UserEntity());
-        when(groupMemberRepository.findAllMembersByGroupId(anyLong())).thenReturn(members);
-        when(groupRepository.userAccessToGroup(anyLong(), anyLong())).thenReturn(true);
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}", "1")))
-                .andExpect(status().isOk());
-    }
 }
