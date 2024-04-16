@@ -16,7 +16,8 @@ const Home = () => {
 
   useEffect(() => {
     apiCall.get(ApiRoutes.PROJECTS).then((res) => {
-      const projects = res.data.adminProjects.concat(res.data.enrolledProjects)
+      const projects:ProjectsType = [...res.data.adminProjects,...res.data.enrolledProjects.map(p => ({...p.project,status:p.status}))]
+      console.log("=>", projects)
       setProjects(projects)
     })
   }, [])
@@ -24,9 +25,10 @@ const Home = () => {
   return (
     <div>
       <div>
-       
-
-        <HorizontalCourseScroll projects={projects} onOpenNew={()=> setOpen(true)} />
+        <HorizontalCourseScroll
+          projects={projects}
+          onOpenNew={() => setOpen(true)}
+        />
       </div>
       <br />
       <br />

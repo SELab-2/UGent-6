@@ -15,6 +15,7 @@ import AdminView from "../hooks/AdminView"
 import CourseInvite from "../pages/courseInvite/CourseInvite"
 import Submission from "../pages/submission/Submission"
 import AuthenticatedRoute from "./AuthenticatedRoute"
+import CourseAdminView from "../hooks/CourseAdminView"
 
 const AppRouter = () => {
   return (
@@ -54,17 +55,19 @@ const AppRouter = () => {
         <Route
           path={AppRoutes.COURSE}
           element={<CourseRoutes />}
-          >
+        >
           {/* ========================= Course Routes ========================= */}
           <Route
             path=""
             element={<Course />}
           />
 
-          <Route
-            path={AppRoutes.PROJECT_CREATE}
-            element={<ProjectCreate />}
-          />
+          
+            <Route
+              path={AppRoutes.PROJECT_CREATE}
+              element={<CourseAdminView><ProjectCreate /> </CourseAdminView>}
+            />
+         
 
           <Route
             path={AppRoutes.PROJECT}

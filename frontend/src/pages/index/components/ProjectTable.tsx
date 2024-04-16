@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next"
 import useAppApi from "../../../hooks/useAppApi"
 import ProjectInfo from "./ProjectInfo"
 import ProjectStatusTag from "./ProjectStatusTag"
-import useIsTeacher from "../../../hooks/useIsTeacher"
 import GroupProgress from "./GroupProgress"
 import { Link } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
@@ -15,23 +14,22 @@ export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }> = ({ projects,ignoreColumns }) => {
   const { t } = useTranslation()
   const { modal } = useAppApi()
-  const isTeacher = useIsTeacher()
 
   const columns: TableProps<ProjectType>["columns"] = useMemo(
     () => {
       let columns:TableProps<ProjectType>["columns"] = [
       {
         title: t("home.projects.name"),
-        dataIndex: "name",
         key: "name",
-        render: (text: string, project) => {
+        render: (project:ProjectType) => {
+          console.log(project);
           return (
             <Link to={AppRoutes.PROJECT.replace(":courseId", project.course.courseId + "").replace(":projectId", project.projectId + "")}>
               <Button
                 type="link"
                 style={{ fontWeight: "bold" }}
               >
-                {text}
+                {project.name}
               </Button>
             </Link>
           )
@@ -100,17 +98,17 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
     }
     return columns
   },
-    [t, modal, isTeacher]
+    [t, modal, projects]
   )
 
-
+  console.log(projects);
   return (
     <Table
       locale={{
         emptyText: t("home.projects.noProjects"),
       }}
       loading={projects == null}
-      dataSource={(projects??[]).map((p) => ({ ...p, key: p.projectId }))}
+      dataSource={projects??[]}
       columns={columns}
     />
   )

@@ -36,7 +36,7 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     },
     {
       label: t("home.projects.projectStatus"),
-      children: <ProjectStatusTag status={project.state} />,
+      children: project.status && <ProjectStatusTag status={project.status} />,
       span: 24
     },
     {

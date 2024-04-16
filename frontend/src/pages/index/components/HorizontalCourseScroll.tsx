@@ -36,7 +36,6 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
     })
 
     if (ignore) return
-
     projects.forEach((project) => {
       if (project.course.courseId in courseProjects) {
         courseProjects[project.course.courseId].projects.push(project)

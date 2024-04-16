@@ -230,7 +230,7 @@ export type GET_Responses = {
   [ApiRoutes.PROJECT_GROUPS]: GET_Responses[ApiRoutes.GROUP][] //GET_Responses[ApiRoutes.PROJECT_GROUP][]
 
   [ApiRoutes.PROJECTS]: {
-    enrolledProjects: GET_Responses[ApiRoutes.PROJECT][],
+    enrolledProjects: {project: GET_Responses[ApiRoutes.PROJECT], status: ProjectStatus}[],
     adminProjects: Omit<GET_Responses[ApiRoutes.PROJECT], "status">[] 
   },
 
