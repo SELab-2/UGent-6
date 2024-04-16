@@ -21,6 +21,7 @@ export enum ApiRoutes {
   PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",
   PROJECT_GROUP = "api/projects/:id/groups/:groupId",
   PROJECT_GROUPS = "api/projects/:id/groups",
+  PROJECT_GROUP_SUBMISSIONS = "api/projects/:projectId/submissions/:groupId",
 
   SUBMISSION = "api/submissions/:id",
   SUBMISSION_FILE = "api/submissions/:id/file",
@@ -118,6 +119,7 @@ export type GET_Responses = {
     group: GET_Responses[ApiRoutes.GROUP], 
     submission:  GET_Responses[ApiRoutes.SUBMISSION] | null // null if no submission yet
   }[],
+  [ApiRoutes.PROJECT_GROUP_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
   [ApiRoutes.GROUP_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION]
   [ApiRoutes.SUBMISSION]: {
     submissionId: number
@@ -144,7 +146,7 @@ export type GET_Responses = {
     description: string
     projectId: number
     name: string
-    submissionUrl: string
+    submissionUrl: ApiRoutes.PROJECT_GROUP_SUBMISSIONS
     testsUrl: string
     maxScore:number
     visible: boolean

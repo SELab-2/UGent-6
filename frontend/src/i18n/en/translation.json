@@ -149,7 +149,8 @@
     "deleteCourseDescription": "Are you sure you want to delete this course? All projects and submissions will be deleted as well. This action cannot be undone.",
     "confirmDelete": "Confirm delete",
     "courseDeleted": "Course successfully deleted",
-    "createCourse": "Create course"
+    "createCourse": "Create course",
+    "noFeedback": "You have no grades yet"
   },
   "cancel": "Cancel",
   "ok": "OK",
@@ -161,7 +162,5 @@
     "403_message": "you are not authorized to access this page.",
     "404_message": "Sorry, the page you visited does not exist.",
     "500_message": "Sorry, Something went wrong"
-  },
-  "cancel": "Cancel",
-  "ok": "OK"
+  }
 }

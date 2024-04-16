@@ -1,39 +1,49 @@
-import { Button, List, Typography } from "antd"
+import { Button, List, Table, TableProps, Typography } from "antd"
 import { FC } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 import { Link } from "react-router-dom"
 import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
+import { GroupSubmissionType } from "./SubmissionTab"
+import { useTranslation } from "react-i18next"
 
-export type SubmissionType = GET_Responses[ApiRoutes.PROJECT_SUBMISSIONS][number]
 
-const SubmissionList: FC<{ submissions: SubmissionType[] | null }> = ({ submissions }) => {
-  const SubmissionItem = (submission: SubmissionType) => {
-    return (
-      <List.Item
-        actions={[
-          <SubmissionStatusTag
-            key="status"
-            status={createStatusBitVector(submission.submission)}
-          />,
-        ]}
-      >
-       {submission.submission && <List.Item.Meta
-          title={
-            <Link to={"feedback/" + submission.submission?.submissionId}>
-                <Button type="link" size="small" >#{submission.submission.submissionId}</Button>
-            </Link>
-          }
-        />}
-      </List.Item>
-    )
-  }
 
-  return (
-    <List
-      loading={submissions === null}
-      dataSource={submissions ?? []}
-      renderItem={SubmissionItem}
-    />
+
+const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null }> = ({ submissions }) => {
+  const {t} = useTranslation()
+
+  
+
+  const columns: TableProps['columns'] = [
+    {
+      title: t("project.submission"),
+      dataIndex: "submissionId",
+      key: "submissionId",
+      render: (submissionId: GroupSubmissionType["submissionId"]) => (
+        <Link to={"feedback/" + submissionId}>
+          <Button type="link">#{submissionId}</Button>
+        </Link>
+      ),
+    },
+    {
+      title: t("project.submissionTime"),
+      dataIndex: "submissionTime",
+      key: "submissionTime",
+      
+      render: (submission: GroupSubmissionType["submissionTime"]) => (
+        <Typography.Text>{new Date(submission).toLocaleString()}</Typography.Text>
+      ),
+    },
+    {
+      title: t("project.status"),
+      render: (submission: GroupSubmissionType) => (
+        <SubmissionStatusTag status={createStatusBitVector(submission)} />
+      ),
+    }
+  ]
+
+
+
+  return ( <Table loading={submissions === null} dataSource={submissions||[]} columns={columns} rowKey="submissionId" />
   )
 }
 

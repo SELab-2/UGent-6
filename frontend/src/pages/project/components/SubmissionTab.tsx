@@ -1,16 +1,22 @@
 import { FC, useEffect, useState } from "react"
-import SubmissionList, { SubmissionType } from "./SubmissionList"
+import SubmissionList from "./SubmissionList"
 import apiCall from "../../../util/apiFetch"
-import { ApiRoutes } from "../../../@types/requests.d"
+import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
+import { useParams } from "react-router-dom"
+import useProject from "../../../hooks/useProject"
+
+export type GroupSubmissionType = GET_Responses[ApiRoutes.PROJECT_GROUP_SUBMISSIONS][number]
 
 const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId, courseId }) => {
-  const [submissions, setSubmissions] = useState<SubmissionType[] | null>(null)
+  const [submissions, setSubmissions] = useState<GroupSubmissionType[] | null>(null)
+  const project = useProject()
 
   useEffect(() => {
-    //TODO: fetch submissions
-    
+    //TODO: fetch submissions /api/projects/1/submissions/1
 
-    apiCall.get(ApiRoutes.PROJECT_SUBMISSIONS, {id: projectId}).then((res) => {
+    if(!project) return 
+    console.log(project.submissionUrl);
+    apiCall.get(project.submissionUrl ).then((res) => {
       console.log(res.data)
       setSubmissions(res.data)
     })

@@ -12,6 +12,7 @@ const GradesList: FC<{ feedback: CourseGradesType[]; courseId: number }> = ({ fe
   return (
     <>
       <List
+      locale={ {emptyText: t("course.noFeedback")} }
         dataSource={feedback}
         header={
           <div style={{ display: "flex", justifyContent: "space-between" }}>
