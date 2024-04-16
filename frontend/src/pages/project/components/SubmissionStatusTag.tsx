@@ -6,24 +6,23 @@ import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 
 export enum SubmissionStatus {
   STRUCTURE_REJECTED = 0,
-  DOCKER_REJECTED = 1,
-  NOT_SUBMITTED = 3,
-  PASSED = 4
+  DOCKER_REJECTED = 1<<1,
+  NOT_SUBMITTED = 1<<2,
+  PASSED = 1<<3
 }
 
 export function createStatusBitVector(submission: GET_Responses[ApiRoutes.SUBMISSION] | null) {
 
   if(submission === null) return SubmissionStatus.NOT_SUBMITTED
-
   let status = 0
   if(!submission.structureAccepted){
-    status |= 1 << SubmissionStatus.STRUCTURE_REJECTED
+    status |= SubmissionStatus.STRUCTURE_REJECTED
   }
   if(!submission.dockerAccepted){
-    status |= 1 << SubmissionStatus.DOCKER_REJECTED
+    status |= SubmissionStatus.DOCKER_REJECTED
   }
   if(status === 0){
-    status |= 1 << SubmissionStatus.PASSED
+    status |= SubmissionStatus.PASSED
   }
   return status
 }

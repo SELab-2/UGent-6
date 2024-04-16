@@ -21,9 +21,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
       {
         title: t("home.projects.name"),
         key: "name",
-        render: (project:ProjectType) => {
-          console.log(project);
-          return (
+        render: (project:ProjectType) => (
             <Link to={AppRoutes.PROJECT.replace(":courseId", project.course.courseId + "").replace(":projectId", project.projectId + "")}>
               <Button
                 type="link"
@@ -33,7 +31,6 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
               </Button>
             </Link>
           )
-        },
       },
       {
         title: t("home.projects.course"),
@@ -102,7 +99,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
     [t, modal, projects]
   )
 
-  console.log(projects);
+
   return (
     <Table
       locale={{

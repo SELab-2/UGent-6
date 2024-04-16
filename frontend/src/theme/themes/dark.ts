@@ -13,7 +13,7 @@ export const darkTheme: ThemeConfig = {
   },
   components: {
    Layout: {
-    headerBg: "#002766", //#1b1b1B
+    headerBg: "#002b60", // #002766 #1b1b1B
     headerHeight: 48,
 
    },

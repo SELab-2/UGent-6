@@ -17,8 +17,8 @@ const ScoreCard = () => {
   const [score, setScore] = useState<ScoreType | null | undefined>(undefined)
   const {projectId} = useParams()
   const project = useProject()
-  console.log(project);
 
+  
   useEffect(() => {
     // /projects/{projectid}/groups/{groupid}/score
     if(!projectId) return console.error("No project id")

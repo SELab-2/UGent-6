@@ -34,13 +34,13 @@ const CourseRoutes: FC = () => {
     if (!courseId) return
 
     let ignore = false
-    console.log(courseId)
+
     apiCall
       .get(ApiRoutes.COURSE, { courseId: courseId! })
       .then((res) => {
         // TODO: if user is not in member list -> render 403 page
         if (!ignore) {
-          console.log("=>", res.data)
+          console.log("Course: ", res.data)
           setCourse(res.data)
         }
       })

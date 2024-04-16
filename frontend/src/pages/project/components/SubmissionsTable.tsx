@@ -37,13 +37,14 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       },
       {
         title: t("project.submission"),
+        key:"submissionId",
         render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION.replace(":submissionId", s.submission?.submissionId+"").replace(":projectId", s.submission?.projectId+"").replace(":courseId", courseId!)}><Button type="link">#{s.submission?.submissionId}</Button></Link>,
       },
       {
         title: t("project.status"),
         dataIndex: "submission",
         key:"submissionStatus",
-        render: (s) => <Typography.Text><SubmissionStatusTag status={createStatusBitVector(s)}/> </Typography.Text>,
+        render: (s) => <Typography.Text><SubmissionStatusTag status={createStatusBitVector(s)}/> </Typography.Text>
       },
       {
         title: t("project.submissionTime"),
@@ -101,7 +102,6 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
           </>
         ),
       }}
-      rowKey="submissionId"
       pagination={false}
       columns={columns}
     />
