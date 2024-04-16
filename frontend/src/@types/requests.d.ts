@@ -67,6 +67,7 @@ export type POST_Responses = {
  */
 export type DELETE_Requests = {
   [ApiRoutes.COURSE]: undefined
+  [ApiRoutes.PROJECT]: undefined
 }
 
 
