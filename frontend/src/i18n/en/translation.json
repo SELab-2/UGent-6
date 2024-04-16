@@ -104,7 +104,7 @@
       "title": "Tests for {{projectName}}",
       "subtitle": "Configure the tests of this project",
       "structureSlider": "Enable structure tests: ",
-      "structurePlaceHolder": "Enter file structure template",
+      "structurePlaceholder": "Enter file structure template",
       "dockerSlider" : "Enable docker tests: ",
       "dockerImagePlaceholder": "Enter docker image",
       "dockerScriptPlaceholder": "Enter docker script or upload file",
