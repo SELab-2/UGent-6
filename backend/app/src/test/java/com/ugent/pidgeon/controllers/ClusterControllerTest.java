@@ -71,7 +71,7 @@ public class ClusterControllerTest extends ControllerTest{
     @Test
     public void testGetClustersForCourse() throws Exception {
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
-                .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair(courseEntity, CourseRelation.enrolled)));
+                .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, CourseRelation.enrolled)));
         when(groupClusterRepository.findClustersWithoutInvidualByCourseId(anyLong())).thenReturn(List.of(groupClusterEntity));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/clusters"))
                 .andExpect(status().isOk());
@@ -161,7 +161,7 @@ public class ClusterControllerTest extends ControllerTest{
     }
 
     @Test
-    public void testDeletCluster() throws Exception {
+    public void testDeleteCluster() throws Exception {
         when(clusterUtil.canDeleteCluster(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(commonDatabaseActions.deleteClusterById(anyLong())).thenReturn(new CheckResult<>(HttpStatus.OK,"", null));
         mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.CLUSTER_BASE_PATH + "/1"))
@@ -204,37 +204,3 @@ public class ClusterControllerTest extends ControllerTest{
                 .andExpect(status().isBadRequest());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
