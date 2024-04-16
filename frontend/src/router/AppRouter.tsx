@@ -51,6 +51,11 @@ const AppRouter = () => {
           path={AppRoutes.EDIT_ROLE}
           element={<AdminView><EditRole /></AdminView>}
         />
+
+        <Route
+          path={AppRoutes.COURSE_INVITE}
+          element={<CourseInvite />}
+        />
       <Route
         path={AppRoutes.COURSE}
         element={<CourseRoutes />}
