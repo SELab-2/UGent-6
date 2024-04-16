@@ -1,11 +1,10 @@
 import React, { useState } from "react"
-import { useParams, useNavigate, useNavigation } from "react-router-dom"
-import { Button, Form, Input, Switch, DatePicker, theme, Checkbox, Typography, Card, Flex } from "antd"
+import { useParams, useNavigate } from "react-router-dom"
+import { Button, Form, Card } from "antd"
 import { useTranslation } from "react-i18next"
 import { ProjectFormData, ProjectError } from "./components/ProjectCreateService"
 import Error from "../error/Error"
 import ProjectCreateService from "./components/ProjectCreateService"
-import GroupClusterDropdown from "./components/GroupClusterDropdown"
 import ProjectForm from "../../components/forms/ProjectForm"
 import { AppRoutes } from "../../@types/routes"
 import useAppApi from "../../hooks/useAppApi"
@@ -17,8 +16,7 @@ const ProjectCreate: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<ProjectError | null>(null) // Gebruik ProjectError type voor error state
-const { message } = useAppApi()
-
+  const { message } = useAppApi()
 
   const handleCreation = async (values: ProjectFormData) => {
     console.log(values)
@@ -63,7 +61,7 @@ const { message } = useAppApi()
             initialValues={{
               name: "",
               description: "",
-              groupClusterId: 0,
+              groupClusterId: undefined,
               testId: null,
               visible: false, // Stel de standaardwaarde in op false
               maxScore: 0,
