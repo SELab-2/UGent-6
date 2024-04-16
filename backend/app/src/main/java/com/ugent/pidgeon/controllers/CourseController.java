@@ -214,7 +214,7 @@ public class CourseController {
      */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getCourseByCourseId(@PathVariable Long courseId, Auth auth) {
+    public ResponseEntity<?> getCourseByCourseId(@PathVariable long courseId, Auth auth) {
         CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
