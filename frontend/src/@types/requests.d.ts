@@ -1,4 +1,4 @@
-import {ProjectFormData} from "../pages/projectCreate/components/ProjectCreateService";
+import type {ProjectFormData} from "../pages/projectCreate/components/ProjectCreateService";
 
 /**
  * Routes used to make API calls
@@ -58,9 +58,7 @@ export type POST_Requests = {
 export type POST_Responses = {
 
   [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE],
-  [ApiRoutes.PROJECT_CREATE]: {
-    id: string
-  }
+  [ApiRoutes.PROJECT_CREATE]: GET_Responses[ApiRoutes.PROJECT]
 
 }
 

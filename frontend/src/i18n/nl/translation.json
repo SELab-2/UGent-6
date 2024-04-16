@@ -89,18 +89,19 @@
     "change": {
       "title": "Maak project aan",
       "name": "Naam",
-      "nameMessage": "Vul de naam van het project in asljeblieft",
+      "nameMessage": "Vul de naam van het project in",
       "description": "Beschrijving",
-      "descriptionMessage": "Vul de beschrijving van het project in alsjeblieft",
+      "descriptionMessage": "Vul de beschrijving van het project in",
       "groupClusterId": "Groep Cluster ID",
-      "groupClusterIdMessage": "Vul de Groep Cluster ID in alsjeblieft",
+      "groupClusterIdMessage": "Vul de Groep Cluster ID in",
       "testId": "Test Id",
-      "testIdMessage": "Vul de Test ID in alsjeblieft",
+      "testIdMessage": "Vul de Test ID in",
       "visible": "Project zichtbaar maken",
       "maxScore": "Maximum score",
-      "maxScoreMessage": "Vul alsjeblieft de maximum score van het project in)",
+      "maxScoreMessage": "Vul de maximum score van het project in)",
       "deadline": "Deadline",
-      "create": "Project Aanmaken"
+      "create": "Project Aanmaken",
+      "success": "Project succesvol aangemaakt"
     }
   },
   "group": {

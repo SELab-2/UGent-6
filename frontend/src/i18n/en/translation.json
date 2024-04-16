@@ -97,7 +97,8 @@
       "maxScore": "Maximum score",
       "maxScoreMessage": "Please enter the maximum score for the project",
       "deadline": "Deadline",
-      "create": "Create"
+      "create": "Create",
+      "success": "Project successfully created "
     }
   },
   "group": {

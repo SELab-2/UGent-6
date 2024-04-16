@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Select } from 'antd';
+import { Select, SelectProps } from 'antd';
 import {ApiRoutes} from "../../../@types/requests.d";
 import  apiCall  from "../../../util/apiFetch";
-
-const { Option } = Select;
 
 
 interface Cluster {
@@ -23,20 +21,24 @@ interface Cluster {
 
 
 interface GroupClusterDropdownProps {
-    courseId: string;
-    onSelect: (value: number) => void;
+    courseId: string|number;
 }
 
-const GroupClusterDropdown: React.FC<GroupClusterDropdownProps> = ({ courseId, onSelect }) => {
-    const [clusters, setClusters] = useState<Cluster[]>([]); // Gebruik Cluster-interface
+const GroupClusterDropdown: React.FC<GroupClusterDropdownProps & SelectProps> = ({ courseId, ...args  }) => {
+    const [clusters, setClusters] = useState<SelectProps['options']>([]); // Gebruik Cluster-interface
     const [loading, setLoading] = useState(false);
+    
 
     useEffect(() => {
         const fetchClusters = async () => {
             setLoading(true);
             try {
                 const response = await apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId });
-                setClusters(response.data); // Zorg ervoor dat de nieuwe staat correct wordt doorgegeven
+                const options: SelectProps['options'] = response.data.map(
+                    (cluster: Cluster) => ({ label: cluster.name, value: cluster.clusterId })
+                )
+
+                setClusters(options); // Zorg ervoor dat de nieuwe staat correct wordt doorgegeven
             } catch (error) {
                 console.error('Error fetching clusters:', error);
             } finally {
@@ -49,15 +51,10 @@ const GroupClusterDropdown: React.FC<GroupClusterDropdownProps> = ({ courseId, o
 
     return (
         <Select
+            {...args}
             loading={loading}
-            onChange={onSelect}
-        >
-            {clusters.map((cluster) => (
-                <Option key={cluster.clusterId} value={cluster.clusterId}>
-                    {cluster.name}
-                </Option>
-            ))}
-        </Select>
+            options={clusters}
+       />
     );
 };
 
