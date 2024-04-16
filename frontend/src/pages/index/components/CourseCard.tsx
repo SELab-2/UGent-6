@@ -22,13 +22,17 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
         title: {
           fontSize: "1.1em",
         },
+        body: {
+          height:"calc(100% - 6rem)",
+        }
       }}
+
       bordered={false}
       hoverable
       onClick={() => navigate(AppRoutes.COURSE.replace(":courseId", courseProjects.course.courseId.toString()))}
       type="inner"
       title={courseProjects.course.name}
-      style={{ width: 300 }}
+      style={{ width: 300,height:"100%" }}
       actions={[
         <Tooltip title={t("home.projects.userCourseCount", { count: 2 })}>
           <span>

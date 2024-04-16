@@ -7,13 +7,14 @@ import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
 import CourseAdminView from "../../hooks/CourseAdminView"
-import { DownloadOutlined, PlusOutlined, SettingFilled } from "@ant-design/icons"
+import { DeleteOutlined, DownloadOutlined, PlusOutlined, SettingFilled } from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
 import { AppRoutes } from "../../@types/routes"
 import SubmissionsTab from "./components/SubmissionsTab"
 import MarkdownTextfield from "../../components/input/MarkdownTextfield"
+import apiCall from "../../util/apiFetch"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -85,6 +86,13 @@ const Project = () => {
     navigate(AppRoutes.NEW_SUBMISSION.replace(AppRoutes.PROJECT + "/", ""))
   }
 
+  const deleteProject = async () => {
+    if(!project || !course) return console.error("project is undefined")
+    await apiCall.delete(ApiRoutes.PROJECT, undefined, { id: project!.projectId+"" })
+
+    navigate(AppRoutes.COURSE.replace(":courseId", course.courseId+""))
+  }
+
   return (
     <div style={{ margin: "3rem 0", width: "100%", paddingBottom: "3rem" }}>
       <Card
@@ -104,7 +112,7 @@ const Project = () => {
         title={project?.name}
         loading={!project}
         extra={
-          courseAdmin ? (
+          courseAdmin ? (<>
             <Link to="edit">
               <Button
                 type="primary"
@@ -113,6 +121,8 @@ const Project = () => {
                 {t("project.options")}
               </Button>
             </Link>
+            <Button style={{marginLeft:"1rem"}} type="primary" onClick={deleteProject} danger icon={<DeleteOutlined/>} />
+            </>
           ) : (
             <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
               <span>

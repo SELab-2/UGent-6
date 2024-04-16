@@ -123,7 +123,7 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
           </Typography.Title>
           <Space
             className="small-scroll-bar"
-            style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem" }}
+            style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem",alignItems: 'stretch' }}
           >
             {adminCourseProjectsArray.map((c) => (
               <CourseCard
