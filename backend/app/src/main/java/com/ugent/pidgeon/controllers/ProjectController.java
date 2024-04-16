@@ -307,7 +307,7 @@ public class ProjectController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getGroupsOfProject(@PathVariable Long projectId, Auth auth) {
         // Check if the user is an admin of the project
-        CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, auth.getUserEntity());
+        CheckResult<ProjectEntity> projectCheck = projectUtil.canGetProject(projectId, auth.getUserEntity());
         if (projectCheck.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
