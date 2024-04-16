@@ -456,7 +456,7 @@ public class CourseController {
      */
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
-    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @PathVariable long userId) {
+    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @PathVariable Long userId) {
         CheckResult<CourseRelation> checkResult = courseUtil.canDeleteUser(courseId, userId, auth.getUserEntity());
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());

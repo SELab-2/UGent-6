@@ -5,6 +5,7 @@ import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.CourseReferenceJson;
 import com.ugent.pidgeon.model.json.ProjectJson;
 import com.ugent.pidgeon.model.json.ProjectProgressJson;
+import com.ugent.pidgeon.model.json.userProjectsJson;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -14,6 +15,7 @@ import com.ugent.pidgeon.util.ClusterUtil;
 import com.ugent.pidgeon.util.CommonDatabaseActions;
 import com.ugent.pidgeon.util.CourseUtil;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.Pair;
 import com.ugent.pidgeon.util.ProjectUtil;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,6 +91,7 @@ public class ProjectControllerTest {
     ProjectEntity project = new ProjectEntity();
     project.setName("Project 1");
     project.setId(1L);
+    project.setVisible(true);
     List<ProjectEntity> projects = new ArrayList<>();
     projects.add(project);
     UserEntity user = new UserEntity("Test", "De Tester", "test.tester@test.com", UserRole.student,
@@ -98,18 +101,19 @@ public class ProjectControllerTest {
     // Mock repository behavior
     when(projectRepository.findProjectsByUserId(anyLong())).thenReturn(projects);
     when(auth.getUserEntity()).thenReturn(user);
+    when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
+        .thenReturn(new CheckResult<>(HttpStatus.OK, "",
+            new Pair<>(new CourseEntity(), CourseRelation.enrolled)));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjects(auth);
 
     // Verify response
+    assertInstanceOf(userProjectsJson.class, response.getBody());
+    userProjectsJson responseBody = (userProjectsJson) response.getBody();
+    assertEquals(1, responseBody.enrolledProjects().size());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertInstanceOf(List.class, response.getBody());
-    List<?> responseBody = (List<?>) response.getBody();
-    assertEquals(1, responseBody.size());
-    assertEquals("{name=Project 1, url=/api/projects/1}", responseBody.get(0).toString());
-
   }
 
   @Test
@@ -119,9 +123,11 @@ public class ProjectControllerTest {
     ProjectEntity project1 = new ProjectEntity();
     project1.setName("Project 1");
     project1.setId(1L);
+    project1.setVisible(true);
     ProjectEntity project2 = new ProjectEntity();
     project2.setName("Project 2");
     project2.setId(2L);
+    project2.setVisible(true);
     List<ProjectEntity> projects = new ArrayList<>();
     projects.add(project1);
     projects.add(project2);
@@ -132,6 +138,9 @@ public class ProjectControllerTest {
     // Mock repository behavior
     when(projectRepository.findProjectsByUserId(anyLong())).thenReturn(projects);
     when(auth.getUserEntity()).thenReturn(user);
+    when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
+        .thenReturn(new CheckResult<>(HttpStatus.OK, "",
+            new Pair<>(new CourseEntity(), CourseRelation.enrolled)));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjects(auth);
@@ -139,11 +148,9 @@ public class ProjectControllerTest {
     // Verify response
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertInstanceOf(List.class, response.getBody());
-    List<?> responseBody = (List<?>) response.getBody();
-    assertEquals(2, responseBody.size());
-    assertEquals("{name=Project 1, url=/api/projects/1}", responseBody.get(0).toString());
-    assertEquals("{name=Project 2, url=/api/projects/2}", responseBody.get(1).toString());
+    assertInstanceOf(userProjectsJson.class, response.getBody());
+    userProjectsJson responseBody = (userProjectsJson) response.getBody();
+    assertEquals(2, responseBody.enrolledProjects().size());
   }
 
 
@@ -156,13 +163,16 @@ public class ProjectControllerTest {
     ProjectEntity project1 = new ProjectEntity();
     project1.setName("Project 1");
     project1.setId(1L);
+    project1.setVisible(true);
     ProjectEntity project2 = new ProjectEntity();
     project2.setName("Project 2");
     project2.setId(2L);
+    project2.setVisible(true);
     project2.setCourseId(1L);
     ProjectEntity project3 = new ProjectEntity();
     project3.setName("Project 3");
     project3.setId(3L);
+    project3.setVisible(true);
     List<ProjectEntity> projects = new ArrayList<>();
     projects.add(project1);
     projects.add(project2);
@@ -175,14 +185,14 @@ public class ProjectControllerTest {
     CourseEntity courseEntity = new CourseEntity();
     CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
         project2);
-    CheckResult<CourseEntity> courseCheck = new CheckResult<>(HttpStatus.OK, "TestCourse",
-        courseEntity);
+    CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = new CheckResult<>(HttpStatus.OK, "TestCourse",
+        new Pair<>(courseEntity, CourseRelation.enrolled));
 
     // Mock repository behavior
     when(projectUtil.canGetProject(2L, user)).thenReturn(checkResult);
-    when(courseUtil.getCourseIfExists(1L)).thenReturn(courseCheck);
+    when(courseUtil.getCourseIfUserInCourse(1L, user)).thenReturn(courseCheck);
     when(auth.getUserEntity()).thenReturn(user);
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData(),
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData().getFirst(),
         user)).thenReturn(new ProjectResponseJson(
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
         OffsetDateTime.MAX,
@@ -261,13 +271,16 @@ public class ProjectControllerTest {
     ProjectEntity project1 = new ProjectEntity();
     project1.setName("Project 1");
     project1.setId(1L);
+    project1.setVisible(true);
     ProjectEntity project2 = new ProjectEntity();
     project2.setName("Project 2");
     project2.setId(2L);
+    project2.setVisible(true);
     project2.setCourseId(1L);
     ProjectEntity project3 = new ProjectEntity();
     project3.setName("Project 3");
     project3.setId(3L);
+    project3.setVisible(true);
     List<ProjectEntity> projects = new ArrayList<>();
     projects.add(project1);
     projects.add(project2);
@@ -280,15 +293,14 @@ public class ProjectControllerTest {
     CourseEntity courseEntity = new CourseEntity();
     CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
         project2);
-    CheckResult<CourseEntity> courseCheck = new CheckResult<>(HttpStatus.FORBIDDEN,
-        "testCourseForbidden",
-        courseEntity);
+    CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = new CheckResult<>(HttpStatus.FORBIDDEN, "testCourseForbidden",
+        new Pair<>(courseEntity, CourseRelation.enrolled));
 
     // Mock repository behavior
     when(projectUtil.canGetProject(2L, user)).thenReturn(checkResult);
-    when(courseUtil.getCourseIfExists(1L)).thenReturn(courseCheck);
+    when(courseUtil.getCourseIfUserInCourse(1L, user)).thenReturn(courseCheck);
     when(auth.getUserEntity()).thenReturn(user);
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData(),
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData().getFirst(),
         user)).thenReturn(new ProjectResponseJson(
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
         OffsetDateTime.MAX,

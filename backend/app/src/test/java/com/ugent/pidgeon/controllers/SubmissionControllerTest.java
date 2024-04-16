@@ -115,15 +115,10 @@ public class SubmissionControllerTest extends ControllerTest {
         when(entityToJsonConverter.groupEntityToJson(any())).thenReturn(groupJson);
         when(groupFeedbackRepository.getGroupFeedback(anyLong(), anyLong())).thenReturn(groupFeedbackEntity);
         when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(Optional.of(submission));
-        when(submissionRepository.findById(anyLong())).thenReturn(Optional.of(submission));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
                 .andExpect(status().isOk());
 
-        when(submissionRepository.findById(anyLong())).thenReturn(Optional.empty());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
-                .andExpect(status().isInternalServerError());
-
-        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(null);
+        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(Optional.empty());
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
                 .andExpect(status().isOk());
 

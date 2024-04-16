@@ -8,6 +8,8 @@ import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,19 +61,14 @@ public class EntityToJsonConverterTest {
 
   @BeforeEach
   public void setUp() {
-    groupEntity = new GroupEntity();
+    groupEntity = new GroupEntity("test group", 1L);
     groupEntity.setId(1L);
-    groupEntity.setName("Test Group");
-    groupEntity.setClusterId(1L);
 
-    groupClusterEntity = new GroupClusterEntity();
+    groupClusterEntity = new GroupClusterEntity(1L, 5, "Test Cluster", 1);
     groupClusterEntity.setId(1L);
-    groupClusterEntity.setName("Test Cluster");
-    groupClusterEntity.setGroupAmount(1);
 
-    userEntity = new UserEntity();
+    userEntity = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
     userEntity.setId(1L);
-    userEntity.setName("Test User");
 
     courseEntity = new CourseEntity();
     courseEntity.setId(1L);
@@ -79,9 +76,11 @@ public class EntityToJsonConverterTest {
 
     projectEntity = new ProjectEntity();
     projectEntity.setId(1L);
+    projectEntity.setVisible(true);
     projectEntity.setName("Test Project");
 
-    submissionEntity = new SubmissionEntity(1L,1L,1L, OffsetDateTime.now(),true,true);
+    submissionEntity = new SubmissionEntity(1L, 1L, 1L, OffsetDateTime.now(), true, true);
+    submissionEntity.setId(1L);
 
     testEntity = new TestEntity();
     testEntity.setId(1L);
@@ -91,45 +90,53 @@ public class EntityToJsonConverterTest {
   @Test
   public void testGroupEntityToJson() {
     when(groupClusterRepository.findById(anyLong())).thenReturn(Optional.of(groupClusterEntity));
-    when(groupRepository.findGroupUsersReferencesByGroupId(anyLong())).thenReturn(Collections.emptyList());
+    when(groupRepository.findGroupUsersReferencesByGroupId(anyLong())).thenReturn(
+        Collections.emptyList());
     GroupJson result = entityToJsonConverter.groupEntityToJson(groupEntity);
     assertEquals(groupEntity.getName(), result.getName());
   }
 
   @Test
   public void testClusterEntityToClusterJson() {
-    when(groupRepository.findAllByClusterId(anyLong())).thenReturn(Collections.singletonList(groupEntity));
+    when(groupRepository.findAllByClusterId(anyLong())).thenReturn(
+        Collections.singletonList(groupEntity));
+    when(groupClusterRepository.findById(anyLong())).thenReturn(Optional.of(groupClusterEntity));
     GroupClusterJson result = entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity);
     assertEquals(groupClusterEntity.getId(), result.clusterId());
     assertEquals(groupClusterEntity.getName(), result.name());
   }
 
-//  @Test
-//  public void testUserEntityToUserReference() {
-//    UserReferenceJson result = entityToJsonConverter.userEntityToUserReference(userEntity);
-//    assertEquals(userEntity.getId(), result.getId());
-//    assertEquals(userEntity.getName(), result.getName());
-//  }
+  @Test
+  public void testUserEntityToUserReference() {
+    UserReferenceJson result = entityToJsonConverter.userEntityToUserReference(userEntity);
+    assertEquals(userEntity.getId(), result.getUserId());
+    assertEquals(userEntity.getName() + " " + userEntity.getSurname(), result.getName());
+  }
 
   @Test
   public void testCourseEntityToCourseWithInfo() {
     when(courseRepository.findTeacherByCourseId(anyLong())).thenReturn(userEntity);
     when(courseRepository.findAssistantsByCourseId(anyLong())).thenReturn(Collections.emptyList());
-    CourseWithInfoJson result = entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, "joinLink");
+    CourseWithInfoJson result = entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity,
+        "joinLink");
     assertEquals(courseEntity.getId(), result.courseId());
     assertEquals(courseEntity.getName(), result.name());
   }
 
-//  @Test
-//  public void testProjectEntityToProjectResponseJson() {
-//    when(projectRepository.findGroupIdsByProjectId(anyLong())).thenReturn(Collections.singletonList(1L));
-//    when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(1L);
-//    when(submissionRepository.findById(anyLong())).thenReturn(Optional.of(submissionEntity));
-//    when(courseUserRepository.findById(any(CourseUserId.class))).thenReturn(Optional.empty());
-//    ProjectResponseJson result = entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, courseEntity, userEntity);
-//    assertEquals(projectEntity.getId(), result.projectId());
-//    assertEquals(projectEntity.getName(), result.name());
-//  }
+  @Test
+  public void testProjectEntityToProjectResponseJson() {
+    when(projectRepository.findGroupIdsByProjectId(anyLong())).thenReturn(
+        Collections.singletonList(1L));
+    when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong()))
+        .thenReturn(Optional.of(submissionEntity));
+    when(courseUserRepository.findById(any())).thenReturn(
+        Optional.of(new CourseUserEntity(1L, 1L, CourseRelation.enrolled)));
+    when(groupRepository.groupIdByProjectAndUser(anyLong(), anyLong())).thenReturn(1L);
+    ProjectResponseJson result = entityToJsonConverter.projectEntityToProjectResponseJson(
+        projectEntity, courseEntity, userEntity);
+    assertEquals(projectEntity.getId(), result.projectId());
+    assertEquals(projectEntity.getName(), result.name());
+  }
 
   @Test
   public void testGetSubmissionJson() {

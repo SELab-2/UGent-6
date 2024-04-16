@@ -376,21 +376,21 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testRemoveCourseMember() throws Exception {
         String userIdJson = "{\"userId\": 1}";
-        when(courseUtil.canDeleteUser(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", CourseRelation.enrolled));
+        when(courseUtil.canDeleteUser(anyLong(), anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", CourseRelation.enrolled));
         when(commonDatabaseActions.removeIndividualClusterGroup(anyLong(), anyLong())).thenReturn(true);
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/members")
+        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userIdJson))
                 .andExpect(status().isOk());
 
         when(commonDatabaseActions.removeIndividualClusterGroup(anyLong(), anyLong())).thenReturn(false);
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/members")
+        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userIdJson))
                 .andExpect(status().isInternalServerError());
 
-        when(courseUtil.canDeleteUser(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/members")
+        when(courseUtil.canDeleteUser(anyLong(), anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userIdJson))
                 .andExpect(status().isIAmATeapot());
@@ -402,10 +402,19 @@ public class CourseControllerTest extends ControllerTest {
         String request = "{\"userId\": 1, \"relation\": \"enrolled\"}";
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.enrolled)));
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong()))
+            .thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated());
+
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong()))
+            .thenReturn(false);
+        mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isInternalServerError());
 
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/members")
@@ -419,7 +428,7 @@ public class CourseControllerTest extends ControllerTest {
         String request = "{\"userId\": 1, \"relation\": \"enrolled\"}";
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.enrolled)));
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members")
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isOk());
@@ -428,13 +437,13 @@ public class CourseControllerTest extends ControllerTest {
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.course_admin)));
         when(commonDatabaseActions.removeIndividualClusterGroup(anyLong(), anyLong())).thenReturn(false);
         request = "{\"userId\": 1, \"relation\": \"course_admin\"}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members")
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isInternalServerError());
 
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.BAD_REQUEST, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members")
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest());

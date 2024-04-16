@@ -108,12 +108,10 @@ public class CourseUtilTest {
 
   @Test
   public void testCanDeleteUser() throws Exception {
-    UserIdJson request = new UserIdJson();
-    request.setUserId(5L);
     when(courseRepository.findById(anyLong())).thenReturn(Optional.of(course));
     when(courseUserRepository.findById(any())).thenReturn(Optional.of(cuAdmin));
     CheckResult<CourseRelation> checkResult = courseUtil.canDeleteUser(
-        1L, user.getId(), user
+        1L, 5L, user
     );
     assertEquals(HttpStatus.OK, checkResult.getStatus());
     assertEquals(CourseRelation.course_admin, checkResult.getData());
