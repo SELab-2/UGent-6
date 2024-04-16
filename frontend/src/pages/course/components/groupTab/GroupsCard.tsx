@@ -35,8 +35,12 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     ),
   }))
 
-  if(!items?.length) return <div style={{textAlign:"center"}}>
+  if(Array.isArray(items) && !items.length) return <div style={{textAlign:"center"}}>
      <Typography.Text type="secondary">No groups found</Typography.Text>
+  </div>
+
+  if(!items) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
+    <Spin tip="Loading"/>
   </div>
   return (
     <Card

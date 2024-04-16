@@ -7,7 +7,7 @@ import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
 import CourseAdminView from "../../hooks/CourseAdminView"
-import { DeleteOutlined, DownloadOutlined, PlusOutlined, SettingFilled } from "@ant-design/icons"
+import { DeleteOutlined, DownloadOutlined, InfoOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
@@ -39,6 +39,7 @@ const Project = () => {
       {
         key: "description",
         label: t("home.projects.description"),
+        icon: <InfoOutlined />,
         children: project && (
           <div style={{ padding: "0 8rem" }}>
             <MarkdownTextfield content={project.description} />
@@ -48,11 +49,13 @@ const Project = () => {
       {
         key: "groups",
         label: t("course.groups"),
+        icon: <TeamOutlined />,
         children: <GroupTab />,
       },
       {
         key: "submissions",
         label: t("project.submissions"),
+        icon: <SendOutlined />,
         children: courseAdmin ? (
           <span>
             <SubmissionsTab />
