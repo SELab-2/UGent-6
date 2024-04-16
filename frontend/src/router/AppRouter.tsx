@@ -16,6 +16,7 @@ import CourseInvite from "../pages/courseInvite/CourseInvite"
 import Submission from "../pages/submission/Submission"
 import AuthenticatedRoute from "./AuthenticatedRoute"
 import CourseAdminView from "../hooks/CourseAdminView"
+import ProjectTestsPage from "../pages/projectTest/ProjectTestPage";
 
 const AppRouter = () => {
   return (
@@ -92,6 +93,10 @@ const AppRouter = () => {
             <Route
               path={AppRoutes.SUBMISSION}
               element={<Submission />}
+            />
+            <Route
+              path={AppRoutes.PROJECT_TESTS}
+              element={<ProjectTestsPage/>}
             />
           </Route>
         </Route>

@@ -99,6 +99,25 @@
       "deadline": "Deadline",
       "create": "Create",
       "success": "Project successfully created "
+    },
+    "tests": {
+      "title": "Tests for {{projectName}}",
+      "subtitle": "Configure the tests of this project",
+      "structureSlider": "Enable structure tests: ",
+      "structurePlaceHolder": "Enter file structure template",
+      "dockerSlider" : "Enable docker tests: ",
+      "dockerImagePlaceholder": "Enter docker image",
+      "dockerScriptPlaceholder": "Enter docker script or upload file",
+      "mode": "mode",
+      "modeTemplate": "Template",
+      "modeSimple": "Simple",
+      "modeTemplatePlaceholder": "Enter template or upload file",
+      "submit": "submit",
+      "toTests": "Change tests",
+      "structureTemplateHeader": "Structure",
+      "dockerImageHeader": "Docker image",
+      "dockerScriptHeader": "Docker script",
+      "modeHeader": "Template"
     }
   },
   "group": {

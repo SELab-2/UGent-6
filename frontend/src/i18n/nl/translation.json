@@ -102,6 +102,25 @@
       "deadline": "Deadline",
       "create": "Project Aanmaken",
       "success": "Project succesvol aangemaakt"
+    },
+    "tests": {
+      "title": "Testen voor {{projectName}}",
+      "subtitle": "Configureer de testen voor dit project",
+      "structureSlider": "Schakel bestand structuur testen in: ",
+      "structurePlaceholder": "Vul bestand structuur sjabloon in",
+      "dockerSlider" : "Dockertests inschakelen: ",
+      "dockerImagePlaceholder": "Vul docker image in",
+      "dockerScriptPlaceholder": "Vul docker script in of upload bestand",
+      "mode": "modus",
+      "modeTemplate": "Sjabloon",
+      "modeSimple": "Simpel",
+      "modeTemplatePlaceholder": "Vul Sjabloon in of upload bestand",
+      "submit": "Instellen",
+      "toTests": "Verander testen",
+      "structureTemplateHeader": "Structuur",
+      "dockerImageHeader": "Docker image",
+      "dockerScriptHeader": "Docker script",
+      "modeHeader": "Sjabloon"
     }
   },
   "group": {
