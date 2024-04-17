@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react"
 import { ProjectType } from "./ProjectTable"
-import { Descriptions, DescriptionsProps } from "antd"
+import { Descriptions, DescriptionsProps, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import ProjectStatusTag from "./ProjectStatusTag"
 import GroupProgress from "./GroupProgress"
@@ -31,7 +31,7 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     },
     {
       label: t("home.projects.description"),
-      children: <MarkdownTextfield  content={project.description}/>,
+      children: <div style={{maxWidth:"600px"}} ><MarkdownTextfield  content={project.description}/></div>,
       span: 24
     },
     {
