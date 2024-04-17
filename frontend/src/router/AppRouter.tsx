@@ -36,10 +36,6 @@ const AppRouter = () => {
           element={<CourseInvite />}
         />
 
-        <Route
-          path={AppRoutes.NEW_SUBMISSION}
-          element={<Submit />}
-        />
 
         <Route
           path={AppRoutes.PROFILE}

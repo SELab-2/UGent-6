@@ -10,7 +10,6 @@ export enum AppRoutes {
   PROJECT_CREATE = "/courses/:courseId/create",
   PROJECT_TESTS = "/courses/:courseId/projects/:projectId/tests",
   COURSE = "/courses/:courseId",
-  SUBMISSION_FEEDBACK = "/courses/:courseId/projects/:projectId/feedback/:submitionId",
   NEW_SUBMISSION = "/courses/:courseId/projects/:projectId/submit",
   EDIT_PROJECT = "/courses/:courseId/projects/:projectId/edit",
   SUBMISSION = "/courses/:courseId/projects/:projectId/submissions/:submissionId",
