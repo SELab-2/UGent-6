@@ -95,7 +95,6 @@ public class GroupFeedbackController {
             groupFeedbackRepository.delete(checkResult.getData());
             return ResponseEntity.status(HttpStatus.OK).body("Group feedback deleted");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not delete group feedback");
         }
     }
@@ -125,7 +124,6 @@ public class GroupFeedbackController {
             groupFeedbackRepository.save(groupFeedbackEntity);
             return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
         } catch (Exception e) {
-            System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not update score of group feedback");
         }
     }

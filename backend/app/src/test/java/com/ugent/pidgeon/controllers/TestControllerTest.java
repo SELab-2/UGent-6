@@ -48,55 +48,5 @@ public class TestControllerTest extends ControllerTest{
                         .with(request -> { request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication()); return request; }))
                 .build();
     }
-
-//    @Test
-//    public void updateTestsReturnsOkWhenUserHasAccessToProject() throws Exception {
-//        when(projectRepository.userPartOfProject(anyLong(), anyLong())).thenReturn(true);
-//        when(testRepository.findByProjectId(anyLong())).thenReturn(Optional.empty());
-//        when(projectRepository.save(any())).thenReturn(new GroupEntity());
-//        when(testRepository.save(any())).thenReturn(new GroupEntity());
-//        when(fileRepository.save(any())).thenReturn(new GroupEntity());
-//
-//
-//        Filehandler filehandler = mock(Filehandler.class);
-//
-//        // Define the path that should be returned
-//                Path mockPath = Paths.get("mock/path");
-//
-//        // Specify what should be returned when saveTest is called
-//                when(filehandler.saveTest(any(MultipartFile.class), anyLong())).thenReturn(mockPath);
-//
-//
-//        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.PROJECT_BASE_PATH + "/1/tests")
-//                        .contentType(MediaType.MULTIPART_FORM_DATA)
-//                        .param("dockerimage", "dockerImage")
-//                        .param("dockertest", "dockerTest")
-//                        .param("structuretest", "structureTest"))
-//                .andExpect(status().isOk());
-//    }
-
-//    @Test
-//    public void updateTestsReturnsForbiddenWhenUserDoesNotHaveAccessToProject() throws Exception {
-//        when(projectRepository.userPartOfProject(anyLong(), anyLong())).thenReturn(false);
-//
-//        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.PROJECT_BASE_PATH + "/1/tests")
-//                        .contentType(MediaType.MULTIPART_FORM_DATA)
-//                        .param("dockerimage", "dockerImage")
-//                        .param("dockertest", "dockerTest")
-//                        .param("structuretest", "structureTest"))
-//                .andExpect(status().isForbidden());
-//    }
-//
-//    @Test
-//    public void updateTestsReturnsInternalServerErrorWhenErrorOccursWhileSavingFiles() throws Exception {
-//        when(projectRepository.userPartOfProject(anyLong(), anyLong())).thenReturn(true);
-//        when(fileRepository.save(any())).thenThrow(new IOException());
-//
-//        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.PROJECT_BASE_PATH + "/1/tests")
-//                        .contentType(MediaType.MULTIPART_FORM_DATA)
-//                        .param("dockerimage", "dockerImage")
-//                        .param("dockertest", "dockerTest")
-//                        .param("structuretest", "structureTest"))
-//                .andExpect(status().isInternalServerError());
-//    }
+    //TODO: tests schrijven eens de backend stabiel is.
 }
