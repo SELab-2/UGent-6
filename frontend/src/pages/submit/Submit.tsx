@@ -47,13 +47,12 @@ const Submit = () => {
           </Col>
         </Row>
       </div>
-      <div style={{ height: "5rem" }}> </div>
       <Card
-        style={{ position: "fixed", bottom: 32, width: "calc(100% - 2rem)", maxWidth: "1200px", height: "4rem", margin: "1rem" }}
+        style={{ position: "fixed", bottom: 32, width: "calc(100% - 8rem)", maxWidth: "1200px", height: "4rem", margin: "1rem" }}
         styles={{ body: { padding:"10px 0",display:"flex",gap:"1rem" } }}
       >
         <Button size="large" onClick={() => navigate(-1)}>
-          {t("project.back")}
+          {t("goBack")}
         </Button>
         <Button
           type="primary"
