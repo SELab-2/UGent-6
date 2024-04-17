@@ -1,111 +1,58 @@
-import { Card, Collapse, CollapseProps, Spin } from "antd"
+import { Card, Collapse, CollapseProps, Spin, Typography } from "antd"
 import { FC, useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
-import GroupCollapseItem from "./GroupCollapseItem"
+import apiCall from "../../../../util/apiFetch"
+import { useTranslation } from "react-i18next"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
 const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ courseId, cardProps }) => {
   const [groups, setGroups] = useState<ClusterType[] | null>(null)
-
+  const {t} = useTranslation()
   useEffect(() => {
     // TODO: do the fetch (get all clusters from the course )
     if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
-    setTimeout(() => {
-      setGroups([
-        {
-          capacity: 10,
-          clusterid: 1,
-          course_url: "/api/courses/1",
-          groups: [
-            {
-              group_url: "/api/groups/1",
-              name: "Groep 1",
-            },
-            {
-              group_url: "/api/groups/2",
-              name: "Groep 2",
-            },
-            {
-              group_url: "/api/groups/3",
-              name: "Groep 3",
-            },
-          ],
-          name: "Project 1 groups",
-        },
-        {
-          capacity: 100,
-          clusterid: 2,
-          course_url: "/api/courses/2",
-          groups: [
-            {
-              group_url: "/api/groups/4",
-              name: "Groep 4",
-            },
-            {
-              group_url: "/api/groups/5",
-              name: "Groep 5",
-            },
-            {
-              group_url: "/api/groups/6",
-              name: "Groep 6",
-            },
-          ],
-          name: "Project 2 groups",
-        },
-        {
-          capacity: 120,
-          clusterid: 3,
-          course_url: "/api/courses/3",
-          groups: [
-            {
-              group_url: "/api/groups/7",
-              name: "Groep 7",
-            },
-            {
-              group_url: "/api/groups/8",
-              name: "Groep 8",
-            },
-            {
-              group_url: "/api/groups/9",
-              name: "Groep 9",
-            },
-          ],
-          name: "Project 3 groups",
-        },
-      ])
-    }, 250)
+
+    apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId }).then((res) => {
+      console.log(res.data)
+      setGroups(res.data)
+    })
   }, [courseId])
 
   // if(!groups) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
   //   <Spin tip="Loading"></Spin>
   // </div>
 
-  const items: CollapseProps["items"] =
-    groups?.map((group) => ({
-      key: group.clusterid.toString(),
-      label: group.name,
-      children: group.groups.map((g) => (
-        <GroupCollapseItem
-          key={g.group_url}
-          groupUrl={g.group_url}
-        />
-      )),
-    })) ?? []
+  const items: CollapseProps["items"] = groups?.map((cluster) => ({
+    key: cluster.clusterId.toString(),
+    label: cluster.name,
+    children: (
+      <GroupList
+        groups={cluster.groups}
+        capacity={cluster.capacity}
+      />
+    ),
+  }))
 
+  if(Array.isArray(items) && !items.length) return <div style={{textAlign:"center"}}>
+     <Typography.Text type="secondary">{t("course.noGroups")}</Typography.Text>
+  </div>
+
+  if(!items) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
+    <Spin tip="Loading"/>
+  </div>
   return (
     <Card
       {...cardProps}
-      loading={!groups}
       styles={{
         body: {
           padding: "0",
         },
       }}
     >
-      <Collapse items={items} />
+       <Collapse items={items} />
     </Card>
   )
 }

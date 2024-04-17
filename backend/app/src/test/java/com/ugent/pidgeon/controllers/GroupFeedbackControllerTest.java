@@ -208,4 +208,3 @@ public class GroupFeedbackControllerTest extends ControllerTest {
         .andExpect(status().isBandwidthLimitExceeded());
   }
 }
-

@@ -5,7 +5,8 @@ import { useIsAuthenticated } from "@azure/msal-react"
 
 type UserContextProps = {
   user: User | null
-  updateUser: () => void
+  updateUser: () => Promise<void>
+  updateCourses: (userId?:number|undefined) => Promise<void>
   courses: UserCourseType[] | null
 }
 
@@ -17,7 +18,7 @@ export type User = GET_Responses[ApiRoutes.USER]
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
   const [user, setUser] = useState<User | null>(null)
-  const [courses, setCourses] = useState<UserCourseType[]|null>(null)
+  const [courses, setCourses] = useState<UserCourseType[] | null>(null)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -25,33 +26,30 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [isAuthenticated])
 
-  const updateUser = () => {
-    apiCall
-      .get(ApiRoutes.USER_AUTH)
-      .then((data) => {
-        setUser(data.data)
+  const updateCourses =  async (userId:number|undefined = user?.id) => {
+    if(!userId) return console.error("No user id provided")
+    try {
+      const res = await apiCall.get(ApiRoutes.USER_COURSES,{id:userId})
+      setCourses(res.data)
 
-        apiCall
-          .get(ApiRoutes.USER_COURSES, { 
-            id: data.data.id 
-          })
-          .then((data) => {
-            setCourses(data.data)
-          })
-          .catch((error) => {
-            console.error(error)
-            // TODO: handle error
-          })
-
-
-      })
-      .catch((error) => {
-        // TODO: handle error
-        console.error(error)
-      })
+    } catch(err){
+      // TODO: handle error
+    }
   }
 
-  return <UserContext.Provider value={{ updateUser, user, courses }}>{children}</UserContext.Provider>
+  const updateUser = async () => {
+    try {
+      let data = await apiCall.get(ApiRoutes.USER_AUTH)
+
+      setUser(data.data)
+
+      await updateCourses(data.data.id)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  return <UserContext.Provider value={{ updateUser,updateCourses, user, courses }}>{children}</UserContext.Provider>
 }
 
 export { UserProvider, UserContext }

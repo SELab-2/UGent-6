@@ -64,12 +64,12 @@ public class CourseController {
             // Retrieve course entities based on user courses
             List<CourseWithRelationJson> courseJSONObjects = userCourses.stream()
                     .map(courseWithRelation -> {
-                        CourseEntity course = courseRepository.findById(courseWithRelation.getCourseId()).orElse(null);
-                        if (course == null) {
-                            return null;
-                        }
-                        return entityToJsonConverter.courseEntityToCourseWithRelation(course, courseWithRelation.getRelation());
-                    }
+                                CourseEntity course = courseRepository.findById(courseWithRelation.getCourseId()).orElse(null);
+                                if (course == null) {
+                                    return null;
+                                }
+                                return entityToJsonConverter.courseEntityToCourseWithRelation(course, courseWithRelation.getRelation());
+                            }
                     )
                     .filter(Objects::nonNull)
                     .toList();
@@ -213,7 +213,7 @@ public class CourseController {
      */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getCourseByCourseId(@PathVariable Long courseId, Auth auth) {
+    public ResponseEntity<?> getCourseByCourseId(@PathVariable long courseId, Auth auth) {
         CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
@@ -305,7 +305,7 @@ public class CourseController {
             projects = projects.stream().filter(ProjectEntity::isVisible).toList();
         }
         List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
-            entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, course, user)
+                entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, course, user)
         ).toList();
 
 

@@ -8,25 +8,26 @@ import Sidebar from "../sidebar/Sidebar"
 import LanguageDropdown from "../../LanguageDropdown"
 
 
-const Layout: FC<PropsWithChildren> = ({ children }) => {
+const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
 
 
 
-  if(!isAuthenticated) return children
+  if(!isAuthenticated) return <>{children}</>
 
   return (
     <div style={{ position: "fixed", width: "100vw" }}>
         <AntLayout.Header style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
           <Sidebar />
 
-          <Logo style={{ margin: 0, padding: 0, width: "100%" }} />
+          <Logo className="nav-logo" style={{ margin: 0, padding: 0, width: "100%" }} />
           {/* <UnauthenticatedTemplate>
           <UnauthNav />
         </UnauthenticatedTemplate> */}
           <AuthenticatedTemplate>
             <AuthNav />
           </AuthenticatedTemplate>
+
 
           <LanguageDropdown/>
         </AntLayout.Header>
@@ -40,9 +41,9 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
             }}
             justify="center"
           >
-            <div style={{ maxWidth: "1200px", width: "100%", height: "100%" }}>{children}</div>
+            <div style={{ maxWidth: "1200px", width: "100%", height: "100%",margin: "0 1rem" }}>{children}</div>
           </Flex>
-          <AntLayout.Footer style={{ height: "2rem", width: "100%", bottom: 0 }}></AntLayout.Footer>
+          {/* <AntLayout.Footer style={{ height: "2rem", width: "100%", bottom: 0 }}></AntLayout.Footer> */}
         </AntLayout.Content>
       </AntLayout>
     </div>

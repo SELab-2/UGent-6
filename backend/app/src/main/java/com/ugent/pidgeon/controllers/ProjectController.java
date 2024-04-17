@@ -279,13 +279,12 @@ public class ProjectController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}/groups")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getGroupsOfProject(@PathVariable Long projectId, Auth auth) {
-      // Check if the user is an admin of the project
-      CheckResult<ProjectEntity> projectCheck = projectUtil.canGetProject(projectId,
-          auth.getUserEntity());
-      if (projectCheck.getStatus() != HttpStatus.OK) {
-        return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
-      }
-      ProjectEntity project = projectCheck.getData();
+        // Check if the user is an admin of the project
+        CheckResult<ProjectEntity> projectCheck = projectUtil.canGetProject(projectId, auth.getUserEntity());
+        if (projectCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
+        }
+        ProjectEntity project = projectCheck.getData();
 
       if (clusterUtil.isIndividualCluster(project.getGroupClusterId())) {
         String memberUrl = ApiRoutes.COURSE_BASE_PATH + "/" + project.getCourseId() + "/members";

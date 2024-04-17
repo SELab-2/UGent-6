@@ -125,6 +125,7 @@ public class CommonDatabaseActions {
             }
             return deleteTestById(projectEntity, testEntity);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting project", null);
         }
     }

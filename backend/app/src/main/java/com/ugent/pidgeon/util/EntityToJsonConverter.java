@@ -117,7 +117,9 @@ public class EntityToJsonConverter {
         return new GroupFeedbackJsonWithProject(
                 project.getName(),
                 ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId(),
-                groupFeedbackEntity == null ? null : groupFeedbackEntityToJson(groupFeedbackEntity)
+                project.getId(),
+                groupFeedbackEntity == null ? null : groupFeedbackEntityToJson(groupFeedbackEntity),
+                project.getMaxScore()
         );
     }
 

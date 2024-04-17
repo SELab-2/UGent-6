@@ -1,45 +1,9 @@
-import { useEffect, useState } from "react";
-
-import { MsalAuthenticationTemplate, useMsal,MsalAuthenticationResult } from "@azure/msal-react";
-import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
-import { loginRequest } from "../../auth/AuthConfig";
-import { callMsGraph } from "../../auth/MsGraphApiCall";
 import { Spin } from "antd";
 import ProfileCard from "./components/ProfileCard"
 import useUser from "../../hooks/useUser";
 
-const ErrorComponent: React.FC<MsalAuthenticationResult> = ({error}) => {
-  return <h6>An Error Occurred: {error ? error.errorCode : "unknown error"}</h6>;
-}
-
-
 const ProfileContent = () => {
-    const { instance, inProgress } = useMsal();
-    const [id, setId] = useState<String | null>(null);
     const { user } = useUser()
-
-    useEffect(() => {
-        if (!id && inProgress === InteractionStatus.None) {
-            callMsGraph().then(response => {
-                    if (response) {
-                        setId(response.id);
-                    } else {
-                        throw("User not found");
-                    }
-                }).catch((e) => {
-                if (e instanceof InteractionRequiredAuthError) {
-
-                    instance.acquireTokenRedirect({
-                        ...loginRequest,
-                        account: instance.getActiveAccount() as AccountInfo
-                    });
-                }
-            }).catch(err => {
-                console.log(err);
-            });
-            console.log(id);
-        }
-    }, [inProgress, id, instance]);
 
     if (user === null) {
         return (
@@ -60,18 +24,10 @@ const ProfileContent = () => {
 };
 
 export function Profile() {
-    const authRequest = {
-        ...loginRequest
-    };
+ 
     return (
-        <MsalAuthenticationTemplate 
-            interactionType={InteractionType.Redirect} 
-            authenticationRequest={authRequest} 
-            errorComponent={ErrorComponent} 
-            loadingComponent={() => <h6>Authentication in progress...</h6>}
-        >
+       
             <ProfileContent />
-        </MsalAuthenticationTemplate>
       )
 };
 

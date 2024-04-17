@@ -28,14 +28,14 @@ const GroupInfoModal: FC<{ group: GroupType | null; open: boolean; setOpen: (b: 
                   <Button
                     size="small"
                     type="text"
-                    onClick={() => removeUserFromGroup(m.userid)}
+                    onClick={() => removeUserFromGroup(m.userId)}
                     icon={<CloseOutlined />}
                   />
                 </Tooltip>
               </CourseAdminView>,
             ]}
           >
-            {m.name} {m.surname}
+            {m.name}
           </List.Item>
         )}
       />
