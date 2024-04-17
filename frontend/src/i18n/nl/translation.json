@@ -175,8 +175,8 @@
     "courseDeleted": "Vak succesvol verwijderd",
     "createCourse":"Vak aanmaken",
     "changesSaved": "Aanpassingen opgeslagen",
-    "noFeedback": "Nog geen feedback beschikbaar"
-    
+    "noFeedback": "Nog geen feedback beschikbaar",
+    "noMembersFound": "Geen leden gevonden"
   },
   "cancel": "Annuleren",
   "ok": "Ok",

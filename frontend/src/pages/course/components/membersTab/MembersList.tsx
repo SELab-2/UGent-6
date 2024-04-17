@@ -43,6 +43,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
 
   return (
     <List
+    locale={{emptyText:t("course.noMembersFound")}}
       loading={members === null}
       dataSource={members ?? []}
       renderItem={(user) => (
@@ -55,7 +56,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
               description={t("course.removeUserConfirm", {
                 name: user.user.name,
               })}
-              onConfirm={() => removeUserFromCourse(user.user.userId)}
+              onConfirm={() => removeUserFromCourse(user.user.id)}
               okText={t("course.yes")}
               cancelText={t("course.cancel")}
               key="remove"
@@ -77,7 +78,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
             title={user.user.name}
             description={
               isCourseAdmin ? (
-                <Dropdown menu={{ items,onClick:(e) => onRoleChange(user.user.userId, e.key as CourseRelation), defaultSelectedKeys:[user.relation] }}>
+                <Dropdown menu={{ items,onClick:(e) => onRoleChange(user.user.id, e.key as CourseRelation), defaultSelectedKeys:[user.relation] }}>
                   <a onClick={(e) => e.preventDefault()}>
                     <Space>
                       {rolesNames[user.relation]}
