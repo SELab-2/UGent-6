@@ -108,11 +108,11 @@
       "dockerSlider" : "Enable docker tests: ",
       "dockerImagePlaceholder": "Enter docker image",
       "dockerScriptPlaceholder": "Enter docker script or upload file",
-      "mode": "mode",
+      "mode": "Mode",
       "modeTemplate": "Template",
       "modeSimple": "Simple",
       "modeTemplatePlaceholder": "Enter template or upload file",
-      "submit": "submit",
+      "submit": "Update tests",
       "toTests": "Change tests",
       "structureTemplateHeader": "Structure",
       "dockerImageHeader": "Docker image",
@@ -181,5 +181,6 @@
     "403_message": "you are not authorized to access this page.",
     "404_message": "Sorry, the page you visited does not exist.",
     "500_message": "Sorry, Something went wrong"
-  }
+  },
+  "goBack": "Go back"
 }

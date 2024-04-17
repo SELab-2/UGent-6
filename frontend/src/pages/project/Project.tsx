@@ -7,16 +7,7 @@ import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
 import CourseAdminView from "../../hooks/CourseAdminView"
-import {
-  DeleteOutlined,
-  DownloadOutlined,
-  HeatMapOutlined,
-  InfoOutlined,
-  PlusOutlined,
-  SendOutlined,
-  SettingFilled,
-  TeamOutlined
-} from "@ant-design/icons"
+import { DeleteOutlined, DownloadOutlined, HeatMapOutlined, InfoOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
@@ -50,8 +41,11 @@ const Project = () => {
         label: t("home.projects.description"),
         icon: <InfoOutlined />,
         children: project && (
-          <div style={{ padding: "0 8rem" }}>
+          <div style={{display:"flex",justifyContent:"center",width:"100%"}}>
+            <div style={{maxWidth:"800px"}}>
             <MarkdownTextfield content={project.description} />
+
+            </div>
           </div>
         ),
       },
@@ -99,10 +93,10 @@ const Project = () => {
   }
 
   const deleteProject = async () => {
-    if(!project || !course) return console.error("project is undefined")
-    await apiCall.delete(ApiRoutes.PROJECT, undefined, { id: project!.projectId+"" })
+    if (!project || !course) return console.error("project is undefined")
+    await apiCall.delete(ApiRoutes.PROJECT, undefined, { id: project!.projectId + "" })
 
-    navigate(AppRoutes.COURSE.replace(":courseId", course.courseId+""))
+    navigate(AppRoutes.COURSE.replace(":courseId", course.courseId + ""))
   }
 
   return (
@@ -124,26 +118,33 @@ const Project = () => {
         title={project?.name}
         loading={!project}
         extra={
-          courseAdmin ? (<>
-            <Link to="tests">
+          courseAdmin ? (
+            <>
+              <Link to="tests">
+                <Button
+                  type="primary"
+                  icon={<HeatMapOutlined />}
+                  style={{ marginLeft: "1rem" }}
+                >
+                  {t("project.tests.toTests")}
+                </Button>
+              </Link>
+              <Link to="edit">
+                <Button
+                  type="primary"
+                  icon={<SettingFilled />}
+                  style={{ marginLeft: "1rem" }}
+                >
+                  {t("project.options")}
+                </Button>
+              </Link>
               <Button
+                style={{ marginLeft: "1rem" }}
                 type="primary"
-                icon={<HeatMapOutlined />}
-                style={{marginLeft:"1rem"}}
-              >
-                {t("project.tests.toTests")}
-              </Button>
-            </Link>
-            <Link to="edit">
-              <Button
-                type="primary"
-                icon={<SettingFilled />}
-                style={{marginLeft:"1rem"}}
-              >
-                {t("project.options")}
-              </Button>
-            </Link>
-            <Button style={{marginLeft:"1rem"}} type="primary" onClick={deleteProject} danger icon={<DeleteOutlined/>} />
+                onClick={deleteProject}
+                danger
+                icon={<DeleteOutlined />}
+              />
             </>
           ) : (
             <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>

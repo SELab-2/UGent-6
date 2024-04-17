@@ -2,7 +2,7 @@ import React  from "react";
 import { AppRoutes } from "../../@types/routes"
 import {useTranslation} from "react-i18next";
 import {Button, Result, Space, Typography} from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 interface ErrorPageProps {
@@ -13,6 +13,7 @@ interface ErrorPageProps {
 const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
     const { t } = useTranslation()
     const { Title, Text } = Typography;
+    const navigate = useNavigate()
 
     let title:string = "";
     let status: "403" | "404" | "500"  = "404";
@@ -52,9 +53,8 @@ const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
             <Space direction="vertical">
                 <Title>{title}</Title>
                 <Text>{errorMessage}</Text>
-                <Link to={AppRoutes.HOME}>
-                <Button type="primary" >{t("error.homepage")}</Button>
-                </Link>
+               
+                <Button onClick={()=> navigate(-1)} type="primary" >{t("error.homepage")}</Button>
             </Space>
         </Result>
     );

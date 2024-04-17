@@ -1,17 +1,9 @@
 import { InboxOutlined } from "@ant-design/icons"
-import { Button, Form, FormInstance, Space, Upload } from "antd"
-import { UploadProps } from "antd/lib"
+import { Form, FormInstance, Upload } from "antd"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
 
 
-const props: UploadProps = {
-  style:{ width:"100%"},
-  name: "file",
-  multiple: false,
-  accept: ".zip",
-  directory: true,
-}
 
 const SubmitForm:FC<{form:FormInstance}> = ({form}) => {
 
@@ -40,7 +32,8 @@ const SubmitForm:FC<{form:FormInstance}> = ({form}) => {
           style={{height:"100%"}}
         >
           <Upload.Dragger
-            {...props}
+            name="file"
+            multiple={false}
             style={{ height:"100%"}}
             
           >
