@@ -708,7 +708,7 @@ public class ProjectControllerTest {
         groups);
     // Mock behavior
     when(auth.getUserEntity()).thenReturn(user);
-    when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(projectCheck);
+    when(projectUtil.canGetProject(projectId, user)).thenReturn(projectCheck);
     when(clusterUtil.isIndividualCluster(projectEntity.getGroupClusterId())).thenReturn(false);
     when(projectRepository.findGroupIdsByProjectId(projectId)).thenReturn(groupIds);
     when(grouprRepository.findById(groupId)).thenReturn(Optional.of(groupEntity));
