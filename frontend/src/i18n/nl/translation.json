@@ -121,7 +121,9 @@
       "dockerImageHeader": "Docker image",
       "dockerScriptHeader": "Docker script",
       "modeHeader": "Sjabloon"
-    }
+    },
+    "noScore": "Nog geen score beschikbaar",
+    "noFeedback": "Geen feedback gegeven"
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
@@ -174,6 +176,7 @@
     "createCourse":"Vak aanmaken",
     "changesSaved": "Aanpassingen opgeslagen",
     "noFeedback": "Nog geen feedback beschikbaar"
+    
   },
   "cancel": "Annuleren",
   "ok": "Ok",

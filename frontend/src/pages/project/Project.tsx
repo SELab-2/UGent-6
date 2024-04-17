@@ -42,7 +42,7 @@ const Project = () => {
         icon: <InfoOutlined />,
         children: project && (
           <div style={{display:"flex",justifyContent:"center",width:"100%"}}>
-            <div style={{maxWidth:"800px"}}>
+            <div style={{maxWidth:"800px",width:"100%"}}>
             <MarkdownTextfield content={project.description} />
 
             </div>

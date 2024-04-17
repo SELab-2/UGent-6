@@ -118,7 +118,9 @@
       "dockerImageHeader": "Docker image",
       "dockerScriptHeader": "Docker script",
       "modeHeader": "Template"
-    }
+    },
+    "noScore": "No score available",
+    "noFeedback": "No feedback provided"
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"
