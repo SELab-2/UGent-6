@@ -1,10 +1,13 @@
 import { useParams, Link } from "react-router-dom";
 import { Button, Card, Typography } from "antd";
+import { AppRoutes } from "../../@types/routes";
+import { useTranslation } from "react-i18next"
 
 const { Title } = Typography;
 
 const CourseInvite = () => {
   const { inviteId } = useParams();
+  const { t } = useTranslation();
 
   const courseName = "Introduction to React";
   const courseDescription = "Learn the basics of React development.";
@@ -14,12 +17,12 @@ const CourseInvite = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{padding: "3rem"}}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Title level={2}>Do you want to join this course?</Title>
-      <Link to="/courses">
+      <Title level={2}>{t("courseInvite.confirmJoin")}</Title>
+      <Link to={AppRoutes.COURSES}>
         <Button type="primary" onClick={handleJoinClick}>
-          Join Course
+          {t("courseInvite.join")}
         </Button>
       </Link>
       </div>

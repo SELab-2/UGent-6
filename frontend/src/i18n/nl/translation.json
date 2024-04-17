@@ -59,6 +59,11 @@
     "confirmationText": "Bent u zeker dat u de rol van {{name}} wilt aanpassen naar {{role}}?"
   },
 
+  "courseInvite": {
+    "confirmJoin": "Wil je lid worden van dit vak?",
+    "join": "Lid worden"
+  },
+
   "project": {
     "submissions": "Indieningen",
     "newSubmission": "Nieuwe indiening",
