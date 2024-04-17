@@ -7,7 +7,16 @@ import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
 import CourseAdminView from "../../hooks/CourseAdminView"
-import { DeleteOutlined, DownloadOutlined, InfoOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  HeatMapOutlined,
+  InfoOutlined,
+  PlusOutlined,
+  SendOutlined,
+  SettingFilled,
+  TeamOutlined
+} from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
@@ -116,10 +125,20 @@ const Project = () => {
         loading={!project}
         extra={
           courseAdmin ? (<>
+            <Link to="tests">
+              <Button
+                type="primary"
+                icon={<HeatMapOutlined />}
+                style={{marginLeft:"1rem"}}
+              >
+                {t("project.tests.toTests")}
+              </Button>
+            </Link>
             <Link to="edit">
               <Button
                 type="primary"
                 icon={<SettingFilled />}
+                style={{marginLeft:"1rem"}}
               >
                 {t("project.options")}
               </Button>
