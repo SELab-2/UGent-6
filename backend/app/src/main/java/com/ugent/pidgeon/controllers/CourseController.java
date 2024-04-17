@@ -1,6 +1,5 @@
 package com.ugent.pidgeon.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.ProjectResponseJson;
@@ -291,7 +290,7 @@ public class CourseController {
      */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getProjectByCourseId(@PathVariable Long courseId, Auth auth) {
+    public ResponseEntity<?> getProjectsByCourseId(@PathVariable Long courseId, Auth auth) {
         UserEntity user = auth.getUserEntity();
 
         CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
@@ -457,7 +456,7 @@ public class CourseController {
      */
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
-    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @PathVariable long userId) {
+    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @PathVariable Long userId) {
         CheckResult<CourseRelation> checkResult = courseUtil.canDeleteUser(courseId, userId, auth.getUserEntity());
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());

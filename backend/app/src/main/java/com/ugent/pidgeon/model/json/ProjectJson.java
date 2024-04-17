@@ -28,6 +28,9 @@ public class ProjectJson {
         this.deadline = deadline;
     }
 
+    public ProjectJson() {
+    }
+
     public String getName() {
         return name;
     }
