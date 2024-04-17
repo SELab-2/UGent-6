@@ -265,9 +265,41 @@ public class ProjectController {
     if (checkProject.getStatus() != HttpStatus.OK) {
       return ResponseEntity.status(checkProject.getStatus()).body(checkProject.getMessage());
     }
-
     return doProjectUpdate(project, projectJson, auth.getUserEntity());
   }
+
+    /**
+     * Function to get all groups of a project
+     * @param projectId ID of the project to get the groups of
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6343073">apiDog documentation</a>
+     * @HttpMethod GET
+     * @ApiPath /api/projects/{projectId}/groups
+     * @return ResponseEntity with groups as specified in the apidog
+     */
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}/groups")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getGroupsOfProject(@PathVariable Long projectId, Auth auth) {
+      // Check if the user is an admin of the project
+      CheckResult<ProjectEntity> projectCheck = projectUtil.canGetProject(projectId,
+          auth.getUserEntity());
+      if (projectCheck.getStatus() != HttpStatus.OK) {
+        return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
+      }
+      ProjectEntity project = projectCheck.getData();
+
+      if (clusterUtil.isIndividualCluster(project.getGroupClusterId())) {
+        String memberUrl = ApiRoutes.COURSE_BASE_PATH + "/" + project.getCourseId() + "/members";
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+            "No groups for this project: use " + memberUrl + " to get the members of the course");
+      }
+
+      List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
+      List<GroupJson> groupjsons = groups.stream()
+          .map((Long id) -> {
+            return groupRepository.findById(id).orElse(null);
+          }).filter(Objects::nonNull).map(entityToJsonConverter::groupEntityToJson).toList();
+      return ResponseEntity.ok(groupjsons);
+    }
 
   /**
    * Function to delete a project by its ID
@@ -294,36 +326,4 @@ public class ProjectController {
 
     return ResponseEntity.ok().build();
   }
-
-  /**
-   * Function to get all groups of a project
-   * @param projectId ID of the project to get the groups of
-   * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6343073">apiDog documentation</a>
-   * @HttpMethod GET
-   * @ApiPath /api/projects/{projectId}/groups
-   * @return ResponseEntity with groups as specified in the apidog
-   */
-  @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}/groups")
-  @Roles({UserRole.teacher, UserRole.student})
-  public ResponseEntity<?> getGroupsOfProject(@PathVariable Long projectId, Auth auth) {
-    // Check if the user is an admin of the project
-    CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, auth.getUserEntity());
-    if (projectCheck.getStatus() != HttpStatus.OK) {
-      return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
-    }
-    ProjectEntity project = projectCheck.getData();
-
-    if (clusterUtil.isIndividualCluster(project.getGroupClusterId())) {
-      String memberUrl = ApiRoutes.COURSE_BASE_PATH + "/" + project.getCourseId() + "/members";
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No groups for this project: use " + memberUrl + " to get the members of the course");
-    }
-
-    List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
-    List<GroupJson> groupjsons = groups.stream()
-        .map((Long id) -> {
-          return  groupRepository.findById(id).orElse(null);
-        }).filter(Objects::nonNull).map(entityToJsonConverter::groupEntityToJson).toList();
-    return ResponseEntity.ok(groupjsons);
-  }
-
 }
