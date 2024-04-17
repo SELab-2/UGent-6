@@ -5,6 +5,7 @@ import useProject from '../../hooks/useProject';
 import {useTranslation} from 'react-i18next';
 import {Link} from "react-router-dom";
 import useCourse from "../../hooks/useCourse";
+import {AppRoutes} from "../../@types/routes";
 
 const {Title, Text} = Typography;
 const {TextArea} = Input;
@@ -95,7 +96,7 @@ const ProjectTestsPage: React.FC = () => {
                            style={{marginBottom: '0.5rem'}}>{t('project.tests.title', {projectName: project?.name})}</Title>
                     <Text type="secondary">{t('project.tests.subtitle')}</Text>
                 </div>
-                <Link to={`/courses/${course?.courseId}/projects/${project?.projectId}`}>
+                <Link to={AppRoutes.PROJECT.replace(":courseId", course?.courseId?.toString() ?? "").replace(":projectId", project?.projectId?.toString() ?? "")}>
                     <Button
                         type="default"
                         icon={<LeftOutlined/>}
