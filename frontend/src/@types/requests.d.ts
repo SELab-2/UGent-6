@@ -12,6 +12,7 @@ export enum ApiRoutes {
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
+  COURSE_JOIN = '/api/courses/:id/join',
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -50,6 +51,8 @@ export type POST_Requests = {
   }
   [ApiRoutes.PROJECT_CREATE]:
       ProjectFormData
+  
+  [ApiRoutes.COURSE_JOIN]: {}
 }
 
 /**
@@ -238,5 +241,10 @@ export type GET_Responses = {
     projectId: number,
     maxScore: number,
     groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE]
-  }[]
+  }[],
+
+  [ApiRoutes.COURSE_JOIN]: {
+    name: string,
+    description: string
+  }
 }
