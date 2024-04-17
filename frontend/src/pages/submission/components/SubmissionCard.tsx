@@ -16,7 +16,6 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
   const [structureFeedback, setStructureFeedback] = useState<string | null>(null)
   const [dockerFeedback, setDockerFeedback] = useState<string | null>(null)
   const navigate = useNavigate()
-
   useEffect(() => {
     if (!submission.dockerAccepted) apiCall.get(submission.dockerFeedbackUrl).then((res) => setDockerFeedback(res.data ? res.data : ""))
     if (!submission.structureAccepted) apiCall.get(submission.structureFeedbackUrl).then((res) => setStructureFeedback(res.data ? res.data : ""))
@@ -24,17 +23,21 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
 
   const downloadSubmission = async () => {
     //TODO: testen of dit wel echt werkt
-    const fileContent = apiCall.get(submission.fileUrl).then((res) => {return res.data})
-
-    const blob = new Blob([fileContent], { type: "text/plain" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = "indiening.zip"
-    document.body.appendChild(link)
-    link.click()
-    URL.revokeObjectURL(url)
-    document.body.removeChild(link)
+    try {
+      const fileContent = await apiCall.get(submission.fileUrl)
+      console.log(fileContent)
+      const blob = new Blob([fileContent.data], { type: "text/plain" })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "indiening.zip"
+      document.body.appendChild(link)
+      link.click()
+      URL.revokeObjectURL(url)
+      document.body.removeChild(link)
+    } catch (err) {
+      // TODO: handle error
+    }
   }
 
   return (
@@ -82,14 +85,17 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
           <Typography.Text type={submission.structureAccepted ? "success" : "danger"}>{submission.structureAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
           {submission.structureAccepted ? null : (
             <div>
-              {structureFeedback === null ? <Spin /> :
-              <Input.TextArea
-                readOnly
-                value={structureFeedback}
-                style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
-                rows={4}
-                autoSize={{ minRows: 4, maxRows: 8 }}
-              />}
+              {structureFeedback === null ? (
+                <Spin />
+              ) : (
+                <Input.TextArea
+                  readOnly
+                  value={structureFeedback}
+                  style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
+                  rows={4}
+                  autoSize={{ minRows: 4, maxRows: 8 }}
+                />
+              )}
             </div>
           )}
         </li>
@@ -102,16 +108,19 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
           <Typography.Text type={submission.dockerAccepted ? "success" : "danger"}>{submission.dockerAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
           {submission.dockerAccepted ? null : (
             <div>
-              {dockerFeedback === null ? <Spin /> :
-              <Input.TextArea
-                readOnly
-                value={dockerFeedback}
-                style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
-                rows={4}
-                autoSize={{ minRows: 4, maxRows: 16 }}
-              />}
-             </div>
-           )}
+              {dockerFeedback === null ? (
+                <Spin />
+              ) : (
+                <Input.TextArea
+                  readOnly
+                  value={dockerFeedback}
+                  style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
+                  rows={4}
+                  autoSize={{ minRows: 4, maxRows: 16 }}
+                />
+              )}
+            </div>
+          )}
         </li>
       </ul>
     </Card>

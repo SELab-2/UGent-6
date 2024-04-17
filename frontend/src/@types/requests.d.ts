@@ -25,6 +25,8 @@ export enum ApiRoutes {
 
   SUBMISSION = "api/submissions/:id",
   SUBMISSION_FILE = "api/submissions/:id/file",
+  SUBMISSION_STRUCTURE_FEEDBACK= "/api/submissions/:id/structurefeedback",
+  SUBMISSION_DOCKER_FEEDBACK= "/api/submissions/:id/dockerfeedback",
 
   CLUSTER = "api/clusters/:id",
 
@@ -128,13 +130,13 @@ export type GET_Responses = {
     structureAccepted: boolean
     dockerAccepted: boolean
     submissionTime: Timestamp
-    projectUrl: string
-    groupUrl: string
-    fileUrl: string
-    structureFeedbackUrl: string
-    dockerFeedbackUrl: string
+    projectUrl: ApiRoutes.PROJECT
+    groupUrl: ApiRoutes.GROUP
+    fileUrl: ApiRoutes.SUBMISSION_FILE
+    structureFeedbackUrl: ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK
+    dockerFeedbackUrl: ApiRoutes.SUBMISSION_DOCKER_FEEDBACK
   }
-  [ApiRoutes.SUBMISSION_FILE]: FormData
+  [ApiRoutes.SUBMISSION_FILE]: BlobPart
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]
   [ApiRoutes.PROJECT]: {
     course: {
@@ -241,4 +243,7 @@ export type GET_Responses = {
     maxScore: number,
     groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE]
   }[]
+
+  [ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK]: string | null  // Null if no feedback is given
+  [ApiRoutes.SUBMISSION_DOCKER_FEEDBACK]: string | null // Null if no feedback is given
 }

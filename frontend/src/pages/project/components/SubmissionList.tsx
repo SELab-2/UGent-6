@@ -1,26 +1,26 @@
 import { Button, List, Table, TableProps, Typography } from "antd"
 import { FC } from "react"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
 import { GroupSubmissionType } from "./SubmissionTab"
 import { useTranslation } from "react-i18next"
+import { AppRoutes } from "../../../@types/routes"
 
 
 
 
 const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null }> = ({ submissions }) => {
   const {t} = useTranslation()
-
+  const {courseId} = useParams()
   
 
   const columns: TableProps['columns'] = [
     {
       title: t("project.submission"),
-      dataIndex: "submissionId",
       key: "submissionId",
-      render: (submissionId: GroupSubmissionType["submissionId"]) => (
-        <Link to={"feedback/" + submissionId}>
-          <Button type="link">#{submissionId}</Button>
+      render: (submission: GroupSubmissionType) => (
+        <Link to={AppRoutes.SUBMISSION.replace(":courseId",courseId!).replace(":projectId",submission.projectId+"").replace(":submissionId",submission.submissionId+"")}>
+          <Button type="link">#{submission.submissionId}</Button>
         </Link>
       ),
     },
