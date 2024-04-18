@@ -100,7 +100,7 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
               ))}
       </Space>
 
-      {adminCourseProjects && (
+      {adminCourseProjects && (adminCourseProjectsArray.length || courseProjectsArray.length === 0   )&& (
         <>
           <Typography.Title
             level={3}
@@ -110,7 +110,7 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
           >
             {t("home.myCourses")}
 
-            {courseProjects && courseProjectsArray.length === 0 && (<TeacherView>
+            {courseProjects  && (<TeacherView>
               <Button
                 onClick={onOpenNew}
                 type="text"

@@ -62,7 +62,6 @@ const ProjectCreate: React.FC = () => {
               name: "",
               description: "",
               groupClusterId: undefined,
-              testId: null,
               visible: false, // Stel de standaardwaarde in op false
               maxScore: 0,
               deadline: null,
@@ -70,6 +69,7 @@ const ProjectCreate: React.FC = () => {
             form={form}
             onFinish={handleCreation}
             layout="vertical"
+            requiredMark="optional"
           >
             <ProjectForm />
 

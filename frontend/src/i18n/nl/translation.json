@@ -92,16 +92,15 @@
       "nameMessage": "Vul de naam van het project in",
       "description": "Beschrijving",
       "descriptionMessage": "Vul de beschrijving van het project in",
-      "groupClusterId": "Groep Cluster ID",
-      "groupClusterIdMessage": "Vul de Groep Cluster ID in",
-      "testId": "Test Id",
-      "testIdMessage": "Vul de Test ID in",
+      "groupClusterId": "Groepen",
+      "groupClusterIdMessage": "Vul de Groep Cluster in",
       "visible": "Project zichtbaar maken",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in)",
       "deadline": "Deadline",
       "create": "Project Aanmaken",
-      "success": "Project succesvol aangemaakt"
+      "success": "Project succesvol aangemaakt",
+      "groupClusterIdTooltip": "Kies een groepcluster voor dit project. Als er geen geselecteerd is, moet het project individueel gemaakt worden."
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
