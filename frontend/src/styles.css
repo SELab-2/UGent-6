@@ -13,6 +13,10 @@ html {
   color: #00325a;
 }
 
+.dark-theme, .dodona-theme {
+  background-color: #111;
+}
+
 .dodona-theme .ant-layout-header .ant-btn {
   background-color: rgba(255, 255, 255, 0.1);
 }

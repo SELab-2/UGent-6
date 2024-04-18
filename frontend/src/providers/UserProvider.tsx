@@ -51,7 +51,7 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
 
-  if (!isAuthenticated) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+  if (!user) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
     <Spin size="large" />
   </div>
 
