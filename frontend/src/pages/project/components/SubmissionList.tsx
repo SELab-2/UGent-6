@@ -44,7 +44,7 @@ const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null }> = ({ sub
 
 
 
-  return ( <Table loading={submissions === null} dataSource={submissions||[]} columns={columns} rowKey="submissionId" />
+  return ( <Table locale={{emptyText: t("project.noSubmissions")}} loading={submissions === null} dataSource={submissions||[]} columns={columns} rowKey="submissionId" />
   )
 }
 

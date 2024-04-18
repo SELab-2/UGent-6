@@ -7,14 +7,15 @@ import GroupInfoModal from "./GroupInfoModal"
 
 export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
-const Group: FC<{ group: GroupType;capacity:number, canJoin: boolean; canLeave: boolean,onClick:()=>void,onLeave:()=>void, onJoin:()=>void }> = ({ group, canJoin, canLeave,onClick,onJoin,onLeave,capacity }) => {
+const Group: FC<{ group: GroupType, canJoin: boolean; canLeave: boolean,onClick:()=>void,onLeave:()=>void, onJoin:()=>void }> = ({ group, canJoin, canLeave,onClick,onJoin,onLeave }) => {
   const { t } = useTranslation()
+
   return (
     <List.Item
     key={group.groupId}
       actions={[
         <Typography.Text key="cap">
-          {group.members.length} / {capacity}
+          {group.members.length} / {group.capacity}
         </Typography.Text>,
         canLeave ? (
           <Button  style={{width:"130px"}} size="small" onClick={onLeave} key="leave">{t("course.leaveGroup")}</Button>
@@ -31,12 +32,12 @@ const Group: FC<{ group: GroupType;capacity:number, canJoin: boolean; canLeave: 
         ),
       ]}
     >
-      <List.Item.Meta title={<Button size="small" onClick={onClick} type="link">{group.name}</Button>} />
+      <List.Item.Meta title={<Button size="small" onClick={onClick} type="link">{group.name || ("Groep " + group.members.map(m => m.name).slice(25))}</Button>} />
     </List.Item>
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null, capacity:number }> = ({ groups,capacity }) => {
+const GroupList: FC<{ groups: GroupType[] | null}> = ({ groups }) => {
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
   const {t} = useTranslation()
@@ -77,12 +78,11 @@ const GroupList: FC<{ groups: GroupType[] | null, capacity:number }> = ({ groups
       renderItem={(g) => (
         <Group
           onClick={()=> handleModalClick(g)}
-          canJoin={g.members.length < capacity || ownGroupId !== null}
+          canJoin={g.members.length < g.capacity || ownGroupId !== null}
           canLeave={ownGroupId === g.groupId}
           group={g}
           onJoin={() => onJoin(g)}
           onLeave={() => onLeave(g)}
-          capacity={capacity}
         />
       )}
     />

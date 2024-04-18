@@ -12,7 +12,7 @@ import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
-import { InfoOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined, UsergroupAddOutlined } from "@ant-design/icons"
+import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined, UsergroupAddOutlined } from "@ant-design/icons"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -29,7 +29,7 @@ const Course: FC = () => {
       {
         key: "info",
         label: t("course.info"),
-        icon: <InfoOutlined />,
+        icon: <InfoCircleOutlined />,
         children: <InformationTab />,
       },
       {

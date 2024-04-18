@@ -31,7 +31,6 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     children: (
       <GroupList
         groups={cluster.groups}
-        capacity={cluster.capacity}
       />
     ),
   }))

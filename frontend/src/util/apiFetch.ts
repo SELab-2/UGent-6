@@ -4,7 +4,7 @@ import { msalInstance } from "../index"
 import { AxiosRequestConfig } from "axios"
 import { msalConfig } from "../auth/AuthConfig"
 
-const serverHost = window.location.origin.includes("localhost") ? "http://localhost:8080" : window.location.origin
+const serverHost =  window.location.origin.includes("localhost") ? "http://localhost:8080" : window.location.origin
 let accessToken: string | null = null
 let tokenExpiry: Date | null = null
 
