@@ -29,7 +29,7 @@ const UserList: React.FC<{ users: UsersType[]; updateRole: (user: UsersType, rol
 
   const renderUserItem = (user: UsersType) => (
     <List.Item>
-      <List.Item.Meta title={user.name + " " + user.surname} />
+      <List.Item.Meta title={user.name} />
       <Dropdown
         trigger={["click"]}
         placement="bottomRight"
@@ -76,7 +76,7 @@ const UserList: React.FC<{ users: UsersType[]; updateRole: (user: UsersType, rol
           onOk={handleConfirm}
           onCancel={onCancel}
         >
-          {t("editRole.confirmationText",{role: selectedRole, name: selectedUser?.name + " " + selectedUser?.surname })}
+          {t("editRole.confirmationText",{role: selectedRole, name: selectedUser?.name })}
         </Modal>
       </div>
     </div>
