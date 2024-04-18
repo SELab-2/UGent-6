@@ -2,6 +2,7 @@ import { FC, PropsWithChildren, createContext, useEffect, useState } from "react
 import { ApiRoutes, GET_Responses } from "../@types/requests.d"
 import apiCall from "../util/apiFetch"
 import { useIsAuthenticated } from "@azure/msal-react"
+import { Spin } from "antd"
 
 type UserContextProps = {
   user: User | null
@@ -48,6 +49,11 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       console.log(err)
     }
   }
+
+
+  if (!user) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+    <Spin size="large" />
+  </div>
 
   return <UserContext.Provider value={{ updateUser,updateCourses, user, courses }}>{children}</UserContext.Provider>
 }

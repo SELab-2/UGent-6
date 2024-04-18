@@ -89,16 +89,15 @@
       "nameMessage": "Please enter Project Name",
       "description": "Description",
       "descriptionMessage": "Please enter the project description",
-      "groupClusterId": "Group Cluster ID",
-      "groupClusterIdMessage": "Please enter the Group Cluster ID",
-      "testId": "Test Id",
-      "testIdMessage": "Please enter the Test ID",
+      "groupClusterId": "Groups",
+      "groupClusterIdMessage": "Please enter the Group Cluster",
       "visible": "Make the project visible",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Please enter the maximum score for the project",
       "deadline": "Deadline",
-      "create": "Create",
-      "success": "Project successfully created "
+      "create": "Create project",
+      "success": "Project successfully created ",
+      "groupClusterIdTooltip": "Select no group to create an individual project. "
     },
     "tests": {
       "title": "Tests for {{projectName}}",

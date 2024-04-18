@@ -27,18 +27,13 @@ const ProjectForm: FC<{}> = () => {
       <Form.Item
         label={t("project.change.groupClusterId")}
         name="groupClusterId"
-        rules={[{ required: true, message: t("project.change.groupClusterIdMessage") }]}
+        tooltip={t("project.change.groupClusterIdTooltip")}
       >
-        <GroupClusterDropdown courseId={courseId!} />
-      </Form.Item>
-      <Form.Item
-        label={t("project.change.testId")}
-        name="testId"
-      >
-        <Input type="number" />
+        <GroupClusterDropdown allowClear courseId={courseId!} />
       </Form.Item>
       <Form.Item
         label={t("project.change.visible")}
+        required
         name="visible"
         valuePropName="checked"
       >
@@ -49,7 +44,7 @@ const ProjectForm: FC<{}> = () => {
         name="maxScore"
         rules={[{ required: true, message: t("project.change.maxScoreMessage") }]}
       >
-        <Input type="number" />
+        <Input min={1} type="number" />
       </Form.Item>
       <Form.Item
         label={t("project.change.deadline")}

@@ -28,7 +28,7 @@ const GroupInfoModal: FC<{ group: GroupType | null; open: boolean; setOpen: (b: 
                   <Button
                     size="small"
                     type="text"
-                    onClick={() => removeUserFromGroup(m.userId)}
+                    onClick={() => removeUserFromGroup(m.id)}
                     icon={<CloseOutlined />}
                   />
                 </Tooltip>
