@@ -95,9 +95,9 @@
       "maxScore": "Maximum score",
       "maxScoreMessage": "Please enter the maximum score for the project",
       "deadline": "Deadline",
-      "create": "Create",
+      "create": "Create project",
       "success": "Project successfully created ",
-      "groupClusterIdTooltip": "Choose a group cluster for this project. If none selected, the project should be completed individually."
+      "groupClusterIdTooltip": "Select no group to create an individual project. "
     },
     "tests": {
       "title": "Tests for {{projectName}}",

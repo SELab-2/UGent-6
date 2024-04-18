@@ -29,7 +29,7 @@ const ProjectForm: FC<{}> = () => {
         name="groupClusterId"
         tooltip={t("project.change.groupClusterIdTooltip")}
       >
-        <GroupClusterDropdown courseId={courseId!} />
+        <GroupClusterDropdown allowClear courseId={courseId!} />
       </Form.Item>
       <Form.Item
         label={t("project.change.visible")}
@@ -44,7 +44,7 @@ const ProjectForm: FC<{}> = () => {
         name="maxScore"
         rules={[{ required: true, message: t("project.change.maxScoreMessage") }]}
       >
-        <Input type="number" />
+        <Input min={1} type="number" />
       </Form.Item>
       <Form.Item
         label={t("project.change.deadline")}

@@ -98,9 +98,9 @@
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in)",
       "deadline": "Deadline",
-      "create": "Project Aanmaken",
+      "create": "Project aanmaken",
       "success": "Project succesvol aangemaakt",
-      "groupClusterIdTooltip": "Kies een groepcluster voor dit project. Als er geen geselecteerd is, moet het project individueel gemaakt worden."
+      "groupClusterIdTooltip": "Selecteer geen groep om een individueel project te maken. "
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
