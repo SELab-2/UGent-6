@@ -9,7 +9,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     azure_id VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Courses table to store information about courses
@@ -17,7 +17,8 @@ CREATE TABLE courses (
     course_id SERIAL PRIMARY KEY,
     course_name VARCHAR(100) NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    join_key TEXT
 );
 
 -- Linking table to associate users with courses and define their role in the course
@@ -34,7 +35,7 @@ CREATE TABLE group_clusters (
     max_size INT NOT NULL,
     cluster_name VARCHAR(100) NOT NULL,
     group_amount INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Files table to store file information
@@ -64,17 +65,13 @@ CREATE TABLE projects (
     project_name VARCHAR(100) NOT NULL,
     description TEXT,
     group_cluster_id INT REFERENCES group_clusters(group_cluster_id),
+    deadline TIMESTAMP WITH TIME ZONE NOT NULL,
     test_id INT REFERENCES tests(test_id),
     visible BOOLEAN DEFAULT false NOT NULL,
     max_score INT
 );
 
-CREATE TABLE deadlines (
-    deadline_id SERIAL PRIMARY KEY,
-    project_id BIGINT,
-    deadline TIMESTAMP,
-    FOREIGN KEY (project_id) REFERENCES projects (project_id)
-);
+
 
 -- Groups table to manage groups of students
 CREATE TABLE groups (
@@ -102,8 +99,11 @@ CREATE TABLE submissions (
     project_id INT REFERENCES projects(project_id),
     group_id INT REFERENCES groups(group_id),
     file_id INT REFERENCES files(file_id),
-    accepted BOOLEAN NOT NULL,
-    submission_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    structure_accepted BOOLEAN NOT NULL,
+    docker_accepted BOOLEAN NOT NULL,
+    structure_feedback TEXT,
+    docker_feedback TEXT,
+    submission_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 

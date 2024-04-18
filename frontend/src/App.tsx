@@ -7,6 +7,8 @@ import Layout from "./components/layout/nav/Layout"
 import "./i18n/config"
 import ThemeProvider from "./theme/ThemeProvider"
 import { AppProvider } from "./providers/AppProvider"
+import { UserProvider } from "./providers/UserProvider"
+import AppApiProvider from "./providers/AppApiProvider"
 
 type AppProps = {
   pca: IPublicClientApplication
@@ -20,13 +22,17 @@ function App({ pca }: AppProps) {
   return (
     <div className="App">
       <AppProvider>
-      <ThemeProvider>
-        <MsalProvider instance={pca}>
-          <Layout>
-            <AppRouter />
-          </Layout>
-        </MsalProvider>
-      </ThemeProvider>
+        <ThemeProvider>
+          <AppApiProvider>
+            <MsalProvider instance={pca}>
+              <UserProvider>
+                <Layout>
+                  <AppRouter />
+                </Layout>
+              </UserProvider>
+            </MsalProvider>
+          </AppApiProvider>
+        </ThemeProvider>
       </AppProvider>
     </div>
   )
