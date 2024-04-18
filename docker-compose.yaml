@@ -18,23 +18,22 @@ services:
       - 8080:8080
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_DATASOURCE_USERNAME=${PGU}
+      - SPRING_DATASOURCE_PASSWORD=${PGP}
     restart: always
     volumes:
       - ./backend/app/data:/data:rw 
   db:
     container_name: db
     image: 'postgres:latest'
-    secrets:
-      - db-password
-    environment:
-      - 'POSTGRES_PASSWORD=root'
-      - 'POSTGRES_USER=admin'
-    ports:
-      - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${PGU}
+      - POSTGRES_PASSWORD=${PGP}
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
   pgadmin:
     container_name: container-pgadmin
     image: dpage/pgadmin4
