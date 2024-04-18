@@ -77,7 +77,15 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
         </Typography.Title>
       )}
 
-{courseProjects && !adminCourseProjectsArray.length && !courseProjectsArray.length && <Typography.Text>{t("home.noCourses")}</Typography.Text>}
+      {courseProjects && !adminCourseProjectsArray.length && !courseProjectsArray.length && (
+        <Typography.Text
+          style={{
+            paddingLeft: "2rem",
+          }}
+        >
+          {t("home.noCourses")}
+        </Typography.Text>
+      )}
       <Space
         className="small-scroll-bar"
         style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem" }}
@@ -100,7 +108,7 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
               ))}
       </Space>
 
-      {adminCourseProjects && (adminCourseProjectsArray.length || courseProjectsArray.length === 0   )&& (
+      {adminCourseProjects && !!adminCourseProjectsArray.length && (
         <>
           <Typography.Title
             level={3}
@@ -110,19 +118,20 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
           >
             {t("home.myCourses")}
 
-            {courseProjects  && (<TeacherView>
-              <Button
-                onClick={onOpenNew}
-                type="text"
-                style={{ marginLeft: "1rem" }}
-                icon={<PlusOutlined />}
-              />
+            {courseProjects && (
+              <TeacherView>
+                <Button
+                  onClick={onOpenNew}
+                  type="text"
+                  style={{ marginLeft: "1rem" }}
+                  icon={<PlusOutlined />}
+                />
               </TeacherView>
             )}
           </Typography.Title>
           <Space
             className="small-scroll-bar"
-            style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem",alignItems: 'stretch' }}
+            style={{ maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem", alignItems: "stretch" }}
           >
             {adminCourseProjectsArray.map((c) => (
               <CourseCard
