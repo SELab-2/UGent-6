@@ -1,36 +1,61 @@
 package com.ugent.pidgeon.model.json;
 
-import java.sql.Timestamp;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ugent.pidgeon.postgre.models.OffsetDateTimeSerializer;
+
+import java.time.OffsetDateTime;
 
 public class SubmissionJson {
-    private long id;
+    private long submissionId;
     private String projectUrl;
     private String groupUrl;
-
+    private Long projectId;
+    private Long groupId;
     private String fileUrl;
 
-    private Boolean accepted;
+    private Boolean structureAccepted;
+    private Boolean dockerAccepted;
 
-    private Timestamp submissionTime;
+    @JsonSerialize(using = OffsetDateTimeSerializer.class)
+    private OffsetDateTime submissionTime;
+
+    private String structureFeedbackUrl;
+
+    public String getDockerFeedbackUrl() {
+        return dockerFeedbackUrl;
+    }
+
+    public void setDockerFeedbackUrl(String dockerFeedbackUrl) {
+        this.dockerFeedbackUrl = dockerFeedbackUrl;
+    }
+
+    private String dockerFeedbackUrl;
 
     public SubmissionJson() {
     }
 
-    public SubmissionJson(long id, String projectUrl, String groupUrl, String fileUrl, Boolean accepted, Timestamp submissionTime) {
-        this.id = id;
+    public SubmissionJson(
+            long id, String projectUrl, String groupUrl, Long projectId, Long groupId, String fileUrl,
+            Boolean structureAccepted, OffsetDateTime submissionTime, Boolean dockerAccepted, String structureFeedbackUrl, String dockerFeedbackUrl) {
+        this.submissionId = id;
         this.projectUrl = projectUrl;
         this.groupUrl = groupUrl;
+        this.projectId = projectId;
+        this.groupId = groupId;
         this.fileUrl = fileUrl;
-        this.accepted = accepted;
+        this.structureAccepted = structureAccepted;
         this.submissionTime = submissionTime;
+        this.dockerAccepted = dockerAccepted;
+        this.structureFeedbackUrl = structureFeedbackUrl;
+        this.dockerFeedbackUrl = dockerFeedbackUrl;
     }
 
-    public long getId() {
-        return id;
+    public long getSubmissionId() {
+        return submissionId;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setSubmissionId(long submissionId) {
+        this.submissionId = submissionId;
     }
 
     public String getProjectUrl() {
@@ -57,19 +82,51 @@ public class SubmissionJson {
         this.fileUrl = fileUrl;
     }
 
-    public Boolean getAccepted() {
-        return accepted;
+    public Boolean getStructureAccepted() {
+        return structureAccepted;
     }
 
-    public void setAccepted(Boolean accepted) {
-        this.accepted = accepted;
+    public void setStructureAccepted(Boolean structureAccepted) {
+        this.structureAccepted = structureAccepted;
     }
 
-    public Timestamp getSubmissionTime() {
+    public OffsetDateTime getSubmissionTime() {
         return submissionTime;
     }
 
-    public void setSubmissionTime(Timestamp submissionTime) {
+    public void setSubmissionTime(OffsetDateTime submissionTime) {
         this.submissionTime = submissionTime;
+    }
+
+    public Boolean getDockerAccepted() {
+        return dockerAccepted;
+    }
+
+    public void setDockerAccepted(Boolean dockerAccepted) {
+        this.dockerAccepted = dockerAccepted;
+    }
+
+    public String getStructureFeedbackUrl() {
+        return structureFeedbackUrl;
+    }
+
+    public void setStructureFeedbackUrl(String structureFeedbackUrl) {
+        this.structureFeedbackUrl = structureFeedbackUrl;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 }

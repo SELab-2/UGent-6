@@ -3,7 +3,7 @@ package com.ugent.pidgeon.model.json;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 
 public class CourseWithRelationJson {
-    private Long id;
+    private Long courseId;
     private String url;
     private String name;
 
@@ -19,11 +19,11 @@ public class CourseWithRelationJson {
     public CourseWithRelationJson() {
     }
 
-    public CourseWithRelationJson(String url, CourseRelation relation, String name, Long id) {
+    public CourseWithRelationJson(String url, CourseRelation relation, String name, Long courseId) {
         this.url = url;
         this.relation = relation;
         this.name = name;
-        this.id = id;
+        this.courseId = courseId;
     }
 
     private CourseRelation relation;
@@ -44,11 +44,11 @@ public class CourseWithRelationJson {
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
+    public Long getCourseId() {
+        return courseId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCourseId(Long id) {
+        this.courseId = id;
     }
 }

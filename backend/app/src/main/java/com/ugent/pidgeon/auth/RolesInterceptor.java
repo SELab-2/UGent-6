@@ -13,9 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 /**
@@ -56,12 +57,12 @@ public class RolesInterceptor implements HandlerInterceptor {
             if (rolesAnnotation != null) {
                 List<UserRole> requiredRoles = Arrays.asList(rolesAnnotation.value());
                 Auth auth = (Auth) SecurityContextHolder.getContext().getAuthentication();
-                UserEntity userEntity = userRepository.findUserByAzureId(auth.getOid());
+                UserEntity userEntity = userRepository.findUserByAzureId(auth.getOid()).orElse(null);
 
                 if(userEntity == null) {
                     System.out.println("User does not exist, creating new one. user_id: " + auth.getOid());
                     userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.student, auth.getOid());
-                    Timestamp now = new Timestamp(System.currentTimeMillis());
+                    OffsetDateTime now = OffsetDateTime.now();
                     userEntity.setCreatedAt(now);
                     userRepository.save(userEntity);
                     System.out.println("User created with id: " + userEntity.getId());
@@ -69,7 +70,7 @@ public class RolesInterceptor implements HandlerInterceptor {
                 }
                 auth.setUserEntity(userEntity);
 
-                if (!requiredRoles.contains(userEntity.getRole()) || userEntity.getRole() == UserRole.admin) {
+                if (!requiredRoles.contains(userEntity.getRole()) && userEntity.getRole() != UserRole.admin) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "User does not have required role");
                     return false;
                 }

@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,9 +11,15 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
     List<SubmissionEntity> findByGroupIdAndProjectId(long groupId, long projectId);
 
 
-    //TODO: Once  deadlines are properly implemented, this query should be updated to take into account the deadline
+
+    @Query("SELECT s FROM SubmissionEntity s WHERE s.projectId = :projectId")
+    List<SubmissionEntity> findAllByProjectId(long projectId);
+
+    List<SubmissionEntity> findByProjectId(long projectId);
+
+
     @Query(value = """
-    SELECT s.id
+    SELECT s
     FROM SubmissionEntity s
     WHERE s.groupId = :groupId
     AND s.submissionTime = (
@@ -20,7 +27,9 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
         FROM SubmissionEntity s2
         WHERE s2.groupId = :groupId
         AND s2.projectId = :projectId
-    )
+    ) ORDER BY s.id DESC LIMIT 1
     """)
-    Long findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
+    Optional<SubmissionEntity> findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
+
+    List<SubmissionEntity> findByProjectIdAndGroupId(long projectid, long groupid);
 }

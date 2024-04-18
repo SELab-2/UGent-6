@@ -9,7 +9,6 @@ const UnauthNav = () => {
       await msalInstance.loginPopup({
         scopes: ['openid', 'profile', 'User.Read'],
       });
-     console.log(msalInstance); 
       
     } catch (error) {
       console.error(error)

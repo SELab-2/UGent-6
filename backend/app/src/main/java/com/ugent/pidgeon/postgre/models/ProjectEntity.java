@@ -1,8 +1,8 @@
 package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
-import java.sql.Timestamp;
-import java.util.List;
+
+import java.time.OffsetDateTime;
 
 
 @Entity
@@ -27,25 +27,26 @@ public class ProjectEntity {
         private long groupClusterId;
 
         @Column(name="test_id", nullable = false)
-        private long testId;
+        private Long testId;
 
         @Column(name="visible", nullable = false)
-        private Boolean projectType;
+        private Boolean visible;
 
-        @OneToMany(mappedBy = "projectId")
-        private List<DeadlineEntity> deadlines;
+        @Column(name="deadline", nullable = false)
+        private OffsetDateTime deadline;
 
         @Column(name="max_score")
         private Integer maxScore;
 
-        public ProjectEntity(long courseId, String name, String description, long groupClusterId, long testId, Boolean projectType, Integer maxScore) {
+        public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
                 this.courseId = courseId;
                 this.name = name;
                 this.description = description;
                 this.groupClusterId = groupClusterId;
                 this.testId = testId;
-                this.projectType = projectType;
+                this.visible = visible;
                 this.maxScore = maxScore;
+                this.deadline = deadline;
         }
 
         public ProjectEntity() {
@@ -92,30 +93,35 @@ public class ProjectEntity {
                 this.groupClusterId = groupClusterId;
         }
 
-        public long getTestId() {
+        public Long getTestId() {
                 return testId;
         }
 
-        public void setTestId(long testId) {
+        public void setTestId(Long testId) {
                 this.testId = testId;
         }
 
-        public Boolean getProjectType() {
-                return projectType;
+        public Boolean isVisible() {
+                return visible;
         }
 
-        public void setProjectType(Boolean projectType) {
-                this.projectType = projectType;
+        public void setVisible(Boolean projectType) {
+                this.visible = projectType;
         }
 
-        public List<DeadlineEntity> getDeadlines() {
-                return deadlines;
-        }
         public Integer getMaxScore() {
                 return maxScore;
         }
 
         public void setMaxScore(Integer maxScore) {
                 this.maxScore = maxScore;
+        }
+
+        public OffsetDateTime getDeadline() {
+                return deadline;
+        }
+
+        public void setDeadline(OffsetDateTime deadline) {
+                this.deadline = deadline;
         }
 }

@@ -1,21 +1,24 @@
 package com.ugent.pidgeon.model.json;
 
-import com.ugent.pidgeon.postgre.models.GroupEntity;
-
 import java.util.List;
 
 public class GroupJson {
+
+    private Integer capacity;
+    private Long groupId;
     private String name;
-    private String groupCluster;
+    private String groupClusterUrl;
 
     private List<UserReferenceJson> members;
 
     public GroupJson() {
     }
 
-    public GroupJson(String name, String groupClusterUrl) {
+    public GroupJson(Integer capacity, Long groupId, String name, String groupClusterUrl) {
+      this.capacity = capacity;
+      this.groupId = groupId;
         this.name = name;
-        this.groupCluster = groupClusterUrl;
+        this.groupClusterUrl = groupClusterUrl;
     }
 
 
@@ -28,6 +31,13 @@ public class GroupJson {
     }
 
 
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
 
     public List<UserReferenceJson> getMembers() {
         return members;
@@ -37,11 +47,19 @@ public class GroupJson {
         this.members = members;
     }
 
-    public String getGroupCluster() {
-        return groupCluster;
+    public String getGroupClusterUrl() {
+        return groupClusterUrl;
     }
 
-    public void setGroupCluster(String groupCluster) {
-        this.groupCluster = groupCluster;
+    public void setGroupClusterUrl(String groupClusterUrl) {
+        this.groupClusterUrl = groupClusterUrl;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
     }
 }

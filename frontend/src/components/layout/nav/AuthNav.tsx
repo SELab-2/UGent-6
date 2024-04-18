@@ -1,17 +1,26 @@
 import { useAccount } from "@azure/msal-react"
 import { Dropdown, MenuProps, Typography } from "antd"
 import { useTranslation } from "react-i18next"
-import { BgColorsOutlined, DownOutlined, LogoutOutlined } from "@ant-design/icons"
+import { UserOutlined, BgColorsOutlined, DownOutlined, LogoutOutlined } from "@ant-design/icons"
 import { msalInstance } from "../../../index"
-import { Themes } from "../../../@types/types"
+import { useNavigate } from "react-router-dom"
+import { Themes } from "../../../@types/appTypes"
+import { AppRoutes } from "../../../@types/routes"
 import useApp from "../../../hooks/useApp"
+
 
 const AuthNav = () => {
   const { t } = useTranslation()
   const app = useApp()
   const auth = useAccount()
+  const navigate = useNavigate()
 
   const items: MenuProps["items"] = [
+    {
+      key: "profile",
+      label: t("nav.profile"),
+      icon: <UserOutlined />,
+    },
     {
       key: "theme",
       label: t("nav.theme"),
@@ -40,10 +49,11 @@ const AuthNav = () => {
   ]
 
   const handleDropdownClick: MenuProps["onClick"] = (menu) => {
-    console.log(menu.keyPath,menu.key);
     switch (menu.key) {
+      case "profile":
+        navigate(AppRoutes.PROFILE)
+        break
       case "logout":
-        console.log(auth);
         msalInstance.logoutPopup({
           account: auth,
         })
@@ -56,7 +66,7 @@ const AuthNav = () => {
     }
   }
   
-  return (
+  return (<>
     <div
       style={{
         width: "100%",
@@ -68,6 +78,8 @@ const AuthNav = () => {
         <Typography.Text style={{cursor:"pointer"}}>{auth!.name} <DownOutlined /></Typography.Text>
       </Dropdown>
     </div>
+    
+    </>
   )
 }
 

@@ -1,11 +1,11 @@
 package com.ugent.pidgeon.model.json;
 
-import java.sql.Timestamp; // Import Timestamp
+import java.time.OffsetDateTime;
 
 public class ProjectUpdateDTO {
     private String name;
     private String description;
-    private Timestamp deadline;
+    private OffsetDateTime deadline;
 
     // Getters and Setters
     public String getName() {
@@ -24,11 +24,11 @@ public class ProjectUpdateDTO {
         this.description = description;
     }
 
-    public Timestamp getDeadline() {
+    public OffsetDateTime getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(Timestamp deadline) {
+    public void setDeadline(OffsetDateTime deadline) {
         this.deadline = deadline;
     }
 }

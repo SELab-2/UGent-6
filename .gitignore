@@ -13,7 +13,6 @@ build/
 .settings
 .springBeans
 .sts4-cache
-bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
@@ -36,3 +35,7 @@ out/
 ### VS Code ###
 .vscode/
 backend/app/data/*
+backend/data/*
+
+### Secrets ###
+backend/app/src/main/resources/application-secrets.properties

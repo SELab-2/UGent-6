@@ -1,10 +1,194 @@
 {
   "nav": {
+    "profile": "Profiel",
     "login": "Aanmelden",
     "logout": "Afmelden",
     "accountSwitch": "Account wisselen",
     "theme": "Stijl",
     "dark": "Donker",
     "light": "Licht"
+  },
+  "home": {
+    "yourCourses": "Vakken",
+    "myCourses": "Mijn vakken",
+    "createCourse": "Vak aanmaken",
+    "courseName": "Vak naam",
+    "courseDescription": "Beschrijving",
+    "yourProjects": "Projecten",
+    "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",
+    "courseNameMaxLength": "Vak naam mag maximaal 50 karakters bevatten",
+    "courseNameRequired": "Vak naam is verplicht",
+    "courseNameMinLength": "Vak naam moet minimaal 3 karakters bevatten",
+    "courseDescriptionMaxLength": "Beschrijving mag maximaal 2000 karakters bevatten",
+    "courseCreated": "Vak aangemaakt",
+    "projects": {
+      "noProjects": "Geen projecten",
+      "name": "Naam",
+      "description": "Beschrijving",
+      "course": "Vak",
+      "deadline": "Deadline",
+      "showMore": "Toon meer",
+
+      "projectStatus": "Status",
+      "status": {
+        "completed": "Voltooid",
+        "failed": "Verkeerd",
+        "notStarted": "Niet begonnen"
+      },
+      "groupProgress": "Groeps voortgang",
+      "completeProgress": "{{count}} / {{total}} voltooid",
+
+      "activeProjects": "{{count}} actief project",
+      "activeProjects_plural": "{{count}} actieve projecten",
+      "submit": "Inleveren",
+      "userCourseCount": "{{count}} gebruikers in dit vak"
+    }
+  },
+  "profile": {
+    "student": "Student aan Universiteit Gent",
+    "teacher": "Professor aan Universiteit Gent",
+    "admin": "Admin aan Universiteit Gent",
+    "editRole": "Pas de rol van een gebruiker aan"
+  },
+
+  "editRole": {
+    "student": "Student",
+    "teacher": "Professor",
+    "admin": "Admin",
+    "confirmation": "Bevestiging",
+    "confirmationText": "Bent u zeker dat u de rol van {{name}} wilt aanpassen naar {{role}}?"
+  },
+
+  "project": {
+    "submissions": "Indieningen",
+    "newSubmission": "Nieuwe indiening",
+    "files": "Bestanden",
+    "back": "Annuleren",
+    "submission": "Indiening",
+    "structure": "Structuur",
+    "addFiles": "Bestanden toevoegen",
+    "submit": "Indienen",
+    "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
+    "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
+    "deadlinePassed": "Deadline is verstreken",
+    "downloadSubmissions": "Download alle indieningen",
+    "group": "Groep",
+    "status": "Status",
+    "feedback": "Feedback",
+    "groupEmpty": "Geen leden in deze groep",
+    "testFailed": "Testen gefaalt",
+    "structureFailed": "Structuur testen gefaalt",
+    "passed": "Geslaagd",
+    "notSubmitted": "Niet ingediend",
+    "submissionTime": "Indienings tijd",
+    "noSubmissions": "Geen indieningen",
+    "loadingSubmissions": "Indieningen laden...",
+    "options": "Opties",
+    "groupMembers": "Groepsleden",
+    "newProject": "Nieuw project",
+    "change": {
+      "title": "Maak project aan",
+      "name": "Naam",
+      "nameMessage": "Vul de naam van het project in",
+      "description": "Beschrijving",
+      "descriptionMessage": "Vul de beschrijving van het project in",
+      "groupClusterId": "Groep Cluster ID",
+      "groupClusterIdMessage": "Vul de Groep Cluster ID in",
+      "testId": "Test Id",
+      "testIdMessage": "Vul de Test ID in",
+      "visible": "Project zichtbaar maken",
+      "maxScore": "Maximum score",
+      "maxScoreMessage": "Vul de maximum score van het project in)",
+      "deadline": "Deadline",
+      "create": "Project Aanmaken",
+      "success": "Project succesvol aangemaakt"
+    },
+    "tests": {
+      "title": "Testen voor {{projectName}}",
+      "subtitle": "Configureer de testen voor dit project",
+      "structureSlider": "Schakel bestand structuur testen in: ",
+      "structurePlaceholder": "Vul bestand structuur sjabloon in",
+      "dockerSlider" : "Dockertests inschakelen: ",
+      "dockerImagePlaceholder": "Vul docker image in",
+      "dockerScriptPlaceholder": "Vul docker script in of upload bestand",
+      "mode": "Modus",
+      "modeTemplate": "Sjabloon",
+      "modeSimple": "Simpel",
+      "modeTemplatePlaceholder": "Vul Sjabloon in of upload bestand",
+      "submit": "Aanpassen",
+      "toTests": "Verander testen",
+      "structureTemplateHeader": "Structuur",
+      "dockerImageHeader": "Docker image",
+      "dockerScriptHeader": "Docker script",
+      "modeHeader": "Sjabloon"
+    },
+    "noScore": "Nog geen score beschikbaar",
+    "noFeedback": "Geen feedback gegeven"
+  },
+  "group": {
+    "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
+  },
+  "landingPage":{
+    "title-1": "Officiële",
+    "title-2": "indien platform",
+    "subtitle-1": "Eenvoudig cursussen en projecten beheren,",
+    "subtitle-2": "automatisch code testen en beoordelen.",
+    "getStarted": "Aan de slag"
+  },
+  
+  "submission": {
+    "submission": "Indiening",
+    "submittedFiles": "Ingediende bestanden:",
+    "structuretest": "Resultaten structuurtest:",
+    "dockertest": "Resultaten dockertest:",
+    "status": {
+      "accepted": "Alle testen geslaagd.",
+      "failed": "Sommige testen niet geslaagd."
+    }
+  },
+
+  "course": {
+    "projects": "Projecten",
+    "groups": "Groepen",
+    "info": "Informatie",
+    "grades": "Punten",
+    "members":  "Leden",
+    "settings": "Instellingen",
+    "leaveGroup": "Groep verlaten",
+    "joinGroup": "Groepslid worden",
+    "removeFromCourse": "Verwijder {{name}} van dit vak",
+    "removeUserConfirmTitle": "Gebruiker verwijderen",
+    "removeUserConfirm": "Bent u zeker dat u {{name}} van dit vak wilt verwijderen?",
+    "yes": "Ja",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "courseSaved": "Aanpassingen opgeslagen",
+    "archived": "Gearchiveerd",
+    "score": "Score",
+    "noGroups": "Geen groepen beschikbaar",
+    "searchMember": "Zoek lid",
+    "inviteLink": "Inschrijvings link",
+    "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak.",
+    "deleteCourse": "Vak verwijderen",
+    "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen? Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
+    "confirmDelete": "Bevestig verwijdering",
+    "courseDeleted": "Vak succesvol verwijderd",
+    "createCourse":"Vak aanmaken",
+    "changesSaved": "Aanpassingen opgeslagen",
+    "noFeedback": "Nog geen feedback beschikbaar",
+    "noMembersFound": "Geen leden gevonden"
+  },
+  "cancel": "Annuleren",
+  "ok": "Ok",
+  "woops": "Oeps er ging iets mis",
+  "goBack": "Ga terug",
+  "error": {
+    "title": "Fout",
+    "subtitle": "Er ging iets mis, probeer het later opnieuw.",
+    "homepage": "Naar Start",
+    "403_message": "Je bent niet bevoegd om deze pagina te bezoeken.",
+    "404_message" : "Sorry, de pagina die je bezocht bestaat niet.",
+    "500_message": "Sorry, er ging iets mis."
+
   }
 }
