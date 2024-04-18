@@ -8,7 +8,10 @@ services:
     restart: always
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+      - ./frontend/build/:/usr/share/nginx/html/build/:rw
+    networks:
+      - docker_network
   backend:
     container_name: spring_container
     build: backend/app/
@@ -18,23 +21,28 @@ services:
       - 8080:8080
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_DATASOURCE_USERNAME=${PGU}
+      - SPRING_DATASOURCE_PASSWORD=${PGP}
     restart: always
     volumes:
       - ./backend/app/data:/data:rw 
+    networks:
+      - docker_network
   db:
     container_name: db
     image: 'postgres:latest'
-    secrets:
-      - db-password
-    environment:
-      - 'POSTGRES_PASSWORD=root'
-      - 'POSTGRES_USER=admin'
-    ports:
-      - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${PGU}
+      - POSTGRES_PASSWORD=${PGP}
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    networks:
+      - docker_network
+ 
+
   pgadmin:
     container_name: container-pgadmin
     image: dpage/pgadmin4
@@ -46,13 +54,23 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: root
     restart: unless-stopped
+    networks:
+      - docker_network
   certbot:
     image: certbot/certbot:latest
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
+    networks:
+      - docker_network
 volumes:
   postgres-data:
 secrets:
   db-password:
     file: backend/db/password.txt
+networks:
+  docker_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/24

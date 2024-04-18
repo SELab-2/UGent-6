@@ -22,7 +22,7 @@ const ProjectCreate: React.FC = () => {
     console.log(values)
     if (!courseId) return console.error("courseId is undefined")
     setLoading(true)
-
+    
     try {
       // Roep createProject aan en controleer op fouten
       const result = await ProjectCreateService.createProject(courseId, values)
@@ -62,18 +62,18 @@ const ProjectCreate: React.FC = () => {
               name: "",
               description: "",
               groupClusterId: undefined,
-              testId: null,
               visible: false, // Stel de standaardwaarde in op false
-              maxScore: 0,
+              maxScore: 20,
               deadline: null,
             }}
             form={form}
             onFinish={handleCreation}
             layout="vertical"
+            requiredMark="optional"
           >
             <ProjectForm />
 
-            <Form.Item>
+            <Form.Item style={{textAlign:"center"}}>
               <Button
                 type="primary"
                 htmlType="submit"

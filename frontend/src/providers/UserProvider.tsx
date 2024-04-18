@@ -1,12 +1,14 @@
 import { FC, PropsWithChildren, createContext, useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../@types/requests.d"
 import apiCall from "../util/apiFetch"
-import { useIsAuthenticated } from "@azure/msal-react"
+import { useIsAuthenticated, useMsal } from "@azure/msal-react"
+import { Spin } from "antd"
+import { InteractionStatus } from "@azure/msal-browser"
 
 type UserContextProps = {
   user: User | null
   updateUser: () => Promise<void>
-  updateCourses: (userId?:number|undefined) => Promise<void>
+  updateCourses: (userId?: number | undefined) => Promise<void>
   courses: UserCourseType[] | null
 }
 
@@ -19,6 +21,7 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
   const [user, setUser] = useState<User | null>(null)
   const [courses, setCourses] = useState<UserCourseType[] | null>(null)
+  const { inProgress } = useMsal()
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -26,13 +29,12 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [isAuthenticated])
 
-  const updateCourses =  async (userId:number|undefined = user?.id) => {
-    if(!userId) return console.error("No user id provided")
+  const updateCourses = async (userId: number | undefined = user?.id) => {
+    if (!userId) return console.error("No user id provided")
     try {
-      const res = await apiCall.get(ApiRoutes.USER_COURSES,{id:userId})
+      const res = await apiCall.get(ApiRoutes.USER_COURSES, { id: userId })
       setCourses(res.data)
-
-    } catch(err){
+    } catch (err) {
       // TODO: handle error
     }
   }
@@ -49,7 +51,14 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }
 
-  return <UserContext.Provider value={{ updateUser,updateCourses, user, courses }}>{children}</UserContext.Provider>
+  if (!user && (!(inProgress === InteractionStatus.Startup || inProgress === InteractionStatus.None || inProgress === InteractionStatus.Logout) || isAuthenticated))
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <Spin size="large" />
+      </div>
+    )
+
+  return <UserContext.Provider value={{ updateUser, updateCourses, user, courses }}>{children}</UserContext.Provider>
 }
 
 export { UserProvider, UserContext }
