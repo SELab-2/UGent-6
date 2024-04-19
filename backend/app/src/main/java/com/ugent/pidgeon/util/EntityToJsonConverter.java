@@ -126,6 +126,12 @@ public class EntityToJsonConverter {
     public ProjectResponseJsonWithStatus projectEntityToProjectResponseJsonWithStatus(ProjectEntity project, CourseEntity course, UserEntity user) {
         // Get status
         Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+        if (groupId == null) {
+            return new ProjectResponseJsonWithStatus(
+                    projectEntityToProjectResponseJson(project, course, user),
+                    "no group"
+            );
+        }
         SubmissionEntity sub = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
         String status;
         if (sub == null) {
@@ -163,16 +169,15 @@ public class EntityToJsonConverter {
         if (courseUserEntity == null) {
             return null;
         }
-        if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
-            Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
-            if (groupId == null) {
-                return null;
-            }
-            submissionUrl += "/" + groupId;
-        }
 
         // GroupId is null if the user is a course_admin/creator
         Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+
+        if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
+            submissionUrl += "/" + groupId;
+        }
+
+
         return new ProjectResponseJson(
                 new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
                 project.getDeadline(),
@@ -180,7 +185,7 @@ public class EntityToJsonConverter {
                 project.getId(),
                 project.getName(),
                 submissionUrl,
-                ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
+                project.getTestId() == null ? null : ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
                 project.getMaxScore(),
                 project.isVisible(),
                 new ProjectProgressJson(completed, total),
