@@ -174,7 +174,11 @@ public class EntityToJsonConverter {
         Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
 
         if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
-            submissionUrl += "/" + groupId;
+            if (groupId == null) {
+                submissionUrl = null;
+            } else {
+                submissionUrl += "/" + groupId;
+            }
         }
 
 
