@@ -9,8 +9,8 @@
     "light": "Licht"
   },
   "home": {
-    "yourCourses": "Vakken",
-    "myCourses": "Mijn vakken",
+    "yourCourses": "Ingeschreven vakken",
+    "myCourses": "Beheerde vakken",
     "createCourse": "Vak aanmaken",
     "courseName": "Vak naam",
     "courseDescription": "Beschrijving",
