@@ -8,7 +8,10 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.StringMatcher;
 import com.ugent.pidgeon.util.UserUtil;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +38,7 @@ public class UserController {
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723824">apiDog documentation</a>
      * @return user object
      */
-    @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
+    @GetMapping(ApiRoutes.USERS_BASE_PATH + "/{userid}")
     @Roles({UserRole.student})
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
         UserEntity requester = auth.getUserEntity();
@@ -53,11 +56,48 @@ public class UserController {
         return ResponseEntity.ok().body(res);
     }
 
+    @GetMapping(ApiRoutes.USERS_BASE_PATH)
+    @Roles({UserRole.admin})
+    public ResponseEntity<Object> getUsersByNameOrSurname(
+        @RequestParam(value="email", required = false) String email,
+        @RequestParam(value = "name", required = false) String name,
+        @RequestParam(value = "surname", required = false) String surname
+    ) {
+        if (email != null) {
 
-    @GetMapping(ApiRoutes.USER_BASE_PATH)
+            UserEntity user = userRepository.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
+            }
+            if (name != null && !user.getName().toLowerCase().contains(name.toLowerCase())) {
+                return ResponseEntity.ok().body(new ArrayList<>());
+            } else if (surname != null && !user.getSurname().toLowerCase().contains(surname.toLowerCase())) {
+                return ResponseEntity.ok().body(new ArrayList<>());
+            }
+
+            return ResponseEntity.ok().body(List.of(new UserJson(user)));
+        }
+
+        if ((name == null || name.length() < 3) && (surname == null || surname.length() < 3)) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
+        }
+
+        UserEntity user = null;
+        if (name == null) name = "";
+        if (surname == null) surname = "";
+
+        List<UserEntity> usersByName = userRepository.findByName(name, surname);
+
+
+        return ResponseEntity.ok().body(usersByName.stream().map(UserJson::new).toList());
+    }
+
+
+    @GetMapping(ApiRoutes.LOGGEDIN_USER_PATH)
     @Roles({UserRole.student, UserRole.teacher})
-    public ResponseEntity<Object> getUserByAzureId(Auth auth) {
+    public ResponseEntity<Object> getLoggedInUser(Auth auth) {
         UserEntity res = auth.getUserEntity();
+
         UserJson userJson = new UserJson(res);
         return ResponseEntity.ok().body(userJson);
     }
@@ -83,7 +123,7 @@ public class UserController {
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693479">apiDog documentation</a>
      * @return string
      */
-    @PutMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
+    @PutMapping(ApiRoutes.USERS_BASE_PATH + "/{userid}")
     @Roles({UserRole.admin})
     public ResponseEntity<?> updateUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
 
@@ -106,7 +146,7 @@ public class UserController {
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693481">apiDog documentation</a>
      * @return string
      */
-    @PatchMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
+    @PatchMapping(ApiRoutes.USERS_BASE_PATH + "/{userid}")
     @Roles({UserRole.admin})
     public ResponseEntity<?> patchUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
         UserEntity user = userUtil.getUserIfExists(userid);
