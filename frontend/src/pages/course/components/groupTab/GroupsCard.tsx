@@ -33,14 +33,14 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
         groups={cluster.groups}
       />
     ),
-  }))
+  })) 
 
   if(Array.isArray(items) && !items.length) return <div style={{textAlign:"center"}}>
      <Typography.Text type="secondary">{t("course.noGroups")}</Typography.Text>
   </div>
 
   if(!items) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
-    <Spin tip="Loading"/>
+    <Spin tip="Loading"><span></span></Spin>
   </div>
   return (
     <Card

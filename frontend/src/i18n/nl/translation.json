@@ -76,8 +76,8 @@
     "status": "Status",
     "feedback": "Feedback",
     "groupEmpty": "Geen leden in deze groep",
-    "testFailed": "Testen gefaalt",
-    "structureFailed": "Structuur testen gefaalt",
+    "testFailed": "Testen gefaald",
+    "structureFailed": "Structuur testen gefaald",
     "passed": "Geslaagd",
     "notSubmitted": "Niet ingediend",
     "submissionTime": "Indienings tijd",
@@ -175,7 +175,9 @@
     "createCourse":"Vak aanmaken",
     "changesSaved": "Aanpassingen opgeslagen",
     "noFeedback": "Nog geen feedback beschikbaar",
-    "noMembersFound": "Geen leden gevonden"
+    "noMembersFound": "Geen leden gevonden",
+    "leftGroup": "Groep verlaten",
+    "joinedGroup": "Groepslid geworden"
   },
   "cancel": "Annuleren",
   "ok": "Ok",

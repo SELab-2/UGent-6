@@ -171,7 +171,9 @@
     "courseDeleted": "Course successfully deleted",
     "createCourse": "Create course",
     "noFeedback": "You have no grades yet",
-    "noMembersFound": "No members found"
+    "noMembersFound": "No members found",
+    "leftGroup": "You have left the group",
+    "joinedGroup": "You have joined the group"
   },
   "cancel": "Cancel",
   "ok": "OK",

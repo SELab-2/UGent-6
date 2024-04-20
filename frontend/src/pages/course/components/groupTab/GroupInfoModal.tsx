@@ -14,6 +14,7 @@ const GroupInfoModal: FC<{ group: GroupType | null; open: boolean; setOpen: (b: 
       title={group?.name}
       open={open}
       onCancel={() => setOpen(false)}
+      okButtonProps={{ hidden: true, style: { display: "none" }}}
     >
       <List
         dataSource={group?.members ?? []}

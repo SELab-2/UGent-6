@@ -38,7 +38,7 @@ export enum ApiRoutes {
   TEST = "api/test",
   USER = "api/users/:id",
   USERS = "api/users",
-  USER_AUTH = "api/auth",
+  USER_AUTH = "api/user",
 }
 
 export type Timestamp = string
@@ -53,6 +53,10 @@ export type POST_Requests = {
   }
   [ApiRoutes.PROJECT_CREATE]:
       ProjectFormData
+
+    [ApiRoutes.GROUP_MEMBERS]: {
+      id: number
+    }
 }
 
 /**
@@ -71,6 +75,7 @@ export type POST_Responses = {
 export type DELETE_Requests = {
   [ApiRoutes.COURSE]: undefined
   [ApiRoutes.PROJECT]: undefined
+  [ApiRoutes.GROUP_MEMBER]: undefined
 }
 
 
