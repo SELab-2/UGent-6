@@ -122,7 +122,7 @@ public class CourseController {
             groupClusterEntity.setCreatedAt(currentTimestamp);
             groupClusterRepository.save(groupClusterEntity);
 
-            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId())));
+            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId()), false));
         } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -138,7 +138,7 @@ public class CourseController {
         courseEntity.setName(courseJson.getName());
         courseEntity.setDescription(courseJson.getDescription());
         courseRepository.save(courseEntity);
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId())));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId()), false));
     }
 
     /**
@@ -219,8 +219,9 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseEntity course = checkResult.getData().getFirst();
+        CourseRelation relation = checkResult.getData().getSecond();
 
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId())));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId()), relation.equals(CourseRelation.enrolled)));
     }
 
 
@@ -322,7 +323,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
         }
         courseUserRepository.save(new CourseUserEntity(courseId, user.getId(), CourseRelation.enrolled));
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(),"" + course.getId())));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(),"" + course.getId()), false));
     }
 
     private ResponseEntity<?> getJoinLinkGetResponseEntity(long courseId, String courseKey, UserEntity user) {
@@ -584,13 +585,13 @@ public class CourseController {
      * @ApiPath /api/courses/{courseId}/joinLink
      */
     @Roles({UserRole.teacher, UserRole.student})
-    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<String> getCourseKey(Auth auth, @PathVariable Long courseId) {
         CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        return ResponseEntity.ok(courseUtil.getJoinLink(checkResult.getData().getJoinKey(), courseId.toString()));
+        return ResponseEntity.ok(checkResult.getData().getJoinKey());
     }
 
     // Function for invalidating the previous key and generating a new one, can be useful when starting a new year.
@@ -606,7 +607,7 @@ public class CourseController {
      * @ApiPath /api/courses/{courseId}/joinLink
      */
     @Roles({UserRole.teacher, UserRole.student})
-    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
+    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<?> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
         CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
@@ -617,7 +618,7 @@ public class CourseController {
         String key = UUID.randomUUID().toString();
         course.setJoinKey(key);
         courseRepository.save(course);
-        return ResponseEntity.ok(courseUtil.getJoinLink(key, courseId.toString()));
+        return ResponseEntity.ok(key);
     }
 
     /**
@@ -632,7 +633,7 @@ public class CourseController {
      * @ApiPath /api/courses/{courseId}/joinLink
      */
     @Roles({UserRole.teacher, UserRole.student})
-    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<String> deleteCourseKey(Auth auth, @PathVariable Long courseId) {
         CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
@@ -640,7 +641,8 @@ public class CourseController {
         }
         CourseEntity course = checkResult.getData();
         course.setJoinKey(null);
-        return ResponseEntity.ok(courseUtil.getJoinLink(null, courseId.toString()));
+        courseRepository.save(course);
+        return ResponseEntity.ok("");
     }
 
 }

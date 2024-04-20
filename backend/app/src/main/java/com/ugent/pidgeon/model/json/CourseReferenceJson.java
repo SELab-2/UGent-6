@@ -4,11 +4,13 @@ public class CourseReferenceJson {
     private String name;
     private String url;
     private Long courseId;
+    private Integer memberCount;
 
-    public CourseReferenceJson(String name, String url, Long courseId) {
+    public CourseReferenceJson(String name, String url, Long courseId, Integer memberCount) {
         this.name = name;
         this.url = url;
         this.courseId = courseId;
+      this.memberCount = memberCount;
     }
 
     public String getName() {
@@ -33,5 +35,13 @@ public class CourseReferenceJson {
 
     public void setCourseId(Long courseId) {
         this.courseId = courseId;
+    }
+
+    public Integer getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(Integer memberCount) {
+        this.memberCount = memberCount;
     }
 }

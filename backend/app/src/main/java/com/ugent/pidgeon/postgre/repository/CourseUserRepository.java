@@ -47,4 +47,11 @@ public interface CourseUserRepository extends JpaRepository<CourseUserEntity, Co
 
     Optional<CourseUserEntity> findByCourseIdAndUserId(long courseId, long userId);
 
+    @Query(value = """
+        SELECT COUNT(*) AS entry_count
+        FROM CourseUserEntity cu
+        WHERE cu.courseId = :courseId
+    """)
+    int countUsersInCourse(long courseId);
+
 }

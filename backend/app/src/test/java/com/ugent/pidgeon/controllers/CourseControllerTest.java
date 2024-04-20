@@ -117,9 +117,9 @@ public class CourseControllerTest extends ControllerTest {
         when(courseUserRepository.save(any())).thenReturn(null);
         when(groupClusterRepository.save(any())).thenReturn(null);
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
-        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any())).
+        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), any())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", ""));
+                        new ArrayList<>(), "", "", ""));
 
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -214,9 +214,9 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testGetCourseByCourseId() throws Exception {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
-        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any())).
+        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), any())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", ""));
+                        new ArrayList<>(), "", "", ""));
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(new CourseEntity(), null)));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))

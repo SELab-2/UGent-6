@@ -77,7 +77,7 @@ public class EntityToJsonConverter {
         return new UserReferenceWithRelation(userEntityToUserReference(user), relation.toString());
     }
 
-    public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course, String joinLink) {
+    public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course, String joinLink, boolean hideKey) {
         UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
         UserReferenceJson teacherJson = userEntityToUserReference(teacher);
 
@@ -91,7 +91,8 @@ public class EntityToJsonConverter {
                 teacherJson,
                 assistantsJson,
                 ApiRoutes.COURSE_BASE_PATH + "/" + course.getId() + "/members",
-                joinLink
+                hideKey ? null : joinLink,
+                hideKey ? null : course.getJoinKey()
         );
     }
 
@@ -183,7 +184,7 @@ public class EntityToJsonConverter {
 
 
         return new ProjectResponseJson(
-                new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
+                courseEntityToCourseReference(course),
                 project.getDeadline(),
                 project.getDescription(),
                 project.getId(),
@@ -196,6 +197,18 @@ public class EntityToJsonConverter {
                 groupId
         );
     }
+
+    public CourseReferenceJson courseEntityToCourseReference(CourseEntity course) {
+        int memberCount = courseUserRepository.countUsersInCourse(course.getId());
+        return new CourseReferenceJson(
+            course.getName(),
+            ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
+            course.getId(),
+            memberCount
+        );
+    }
+
+
 
     public SubmissionJson getSubmissionJson(SubmissionEntity submission) {
         return new SubmissionJson(
