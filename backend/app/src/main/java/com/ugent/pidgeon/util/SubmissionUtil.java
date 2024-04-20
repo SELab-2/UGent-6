@@ -69,11 +69,15 @@ public class SubmissionUtil {
      * @return CheckResult with the status of the check and the group id
      */
     public CheckResult<Long> checkOnSubmit(long projectId, UserEntity user) {
-        Long groupId = groupRepository.groupIdByProjectAndUser(projectId, user.getId());
-
         if (!projectUtil.userPartOfProject(projectId, user.getId())) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "You aren't part of this project", null);
         }
+
+        Long groupId = groupRepository.groupIdByProjectAndUser(projectId, user.getId());
+        if (groupId == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "User is not part of a group for this project", null);
+        }
+
 
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
         if (projectCheck.getStatus() != HttpStatus.OK) {

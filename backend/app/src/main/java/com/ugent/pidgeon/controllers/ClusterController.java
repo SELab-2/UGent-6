@@ -27,9 +27,6 @@ public class ClusterController {
     GroupClusterRepository groupClusterRepository;
     @Autowired
     GroupRepository groupRepository;
-    @Autowired
-    GroupUserRepository groupUserRepository;
-
 
     @Autowired
     private ClusterUtil clusterUtil;
