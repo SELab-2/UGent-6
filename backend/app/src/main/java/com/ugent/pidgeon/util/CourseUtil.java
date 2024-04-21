@@ -148,9 +148,13 @@ public class CourseUtil {
         if (courseCheck.getStatus() != HttpStatus.OK) {
             return new CheckResult<>(courseCheck.getStatus(), courseCheck.getMessage(), null);
         }
+        CourseEntity course = courseCheck.getData().getFirst();
         CourseRelation relation = courseCheck.getData().getSecond();
         if (relation.equals(CourseRelation.creator)) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot leave a course you created", null);
+        }
+        if (course.getArchivedAt() != null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot leave an archived course", null);
         }
         return new CheckResult<>(HttpStatus.OK, "", relation);
     }
