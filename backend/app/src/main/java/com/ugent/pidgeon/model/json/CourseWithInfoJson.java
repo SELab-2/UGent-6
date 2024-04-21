@@ -10,6 +10,7 @@ public record CourseWithInfoJson (
         List<UserReferenceJson> assistants,
         String memberUrl,
         String joinUrl,
-        String joinKey
+        String joinKey,
+        Boolean archived
 ) {}
 

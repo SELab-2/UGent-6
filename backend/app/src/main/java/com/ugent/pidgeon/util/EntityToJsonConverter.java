@@ -92,7 +92,8 @@ public class EntityToJsonConverter {
                 assistantsJson,
                 ApiRoutes.COURSE_BASE_PATH + "/" + course.getId() + "/members",
                 hideKey ? null : joinLink,
-                hideKey ? null : course.getJoinKey()
+                hideKey ? null : course.getJoinKey(),
+                course.getArchivedAt() != null
         );
     }
 
@@ -101,7 +102,8 @@ public class EntityToJsonConverter {
                 ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
                 relation,
                 course.getName(),
-                course.getId()
+                course.getId(),
+            course.getArchivedAt() != null
         );
     }
 
@@ -204,7 +206,8 @@ public class EntityToJsonConverter {
             course.getName(),
             ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
             course.getId(),
-            memberCount
+            memberCount,
+            course.getArchivedAt() != null
         );
     }
 

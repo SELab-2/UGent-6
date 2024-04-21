@@ -6,6 +6,7 @@ public class CourseWithRelationJson {
     private Long courseId;
     private String url;
     private String name;
+    private Boolean archived;
 
 
     public String getUrl() {
@@ -16,14 +17,17 @@ public class CourseWithRelationJson {
         this.url = url;
     }
 
-    public CourseWithRelationJson() {
+    public CourseWithRelationJson(Boolean archived) {
+      this.archived = archived;
     }
 
-    public CourseWithRelationJson(String url, CourseRelation relation, String name, Long courseId) {
+    public CourseWithRelationJson(String url, CourseRelation relation, String name, Long courseId,
+        Boolean archived) {
         this.url = url;
         this.relation = relation;
         this.name = name;
         this.courseId = courseId;
+        this.archived = archived;
     }
 
     private CourseRelation relation;
@@ -50,5 +54,13 @@ public class CourseWithRelationJson {
 
     public void setCourseId(Long id) {
         this.courseId = id;
+    }
+
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
     }
 }

@@ -242,7 +242,20 @@ public class CourseUtil {
      * @param courseJson json with the course data
      * @return CheckResult with the status of the check
      */
-    public CheckResult<Void> checkCourseJson(CourseJson courseJson) {
+    public CheckResult<Void> checkCourseJson(CourseJson courseJson, UserEntity user, Long courseId) {
+        // If the courseId is null we are creating a course
+        if (courseId != null) {
+            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, user.getId())).orElse(null);
+            if (courseUserEntity == null) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not part of the course", null);
+            }
+
+            if (courseJson.getArchived() != null && !courseUserEntity.getRelation().equals(CourseRelation.creator)) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "Only the course creator can (un)archive the course", null);
+            }
+        }
+
+
         if (courseJson.getName() == null || courseJson.getDescription() == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "name and description are required", null);
         }

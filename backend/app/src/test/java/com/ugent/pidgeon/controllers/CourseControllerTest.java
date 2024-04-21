@@ -276,7 +276,7 @@ public class CourseControllerTest extends ControllerTest {
                 .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(course, CourseRelation.creator)));
         when(projectRepository.findByCourseId(anyLong())).thenReturn(projects);
         when(entityToJsonConverter.projectEntityToProjectResponseJson(any(ProjectEntity.class), any(CourseEntity.class), any(UserEntity.class))).thenReturn(new ProjectResponseJson(
-                new CourseReferenceJson("", "Test Course", 1L),
+                new CourseReferenceJson("", "Test Course", 1L, 0),
                 OffsetDateTime.MIN,
                 "",
                 1L,
@@ -302,11 +302,11 @@ public class CourseControllerTest extends ControllerTest {
         CourseEntity course = new CourseEntity("name", "descripton");
         course.setId(1);
         when(courseUtil.checkJoinLink(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
-        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong())).thenReturn(true);
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/join/1908"))
                 .andExpect(status().isOk());
 
-        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong())).thenReturn(false);
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any())).thenReturn(false);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/join/1908"))
                 .andExpect(status().isInternalServerError());
 
@@ -334,11 +334,11 @@ public class CourseControllerTest extends ControllerTest {
         CourseEntity course = new CourseEntity("name", "descripton");
         course.setId(1);
         when(courseUtil.checkJoinLink(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
-        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong())).thenReturn(true);
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/join"))
                 .andExpect(status().isOk());
 
-        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong())).thenReturn(false);
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any())).thenReturn(false);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/join"))
                 .andExpect(status().isInternalServerError());
     }
@@ -402,14 +402,14 @@ public class CourseControllerTest extends ControllerTest {
         String request = "{\"userId\": 1, \"relation\": \"enrolled\"}";
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.enrolled)));
-        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong()))
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any()))
             .thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated());
 
-        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), anyLong()))
+        when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any()))
             .thenReturn(false);
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/members")
                 .contentType(MediaType.APPLICATION_JSON)

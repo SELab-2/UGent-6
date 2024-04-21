@@ -194,7 +194,7 @@ public class ProjectControllerTest {
     when(auth.getUserEntity()).thenReturn(user);
     when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData().getFirst(),
         user)).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
+        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, 0),
         OffsetDateTime.MAX,
         "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
         1L));
@@ -248,7 +248,7 @@ public class ProjectControllerTest {
     when(auth.getUserEntity()).thenReturn(user);
     when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData(),
         user)).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
+        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, 0),
         OffsetDateTime.MAX,
         "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
         1L));
@@ -302,7 +302,7 @@ public class ProjectControllerTest {
     when(auth.getUserEntity()).thenReturn(user);
     when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData().getFirst(),
         user)).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
+        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, 0),
         OffsetDateTime.MAX,
         "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
         1L));
@@ -563,7 +563,7 @@ public class ProjectControllerTest {
     when(courseRepository.findById(projectId)).thenReturn(Optional.of(courseEntity));
     when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(
         new ProjectResponseJson(
-            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
+            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, 0),
             OffsetDateTime.MAX,
             "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
             1L));
@@ -610,7 +610,7 @@ public class ProjectControllerTest {
     when(courseRepository.findById(projectId)).thenReturn(Optional.of(courseEntity));
     when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(
         new ProjectResponseJson(
-            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
+            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, 0),
             OffsetDateTime.MAX,
             "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
             1L));

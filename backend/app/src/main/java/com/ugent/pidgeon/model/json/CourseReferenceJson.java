@@ -5,12 +5,15 @@ public class CourseReferenceJson {
     private String url;
     private Long courseId;
     private Integer memberCount;
+    private Boolean archived;
 
-    public CourseReferenceJson(String name, String url, Long courseId, Integer memberCount) {
+    public CourseReferenceJson(String name, String url, Long courseId, Integer memberCount,
+        Boolean archived) {
         this.name = name;
         this.url = url;
         this.courseId = courseId;
-      this.memberCount = memberCount;
+        this.memberCount = memberCount;
+        this.archived = archived;
     }
 
     public String getName() {
@@ -43,5 +46,13 @@ public class CourseReferenceJson {
 
     public void setMemberCount(Integer memberCount) {
         this.memberCount = memberCount;
+    }
+
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
     }
 }
