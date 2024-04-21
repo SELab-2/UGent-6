@@ -1,6 +1,6 @@
 services:
   frontend:
-    container_name : nginx_container
+    container_name: nginx_container
     image: nginx:latest
     ports:
       - 80:80
@@ -17,6 +17,7 @@ services:
     build: backend/app/
     depends_on:
       - db
+      - dind
     ports:
       - 8080:8080
     environment:
@@ -25,7 +26,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${PGP}
     restart: always
     volumes:
-      - ./backend/app/data:/data:rw 
+      - ./backend/app/data:/data:rw
     networks:
       - docker_network
   db:
@@ -41,8 +42,16 @@ services:
       - 5432:5432
     networks:
       - docker_network
- 
-
+  dind:
+    container_name: dind
+    image: docker:dind
+    privileged: true
+    volumes:
+      - /var/lib/docker
+    ports:
+      - 2375:2375
+    networks:
+      - docker_network
   pgadmin:
     container_name: container-pgadmin
     image: dpage/pgadmin4
