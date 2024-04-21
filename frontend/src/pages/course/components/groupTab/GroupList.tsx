@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom"
 
 export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
-const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick: () => void; onLeave: () => void; onJoin: () => void,loading?:boolean }> = ({ group, canJoin, canLeave, onClick, onJoin, onLeave,loading }) => {
+const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick: () => void; onLeave: () => void; onJoin: () => void; loading?: boolean }> = ({ group, canJoin, canLeave, onClick, onJoin, onLeave, loading }) => {
   const { t } = useTranslation()
 
   return (
@@ -36,7 +36,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
             key="join"
             loading={loading}
             size="small"
-            disabled={canJoin}
+            disabled={!canJoin}
             onClick={onJoin}
             style={{ width: "130px" }}
           >
@@ -60,9 +60,9 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null }> = ({ groups, project }) => {
+const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null; onChanged: () => Promise<void> }> = ({ groups, project, onChanged }) => {
   const [modalOpened, setModalOpened] = useState(false)
-  const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
+  const [selectedGroup, setSelectedGroup] = useState<number | null>(null)
   const [groupId, setGroupId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const { t } = useTranslation()
@@ -79,10 +79,9 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null }
     const fetchOwnGroup = async () => {
       if (!user) return
       try {
-        const res = await apiCall.get(ApiRoutes.GROUP, { id: courseId })
+        const res = await apiCall.get(ApiRoutes.PROJECT, { id: courseId })
         if (!ignore) setGroupId(res.data.groupId ?? null)
 
-          console.log(res.data);
       } catch (err) {
         console.error(err)
       }
@@ -94,16 +93,16 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null }
   }, [groups, project, courseId])
 
   const handleModalClick = (group: GroupType) => {
-    setSelectedGroup(group)
+    setSelectedGroup(group.groupId)
     setModalOpened(true)
   }
 
-  const onLeave = async (group: GroupType) => {
-    if (!user || !groupId) return
+  const removeUserFromGroup = async (userId: number, groupId: number) => {
     try {
       setLoading(true)
-      await apiCall.delete(ApiRoutes.GROUP_MEMBER, undefined, { id: groupId, userId: user.id })
-      console.log(group)
+      await apiCall.delete(ApiRoutes.GROUP_MEMBER, undefined, { id: groupId, userId: userId })
+      await onChanged()
+
       setGroupId(null)
       message.success(t("course.leftGroup"))
     } catch (err) {
@@ -114,26 +113,28 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null }
     }
   }
 
+  const onLeave = async (group: GroupType) => {
+    if (!user) return
+    removeUserFromGroup(user.id, group.groupId)
+  }
+
   const onJoin = async (group: GroupType) => {
     // TODO: join group request
     if (!user) return
     try {
       setLoading(true)
-      await apiCall.post(ApiRoutes.GROUP_MEMBERS, { id: user.id }, { groupId: group.groupId })
+      await apiCall.post(ApiRoutes.GROUP_MEMBERS, { id: user.id }, { id: group.groupId })
+      await onChanged()
+
       message.success(t("course.joinedGroup"))
       setGroupId(group.groupId)
     } catch (err) {
       console.error(err)
     }
-  }
-
-  const removeUserFromGroup = (userId: number) => {
-    // TODO: remove user fom group request
+    setLoading(false)
   }
 
 
-
-  console.log(groupId);
   return (
     <>
       <List
@@ -158,7 +159,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null }
 
       <GroupInfoModal
         removeUserFromGroup={removeUserFromGroup}
-        group={selectedGroup}
+        group={selectedGroup && groups ? groups.find((g) => g.groupId === selectedGroup) ?? null : null}
         open={modalOpened}
         setOpen={setModalOpened}
       />

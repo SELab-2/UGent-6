@@ -5,19 +5,22 @@ import { CloseOutlined } from "@ant-design/icons"
 import CourseAdminView from "../../../../hooks/CourseAdminView"
 import { useTranslation } from "react-i18next"
 
-const GroupInfoModal: FC<{ group: GroupType | null; open: boolean; setOpen: (b: boolean) => void; removeUserFromGroup: (userId: number) => void }> = ({ group, open, setOpen, removeUserFromGroup }) => {
+const GroupInfoModal: FC<{ group: GroupType | null; open: boolean; setOpen: (b: boolean) => void; removeUserFromGroup: (userId: number,groupId:number) => void }> = ({ group, open, setOpen, removeUserFromGroup }) => {
   
   const { t } = useTranslation()
-
+  if(!group) return null
   return (
     <Modal
-      title={group?.name}
+      title={group.name}
       open={open}
       onCancel={() => setOpen(false)}
       okButtonProps={{ hidden: true, style: { display: "none" }}}
     >
       <List
-        dataSource={group?.members ?? []}
+        dataSource={group.members ?? []}
+        locale={{
+          emptyText: t("course.noGroupMembers"),
+        }}
         loading={group === null}
         renderItem={(m) => (
           <List.Item
@@ -29,7 +32,7 @@ const GroupInfoModal: FC<{ group: GroupType | null; open: boolean; setOpen: (b: 
                   <Button
                     size="small"
                     type="text"
-                    onClick={() => removeUserFromGroup(m.id)}
+                    onClick={() => removeUserFromGroup(m.userId,group.groupId!)}
                     icon={<CloseOutlined />}
                   />
                 </Tooltip>

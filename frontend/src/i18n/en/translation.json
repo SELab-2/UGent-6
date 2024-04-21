@@ -172,6 +172,7 @@
     "createCourse": "Create course",
     "noFeedback": "You have no grades yet",
     "noMembersFound": "No members found",
+    "noGroupMembers": "No members in this group",
     "leftGroup": "You have left the group",
     "joinedGroup": "You have joined the group"
   },

@@ -181,7 +181,7 @@ export type GET_Responses = {
   [ApiRoutes.GROUP_MEMBER]: {
     email: string
     name: string
-    id: number
+    userId: number
   }
   [ApiRoutes.USERS]: {
     name: string
