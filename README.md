@@ -1,11 +1,10 @@
 ## Doel: 
-docker containers op starten vanuit een docker container
+docker containers op starten vanuit een docker container in java met dind 
 
 ## Probleem
-docker kan niet aan docker
+Java kant niet aan de dind tcp socket
 
 ## Reeds geprobeerde oplossingen
-Mss hier nog vermelden welke van de 2 je prefereert
 ### Oplossing 1: de socket mounten
 Deze zou gewoon moeten werken door in de docker compose een volume aant te maken die de socket van mijn systeem mapt op die in de backend service. Dit heeft niet gewerkt en is daarenboven mijn minst favoriete oplossing.
 
