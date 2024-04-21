@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.model.json;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record CourseWithInfoJson (
@@ -11,6 +12,6 @@ public record CourseWithInfoJson (
         String memberUrl,
         String joinUrl,
         String joinKey,
-        Boolean archived
+        OffsetDateTime archivedAt
 ) {}
 
