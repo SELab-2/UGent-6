@@ -2,7 +2,7 @@
 docker containers op starten vanuit een docker container in java met dind 
 
 ## Probleem
-Java kant niet aan de dind tcp socket
+Java kan niet aan de dind tcp socket
 
 ## Reeds geprobeerde oplossingen
 ### Oplossing 1: de socket mounten
@@ -16,7 +16,7 @@ De relevante files hiervoor zijn:
 Met de relevante snippets:
 
 ### getInstance()
-hier gaan we de dockerhost zetten op de tcp poort van onze ![Dind](https://hub.docker.com/layers/library/docker/dind/images/sha256-f95f0b3931e90bd65ec7542af140f72371f65dad1044e325ff04016e34db3b96?context=explore) service
+hier gaan we de dockerhost zetten op de tcp poort van onze Dind service
 ```java
   public static synchronized DockerClient getInstance() {
 
@@ -74,7 +74,7 @@ Hier gaan we de poort 2375 openzetten bij dind, dit is de poort die mapt op zijn
 41.61     java.lang.RuntimeException at ApacheDockerHttpClientImpl.java:195
 41.61         Caused by: java.net.UnknownHostException at InetAddress.java:801
 ```
-Dit is wat de testen met de zoals reeds beschreven implementatie teruggeven.
+Dit is wat de ![testen](https://github.com/SELab-2/UGent-6/blob/feature/docker-in-docker/backend/app/src/test/java/com/ugent/pidgeon/model/DockerSubmissionTestTest.java) met de zoals reeds beschreven implementatie teruggeven.
 Ik vermoed dus dat er iets mis is met het addres van de socket, maar `tcp://dind:2375` zou normaal moeten werken aangezien ze op hetzelfde docker-netwerk zitten.
 
 zo zou dit er in praktijk moeten uitzien:
