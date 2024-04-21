@@ -78,6 +78,7 @@ Dit is wat de testen met de zoals reeds beschreven implementatie teruggeven.
 Ik vermoed dus dat er iets mis is met het addres van de socket, maar `tcp://dind:2375` zou normaal moeten werken aangezien ze op hetzelfde docker-netwerk zitten.
 
 zo zou dit er in praktijk moeten uitzien:
+
 ![dind chart](dind-chart.png)
 
 
