@@ -55,6 +55,7 @@
     "student": "Student",
     "teacher": "Professor",
     "admin": "Admin",
+    "course_admin": "Assistent",
     "confirmation": "Bevestiging",
     "confirmationText": "Bent u zeker dat u de rol van {{name}} wilt aanpassen naar {{role}}?"
   },

@@ -52,6 +52,7 @@
     "student": "Student",
     "teacher": "Teacher",
     "admin": "Admin",
+    "course_admin": "Assistant",
     "confirmation": "Confirmation",
     "confirmationText": "Are you sure you want to change the role of {{name}} to {{role}}?"
   },
