@@ -32,6 +32,8 @@ public class GroupUtilTest {
   private ClusterUtil clusterUtil;
   @Mock
   private ProjectUtil projectUtil;
+  @Mock
+  private UserUtil userUtil;
 
   @InjectMocks
   private GroupUtil groupUtil;
@@ -115,14 +117,19 @@ public class GroupUtilTest {
   @Test
   public void TestCanAddUserToGroup() throws Exception {
     when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
-    when(groupRepository.isAdminOfGroup(1L, user.getId())).thenReturn(true);
+    when(groupRepository.isAdminOfGroup(user.getId(), 1L)).thenReturn(true);
     when(groupClusterRepository.userInGroupForCluster(anyLong(), anyLong())).thenReturn(false);
     when(groupRepository.userInGroup(anyLong(), anyLong())).thenReturn(false);
     when(clusterUtil.getClusterIfExists(group.getClusterId()))
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", groupCluster));
     when(groupRepository.countUsersInGroup(group.getId())).thenReturn(1);
     when(clusterUtil.isIndividualCluster(groupCluster.getId())).thenReturn(false);
-
+    when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+    UserEntity userToAdd = new UserEntity();
+    userToAdd.setId(2L);
+    userToAdd.setRole(UserRole.student);
+    when(userUtil.getUserIfExists(2L)).thenReturn(userToAdd);
+    when(groupRepository.isAdminOfGroup(2L, 1L)).thenReturn(false);
     CheckResult<Void> result = groupUtil.canAddUserToGroup(group.getId(), 2L, user);
     assertEquals(HttpStatus.OK, result.getStatus());
   }

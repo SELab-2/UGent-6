@@ -141,18 +141,18 @@ public class CourseUtilTest {
 
   @Test
   public void testCheckCourseJson() throws Exception {
-    CourseJson courseJson = new CourseJson("name", "description");
-    CheckResult<Void> result = courseUtil.checkCourseJson(courseJson);
+    CourseJson courseJson = new CourseJson("name", "description", null);
+    CheckResult<Void> result = courseUtil.checkCourseJson(courseJson, user, null);
     assertEquals(HttpStatus.OK, result.getStatus());
 
     courseJson.setDescription(null);
-    result = courseUtil.checkCourseJson(courseJson);
+    result = courseUtil.checkCourseJson(courseJson, user, null);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
     assertEquals("name and description are required", result.getMessage());
 
     courseJson.setDescription("description");
     courseJson.setName("");
-    result = courseUtil.checkCourseJson(courseJson);
+    result = courseUtil.checkCourseJson(courseJson, user, null);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
     assertEquals("Name cannot be empty", result.getMessage());
   }

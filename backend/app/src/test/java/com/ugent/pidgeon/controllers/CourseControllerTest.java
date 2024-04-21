@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -112,27 +113,27 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testCreateCourse() throws Exception {
         String courseJson = "{\"name\": \"test\", \"description\": \"description\"}";
-        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseRepository.save(any())).thenReturn(null);
         when(courseUserRepository.save(any())).thenReturn(null);
         when(groupClusterRepository.save(any())).thenReturn(null);
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
-        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), any())).
+        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", ""));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now()));
 
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(courseJson))
                 .andExpect(status().isOk());
 
-        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        when(courseUtil.checkCourseJson(any(), any(),any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(courseJson))
                 .andExpect(status().isIAmATeapot());
 
-        when(courseUtil.checkCourseJson(any())).thenThrow(new RuntimeException());
+        when(courseUtil.checkCourseJson(any(), any(), any())).thenThrow(new RuntimeException());
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(courseJson))
@@ -146,14 +147,14 @@ public class CourseControllerTest extends ControllerTest {
         String courseJson = "{\"name\": \"test\", \"description\": \"description\"}";
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseEntity()));
-        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseRepository.save(any())).thenReturn(null);
         mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(courseJson))
                 .andExpect(status().isOk());
 
-        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
         mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(courseJson))
@@ -176,7 +177,7 @@ public class CourseControllerTest extends ControllerTest {
     public void testPatchCourse() throws Exception {
         String courseJson = "{\"name\": null, \"description\": \"description\"}";
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseEntity()));
-        when(courseUtil.checkCourseJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseRepository.save(any())).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
@@ -214,11 +215,11 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testGetCourseByCourseId() throws Exception {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
-        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), any())).
+        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", ""));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now()));
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
-                thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(new CourseEntity(), null)));
+                thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(new CourseEntity(), CourseRelation.course_admin)));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))
                 .andExpect(status().isOk());
 
@@ -276,7 +277,7 @@ public class CourseControllerTest extends ControllerTest {
                 .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(course, CourseRelation.creator)));
         when(projectRepository.findByCourseId(anyLong())).thenReturn(projects);
         when(entityToJsonConverter.projectEntityToProjectResponseJson(any(ProjectEntity.class), any(CourseEntity.class), any(UserEntity.class))).thenReturn(new ProjectResponseJson(
-                new CourseReferenceJson("", "Test Course", 1L, 0),
+                new CourseReferenceJson("", "Test Course", 1L, OffsetDateTime.now()),
                 OffsetDateTime.MIN,
                 "",
                 1L,
@@ -404,6 +405,7 @@ public class CourseControllerTest extends ControllerTest {
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.enrolled)));
         when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any()))
             .thenReturn(true);
+        when(userUtil.getUserIfExists(anyLong())).thenReturn(new UserEntity("name", "surname", "email", UserRole.teacher, "id"));
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH + "/1/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -428,6 +430,7 @@ public class CourseControllerTest extends ControllerTest {
         String request = "{\"userId\": 1, \"relation\": \"enrolled\"}";
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.enrolled)));
+        when(userUtil.getUserIfExists(anyLong())).thenReturn(new UserEntity("name", "surname", "email", UserRole.teacher, "id"));
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -472,11 +475,11 @@ public class CourseControllerTest extends ControllerTest {
         CourseEntity course = new CourseEntity("name", "descripton");
         course.setId(1);
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/joinLink"))
+        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
                 .andExpect(status().isOk());
 
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/joinLink"))
+        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
                 .andExpect(status().isIAmATeapot());
     }
 
@@ -485,11 +488,11 @@ public class CourseControllerTest extends ControllerTest {
         CourseEntity course = new CourseEntity("name", "descripton");
         course.setId(1);
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
-        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1/joinLink"))
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
                 .andExpect(status().isOk());
 
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1/joinLink"))
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
                 .andExpect(status().isIAmATeapot());
     }
 
@@ -498,11 +501,11 @@ public class CourseControllerTest extends ControllerTest {
         CourseEntity course = new CourseEntity("name", "descripton");
         course.setId(1);
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/joinLink"))
+        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
                 .andExpect(status().isOk());
 
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/joinLink"))
+        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
                 .andExpect(status().isIAmATeapot());
     }
 }
