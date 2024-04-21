@@ -17,6 +17,7 @@ Met de relevante snippets:
 
 ### getInstance()
 hier gaan we de dockerhost zetten op de tcp poort van onze Dind service
+dit maakt gebruik van de ![javadocker](https://github.com/docker-java/docker-java/blob/main/docs/getting_started.md) library
 ```java
   public static synchronized DockerClient getInstance() {
 
