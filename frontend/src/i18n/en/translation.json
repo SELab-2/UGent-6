@@ -48,7 +48,8 @@
       "completeProgress": "{{count}} / {{total}} completed",
       "activeProjects": "{{count}} active project",
       "activeProjects_plural": "{{count}} active projects",
-      "userCourseCount": "{{count}} users are in this course"
+      "userCourseCount": "{{count}} user is in this course",
+      "userCourseCount_plural": "{{count}} users are in this course"
     },
     "moreCourses": "All courses"
   },

@@ -50,7 +50,8 @@
       "activeProjects": "{{count}} actief project",
       "activeProjects_plural": "{{count}} actieve projecten",
       "submit": "Inleveren",
-      "userCourseCount": "{{count}} gebruikers in dit vak"
+      "userCourseCount_plural": "{{count}} gebruikers in dit vak",
+      "userCourseCount": "{{count}} gebruiker in dit vak"
     },
     "moreCourses": "Alle vakken"
   },
