@@ -13,8 +13,6 @@ services:
     restart: always
     volumes:
       - ./backend/app/data:/data:rw 
-    networks:
-      - docker_network
   db:
     container_name: db
     image: 'postgres:latest'
@@ -26,9 +24,6 @@ services:
       - POSTGRES_DB=postgres
     ports:
       - 5432:5432
-    networks:
-      - docker_network
- 
 
   pgadmin:
     container_name: container-pgadmin
