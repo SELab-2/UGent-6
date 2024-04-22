@@ -31,6 +31,15 @@ public interface GroupClusterRepository extends JpaRepository<GroupClusterEntity
 
     @Query(value = """
     SELECT CASE WHEN EXISTS (
+    	SELECT gc.id FROM GroupClusterEntity gc 
+    	JOIN CourseEntity c ON gc.courseId = c.id
+    	WHERE gc.id = ?1 AND c.archivedAt IS NOT NULL
+    ) THEN true ELSE false END
+    """)
+    Boolean inArchivedCourse(long clusterId);
+
+    @Query(value = """
+    SELECT CASE WHEN EXISTS (
     	SELECT g.id FROM GroupEntity g 
     	JOIN GroupUserEntity gu ON g.id = gu.groupId
     	WHERE gu.userId = ?2 AND g.clusterId = ?1

@@ -15,6 +15,7 @@ import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class GroupMemberController {
      */
     @DeleteMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH + "/{memberid}")
     @Roles({UserRole.teacher, UserRole.student})
+    @Transactional
     public ResponseEntity<String> removeMemberFromGroup(@PathVariable("groupid") long groupId, @PathVariable("memberid") long memberid, Auth auth) {
         UserEntity user = auth.getUserEntity();
         CheckResult<Void> check = groupUtil.canRemoveUserFromGroup(groupId, memberid, user);

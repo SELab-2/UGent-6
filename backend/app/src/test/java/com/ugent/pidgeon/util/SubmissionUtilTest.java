@@ -1,11 +1,14 @@
 package com.ugent.pidgeon.util;
 
+import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import java.time.OffsetDateTime;
+import org.hibernate.validator.constraints.ModCheck.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +35,9 @@ public class SubmissionUtilTest {
 
   @Mock
   private SubmissionRepository submissionRepository;
+
+  @Mock
+  private GroupClusterRepository groupClusterRepository;
 
   @Mock
   private GroupUtil groupUtil;
@@ -87,6 +93,8 @@ public class SubmissionUtilTest {
     when(groupRepository.groupIdByProjectAndUser(anyLong(), anyLong())).thenReturn(1L);
     when(projectUtil.userPartOfProject(anyLong(), anyLong())).thenReturn(true);
     when(projectUtil.getProjectIfExists(anyLong())).thenReturn(new CheckResult<>(HttpStatus.OK, "", projectEntity));
+    when(groupUtil.getGroupIfExists(anyLong())).thenReturn(new CheckResult<>(HttpStatus.OK, "", new GroupEntity()));
+    when(groupClusterRepository.inArchivedCourse(anyLong())).thenReturn(false);
     assertEquals(1L, submissionUtil.checkOnSubmit(1L, userEntity).getData());
   }
 }

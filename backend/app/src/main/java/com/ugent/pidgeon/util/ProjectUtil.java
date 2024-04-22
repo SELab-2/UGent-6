@@ -1,17 +1,9 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.ApiRoutes;
-import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.CourseReferenceJson;
 import com.ugent.pidgeon.model.json.ProjectJson;
-import com.ugent.pidgeon.model.json.ProjectProgressJson;
 import com.ugent.pidgeon.postgre.models.*;
-import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
