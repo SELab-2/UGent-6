@@ -12,6 +12,7 @@ export enum ApiRoutes {
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
+  COURSE_LEAVE = "api/courses/:courseId/leave",
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -76,6 +77,7 @@ export type DELETE_Requests = {
   [ApiRoutes.COURSE]: undefined
   [ApiRoutes.PROJECT]: undefined
   [ApiRoutes.GROUP_MEMBER]: undefined
+  [ApiRoutes.COURSE_LEAVE]: undefined
 }
 
 

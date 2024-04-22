@@ -1,7 +1,7 @@
-import { FC, useMemo } from "react"
+import { FC, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
-import { Space, Tabs, Tag, Typography } from "antd"
+import { Space, Tabs, Tag, Typography, Button, message, Modal } from "antd"
 import { TabsProps } from "antd/lib"
 import ProjectCard from "../index/components/ProjectCard"
 import GroupsCard from "./components/groupTab/GroupsCard"
@@ -12,7 +12,10 @@ import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
+import {leaveCourse, LeaveStatus} from "./components/LeaveCourse/CourseMembershipService";
 import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined, UsergroupAddOutlined } from "@ant-design/icons"
+import {AppRoutes} from "../../@types/routes";
+import LeaveCourseButton from "./components/LeaveCourse/LeaveCourseButton";
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -22,7 +25,31 @@ const Course: FC = () => {
   const isCourseAdmin = useIsCourseAdmin()
   const navigate = useNavigate()
   const location = useLocation();
+  const [confirmLeaveVisible, setConfirmLeaveVisible] = useState<boolean>(false);
 
+  const handleLeaveConfirm = async () => {
+    try {
+      const result = await leaveCourse(course.courseId.toString());
+      if (result.success) {
+        message.success(result.message);
+        setTimeout(() => {
+          window.location.href = AppRoutes.HOME; // Redirect to home page after leaving course
+        }, 2000); // 2 seconds
+      } else {
+        message.error(result.message);
+      }
+    } catch (error) {
+      console.error('Failed to leave the course:');
+    }
+  };
+
+  const handleLeaveCancel = () => {
+    setConfirmLeaveVisible(false);
+  };
+
+  const showConfirmLeaveModal = () => {
+    setConfirmLeaveVisible(true);
+  };
 
   const items: TabsProps["items"] = useMemo(() => {
     let tabs: TabsProps["items"] = [
@@ -80,9 +107,9 @@ const Course: FC = () => {
       <div style={{ padding: "0 2rem" }}>
         <Typography.Title style={{marginBottom:"0.5rem"}} level={1}>{course.name}</Typography.Title>
         <Space direction="horizontal" size="small" style={{marginBottom:"0.5rem"}}>
-          <Tag color="blue">2024-2025</Tag> 
+          <Tag color="blue">2024-2025</Tag>
            <Tag key={course.teacher.url} color="orange">{course.teacher.name} {course.teacher.surname}</Tag>
-          
+
         </Space>
         <br/>
         <Tabs
@@ -90,6 +117,7 @@ const Course: FC = () => {
           defaultActiveKey={location.hash.slice(1) || "1"}
           items={items}
         />
+        <LeaveCourseButton courseId={course.courseId.toString()} />
       </div>
     </div>
   )
