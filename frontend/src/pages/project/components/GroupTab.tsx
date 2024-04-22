@@ -9,6 +9,7 @@ export type GroupType = GET_Responses[ApiRoutes.PROJECT_GROUPS][number]
 const GroupTab: FC<{}> = () => {
   const [groups, setGroups] = useState<null | GroupType[]>(null)
  const {projectId} = useParams()
+ 
 
   useEffect(() => {
     //TODO: perform get request to api/projects/{projectid}/groups
@@ -21,7 +22,7 @@ const GroupTab: FC<{}> = () => {
   }, [])
 
   return (
-      <GroupList groups={groups}  capacity={10}/>
+      <GroupList groups={groups} />
   )
 }
 

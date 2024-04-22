@@ -30,7 +30,7 @@ export function createStatusBitVector(submission: GET_Responses[ApiRoutes.SUBMIS
 
 const SubmissionStatusTag:FC<{status:number}> = ({ status }) => {
   const {t} = useTranslation()
-  if((status & SubmissionStatus.DOCKER_REJECTED) === 0){
+  if(status & SubmissionStatus.DOCKER_REJECTED){
     return (
       <Tag color="red">{t("project.testFailed")}</Tag>
     )
