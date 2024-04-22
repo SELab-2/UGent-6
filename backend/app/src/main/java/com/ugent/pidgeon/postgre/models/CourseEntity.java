@@ -21,6 +21,9 @@ public class CourseEntity {
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
+    @Column(name = "archived_at")
+    private OffsetDateTime archivedAt;
+
     public String getJoinKey() {
         return joinKey;
     }
@@ -74,5 +77,13 @@ public class CourseEntity {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
+    public void setArchivedAt(OffsetDateTime archivedAt) {
+        this.archivedAt = archivedAt;
     }
 }

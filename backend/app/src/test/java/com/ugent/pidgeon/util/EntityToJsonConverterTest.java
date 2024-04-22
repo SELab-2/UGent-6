@@ -118,7 +118,7 @@ public class EntityToJsonConverterTest {
     when(courseRepository.findTeacherByCourseId(anyLong())).thenReturn(userEntity);
     when(courseRepository.findAssistantsByCourseId(anyLong())).thenReturn(Collections.emptyList());
     CourseWithInfoJson result = entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity,
-        "joinLink");
+        "joinLink", false);
     assertEquals(courseEntity.getId(), result.courseId());
     assertEquals(courseEntity.getName(), result.name());
   }

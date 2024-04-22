@@ -56,11 +56,17 @@ public class CourseController {
      */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getUserCourses(Auth auth) {
+    public ResponseEntity<?> getUserCourses(Auth auth, @RequestParam(value="archived", required = false) Boolean archived) {
         long userID = auth.getUserEntity().getId();
         try {
-            List<UserRepository.CourseIdWithRelation> userCourses = userRepository.findCourseIdsByUserId(userID);
-
+            Logger.getGlobal().info("Archived: " + archived);
+            List<UserRepository.CourseIdWithRelation> userCourses = new ArrayList<>();
+            if (archived == null || !archived) {
+                userCourses.addAll(userRepository.findCourseIdsByUserId(userID));
+            }
+            if (archived == null || archived) {
+                userCourses.addAll(userRepository.findArchivedCoursesByUserId(userID));
+            }
             // Retrieve course entities based on user courses
             List<CourseWithRelationJson> courseJSONObjects = userCourses.stream()
                     .map(courseWithRelation -> {
@@ -81,7 +87,6 @@ public class CourseController {
         }
     }
 
-
     /**
      * Function to create a new course
      *
@@ -100,7 +105,7 @@ public class CourseController {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
 
-            CheckResult<Void> courseJsonCheck = courseUtil.checkCourseJson(courseJson);
+            CheckResult<Void> courseJsonCheck = courseUtil.checkCourseJson(courseJson, user, null);
             if (courseJsonCheck.getStatus() != HttpStatus.OK) {
                 return ResponseEntity.status(courseJsonCheck.getStatus()).body(courseJsonCheck.getMessage());
             }
@@ -122,7 +127,7 @@ public class CourseController {
             groupClusterEntity.setCreatedAt(currentTimestamp);
             groupClusterRepository.save(groupClusterEntity);
 
-            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId())));
+            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId()), false));
         } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -130,15 +135,18 @@ public class CourseController {
     }
 
 
-    private ResponseEntity<?> doCourseUpdate(CourseEntity courseEntity, CourseJson courseJson) {
-        CheckResult<Void> courseJsonCheck = courseUtil.checkCourseJson(courseJson);
+    private ResponseEntity<?> doCourseUpdate(CourseEntity courseEntity, CourseJson courseJson, UserEntity user) {
+        CheckResult<Void> courseJsonCheck = courseUtil.checkCourseJson(courseJson, user, courseEntity.getId());
         if (courseJsonCheck.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(courseJsonCheck.getStatus()).body(courseJsonCheck.getMessage());
         }
         courseEntity.setName(courseJson.getName());
         courseEntity.setDescription(courseJson.getDescription());
+        if (courseJson.getArchived() != null) {
+            courseEntity.setArchivedAt(courseJson.getArchived() ? OffsetDateTime.now() : null);
+        }
         courseRepository.save(courseEntity);
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId())));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId()), false));
     }
 
     /**
@@ -165,7 +173,7 @@ public class CourseController {
             }
             CourseEntity course = checkResult.getData();
 
-            return doCourseUpdate(course, courseJson);
+            return doCourseUpdate(course, courseJson, user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -194,7 +202,7 @@ public class CourseController {
                 courseJson.setDescription(courseEntity.getDescription());
             }
 
-            return doCourseUpdate(courseEntity, courseJson);
+            return doCourseUpdate(courseEntity, courseJson, user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -219,8 +227,9 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseEntity course = checkResult.getData().getFirst();
+        CourseRelation relation = checkResult.getData().getSecond();
 
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId())));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId()), relation.equals(CourseRelation.enrolled)));
     }
 
 
@@ -318,11 +327,14 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseEntity course = checkResult.getData();
-        if (!commonDatabaseActions.createNewIndividualClusterGroup(courseId, user.getId())) {
+        if (course.getArchivedAt() != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course is archived");
+        }
+        if (!commonDatabaseActions.createNewIndividualClusterGroup(courseId, user)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
         }
         courseUserRepository.save(new CourseUserEntity(courseId, user.getId(), CourseRelation.enrolled));
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(),"" + course.getId())));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(),"" + course.getId()), false));
     }
 
     private ResponseEntity<?> getJoinLinkGetResponseEntity(long courseId, String courseKey, UserEntity user) {
@@ -332,7 +344,10 @@ public class CourseController {
         }
 
         CourseEntity course = checkResult.getData();
-        CourseJson courseJson = new CourseJson(course.getName(), course.getDescription());
+        if (course.getArchivedAt() != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course is archived");
+        }
+        CourseJoinInformationJson courseJson = new CourseJoinInformationJson(course.getName(), course.getDescription());
         return ResponseEntity.ok(courseJson);
     }
 
@@ -495,7 +510,11 @@ public class CourseController {
 
         courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelationAsEnum()));
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            boolean succesful = commonDatabaseActions.createNewIndividualClusterGroup(courseId, request.getUserId());
+            UserEntity user = userUtil.getUserIfExists(request.getUserId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            boolean succesful = commonDatabaseActions.createNewIndividualClusterGroup(courseId, user);
             if (!succesful) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
             }
@@ -530,7 +549,11 @@ public class CourseController {
         courseUserEntity.setRelation(request.getRelationAsEnum());
         courseUserRepository.save(courseUserEntity);
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
-            commonDatabaseActions.createNewIndividualClusterGroup(courseId, requestwithid.getUserId());
+            UserEntity user = userUtil.getUserIfExists(requestwithid.getUserId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            commonDatabaseActions.createNewIndividualClusterGroup(courseId, user);
         } else {
             if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, requestwithid.getUserId())) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
@@ -584,13 +607,13 @@ public class CourseController {
      * @ApiPath /api/courses/{courseId}/joinLink
      */
     @Roles({UserRole.teacher, UserRole.student})
-    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<String> getCourseKey(Auth auth, @PathVariable Long courseId) {
         CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        return ResponseEntity.ok(courseUtil.getJoinLink(checkResult.getData().getJoinKey(), courseId.toString()));
+        return ResponseEntity.ok(checkResult.getData().getJoinKey());
     }
 
     // Function for invalidating the previous key and generating a new one, can be useful when starting a new year.
@@ -606,7 +629,7 @@ public class CourseController {
      * @ApiPath /api/courses/{courseId}/joinLink
      */
     @Roles({UserRole.teacher, UserRole.student})
-    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
+    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<?> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
         CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
@@ -617,7 +640,7 @@ public class CourseController {
         String key = UUID.randomUUID().toString();
         course.setJoinKey(key);
         courseRepository.save(course);
-        return ResponseEntity.ok(courseUtil.getJoinLink(key, courseId.toString()));
+        return ResponseEntity.ok(key);
     }
 
     /**
@@ -632,7 +655,7 @@ public class CourseController {
      * @ApiPath /api/courses/{courseId}/joinLink
      */
     @Roles({UserRole.teacher, UserRole.student})
-    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinLink")
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
     public ResponseEntity<String> deleteCourseKey(Auth auth, @PathVariable Long courseId) {
         CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
         if (checkResult.getStatus() != HttpStatus.OK) {
@@ -640,7 +663,8 @@ public class CourseController {
         }
         CourseEntity course = checkResult.getData();
         course.setJoinKey(null);
-        return ResponseEntity.ok(courseUtil.getJoinLink(null, courseId.toString()));
+        courseRepository.save(course);
+        return ResponseEntity.ok("");
     }
 
 }
