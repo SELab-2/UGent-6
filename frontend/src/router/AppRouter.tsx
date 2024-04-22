@@ -17,6 +17,7 @@ import Submission from "../pages/submission/Submission"
 import AuthenticatedRoute from "./AuthenticatedRoute"
 import CourseAdminView from "../hooks/CourseAdminView"
 import ProjectTestsPage from "../pages/projectTest/ProjectTestPage";
+import Courses from "../pages/courses/Courses"
 
 const AppRouter = () => {
   return (
@@ -49,6 +50,14 @@ const AppRouter = () => {
             </AdminView>
           }
         />
+
+          <Route>
+            <Route
+              path={AppRoutes.COURSES}
+              element={<Courses/>}
+            />
+          </Route>
+
         <Route
           path={AppRoutes.COURSE}
           element={<CourseRoutes />}

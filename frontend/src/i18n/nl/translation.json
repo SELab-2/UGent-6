@@ -8,7 +8,16 @@
     "dark": "Donker",
     "light": "Licht"
   },
+  "courses":{
+    "courses": "Vakken",
+    "searchCourse": "Zoek vak",
+    "member": "lid",
+    "members": "leden",
+    "archived": "Gearchiveerd",
+    "noCourses": "Geen vakken gevonden"
+  },
   "home": {
+    "allCourses": "Alle vakken",
     "yourCourses": "Ingeschreven vakken",
     "myCourses": "Beheerde vakken",
     "createCourse": "Vak aanmaken",
@@ -42,7 +51,8 @@
       "activeProjects_plural": "{{count}} actieve projecten",
       "submit": "Inleveren",
       "userCourseCount": "{{count}} gebruikers in dit vak"
-    }
+    },
+    "moreCourses": "Alle vakken"
   },
   "profile": {
     "student": "Student aan Universiteit Gent",

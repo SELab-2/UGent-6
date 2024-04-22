@@ -8,7 +8,16 @@
     "dark": "Dark",
     "light": "Light"
   },
+  "courses":{
+    "courses": "Vakken",
+    "searchCourse": "Search course",
+    "member": "member",
+    "members": "members",
+    "archived":"Archived",
+    "noCourses": "No courses found"
+  },
   "home": {
+    "allCourses": "All courses",
     "yourCourses": "Enrolled courses",
     "createCourse": "Create course",
     "courseName": "Course name",
@@ -40,7 +49,8 @@
       "activeProjects": "{{count}} active project",
       "activeProjects_plural": "{{count}} active projects",
       "userCourseCount": "{{count}} users are in this course"
-    }
+    },
+    "moreCourses": "All courses"
   },
   "profile": {
     "student": "Student at Ghent University",

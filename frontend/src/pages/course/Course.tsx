@@ -13,6 +13,7 @@ import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
 import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined, UsergroupAddOutlined } from "@ant-design/icons"
+import PeriodTag from "../../components/common/PeriodTag"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -80,7 +81,8 @@ const Course: FC = () => {
       <div style={{ padding: "0 2rem" }}>
         <Typography.Title style={{marginBottom:"0.5rem"}} level={1}>{course.name}</Typography.Title>
         <Space direction="horizontal" size="small" style={{marginBottom:"0.5rem"}}>
-          <Tag color="blue">2024-2025</Tag> 
+          
+          <PeriodTag start={course.createdAt} end={course.archivedAt} />
            <Tag key={course.teacher.url} color="orange">{course.teacher.name} {course.teacher.surname}</Tag>
           
         </Space>
@@ -91,6 +93,7 @@ const Course: FC = () => {
           items={items}
         />
       </div>
+      <br/><br/>
     </div>
   )
 }
