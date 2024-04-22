@@ -204,5 +204,9 @@
     "404_message" : "Sorry, de pagina die je bezocht bestaat niet.",
     "500_message": "Sorry, er ging iets mis."
 
+  },
+  "components": {
+    "write": "Aanpassen",
+    "Preview": "Voorvertoning"
   }
 }
