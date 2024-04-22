@@ -30,11 +30,7 @@ export function createStatusBitVector(submission: GET_Responses[ApiRoutes.SUBMIS
 
 const SubmissionStatusTag:FC<{status:number}> = ({ status }) => {
   const {t} = useTranslation()
-<<<<<<< Updated upstream
   if(status & SubmissionStatus.DOCKER_REJECTED){
-=======
-  if((status & SubmissionStatus.DOCKER_REJECTED)){
->>>>>>> Stashed changes
     return (
       <Tag color="red">{t("project.testFailed")}</Tag>
     )
