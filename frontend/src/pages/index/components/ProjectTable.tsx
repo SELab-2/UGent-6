@@ -57,7 +57,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
         title: t("home.projects.projectStatus"),
         key:"status",
         render: (project:ProjectType) =>
-          <ProjectStatusTag status={project.status || "not started"} />, 
+          project.status  && <ProjectStatusTag status={project.status } />, 
       },{
         title: t("home.projects.groupProgress"),
         key: "progress",
