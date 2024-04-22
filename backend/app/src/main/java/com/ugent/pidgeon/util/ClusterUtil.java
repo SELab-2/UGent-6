@@ -24,7 +24,7 @@ public class ClusterUtil {
      * @return true if the cluster is an individual cluster
      */
     public boolean isIndividualCluster(GroupClusterEntity cluster) {
-        return cluster != null && cluster.getGroupAmount() <= 1;
+        return (cluster != null && cluster.getMaxSize() <= 1);
     }
 
     /**

@@ -1,14 +1,19 @@
 package com.ugent.pidgeon.model.json;
 
+import java.time.OffsetDateTime;
+
 public class CourseReferenceJson {
     private String name;
     private String url;
     private Long courseId;
+    private OffsetDateTime archivedAt;
 
-    public CourseReferenceJson(String name, String url, Long courseId) {
+    public CourseReferenceJson(String name, String url, Long courseId,
+        OffsetDateTime archived) {
         this.name = name;
         this.url = url;
         this.courseId = courseId;
+        this.archivedAt = archived;
     }
 
     public String getName() {
@@ -33,5 +38,13 @@ public class CourseReferenceJson {
 
     public void setCourseId(Long courseId) {
         this.courseId = courseId;
+    }
+
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
+    public void setArchivedAt(OffsetDateTime archivedAt) {
+        this.archivedAt = archivedAt;
     }
 }

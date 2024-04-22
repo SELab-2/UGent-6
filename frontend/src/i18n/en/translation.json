@@ -9,12 +9,12 @@
     "light": "Light"
   },
   "home": {
-    "yourCourses": "Courses",
+    "yourCourses": "Enrolled courses",
     "createCourse": "Create course",
     "courseName": "Course name",
     "courseDescription": "Description",
     "yourProjects": "Projects",
-    "myCourses": "My courses",
+    "myCourses": "Managed courses",
     "noCourses": "You're not in any courses yet, you can join a course by opening a course join link.",
     "courseNameRequired": "Course name is required",
     "courseNameMaxLength": "Course name must be less than 50 characters",

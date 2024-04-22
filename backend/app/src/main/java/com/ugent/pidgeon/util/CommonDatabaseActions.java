@@ -63,19 +63,19 @@ public class CommonDatabaseActions {
      * @param userId id of the user
      * @return true if the group was created successfully
      */
-    public boolean createNewIndividualClusterGroup(long courseId, long userId) {
+    public boolean createNewIndividualClusterGroup(long courseId, UserEntity user) {
         GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
         if (groupClusterEntity == null) {
             return false;
         }
         // Create new group for the cluster
-        GroupEntity groupEntity = new GroupEntity("", groupClusterEntity.getId());
+        GroupEntity groupEntity = new GroupEntity(user.getName() + " " + user.getSurname(), groupClusterEntity.getId());
         groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() + 1);
         groupClusterRepository.save(groupClusterEntity);
         groupEntity = groupRepository.save(groupEntity);
 
         // Add user to the group
-        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), userId);
+        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), user.getId());
         groupUserRepository.save(groupUserEntity);
         return true;
     }

@@ -77,7 +77,7 @@ public class EntityToJsonConverter {
         return new UserReferenceWithRelation(userEntityToUserReference(user), relation.toString());
     }
 
-    public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course, String joinLink) {
+    public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course, String joinLink, boolean hideKey) {
         UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
         UserReferenceJson teacherJson = userEntityToUserReference(teacher);
 
@@ -91,16 +91,21 @@ public class EntityToJsonConverter {
                 teacherJson,
                 assistantsJson,
                 ApiRoutes.COURSE_BASE_PATH + "/" + course.getId() + "/members",
-                joinLink
+                hideKey ? null : joinLink,
+                hideKey ? null : course.getJoinKey(),
+                course.getArchivedAt()
         );
     }
 
     public CourseWithRelationJson courseEntityToCourseWithRelation(CourseEntity course, CourseRelation relation) {
+        int memberCount = courseUserRepository.countUsersInCourse(course.getId());
         return new CourseWithRelationJson(
                 ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
                 relation,
                 course.getName(),
-                course.getId()
+                course.getId(),
+                course.getArchivedAt(),
+                memberCount
         );
     }
 
@@ -126,6 +131,12 @@ public class EntityToJsonConverter {
     public ProjectResponseJsonWithStatus projectEntityToProjectResponseJsonWithStatus(ProjectEntity project, CourseEntity course, UserEntity user) {
         // Get status
         Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+        if (groupId == null) {
+            return new ProjectResponseJsonWithStatus(
+                    projectEntityToProjectResponseJson(project, course, user),
+                    "no group"
+            );
+        }
         SubmissionEntity sub = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
         String status;
         if (sub == null) {
@@ -163,30 +174,44 @@ public class EntityToJsonConverter {
         if (courseUserEntity == null) {
             return null;
         }
-        if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
-            Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
-            if (groupId == null) {
-                return null;
-            }
-            submissionUrl += "/" + groupId;
-        }
 
         // GroupId is null if the user is a course_admin/creator
         Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+
+        if (courseUserEntity.getRelation() == CourseRelation.enrolled) {
+            if (groupId == null) {
+                submissionUrl = null;
+            } else {
+                submissionUrl += "/" + groupId;
+            }
+        }
+
+
         return new ProjectResponseJson(
-                new CourseReferenceJson(course.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(), course.getId()),
+                courseEntityToCourseReference(course),
                 project.getDeadline(),
                 project.getDescription(),
                 project.getId(),
                 project.getName(),
                 submissionUrl,
-                ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
+                project.getTestId() == null ? null : ApiRoutes.TEST_BASE_PATH + "/" + project.getTestId(),
                 project.getMaxScore(),
                 project.isVisible(),
                 new ProjectProgressJson(completed, total),
                 groupId
         );
     }
+
+    public CourseReferenceJson courseEntityToCourseReference(CourseEntity course) {
+        return new CourseReferenceJson(
+            course.getName(),
+            ApiRoutes.COURSE_BASE_PATH + "/" + course.getId(),
+            course.getId(),
+            course.getArchivedAt()
+        );
+    }
+
+
 
     public SubmissionJson getSubmissionJson(SubmissionEntity submission) {
         return new SubmissionJson(

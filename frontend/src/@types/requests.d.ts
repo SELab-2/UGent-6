@@ -241,7 +241,7 @@ export type GET_Responses = {
     projectUrl: string,
     projectId: number,
     maxScore: number,
-    groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE]
+    groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE] | null
   }[]
 
   [ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK]: string | null  // Null if no feedback is given
