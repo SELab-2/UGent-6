@@ -199,5 +199,9 @@
     "404_message": "Sorry, the page you visited does not exist.",
     "500_message": "Sorry, Something went wrong"
   },
-  "goBack": "Go back"
+  "goBack": "Go back",
+  "components": {
+    "write": "Write",
+    "Preview": "Preview"
+  }
 }
