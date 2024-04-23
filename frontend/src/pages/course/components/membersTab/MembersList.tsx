@@ -26,7 +26,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
     },
     {
       key: "course_admin",
-      label: t("editRole.assistant"),
+      label: t("editRole.course_admin"),
     },
     {
       key: "enrolled",
@@ -36,7 +36,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
   
   const rolesNames = {
     creator: t("editRole.teacher"),
-    course_admin: t("editRole.assistant"),
+    course_admin: t("editRole.course_admin"),
     enrolled: t("editRole.student"),
   }
 

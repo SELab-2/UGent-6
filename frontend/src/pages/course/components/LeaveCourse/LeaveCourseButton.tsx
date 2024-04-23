@@ -1,31 +1,27 @@
 import React, { FC, useState } from "react";
-import {Button, message, Modal, Typography} from "antd";
-import { leaveCourse } from "./CourseMembershipService";
-import {useTranslation} from "react-i18next";
+import { Button, message, Modal, Typography } from "antd";
+import { leaveCourse, LeaveStatus } from "./CourseMembershipService";
+import { useTranslation } from "react-i18next";
 
 interface LeaveCourseButtonProps {
     courseId: string;
 }
 
 const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
-    const { Text } = Typography
-    const { t } = useTranslation()
+    const { Text } = Typography;
+    const { t } = useTranslation();
     const [confirmLeaveVisible, setConfirmLeaveVisible] = useState<boolean>(false);
 
     const handleLeaveConfirm = async () => {
-        try {
-            const result = await leaveCourse(courseId);
-            if (result.success) {
-                message.success(result.message); // Using message from useApp
-                setTimeout(() => {
-                    window.location.href = '/'; // Redirect to home page after leaving course
-                }, 2000); // 2 seconds
-            } else {
-                message.error(result.message); // Using message from useApp
-            }
-        } catch (error) {
-            console.error('Failed to leave the course:');
-            message.error('Failed to leave the course'); // Using message from useApp
+        const result = await leaveCourse(courseId, t); // Pass the translation function as a parameter
+        if (result.success) {
+            message.success(result.message);
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        } else {
+            message.error(result.message);
+            console.error(result);
         }
     };
 
@@ -43,7 +39,7 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
                 {t("course.leave")}
             </Button>
             <Modal
-                title= {t("course.leave")}
+                title={t("course.leave")}
                 open={confirmLeaveVisible}
                 onOk={handleLeaveConfirm}
                 onCancel={handleLeaveCancel}

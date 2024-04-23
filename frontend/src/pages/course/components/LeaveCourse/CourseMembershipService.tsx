@@ -1,6 +1,6 @@
 import apiCall from "../../../../util/apiFetch";
-import {ApiRoutes} from "../../../../@types/requests.d";
-import {useTranslation} from "react-i18next";
+import { ApiRoutes } from "../../../../@types/requests.d";
+import { TFunction } from "i18next";
 
 
 export interface LeaveStatus {
@@ -8,9 +8,7 @@ export interface LeaveStatus {
     message: string;
 }
 
-
-export const leaveCourse = async (courseId: string): Promise<LeaveStatus> => {
-    const { t } = useTranslation()
+export const leaveCourse = async (courseId: string, t: TFunction<"translation", undefined> | undefined): Promise<LeaveStatus> => {
     try {
         const response = await apiCall.delete(ApiRoutes.COURSE_LEAVE, undefined, { courseId: courseId });
 
@@ -18,11 +16,11 @@ export const leaveCourse = async (courseId: string): Promise<LeaveStatus> => {
         if (response.status === 200) {
             return {
                 success: true,
-                message: t("course.leaveSuccess")
+                message: t ? t("course.leaveSuccess") : "Left course successfully"
             };
         } else {
             // Extract error message from response data
-            const errorMessage = response.data?.message || t("course.leaveFail");
+            const errorMessage = response.data?.message || "Failed to leave the course"
             return {
                 success: false,
                 message: errorMessage
@@ -33,7 +31,7 @@ export const leaveCourse = async (courseId: string): Promise<LeaveStatus> => {
         console.error('Failed to leave the course:', error);
         return {
             success: false,
-            message: t("course.leaveFail")
+            message: t ? t("course.leaveFail") : "Failed to leave the course"
         };
     }
 };
