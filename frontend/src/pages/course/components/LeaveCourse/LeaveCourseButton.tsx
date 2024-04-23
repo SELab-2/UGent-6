@@ -18,7 +18,7 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
             message.success(result.message);
             setTimeout(() => {
                 window.location.href = '/';
-            }, 2000);
+            }, 100);
         } else {
             message.error(result.message);
             console.error(result);
