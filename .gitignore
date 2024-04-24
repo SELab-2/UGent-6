@@ -40,3 +40,6 @@ backend/data/*
 ### Secrets ###
 backend/app/src/main/resources/application-secrets.properties
 docker.env
+
+
+./startBackend.sh
