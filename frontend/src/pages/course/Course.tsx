@@ -23,7 +23,7 @@ const Course: FC = () => {
   const isCourseAdmin = useIsCourseAdmin()
   const navigate = useNavigate()
   const location = useLocation();
-  const leaveButton =  <LeaveCourseButton courseId={course.courseId.toString()} />
+
   const items: TabsProps["items"] = useMemo(() => {
     let tabs: TabsProps["items"] = [
       {
@@ -89,7 +89,7 @@ const Course: FC = () => {
           onChange={(k) => navigate(`#${k}`)}
           defaultActiveKey={location.hash.slice(1) || "1"}
           items={items}
-          tabBarExtraContent={leaveButton}
+          tabBarExtraContent={<LeaveCourseButton courseId={course.courseId.toString()} />}
         />
       </div>
     </div>
