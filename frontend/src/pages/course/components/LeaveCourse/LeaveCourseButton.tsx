@@ -7,6 +7,7 @@ import {AppRoutes} from "../../../../@types/routes";
 import useAppApi from "../../../../hooks/useAppApi";
 import {UsergroupDeleteOutlined} from "@ant-design/icons";
 import {CourseContext} from "../../../../router/CourseRoutes";
+import {UserContext} from "../../../../providers/UserProvider";
 
 interface LeaveCourseButtonProps {
     courseId: string;
@@ -19,11 +20,13 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
     const [confirmLeaveVisible, setConfirmLeaveVisible] = useState<boolean>(false);
     const { message } = useAppApi()
     const { member } = useContext(CourseContext)
+    const  userContext  = useContext(UserContext)
 
     const handleLeaveConfirm = async () => {
         const result = await leaveCourse(courseId, t); // Pass the translation function as a parameter
         if (result.success) {
             message.success(result.message);
+            await userContext.updateCourses()
             navigate(AppRoutes.HOME);
         } else {
             message.error(result.message);
