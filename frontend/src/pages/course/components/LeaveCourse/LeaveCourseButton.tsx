@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import {useNavigate} from "react-router-dom";
 import {AppRoutes} from "../../../../@types/routes";
 import useAppApi from "../../../../hooks/useAppApi";
+import {UsergroupDeleteOutlined} from "@ant-design/icons";
 
 interface LeaveCourseButtonProps {
     courseId: string;
@@ -38,7 +39,8 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
 
     return (
         <>
-            <Button style={{ float: "right", marginTop: "1rem", marginRight: "1rem" }} type="primary" onClick={showConfirmLeaveModal}>
+            <Button style={{ float: "right", marginTop: "1rem", marginRight: "1rem" }} type="text"
+                    onClick={showConfirmLeaveModal} icon={<UsergroupDeleteOutlined />}>
                 {t("course.leave")}
             </Button>
             <Modal
@@ -46,6 +48,7 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
                 open={confirmLeaveVisible}
                 onOk={handleLeaveConfirm}
                 onCancel={handleLeaveCancel}
+                okType="danger"
             >
                 <Text> {t("course.leaveConfirm")} </Text>
             </Modal>
