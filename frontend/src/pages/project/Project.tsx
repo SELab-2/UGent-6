@@ -124,15 +124,7 @@ const Project = () => {
         extra={
           courseAdmin ? (
             <>
-              <Link to="tests">
-                <Button
-                  type="primary"
-                  icon={<HeatMapOutlined />}
-                  style={{ marginLeft: "1rem" }}
-                >
-                  {t("project.tests.toTests")}
-                </Button>
-              </Link>
+  
               <Link to="edit">
                 <Button
                   type="primary"

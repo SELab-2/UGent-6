@@ -1,61 +1,64 @@
-import { Button, Card, CardProps, Checkbox, DatePicker, Form, FormInstance, Input, Switch } from "antd"
+import { Card, CardProps, FormInstance } from "antd"
 import { FC, PropsWithChildren, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
 import { TabsProps } from "antd/lib"
 import GeneralFormTab from "./projectFormTabs/GeneralFormTab"
 import GroupsFormTab from "./projectFormTabs/GroupsFormTab"
+import StructureFormTab from "./projectFormTabs/StructureFormTab"
+import DockerFormTab from "./projectFormTabs/DockerFormTab"
 
-
-const projectForms:Record<string, FC> = {
-  general: GeneralFormTab,
-  groups: GroupsFormTab,
-  structure: ()=> null,
-  tests: () =>null
+const VisibleTab: FC<PropsWithChildren<{ visible: boolean }>> = ({ visible, children }) => {
+  return <div style={{ display: visible ? "block" : "none" }}>{children}</div>
 }
 
-const ProjectForm: FC<PropsWithChildren<{cardProps?: CardProps}>> = ({ children,cardProps }) => {
+const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardProps; activeTab: string; onTabChange: (t: string) => void }>> = ({ children, cardProps, activeTab, onTabChange,form }) => {
   const { t } = useTranslation()
-  const [tab,setTab] = useState<string>("general")
 
-  const tabs:TabsProps["items"] = [
+  const tabs: TabsProps["items"] = [
     {
       key: "general",
       label: t("project.change.general"),
-      forceRender: true
     },
     {
       key: "groups",
       label: t("project.change.groups"),
-      forceRender: true
     },
     {
       key: "structure",
       label: t("project.change.structure"),
-      forceRender: true
     },
     {
       key: "tests",
       label: t("project.change.tests"),
-      forceRender: true
-    }
+      forceRender: true,
+    },
   ]
-  const ActiveForm = projectForms[tab];
 
+  // Note: we need to render all tabs, even if they are not visible. Otherwise the form cannot get its values
   return (
     <Card
-    {...cardProps}
+      {...cardProps}
       style={{ maxWidth: "700px", width: "100%", margin: "2rem 0" }}
       tabList={tabs}
       tabProps={{
-        size: 'middle',
-        
+        size: "middle",
+        activeKey: activeTab,
       }}
-      
-      onTabChange={setTab}
+      onTabChange={onTabChange}
     >
-        <ActiveForm />
-      
+      <VisibleTab visible={activeTab === "general"}>
+        <GeneralFormTab />
+      </VisibleTab>
+      <VisibleTab visible={activeTab === "groups"}>
+        <GroupsFormTab />
+      </VisibleTab>
+      <VisibleTab visible={activeTab === "structure"}>
+        <StructureFormTab form={form}/>
+      </VisibleTab>
+      <VisibleTab visible={activeTab === "tests"}>
+        <DockerFormTab form={form}/>
+      </VisibleTab>
+
       {children}
     </Card>
   )

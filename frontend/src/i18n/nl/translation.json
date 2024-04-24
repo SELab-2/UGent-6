@@ -95,7 +95,7 @@
     "submissionTime": "Indienings tijd",
     "noSubmissions": "Geen indieningen",
     "loadingSubmissions": "Indieningen laden...",
-    "options": "Opties",
+    "options": "Aanpassen",
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
     "change": {
@@ -116,7 +116,10 @@
       "general": "Algemeen",
       "groups": "Groepen",
       "structure": "Structuur",
-      "tests": "Testen"
+      "tests": "Testen",
+      "fileStructure": "Bestand structuur",
+      "fileStructurePreview": "Bestand structuur preview",
+      "update": "Project aanpassen"
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
@@ -211,6 +214,6 @@
   },
   "components": {
     "write": "Aanpassen",
-    "Preview": "Voorvertoning"
+    "preview": "Voorvertoning"
   }
 }

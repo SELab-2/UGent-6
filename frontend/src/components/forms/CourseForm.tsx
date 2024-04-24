@@ -29,6 +29,7 @@ const CourseForm:FC<{form:FormInstance} & PropsWithChildren> = ({form,children})
         <MarkdownEditor
           maxLength={2000}
           placeholder={t("home.courseDescription")}
+          
         />
       </Form.Item>
       {children}

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import GroupClusterDropdown from "../../../pages/projectCreate/components/GroupClusterDropdown"
 import { useParams } from "react-router-dom"
 import { FC } from "react"
+import MarkdownEditor from "../../input/MarkdownEditor"
 
 const GeneralFormTab:FC = () => {
   const { t } = useTranslation()
@@ -21,7 +22,7 @@ const GeneralFormTab:FC = () => {
         name="description"
         rules={[{ required: true, message: t("project.change.descriptionMessage") }]}
       >
-        <Input.TextArea />
+        <MarkdownEditor/>
       </Form.Item>
       
       <Form.Item

@@ -151,6 +151,7 @@ export type GET_Responses = {
     }
     deadline: Timestamp
     description: string
+    clusterId: number | null;
     projectId: number
     name: string
     submissionUrl: ApiRoutes.PROJECT_GROUP_SUBMISSIONS

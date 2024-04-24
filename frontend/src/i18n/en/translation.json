@@ -92,7 +92,7 @@
     "submissionTime": "Submission time",
     "noSubmissions": "No submissions",
     "loadingSubmissions": "Loading submissions...",
-    "options": "Options",
+    "options": "Update",
     "groupMembers": "Group members",
     "newProject": "New project",
     "change": {
@@ -113,7 +113,8 @@
       "general": "General",
       "groups": "Groups",
       "structure": "Structure",
-      "tests": "Tests"
+      "tests": "Tests",
+      "update": "Update project"
     },
     "tests": {
       "title": "Tests for {{projectName}}",
@@ -132,7 +133,9 @@
       "structureTemplateHeader": "Structure",
       "dockerImageHeader": "Docker image",
       "dockerScriptHeader": "Docker script",
-      "modeHeader": "Template"
+      "modeHeader": "Template",
+      "fileStructure": "File structure",
+      "fileStructurePreview": "File structure preview"
     },
     "noScore": "No score available",
     "noFeedback": "No feedback provided"
@@ -206,6 +209,6 @@
   "goBack": "Go back",
   "components": {
     "write": "Write",
-    "Preview": "Preview"
+    "preview": "Preview"
   }
 }

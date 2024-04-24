@@ -1,24 +1,24 @@
 import { Input, Tabs, TabsProps } from "antd"
 import { TextAreaProps } from "antd/lib/input"
-import { FC } from "react"
+import { FC, useState } from "react"
 import MarkdownTextfield from "./MarkdownTextfield"
 import { useTranslation } from "react-i18next"
 
-const MarkdownEditor: FC<{ value: string | null } & TextAreaProps> = ({ ...args }) => {
-  // TODO: Implement markdown editor
+const MarkdownEditor: FC<{ value?: string | null } & TextAreaProps> = ({ ...args }) => {
   const {t} = useTranslation()
+  const [value, setValue] = useState<string>("")
 
 
   const items: TabsProps["items"] = [
     {
       key: "write",
       label: t("components.write"),
-      children: <Input.TextArea  rows={4}  {...args} />,
+      children: <Input.TextArea onChange={(e) => setValue(e.target.value)}  rows={4}  {...args} />,
     },
     {
       key: "preview",
       label: t("components.preview"),
-      children: <MarkdownTextfield content={args.value} />,
+      children: <MarkdownTextfield content={args.value ?? value} />,
     },
   ]
 
