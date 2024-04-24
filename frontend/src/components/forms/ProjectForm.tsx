@@ -1,62 +1,63 @@
-import { Checkbox, DatePicker, Form, FormInstance, Input, Switch } from "antd"
-import { FC } from "react"
+import { Button, Card, CardProps, Checkbox, DatePicker, Form, FormInstance, Input, Switch } from "antd"
+import { FC, PropsWithChildren, useState } from "react"
 import { useTranslation } from "react-i18next"
-import GroupClusterDropdown from "../../pages/projectCreate/components/GroupClusterDropdown"
 import { useParams } from "react-router-dom"
+import { TabsProps } from "antd/lib"
+import GeneralFormTab from "./projectFormTabs/GeneralFormTab"
+import GroupsFormTab from "./projectFormTabs/GroupsFormTab"
 
-const ProjectForm: FC<{}> = () => {
+
+const projectForms:Record<string, FC> = {
+  general: GeneralFormTab,
+  groups: GroupsFormTab,
+  structure: ()=> null,
+  tests: () =>null
+}
+
+const ProjectForm: FC<PropsWithChildren<{cardProps?: CardProps}>> = ({ children,cardProps }) => {
   const { t } = useTranslation()
-  const { courseId } = useParams<{ courseId: string }>()
+  const [tab,setTab] = useState<string>("general")
+
+  const tabs:TabsProps["items"] = [
+    {
+      key: "general",
+      label: t("project.change.general"),
+      forceRender: true
+    },
+    {
+      key: "groups",
+      label: t("project.change.groups"),
+      forceRender: true
+    },
+    {
+      key: "structure",
+      label: t("project.change.structure"),
+      forceRender: true
+    },
+    {
+      key: "tests",
+      label: t("project.change.tests"),
+      forceRender: true
+    }
+  ]
+  const ActiveForm = projectForms[tab];
 
   return (
-    <>
-      <Form.Item
-        label={t("project.change.name")}
-        name="name"
-        rules={[{ required: true, message: t("project.change.nameMessage") }]}
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item
-        label={t("project.change.description")}
-        name="description"
-        rules={[{ required: true, message: t("project.change.descriptionMessage") }]}
-      >
-        <Input.TextArea />
-      </Form.Item>
-      <Form.Item
-        label={t("project.change.groupClusterId")}
-        name="groupClusterId"
-        tooltip={t("project.change.groupClusterIdTooltip")}
-      >
-        <GroupClusterDropdown allowClear courseId={courseId!} />
-      </Form.Item>
-      <Form.Item
-        label={t("project.change.visible")}
-        required
-        name="visible"
-        valuePropName="checked"
-      >
-        <Switch />
-      </Form.Item>
-      <Form.Item
-        label={t("project.change.maxScore")}
-        name="maxScore"
-        rules={[{ required: true, message: t("project.change.maxScoreMessage") }]}
-      >
-        <Input min={1} type="number" />
-      </Form.Item>
-      <Form.Item
-        label={t("project.change.deadline")}
-        name="deadline"
-        rules={[{ required: true }]}
-      >
-        <DatePicker
-          showTime
-          format="YYYY-MM-DD HH:mm:ss"
-        />
-      </Form.Item>
-    </>
+    <Card
+    {...cardProps}
+      style={{ maxWidth: "700px", width: "100%", margin: "2rem 0" }}
+      tabList={tabs}
+      tabProps={{
+        size: 'middle',
+        
+      }}
+      
+      onTabChange={setTab}
+    >
+        <ActiveForm />
+      
+      {children}
+    </Card>
   )
 }
 

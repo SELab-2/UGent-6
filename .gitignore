@@ -43,3 +43,4 @@ docker.env
 
 
 ./startBackend.sh
+startBackend.sh

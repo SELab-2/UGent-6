@@ -8,6 +8,7 @@ import ProjectCreateService from "./components/ProjectCreateService"
 import ProjectForm from "../../components/forms/ProjectForm"
 import { AppRoutes } from "../../@types/routes"
 import useAppApi from "../../hooks/useAppApi"
+import { PlusOutlined } from "@ant-design/icons"
 
 const ProjectCreate: React.FC = () => {
   const [form] = Form.useForm()
@@ -18,11 +19,13 @@ const ProjectCreate: React.FC = () => {
   const [error, setError] = useState<ProjectError | null>(null) // Gebruik ProjectError type voor error state
   const { message } = useAppApi()
 
-  const handleCreation = async (values: ProjectFormData) => {
-    console.log(values)
+  const handleCreation = async () => {
+    const values: ProjectFormData = form.getFieldsValue()
+    // console.log(values)
+    // return
     if (!courseId) return console.error("courseId is undefined")
     setLoading(true)
-    
+
     try {
       // Roep createProject aan en controleer op fouten
       const result = await ProjectCreateService.createProject(courseId, values)
@@ -52,39 +55,40 @@ const ProjectCreate: React.FC = () => {
       )}
       {/* Toon Error-pagina als er een fout is */}
 
-      <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-        <Card
-          title={t("project.change.title")}
-          style={{ maxWidth: "700px", width: "100%", margin: "2rem 0" }}
-        >
-          <Form
-            initialValues={{
-              name: "",
-              description: "",
-              groupClusterId: undefined,
-              visible: false, // Stel de standaardwaarde in op false
-              maxScore: 20,
-              deadline: null,
+      <Form
+        initialValues={{
+          name: "",
+          description: "",
+          groupClusterId: undefined,
+          visible: false, // Stel de standaardwaarde in op false
+          maxScore: 20,
+          deadline: null,
+        }}
+        form={form}
+        onFinish={handleCreation}
+        layout="vertical"
+        requiredMark="optional"
+      >
+        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          <ProjectForm
+            cardProps={{
+              title: t("project.change.title"),
+              extra: (
+                <Form.Item style={{ textAlign: "center", margin: 0 }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    icon={<PlusOutlined />}
+                    loading={loading}
+                  >
+                    {t("project.change.create")}
+                  </Button>
+                </Form.Item>
+              ),
             }}
-            form={form}
-            onFinish={handleCreation}
-            layout="vertical"
-            requiredMark="optional"
-          >
-            <ProjectForm />
-
-            <Form.Item style={{textAlign:"center"}}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-              >
-                {t("project.change.create")}
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
-      </div>
+          />
+        </div>
+      </Form>
     </>
   )
 }

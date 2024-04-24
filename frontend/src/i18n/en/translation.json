@@ -109,7 +109,11 @@
       "deadline": "Deadline",
       "create": "Create project",
       "success": "Project successfully created ",
-      "groupClusterIdTooltip": "Select no group to create an individual project. "
+      "groupClusterIdTooltip": "Select no group to create an individual project. ",
+      "general": "General",
+      "groups": "Groups",
+      "structure": "Structure",
+      "tests": "Tests"
     },
     "tests": {
       "title": "Tests for {{projectName}}",
