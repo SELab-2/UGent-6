@@ -266,14 +266,19 @@ public class CourseController {
                 }
             }
 
+            List<GroupClusterEntity> clusters = groupClusterRepository.findByCourseId(courseId);
+            Optional<GroupClusterEntity> individualCluster = groupClusterRepository.findIndividualClusterByCourseId(courseId);
+            individualCluster.ifPresent(clusters::add);
+
             // Delete all groupclusters linked to the course
-            for (GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)) {
+            for (GroupClusterEntity groupCluster : clusters) {
                 // We don't delete groupfeedback as these have been deleted with the projects
                 CheckResult<Void> deleteResult = commonDatabaseActions.deleteClusterById(groupCluster.getId());
                 if (deleteResult.getStatus() != HttpStatus.OK) {
                     return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
                 }
             }
+
 
             // Delete all courseusers linked to the course
             courseUserRepository.deleteAll(courseUserRepository.findAllUsersByCourseId(courseId));
