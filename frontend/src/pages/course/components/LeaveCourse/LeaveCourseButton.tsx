@@ -1,9 +1,10 @@
 import React, { FC, useState } from "react";
-import { Button, message, Modal, Typography } from "antd";
+import { Button, Modal, Typography } from "antd";
 import { leaveCourse } from "./CourseMembershipService";
 import { useTranslation } from "react-i18next";
 import {useNavigate} from "react-router-dom";
 import {AppRoutes} from "../../../../@types/routes";
+import useAppApi from "../../../../hooks/useAppApi";
 
 interface LeaveCourseButtonProps {
     courseId: string;
@@ -14,6 +15,7 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
     const { Text } = Typography;
     const { t } = useTranslation();
     const [confirmLeaveVisible, setConfirmLeaveVisible] = useState<boolean>(false);
+    const { message } = useAppApi()
 
     const handleLeaveConfirm = async () => {
         const result = await leaveCourse(courseId, t); // Pass the translation function as a parameter
