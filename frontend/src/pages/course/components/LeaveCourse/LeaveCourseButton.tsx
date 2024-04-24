@@ -39,7 +39,7 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
 
     return (
         <>
-            <Button style={{ float: "right", marginTop: "1rem", marginRight: "1rem" }} type="text"
+            <Button type="text"
                     onClick={showConfirmLeaveModal} icon={<UsergroupDeleteOutlined />}>
                 {t("course.leave")}
             </Button>

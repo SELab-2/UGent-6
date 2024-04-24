@@ -13,7 +13,7 @@ import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
 import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
-import LeaveCourseButton from "./components/LeaveCourse/LeaveCourseButton";
+import LeaveCourseButton from "./components/LeaveCourse/LeaveCourseButton"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -23,6 +23,7 @@ const Course: FC = () => {
   const isCourseAdmin = useIsCourseAdmin()
   const navigate = useNavigate()
   const location = useLocation();
+  const leaveButton =  <LeaveCourseButton courseId={course.courseId.toString()} />
   const items: TabsProps["items"] = useMemo(() => {
     let tabs: TabsProps["items"] = [
       {
@@ -88,8 +89,8 @@ const Course: FC = () => {
           onChange={(k) => navigate(`#${k}`)}
           defaultActiveKey={location.hash.slice(1) || "1"}
           items={items}
+          tabBarExtraContent={leaveButton}
         />
-        <LeaveCourseButton courseId={course.courseId.toString()} />
       </div>
     </div>
   )
