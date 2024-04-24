@@ -10,16 +10,18 @@ export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
 const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ courseId, cardProps }) => {
   const [groups, setGroups] = useState<ClusterType[] | null>(null)
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   useEffect(() => {
     // TODO: do the fetch (get all clusters from the course )
-    if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
+      fetchGroups().catch(console.error)
 
-    apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId }).then((res) => {
-      console.log(res.data)
-      setGroups(res.data)
-    })
   }, [courseId])
+
+  const fetchGroups = async () => {
+    if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
+      const res = await apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId })
+      setGroups(res.data)
+    }
 
   // if(!groups) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
   //   <Spin tip="Loading"></Spin>
@@ -30,18 +32,27 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     label: cluster.name,
     children: (
       <GroupList
+        onChanged={fetchGroups}
         groups={cluster.groups}
       />
     ),
   }))
 
-  if(Array.isArray(items) && !items.length) return <div style={{textAlign:"center"}}>
-     <Typography.Text type="secondary">{t("course.noGroups")}</Typography.Text>
-  </div>
+  if (Array.isArray(items) && !items.length)
+    return (
+      <div style={{ textAlign: "center" }}>
+        <Typography.Text type="secondary">{t("course.noGroups")}</Typography.Text>
+      </div>
+    )
 
-  if(!items) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
-    <Spin tip="Loading"/>
-  </div>
+  if (!items)
+    return (
+      <div style={{ width: "100%", height: "400px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Spin tip="Loading">
+          <span></span>
+        </Spin>
+      </div>
+    )
   return (
     <Card
       {...cardProps}
@@ -51,7 +62,7 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
         },
       }}
     >
-       <Collapse items={items} />
+      <Collapse items={items} />
     </Card>
   )
 }

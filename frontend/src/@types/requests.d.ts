@@ -12,6 +12,7 @@ export enum ApiRoutes {
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
+  COURSE_LEAVE = "api/courses/:courseId/leave",
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -38,7 +39,7 @@ export enum ApiRoutes {
   TEST = "api/test",
   USER = "api/users/:id",
   USERS = "api/users",
-  USER_AUTH = "api/auth",
+  USER_AUTH = "api/user",
 }
 
 export type Timestamp = string
@@ -53,6 +54,10 @@ export type POST_Requests = {
   }
   [ApiRoutes.PROJECT_CREATE]:
       ProjectFormData
+
+    [ApiRoutes.GROUP_MEMBERS]: {
+      id: number
+    }
 }
 
 /**
@@ -71,6 +76,8 @@ export type POST_Responses = {
 export type DELETE_Requests = {
   [ApiRoutes.COURSE]: undefined
   [ApiRoutes.PROJECT]: undefined
+  [ApiRoutes.GROUP_MEMBER]: undefined
+  [ApiRoutes.COURSE_LEAVE]: undefined
 }
 
 
@@ -176,7 +183,7 @@ export type GET_Responses = {
   [ApiRoutes.GROUP_MEMBER]: {
     email: string
     name: string
-    id: number
+    userId: number
   }
   [ApiRoutes.USERS]: {
     name: string

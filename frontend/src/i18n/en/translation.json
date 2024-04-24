@@ -52,6 +52,7 @@
     "student": "Student",
     "teacher": "Teacher",
     "admin": "Admin",
+    "course_admin": "Assistant",
     "confirmation": "Confirmation",
     "confirmationText": "Are you sure you want to change the role of {{name}} to {{role}}?"
   },
@@ -171,7 +172,14 @@
     "courseDeleted": "Course successfully deleted",
     "createCourse": "Create course",
     "noFeedback": "You have no grades yet",
-    "noMembersFound": "No members found"
+    "noMembersFound": "No members found",
+    "noGroupMembers": "No members in this group",
+    "leftGroup": "You have left the group",
+    "joinedGroup": "You have joined the group",
+    "leave": "Leave Course",
+    "leaveConfirm": "Are you sure you want to leave this course?",
+    "leaveSuccess": "Left course successfully",
+    "leaveFail": "Failed to leave the course"
   },
   "cancel": "Cancel",
   "ok": "OK",
