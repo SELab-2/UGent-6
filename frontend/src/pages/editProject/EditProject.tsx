@@ -79,7 +79,7 @@ const EditProject: React.FC = () => {
             onTabChange={setActiveTab}
             form={form}
             cardProps={{
-              title: t("project.change.title"),
+              title: t("project.change.updateTitle", { name: project.name }),
               extra: (
                 <Form.Item style={{ textAlign: "center", margin: 0 }}>
                   <Button

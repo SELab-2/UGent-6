@@ -97,6 +97,7 @@
     "newProject": "New project",
     "change": {
       "title": "Create project",
+      "updateTitle": "Update {{name}}",
       "name": "Name",
       "nameMessage": "Please enter Project Name",
       "description": "Description",
