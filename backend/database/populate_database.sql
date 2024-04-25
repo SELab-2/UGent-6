@@ -10,12 +10,12 @@ INSERT INTO users (name, surname, email, azure_id, role) VALUES
                                                              ('Charlie', 'Davis', 'charlie.davis@example.com', 'token_5', 'teacher');
 
 -- Inserting into `courses`
-INSERT INTO courses (course_id,course_name, description) VALUES
-                                                             (1,'Math 101', 'Introduction to Mathematics'),
-                                                             (2,'Science 101', 'Basics of Scientific Method'),
-                                                             (3,'History 101', 'World History Overview'),
-                                                             (4,'Computer Science 101', 'Introduction to Computing'),
-                                                             (5,'English 101', 'English Literature');
+INSERT INTO courses (course_id,course_name, description, coures_year) VALUES
+                                                             (1,'Math 101', 'Introduction to Mathematics',2023),
+                                                             (2,'Science 101', 'Basics of Scientific Method',2023),
+                                                             (3,'History 101', 'World History Overview',2023),
+                                                             (4,'Computer Science 101', 'Introduction to Computing',2023),
+                                                             (5,'English 101', 'English Literature',2023);
 
 -- Inserting into `course_users`
 -- Assume course_id and user_id start from 1 and match accordingly

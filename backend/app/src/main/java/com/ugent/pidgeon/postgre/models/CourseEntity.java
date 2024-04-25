@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.time.OffsetDateTime;
 
@@ -17,6 +18,10 @@ public class CourseEntity {
     private String name;
     @Column(name = "description", nullable=false)
     private String description;
+
+    @Column(name = "course_year", nullable = true)
+    private int courseYear;
+
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
@@ -71,6 +76,7 @@ public class CourseEntity {
     }
 
 
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
@@ -86,4 +92,14 @@ public class CourseEntity {
     public void setArchivedAt(OffsetDateTime archivedAt) {
         this.archivedAt = archivedAt;
     }
+
+    public int getCourseYear() {
+        return courseYear;
+    }
+    public void setCourseYear(int courseYear){
+        this.courseYear = courseYear;
+    }
+
+
+
 }

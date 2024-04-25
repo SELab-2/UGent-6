@@ -141,7 +141,7 @@ public class CourseUtilTest {
 
   @Test
   public void testCheckCourseJson() throws Exception {
-    CourseJson courseJson = new CourseJson("name", "description", null);
+    CourseJson courseJson = new CourseJson("name", "description", null,2023);
     CheckResult<Void> result = courseUtil.checkCourseJson(courseJson, user, null);
     assertEquals(HttpStatus.OK, result.getStatus());
 
