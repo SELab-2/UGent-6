@@ -140,9 +140,9 @@ class AuthProvider {
 
                 const tokenResponse = await msalInstance.acquireTokenByCode(authCodeRequest, req.body);
 
-                // req.session.tokenCache = msalInstance.getTokenCache().serialize();
+                req.session.tokenCache = msalInstance.getTokenCache().serialize();
                 req.session.idToken = tokenResponse.idToken;
-                // req.session.account = tokenResponse.account;
+                req.session.account = tokenResponse.account;
                 req.session.isAuthenticated = true;
                 
                 const state = JSON.parse(this.cryptoProvider.base64Decode(req.body.state));
@@ -167,8 +167,9 @@ class AuthProvider {
                 logoutUri += `logout?post_logout_redirect_uri=${options.postLogoutRedirectUri}`;
             }
 
-            req.session = null;
-            res.redirect(logoutUri)
+            req.session.destroy(() => {
+                res.redirect(logoutUri);
+            });
         }
     }
 

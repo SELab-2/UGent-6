@@ -2,13 +2,11 @@ require('dotenv').config();
 
 const path = require('path');
 const express = require('express');
-const session = require('cookie-session');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const createError = require('http-errors');
-const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const helmet = require('helmet');
-const hpp = require('hpp');
-const csurf = require('csurf');
+
 const rateLimit = require('express-rate-limit')
 
 const indexRouter = require('./routes/index');
@@ -18,18 +16,28 @@ const authRouter = require('./routes/auth');
 /* initialize express */
 const app = express();
 
-/* Set security configs */
-app.use(helmet());
-app.use(hpp());
-
 
 /**
  * Using cookie-session middleware for persistent user session.
  */
+
+connection_string = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=admin`
+
+console.log(connection_string)
+
 app.use(session({
-    name: 'session',
+    name: 'pigeon session',
     secret: process.env.EXPRESS_SESSION_SECRET,
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    resave: false,
+    saveUninitialized: false,
+    // expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    cookie: {
+        httpOnly: true,
+        secure: false, // make sure this is true in production
+        maxAge: 7*24*60*60*1000,
+    },
+    store: MongoStore.create(
+        {mongoUrl: connection_string})
 }));
 
 
@@ -47,7 +55,6 @@ app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -3,12 +3,12 @@
  * Licensed under the MIT License.
  */
 
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var fetch = require('../fetch');
+const fetch = require('../fetch');
 
-var { BACKEND_API_ENDPOINT } = require('../authConfig');
+const { BACKEND_API_ENDPOINT } = require('../authConfig');
 
 // custom middleware to check auth state
 function isAuthenticated(req, res, next) {
