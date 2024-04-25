@@ -39,9 +39,10 @@ public class CourseEntity {
     @Column(name = "join_key", nullable=true)
     private String joinKey;
 
-    public CourseEntity(String name, String description) {
+    public CourseEntity(String name, String description,Integer courseYear) {
         this.name = name;
         this.description = description;
+        this.courseYear = courseYear;
     }
 
     public CourseEntity() {

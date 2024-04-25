@@ -260,8 +260,8 @@ public class CourseUtil {
         }
 
 
-        if (courseJson.getName() == null || courseJson.getDescription() == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "name and description are required", null);
+        if (courseJson.getName() == null || courseJson.getDescription() == null || courseJson.getCourseYear() == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "name, description and year are required", null);
         }
 
         if (courseJson.getName().isBlank()) {
