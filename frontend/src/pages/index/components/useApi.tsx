@@ -31,6 +31,43 @@ type HandleErrorReturn<T> =
       errorMessage?: string
     }
 
+
+/**
+ * 
+ * @returns the useApi hook
+ * 
+ * @example
+ * const {GET} = useApi()
+ * 
+ * // With the message feedback api
+ * const result = await GET(ApiRoutes.COURSES, {pathValues: {courseId: 1}}, {mode: "message", errorMessage: "could not fetch course"})
+ * if(result.success) setCourse(result.response.data)
+ * 
+ * @example
+ * // With the alert feedback api
+ * const result = await GET(ApiRoutes.COURSES, {pathValues: {courseId: 1}}, {mode: "alert", errorMessage: "could not fetch course"})
+ * if(!result.success) setError(result.alert)
+ * // ...
+ * 
+ * return (<>{error}</>)  // show the error as an Ant design Alert component
+ * 
+ * @example
+ * // With the page feedback 
+ * const result = await GET(ApiRoutes.COURSES, {pathValues: {courseId: 1}}, 'page') 
+ * if(result.success) setCourses(result.response.data)
+ * 
+ * @example
+ * // With no feedback
+ * const result = await GET(ApiRoutes.COURSES, {pathValues: {courseId: 1}})
+ * if(result.success) setCourses(result.response.data)
+ * else console.error(result.errorMessage)
+ * 
+ * @example 
+ * // You can use other methods as well
+ * const {POST, DELETE, PUT, PATCH} = useApi()
+ * 
+ * await POST(ApiRoutes.COURSES, {body: {name: "New Course"}, pathValues: {courseId: 1}},'alert')
+ */
 const useApi = () => {
   const { message } = useAppApi()
   const { t } = useTranslation()
@@ -38,7 +75,6 @@ const useApi = () => {
 
   /**
    *
-   * @param apiCall the api call
    * @param mode the modes of user feedback
    *  - 'message': uses the useAppApi message to show a message of whether is a success or an error
    *  - 'alert': returns a react component with an alert component that can be displayed in the UI
