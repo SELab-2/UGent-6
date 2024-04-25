@@ -1,11 +1,16 @@
 package com.ugent.pidgeon.model.json;
 
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import java.time.OffsetDateTime;
 
 public class CourseWithRelationJson {
     private Long courseId;
     private String url;
     private String name;
+    private OffsetDateTime archivedAt;
+    private CourseRelation relation;
+    private Integer memberCount;
+
 
 
     public String getUrl() {
@@ -16,17 +21,17 @@ public class CourseWithRelationJson {
         this.url = url;
     }
 
-    public CourseWithRelationJson() {
-    }
 
-    public CourseWithRelationJson(String url, CourseRelation relation, String name, Long courseId) {
+    public CourseWithRelationJson(String url, CourseRelation relation, String name, Long courseId,
+        OffsetDateTime archivedAt, Integer memberCount) {
         this.url = url;
         this.relation = relation;
         this.name = name;
         this.courseId = courseId;
+        this.archivedAt = archivedAt;
+        this.memberCount = memberCount;
     }
 
-    private CourseRelation relation;
 
     public CourseRelation getRelation() {
         return relation;
@@ -50,5 +55,21 @@ public class CourseWithRelationJson {
 
     public void setCourseId(Long id) {
         this.courseId = id;
+    }
+
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
+    public void setArchivedAt(OffsetDateTime archivedAt) {
+        this.archivedAt = archivedAt;
+    }
+
+    public Integer getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(Integer memberCount) {
+        this.memberCount = memberCount;
     }
 }

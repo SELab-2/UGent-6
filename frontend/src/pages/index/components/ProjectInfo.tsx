@@ -1,9 +1,10 @@
 import { FC, useMemo } from "react"
 import { ProjectType } from "./ProjectTable"
-import { Descriptions, DescriptionsProps } from "antd"
+import { Descriptions, DescriptionsProps, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import ProjectStatusTag from "./ProjectStatusTag"
 import GroupProgress from "./GroupProgress"
+import MarkdownTextfield from "../../../components/input/MarkdownTextfield"
 
 
 
@@ -30,22 +31,26 @@ const ProjectInfo:FC<{project:ProjectType}> = ({project}) => {
     },
     {
       label: t("home.projects.description"),
-      children: project.description,
+      children: <div style={{maxWidth:"600px"}} ><MarkdownTextfield  content={project.description}/></div>,
       span: 24
     },
     {
       label: t("home.projects.projectStatus"),
-      children: <ProjectStatusTag status={Math.random() > 0.5? "completed": "notStarted"} />,
+      children: project.status && <ProjectStatusTag status={project.status} />,
       span: 24
     },
     {
       label: t("home.projects.groupProgress"),
-      children: <GroupProgress usersCompleted={Math.floor(Math.random() * 121)} userCount={121} />,
+      children: <GroupProgress usersCompleted={project.progress.completed} userCount={project.progress.total} />,
       span: 24
     }
   ],[project, t])
 
-  return <Descriptions column={24} bordered items={items} />
+  return <div>
+
+
+<Descriptions column={24}  items={items} />
+  </div>
 }
 
 export default ProjectInfo

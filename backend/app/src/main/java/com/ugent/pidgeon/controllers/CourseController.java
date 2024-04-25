@@ -1,353 +1,675 @@
 package com.ugent.pidgeon.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.CourseMemberRequestJson;
-import com.ugent.pidgeon.model.json.PublicUserDTO;
-import com.ugent.pidgeon.model.json.UserIdJson;
-import com.ugent.pidgeon.model.json.CourseJson;
+import com.ugent.pidgeon.model.ProjectResponseJson;
+import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @RestController
 public class CourseController {
 
     @Autowired
     private CourseRepository courseRepository;
-
-    @Autowired 
-    private ProjectController projectController;
-
     @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
-
-    private TestRepository testRepository;
-
     @Autowired
     private CourseUserRepository courseUserRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private GroupClusterRepository groupClusterRepository;
 
     @Autowired
-    private ClusterController groupClusterController;
-    
+    private UserUtil userUtil;
+    @Autowired
+    private CourseUtil courseUtil;
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
 
 
-  @GetMapping(ApiRoutes.COURSE_BASE_PATH)
+    /**
+     * Function to retrieve all courses of a user
+     *
+     * @param auth authentication object of the requesting user
+     * @return ResponseEntity with a JSON string containing the courses of the user
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6091747">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses
+     */
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<String> getUserCourses(Auth auth){
+    public ResponseEntity<?> getUserCourses(Auth auth, @RequestParam(value="archived", required = false) Boolean archived) {
         long userID = auth.getUserEntity().getId();
         try {
-            List<UserRepository.CourseIdWithRelation> userCourses = userRepository.findCourseIdsByUserId(userID);
-
+            Logger.getGlobal().info("Archived: " + archived);
+            List<UserRepository.CourseIdWithRelation> userCourses = new ArrayList<>();
+            if (archived == null || !archived) {
+                userCourses.addAll(userRepository.findCourseIdsByUserId(userID));
+            }
+            if (archived == null || archived) {
+                userCourses.addAll(userRepository.findArchivedCoursesByUserId(userID));
+            }
             // Retrieve course entities based on user courses
-            List<CourseJSONObject> courseJSONObjects = userCourses.stream()
-                    .map(courseWithRelation -> courseRepository.findById(courseWithRelation.getCourseId())
-                            .orElse(null))
+            List<CourseWithRelationJson> courseJSONObjects = userCourses.stream()
+                    .map(courseWithRelation -> {
+                                CourseEntity course = courseRepository.findById(courseWithRelation.getCourseId()).orElse(null);
+                                if (course == null) {
+                                    return null;
+                                }
+                                return entityToJsonConverter.courseEntityToCourseWithRelation(course, courseWithRelation.getRelation());
+                            }
+                    )
                     .filter(Objects::nonNull)
-                    .map(entity -> new CourseJSONObject(entity.getId(), entity.getName(), ApiRoutes.COURSE_BASE_PATH + "/" + entity.getId()))
                     .toList();
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonResponse = objectMapper.writeValueAsString(courseJSONObjects);
-
-
             // Return the JSON string in ResponseEntity
-            return ResponseEntity.ok(jsonResponse);
+            return ResponseEntity.ok(courseJSONObjects);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve courses");
         }
     }
 
-    // Hulpobject voor de getmapping mooi in JSON te kunnen zetten.
-    private record CourseJSONObject(long id, String name, String url){}
-
+    /**
+     * Function to create a new course
+     *
+     * @param courseJson JSON object containing the course name and description
+     * @param auth       authentication object of the requesting user
+     * @return ResponseEntity with the created course entity
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723791">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher
+     * @ApiPath /api/courses
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher})
-    public ResponseEntity<CourseEntity> createCourse(@RequestBody CourseJson courseJson, Auth auth){
+    public ResponseEntity<?> createCourse(@RequestBody CourseJson courseJson, Auth auth) {
         try {
             UserEntity user = auth.getUserEntity();
             long userId = user.getId();
 
-            // nieuw vak aanmaken
+            CheckResult<Void> courseJsonCheck = courseUtil.checkCourseJson(courseJson, user, null);
+            if (courseJsonCheck.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(courseJsonCheck.getStatus()).body(courseJsonCheck.getMessage());
+            }
+
+            // Create new course
             CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription());
             // Get current time and convert to SQL Timestamp
-            Timestamp currentTimestamp = Timestamp.valueOf(LocalDateTime.now());
+            OffsetDateTime currentTimestamp = OffsetDateTime.now();
             courseEntity.setCreatedAt(currentTimestamp);
-            // vak opslaan
+            // Save course
             courseRepository.save(courseEntity);
 
-            // leerkracht course relation opslaan
+            // Add user as course creator
             CourseUserEntity courseUserEntity = new CourseUserEntity(courseEntity.getId(), userId, CourseRelation.creator);
             courseUserRepository.save(courseUserEntity);
 
-            return ResponseEntity.ok(courseEntity);
-        } catch (Exception e){
+            // Create new cluster with size 1 for projects without groups
+            GroupClusterEntity groupClusterEntity = new GroupClusterEntity(courseEntity.getId(), 1, "Students", 0);
+            groupClusterEntity.setCreatedAt(currentTimestamp);
+            groupClusterRepository.save(groupClusterEntity);
+
+            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId()), false));
+        } catch (Exception e) {
             Logger.getLogger("CourseController").severe("Error while creating course: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
+
+    private ResponseEntity<?> doCourseUpdate(CourseEntity courseEntity, CourseJson courseJson, UserEntity user) {
+        CheckResult<Void> courseJsonCheck = courseUtil.checkCourseJson(courseJson, user, courseEntity.getId());
+        if (courseJsonCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(courseJsonCheck.getStatus()).body(courseJsonCheck.getMessage());
+        }
+        courseEntity.setName(courseJson.getName());
+        courseEntity.setDescription(courseJson.getDescription());
+        if (courseJson.getArchived() != null) {
+            courseEntity.setArchivedAt(courseJson.getArchived() ? OffsetDateTime.now() : null);
+        }
+        courseRepository.save(courseEntity);
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId()), false));
+    }
+
+    /**
+     * Function to update a course
+     *
+     * @param courseJson JSON object containing the course name and description
+     * @param courseId   ID of the course to update
+     * @param auth       authentication object of the requesting user
+     * @return ResponseEntity with the updated course entity
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723806">apiDog documentation</a>
+     * @HttpMethod PUT
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}
+     */
     @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth){
+    public ResponseEntity<?> updateCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth) {
         try {
             UserEntity user = auth.getUserEntity();
-            long userId = user.getId();
 
-            // het vak selecteren
-            CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
-            if (courseEntity == null) {
-                return ResponseEntity.notFound().build();
+            CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, user);
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
+            CourseEntity course = checkResult.getData();
 
-            // check of de user admin of lesgever is van het vak
-            Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, userId));
-            if (courseUserEntityOptional.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
-            }
-            CourseUserEntity courseUserEntity = courseUserEntityOptional.get();
-            if(courseUserEntity.getRelation() == CourseRelation.enrolled){
-               return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to update the course");
-            }
-
-            //update velden
-            courseEntity.setName(courseJson.getName());
-            courseEntity.setDescription(courseJson.getDescription());
-            courseRepository.save(courseEntity);
-
-            // Response verzenden
-            return ResponseEntity.ok(courseEntity);
-        } catch (Exception e){
+            return doCourseUpdate(course, courseJson, user);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
+    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth) {
+        try {
+            UserEntity user = auth.getUserEntity();
+
+            CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, user);
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+            }
+
+            if (courseJson.getName() == null && courseJson.getDescription() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name or description is required");
+            }
+
+            CourseEntity courseEntity = checkResult.getData();
+            if (courseJson.getName() == null) {
+                courseJson.setName(courseEntity.getName());
+            }
+            if (courseJson.getDescription() == null) {
+                courseJson.setDescription(courseEntity.getDescription());
+            }
+
+            return doCourseUpdate(courseEntity, courseJson, user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Function to retrieve a course by its ID
+     *
+     * @param courseId ID of the course to retrieve
+     * @param auth     authentication object of the requesting user
+     * @return ResponseEntity with the course entity
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723783">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<CourseEntity> getCourseByCourseId(@PathVariable Long courseId) {
-        Optional<CourseEntity> courseopt = courseRepository.findById(courseId);
-        if (courseopt.isEmpty()) {
-            return ResponseEntity.notFound().build(); // Or return an empty list, based on your preference
+    public ResponseEntity<?> getCourseByCourseId(@PathVariable long courseId, Auth auth) {
+        CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        CourseEntity course = courseopt.get();
-        return ResponseEntity.ok(course);
+        CourseEntity course = checkResult.getData().getFirst();
+        CourseRelation relation = checkResult.getData().getSecond();
+
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId()), relation.equals(CourseRelation.enrolled)));
     }
 
+
+
+    /**
+     * Function to delete a course by its ID
+     *
+     * @param courseId ID of the course to delete
+     * @param auth     authentication object of the requesting user
+     * @return ResponseEntity with a message indicating the result of the deletion
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723808">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}
+     */
     @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<String> deleteCourse(@PathVariable long courseId, Auth auth){
+    @Transactional
+    public ResponseEntity<?> deleteCourse(@PathVariable long courseId, Auth auth) {
         try {
-            // De user vinden
-            UserEntity user = auth.getUserEntity();
-            long userId = user.getId();
-
-            // het vak selecteren
-            CourseEntity courseEntity = courseRepository.findById(courseId).orElse(null);
-            if (courseEntity == null) {
-                return ResponseEntity.notFound().build();
+            CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+            }
+            if (!checkResult.getData().getSecond().equals(CourseRelation.creator)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the creator of a course can delete it");
             }
 
-            // check of de user admin of lesgever is van het vak
-            CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).orElse(null);
-            if (courseUserEntity == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not part of the course");
-            }
-            if(courseUserEntity.getRelation() != CourseRelation.creator){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not allowed to delete the course");
-            }
-
-            //voor elk project
-            for(ProjectEntity project : courseRepository.findAllProjectsByCourseId(courseId)){
-                projectController.deleteProjectById(project.getId(), auth);
+            // Delete all projects linked to the course
+            for (ProjectEntity project : courseRepository.findAllProjectsByCourseId(courseId)) {
+                CheckResult<Void> deleteResult = commonDatabaseActions.deleteProject(project.getId());
+                if (deleteResult.getStatus() != HttpStatus.OK) {
+                    return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
+                }
             }
 
-            //voor elke groepcluster
-            for(GroupClusterEntity groupCluster : groupClusterRepository.findByCourseId(courseId)){
-                // We verwijderen de groepfeedback niet omdat die al verwijderd werd wanneer het project verwijderd werd
-                groupClusterController.deleteCluster(groupCluster.getId(), auth);
+            List<GroupClusterEntity> clusters = groupClusterRepository.findByCourseId(courseId);
+            Optional<GroupClusterEntity> individualCluster = groupClusterRepository.findIndividualClusterByCourseId(courseId);
+            individualCluster.ifPresent(clusters::add);
+
+            // Delete all groupclusters linked to the course
+            for (GroupClusterEntity groupCluster : clusters) {
+                // We don't delete groupfeedback as these have been deleted with the projects
+                CheckResult<Void> deleteResult = commonDatabaseActions.deleteClusterById(groupCluster.getId());
+                if (deleteResult.getStatus() != HttpStatus.OK) {
+                    return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
+                }
             }
 
-            // Alle CourseUsers verwijderen
+
+            // Delete all courseusers linked to the course
             courseUserRepository.deleteAll(courseUserRepository.findAllUsersByCourseId(courseId));
 
-            //vak verwijderen
-            courseRepository.delete(courseEntity);
-            return ResponseEntity.ok("Vak verwijderd");
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Probleem bij vak verwijderen: " + e.getMessage());
+            // Delete the course
+            courseRepository.deleteById(courseId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error while deleting course");
         }
     }
 
+    /**
+     * Function to retrieve all projects of a course
+     *
+     * @param courseId ID of the course to retrieve the projects from
+     * @param auth     authentication object of the requesting user
+     * @return ResponseEntity with a JSON string containing the projects of the course
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723840">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/projects
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/projects")
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<List<ProjectEntity>> getProjectByCourseId(Auth auth, @PathVariable Long courseId) {
+    public ResponseEntity<?> getProjectsByCourseId(@PathVariable Long courseId, Auth auth) {
+        UserEntity user = auth.getUserEntity();
+
+        CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        CourseEntity course = checkResult.getData().getFirst();
+        CourseRelation relation = checkResult.getData().getSecond();
+
         List<ProjectEntity> projects = projectRepository.findByCourseId(courseId);
-        if (projects.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        if (relation.equals(CourseRelation.enrolled)) {
+            projects = projects.stream().filter(ProjectEntity::isVisible).toList();
         }
-        return ResponseEntity.ok(projects);
+        List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
+                entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, course, user)
+        ).toList();
+
+
+        return ResponseEntity.ok(projectResponseJsons);
     }
 
-    Boolean hasCourseRights(long courseId, UserEntity user){
-        if(user.getRole() == UserRole.admin){
-            return true;
-        }else{
-            return courseUserRepository.isCourseAdmin(courseId, user.getId());
+    private ResponseEntity<?> getJoinLinkPostResponseEntity(long courseId, String courseKey, UserEntity user) {
+        CheckResult<CourseEntity> checkResult = courseUtil.checkJoinLink(courseId, courseKey, user);
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+        CourseEntity course = checkResult.getData();
+        if (course.getArchivedAt() != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course is archived");
+        }
+        if (!commonDatabaseActions.createNewIndividualClusterGroup(courseId, user)) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
+        }
+        courseUserRepository.save(new CourseUserEntity(courseId, user.getId(), CourseRelation.enrolled));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(),"" + course.getId()), false));
     }
 
+    private ResponseEntity<?> getJoinLinkGetResponseEntity(long courseId, String courseKey, UserEntity user) {
+        CheckResult<CourseEntity> checkResult = courseUtil.checkJoinLink(courseId, courseKey, user);
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        CourseEntity course = checkResult.getData();
+        if (course.getArchivedAt() != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course is archived");
+        }
+        CourseJoinInformationJson courseJson = new CourseJoinInformationJson(course.getName(), course.getDescription());
+        return ResponseEntity.ok(courseJson);
+    }
+
+    /**
+     * Function to join course with key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to join
+     * @param courseKey key of the course to join
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698810">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join/{courseKey}
+     */
+    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
+    @Roles({UserRole.student, UserRole.teacher})
+    public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId, @PathVariable String courseKey) {
+        return getJoinLinkPostResponseEntity(courseId, courseKey, auth.getUserEntity());
+    }
+
+    /**
+     * Function to get course information for joining course with key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the join key from
+     * @param courseKey key of the course to get the join key from
+     * @return ResponseEntity with a statuscode and a JSON object containing the course information
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698818">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join/{courseKey}
+     */
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join/{courseKey}")
+    @Roles({UserRole.student, UserRole.teacher})
+    public ResponseEntity<?> getCourseJoinKey(Auth auth, @PathVariable Long courseId, @PathVariable String courseKey) {
+        return getJoinLinkGetResponseEntity(courseId, courseKey, auth.getUserEntity());
+    }
+
+    /**
+     * Function to join course without key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to join
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698821">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> joinCourse(Auth auth, @PathVariable Long courseId) {
-        if(courseRepository.existsById(courseId)){
-            if(courseUserRepository.isCourseMember(courseId, auth.getUserEntity().getId())){
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
-            }
-            courseUserRepository.save(new CourseUserEntity(courseId, auth.getUserEntity().getId(), CourseRelation.enrolled));
-            return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
-        }else{
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No course with given id");
-        }
+        return getJoinLinkPostResponseEntity(courseId, null, auth.getUserEntity());
     }
 
-    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
-    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody UserIdJson userId) {
-        if (!courseRepository.existsById(courseId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
-        }
-        CourseRelation coursePermissions = courseUserRepository.getCourseRelation(courseId, auth.getUserEntity().getId());
-        if(hasCourseRights(courseId, auth.getUserEntity())){
-            Optional<CourseUserEntity> courseUserEntityOptional = courseUserRepository.findById(new CourseUserId(courseId, userId.getUserId()));
-            if (courseUserEntityOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
+    /**
+     * Function to get course information for joining course without key
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the join key from
+     * @return ResponseEntity with a statuscode and a JSON object containing the course information
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698822">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/join
+     */
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/join")
+    @Roles({UserRole.student, UserRole.teacher})
+    public ResponseEntity<?> getCourseJoinKey(Auth auth, @PathVariable Long courseId) {
+        return getJoinLinkGetResponseEntity(courseId, null, auth.getUserEntity());
+    }
+
+    /**
+     * Function to leave a course
+     *
+     * @param courseId ID of the course to leave
+     * @param auth authentication object of the requesting user
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698775">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/leave
+     */
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/leave")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> leaveCourse(@PathVariable long courseId, Auth auth) {
+        try {
+            long userId = auth.getUserEntity().getId();
+            CheckResult<CourseRelation> checkResult = courseUtil.canLeaveCourse(courseId, auth.getUserEntity());
+            if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
-            CourseRelation userRelation = courseUserEntityOptional.get().getRelation();
-            if (auth.getUserEntity().getId() == userId.getUserId()){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove yourself");
-            }
-            if(userRelation == CourseRelation.creator){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot remove course creator");
-            } else if (userRelation == CourseRelation.course_admin){
-                if(coursePermissions != CourseRelation.creator){
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Course admin cannot remove a course admin");
-                }else{
-                    courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
-                    return ResponseEntity.ok().build();
+            CourseRelation userRelation = checkResult.getData();
+
+            // Delete the user from the course
+            courseUserRepository.deleteById(new CourseUserId(courseId, userId));
+            if (userRelation.equals(CourseRelation.enrolled)) {
+                if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId)) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
                 }
             }
-            courseUserRepository.deleteById(new CourseUserId(courseId, userId.getUserId()));
-            return ResponseEntity.ok().build(); // Successfully removed
-        }else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
+    /**
+     * Function to remove a different user from a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to leave
+     * @param userId JSON object containing the user id
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883724">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/members/{userId}
+     */
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
+    @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
+    public ResponseEntity<?> removeCourseMember(Auth auth, @PathVariable Long courseId, @PathVariable Long userId) {
+        CheckResult<CourseRelation> checkResult = courseUtil.canDeleteUser(courseId, userId, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        CourseRelation userRelation = checkResult.getData();
+
+        courseUserRepository.deleteById(new CourseUserId(courseId, userId));
+        if (userRelation.equals(CourseRelation.enrolled)) {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, userId)) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
+            }
+        }
+        return ResponseEntity.ok().build(); // Successfully removed
+    }
+
+    /**
+     * Function to add a different user to a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to add the user to
+     * @param request JSON object containing the user id and relation
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883723">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher, admin, student
+     * @ApiPath /api/courses/{courseId}/members
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.admin, UserRole.student})
+    @Transactional
     public ResponseEntity<?> addCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
-        if (!courseRepository.existsById(courseId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, request, auth.getUserEntity(), HttpMethod.POST);
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        // Only teacher and admin can add different users to a course.
-        if(hasCourseRights(courseId, auth.getUserEntity())){
-            if(request.getRelation() == CourseRelation.creator){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot add a creator");
+        courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelationAsEnum()));
+        if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
+            UserEntity user = userUtil.getUserIfExists(request.getUserId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
-            boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
-            boolean isCreator = courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) == CourseRelation.creator;
-            boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
-            if(creatingAdmin && (!isCreator  && !isAdmin)){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can create more course-admins");
+            boolean succesful = commonDatabaseActions.createNewIndividualClusterGroup(courseId, user);
+            if (!succesful) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
             }
-            if (courseUserRepository.isCourseMember(courseId, request.getUserId())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of the course");
-            }
-            courseUserRepository.save(new CourseUserEntity(courseId, request.getUserId(), request.getRelation()));
-            return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
-        }else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
+        return ResponseEntity.status(HttpStatus.CREATED).build(); // Successfully added
     }
 
+    /**
+     * Function to update the relation of a user in a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to update the user in
+     * @param request JSON object containing the user id and relation
+     * @return ResponseEntity with a statuscode and no body
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883731">apiDog documentation</a>
+     * @HttpMethod PATCH
+     * @AllowedRoles teacher, admin
+     * @ApiPath /api/courses/{courseId}/members/{userId}
+     */
+    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members/{userId}")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody RelationRequest request, @PathVariable long userId) {
+        CourseMemberRequestJson requestwithid = new CourseMemberRequestJson();
+        requestwithid.setUserId(userId);
+        requestwithid.setRelation(request.getRelation());
 
-    @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
-    @Roles({UserRole.teacher, UserRole.admin})
-    public ResponseEntity<?> updateCourseMember(Auth auth, @PathVariable Long courseId, @RequestBody CourseMemberRequestJson request) {
-        if (!courseRepository.existsById(courseId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        CheckResult<CourseUserEntity> checkResult = courseUtil.canUpdateUserInCourse(courseId, requestwithid, auth.getUserEntity(), HttpMethod.PATCH);
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-
-        // Only teacher and admin can add different users to a course.
-        if(hasCourseRights(courseId, auth.getUserEntity())){
-            if(auth.getUserEntity().getId() == request.getUserId()){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change your own role.");
+        CourseUserEntity courseUserEntity = checkResult.getData();
+        courseUserEntity.setRelation(request.getRelationAsEnum());
+        courseUserRepository.save(courseUserEntity);
+        if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
+            UserEntity user = userUtil.getUserIfExists(requestwithid.getUserId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
-
-            if(request.getRelation() == CourseRelation.course_admin){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot change role to creator");
+            commonDatabaseActions.createNewIndividualClusterGroup(courseId, user);
+        } else {
+            if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, requestwithid.getUserId())) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
-
-            boolean isAdmin = auth.getUserEntity().getRole() == UserRole.admin;
-            boolean isCreator = courseUserRepository.getCourseRelation(courseId,auth.getUserEntity().getId()) == CourseRelation.creator;
-            boolean creatingAdmin = request.getRelation() == CourseRelation.course_admin;
-            if(creatingAdmin && (!isCreator  && !isAdmin)){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the creator can promote to course-admin");
-            }
-            Optional<CourseUserEntity> ce = courseUserRepository.findById(new CourseUserId(courseId, request.getUserId()));
-            if (ce.isPresent()) {
-                ce.get().setRelation(request.getRelation());
-                courseUserRepository.save(ce.get());
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.notFound().build(); //  User is not allowed to do the action, teachers cant remove students of other users course
-            }
-        }else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No acces to course");
         }
+        return ResponseEntity.ok().build();
     }
 
+    /**
+     * Function to get all members of a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the members from
+     * @return ResponseEntity with a JSON object containing the members of the course
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724006">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/members
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/members")
     @Roles({UserRole.teacher, UserRole.student}) // student is allowed to see people in its class
     public ResponseEntity<?> getCourseMembers(Auth auth, @PathVariable Long courseId) {
-        if(courseRepository.existsById(courseId)){
-            UserEntity ue = auth.getUserEntity();
-            if(ue.getRole() == UserRole.admin || courseUserRepository.isCourseMember(courseId, ue.getId())){
-                List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
-                List<PublicUserDTO> memberJson = members.stream().map(cue -> {
-                    Map<String, Object> json = new HashMap<>();
-                    // Assuming `CourseUserEntity` has some properties like `id`, `name`, etc.
-                    UserEntity user = userRepository.getReferenceById(cue.getUserId());
-
-                    // Add more properties as needed
-                    return new PublicUserDTO(user.getName(), user.getSurname(), user.getEmail());
-                }).toList();
-                Map<String, Object> resultJson = new HashMap<>();
-                return ResponseEntity.ok(memberJson); // Successfully retrieved members
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not a member of the course");
-        }else{
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No course with given id");
+        CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+
+        List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
+        List<UserReferenceWithRelation> memberJson = members.stream().
+                map(cue -> {
+                    UserEntity user = userUtil.getUserIfExists(cue.getUserId());
+                    if (user == null) {
+                        return null;
+                    }
+                    return entityToJsonConverter.userEntityToUserReferenceWithRelation(user, cue.getRelation());
+                }).
+                filter(Objects::nonNull).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(memberJson);
     }
+
+    /**
+     * Function to get the join link of a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to get the join link from
+     * @return ResponseEntity with the join link of the course
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698763">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/joinLink
+     */
+    @Roles({UserRole.teacher, UserRole.student})
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
+    public ResponseEntity<String> getCourseKey(Auth auth, @PathVariable Long courseId) {
+        CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        return ResponseEntity.ok(checkResult.getData().getJoinKey());
+    }
+
+    // Function for invalidating the previous key and generating a new one, can be useful when starting a new year.
+    /**
+     * Function to generate a new join link for a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to generate the join link for
+     * @return ResponseEntity with the new join link of the course
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6691656">apiDog documentation</a>
+     * @HttpMethod PUT
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/joinLink
+     */
+    @Roles({UserRole.teacher, UserRole.student})
+    @PutMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
+    public ResponseEntity<?> getAndGenerateCourseKey(Auth auth, @PathVariable Long courseId) {
+        CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        CourseEntity course = checkResult.getData();
+
+        String key = UUID.randomUUID().toString();
+        course.setJoinKey(key);
+        courseRepository.save(course);
+        return ResponseEntity.ok(key);
+    }
+
+    /**
+     * Function to remove the joinKey from the joinLink of a course
+     *
+     * @param auth authentication object of the requesting user
+     * @param courseId ID of the course to remove the join link from
+     * @return ResponseEntity with the new join link of the course (without the key)
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698823">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/joinLink
+     */
+    @Roles({UserRole.teacher, UserRole.student})
+    @DeleteMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/joinKey")
+    public ResponseEntity<String> deleteCourseKey(Auth auth, @PathVariable Long courseId) {
+        CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseId, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        CourseEntity course = checkResult.getData();
+        course.setJoinKey(null);
+        courseRepository.save(course);
+        return ResponseEntity.ok("");
+    }
+
 }

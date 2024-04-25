@@ -4,91 +4,89 @@ package com.ugent.pidgeon.controllers;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.*;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
 public class ClusterController {
+
     @Autowired
     GroupClusterRepository groupClusterRepository;
     @Autowired
     GroupRepository groupRepository;
-    @Autowired
-    CourseUserRepository courseUserRepository;
-    @Autowired
-    CourseRepository courseRepository;
-    @Autowired
-    GroupUserRepository groupUserRepository;
-    @Autowired
-    GroupController groupController;
 
-    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters") // Returns all clusters for a course
+    @Autowired
+    private ClusterUtil clusterUtil;
+    @Autowired
+    private EntityToJsonConverter entityToJsonConverter;
+    @Autowired
+    private CourseUtil courseUtil;
+    @Autowired
+    private CommonDatabaseActions commonDatabaseActions;
+
+    /**
+     * Returns all clusters for a course
+     *
+     * @param courseid identifier of a course
+     * @param auth authentication object of the requesting user
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883051">...</a>
+     * @HttpMethod GET
+     * @ApiPath /api/courses/{courseid}/clusters
+     * @AllowedRoles student, teacher
+     */
+    @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters")
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> getClustersForCourse(@PathVariable("courseid") Long courseid, Auth auth) {
-        // Get the user id
-        long userId = auth.getUserEntity().getId();
-        if (!courseRepository.existsById(courseid)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseid, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        if (courseUserRepository.findByCourseIdAndUserId(courseid, userId).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of course");
-        }
-
         // Get the clusters for the course
-        List<GroupClusterEntity> clusters = groupClusterRepository.findClustersByCourseId(courseid);
-        List<GroupClusterReferenceJson> clusterJsons = clusters.stream().map(
-                this::clusterEntityToClusterReferenceJson).toList();
+        List<GroupClusterEntity> clusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(courseid);
+        List<GroupClusterJson> clusterJsons = clusters.stream().map(
+                entityToJsonConverter::clusterEntityToClusterJson).toList();
         // Return the clusters
         return ResponseEntity.ok(clusterJsons);
     }
 
-    private GroupClusterReferenceJson clusterEntityToClusterReferenceJson(GroupClusterEntity cluster) {
-        return new GroupClusterReferenceJson(
-                cluster.getId(),
-                cluster.getName(),
-                cluster.getGroupAmount(),
-                ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId()
-        );
-    }
-
-    private GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster) {
-        List<GroupReferenceJson> groups = groupRepository.findAllByClusterId(cluster.getId()).stream().map(
-                group -> new GroupReferenceJson(
-                        group.getName(),
-                        ApiRoutes.GROUP_BASE_PATH + "/" + group.getId()
-                )
-        ).toList();
-        return new GroupClusterJson(
-                cluster.getId(),
-                cluster.getName(),
-                cluster.getMaxSize(),
-                cluster.getGroupAmount(),
-                cluster.getCreatedAt(),
-                groups,
-                ApiRoutes.COURSE_BASE_PATH + "/" + cluster.getCourseId()
-                );
-    }
-
-    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters") // Creates a new cluster for a course
+    /**
+     * Creates a new cluster for a course
+     *
+     * @param courseid identifier of a course
+     * @param auth authentication object of the requesting user
+     * @param clusterJson ClusterJson object containing the cluster data
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883393">apiDog documentation</a>
+     * @HttpMethod POST
+     * @ApiPath /api/courses/{courseid}/clusters
+     * @AllowedRoles student, teacher
+     */
+    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseid}/clusters")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> createClusterForCourse(@PathVariable("courseid") Long courseid, Auth auth, @RequestBody GroupClusterCreateJson clusterJson) {
-        // Get the user id
-        long userId = auth.getUserEntity().getId();
-        if (!courseRepository.existsById(courseid)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+
+        CheckResult<CourseEntity> checkResult = courseUtil.getCourseIfAdmin(courseid, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        if (!courseRepository.adminOfCourse(courseid, userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+
+        CheckResult<Void> jsonCheckResult = clusterUtil.checkGroupClusterCreateJson(clusterJson);
+        if (jsonCheckResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(jsonCheckResult.getStatus()).body(jsonCheckResult.getMessage());
         }
 
         // Create the cluster
@@ -98,96 +96,161 @@ public class ClusterController {
                 clusterJson.name(),
                 clusterJson.groupCount()
         );
-        cluster.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-        GroupClusterEntity clusterEntity =  groupClusterRepository.save(cluster);
+        cluster.setCreatedAt(OffsetDateTime.now());
+        GroupClusterEntity clusterEntity = groupClusterRepository.save(cluster);
 
         for (int i = 0; i < clusterJson.groupCount(); i++) {
-            groupRepository.save(new GroupEntity( "Group " + (i+1), cluster.getId()));
+            groupRepository.save(new GroupEntity("Group " + (i + 1), cluster.getId()));
         }
 
-        GroupClusterJson clusterJsonResponse = clusterEntityToClusterJson(clusterEntity);
+        GroupClusterJson clusterJsonResponse = entityToJsonConverter.clusterEntityToClusterJson(clusterEntity);
 
         // Return the cluster
         return ResponseEntity.status(HttpStatus.CREATED).body(clusterJsonResponse);
     }
 
+    /**
+     * Returns all groups for a cluster
+     *
+     * @param clusterid identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883478">apiDog documentation</a>
+     * @HttpMethod GET
+     * @ApiPath /api/clusters/{clusterid}
+     * @AllowedRoles student, teacher
+     */
     @GetMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}") // Returns a cluster
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<?> getCluster(@PathVariable("clusterid") Long clusterid, Auth auth) {
-        // Get the user id
-        long userId = auth.getUserEntity().getId();
-        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
-        if (cluster == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        CheckResult<GroupClusterEntity> checkResult = clusterUtil.getGroupClusterEntityIfNotIndividual(clusterid, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        if (courseUserRepository.findByCourseIdAndUserId(cluster.getCourseId(), userId).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not part of course");
-        }
-
+        GroupClusterEntity cluster = checkResult.getData();
         // Return the cluster
-        return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
+        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(cluster));
     }
 
-    @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}") // Updates a cluster
+
+    /**
+     * Updates a cluster
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @param clusterJson ClusterJson object containing the cluster data
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883519">apiDog documentation</a>
+     * @HttpMethod PUT
+     * @ApiPath /api/clusters/{clusterid}
+     * @AllowedRoles student, teacher
+     */
+    @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
-        // Get the user id
-        long userId = auth.getUserEntity().getId();
-        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
-        if (cluster == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        CheckResult<GroupClusterEntity> checkResult = clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(clusterid, auth.getUserEntity());
+
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
-        }
-        cluster.setName(clusterJson.name());
-        cluster.setMaxSize(clusterJson.capacity());
-        cluster = groupClusterRepository.save(cluster);
-        return ResponseEntity.ok(clusterEntityToClusterJson(cluster));
+
+        return doGroupClusterUpdate(checkResult.getData(), clusterJson);
     }
 
-    @DeleteMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}") // Deletes a cluster
+    public ResponseEntity<?> doGroupClusterUpdate(GroupClusterEntity clusterEntity, GroupClusterUpdateJson clusterJson) {
+        CheckResult<Void> checkResult = clusterUtil.checkGroupClusterUpdateJson(clusterJson);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        clusterEntity.setMaxSize(clusterJson.getCapacity());
+        clusterEntity.setName(clusterJson.getName());
+        groupClusterRepository.save(clusterEntity);
+        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity));
+    }
+
+    @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> patchCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
+        CheckResult<GroupClusterEntity> checkResult = clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(clusterid, auth.getUserEntity());
+
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        GroupClusterEntity cluster = checkResult.getData();
+
+        if (clusterJson.getCapacity() == null) {
+            clusterJson.setCapacity(cluster.getMaxSize());
+        }
+
+        if (clusterJson.getName() == null) {
+            clusterJson.setName(cluster.getName());
+        }
+
+        return doGroupClusterUpdate(cluster, clusterJson);
+    }
+
+    /**
+     * Deletes a cluster
+     *
+     * @param clusterid identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883520">apiDog documentation</a>
+     * @HttpMethod DELETE
+     * @ApiPath /api/clusters/{clusterid}
+     * @AllowedRoles student, teacher
+     */
+    @DeleteMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     @Transactional
     public ResponseEntity<?> deleteCluster(@PathVariable("clusterid") Long clusterid, Auth auth) {
-        // Get the user id
-        long userId = auth.getUserEntity().getId();
-        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
-        if (cluster == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        CheckResult<Void> checkResult = clusterUtil.canDeleteCluster(clusterid, auth.getUserEntity());
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
-        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+
+        CheckResult<Void> deleteResult = commonDatabaseActions.deleteClusterById(clusterid);
+        if (deleteResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
         }
-        if (groupClusterRepository.usedInProject(clusterid)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cluster is being used in a project");
-        }
-        for (GroupEntity group : groupRepository.findAllByClusterId(clusterid)) {
-            // Delete all groupUsers
-            groupUserRepository.deleteAllByGroupId(group.getId());
-            groupRepository.deleteById(group.getId());
-        }
-        groupClusterRepository.deleteById(clusterid);
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PostMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}/groups") // Creates a new group for a cluster
+    /**
+     * Creates a new group for a cluster
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth     authentication object of the requesting user
+     * @param groupJson  GroupCreateJson object containing the group data
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723980">apiDog documentation</a>
+     * @HttpMethod POST
+     * @ApiPath /api/clusters/{clusterid}/groups
+     * @AllowedRoles student, teacher
+     */
+    @PostMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}/groups")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> createGroupForCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupCreateJson groupJson) {
-        // Get the user id
-        long userId = auth.getUserEntity().getId();
-        GroupClusterEntity cluster = groupClusterRepository.findById(clusterid).orElse(null);
-        if (cluster == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cluster not found");
+        if (groupJson.name() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("name must be provided");
         }
-        if (!courseRepository.adminOfCourse(cluster.getCourseId(), userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not admin of course");
+
+        if (groupJson.name().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name cannot be empty");
         }
+
+        CheckResult<GroupClusterEntity> clusterCheck = clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(clusterid, auth.getUserEntity());
+        if (clusterCheck.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(clusterCheck.getStatus()).body(clusterCheck.getMessage());
+        }
+        GroupClusterEntity cluster = clusterCheck.getData();
         GroupEntity group = new GroupEntity(groupJson.name(), clusterid);
         group = groupRepository.save(group);
 
         cluster.setGroupAmount(cluster.getGroupAmount() + 1);
         groupClusterRepository.save(cluster);
-        return ResponseEntity.status(HttpStatus.CREATED).body(groupController.groupEntityToJson(group));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupEntityToJson(group));
     }
 }

@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.postgre.repository;
 
+import com.ugent.pidgeon.model.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
@@ -8,13 +9,30 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
 
     @Query("SELECT p FROM ProjectEntity p WHERE p.courseId = :courseId")
     List<ProjectEntity> findAllProjectsByCourseId(long courseId);
+
+    @Query("SELECT c FROM CourseEntity c WHERE c.joinKey = :courseKey")
+
+    CourseEntity findByJoinKey(String courseKey);
+
+    @Query("""
+        SELECT u FROM UserEntity u
+        JOIN CourseUserEntity cu ON u.id = cu.userId
+        WHERE cu.courseId = ?1 AND cu.relation = 'creator'
+        """)
+    UserEntity findTeacherByCourseId(long id);
+
+    @Query("""
+        SELECT u FROM UserEntity u
+        JOIN CourseUserEntity cu ON u.id = cu.userId
+        WHERE cu.courseId = ?1 AND cu.relation = 'course_admin'
+        """)
+    List<UserEntity> findAssistantsByCourseId(long id);
 
     public interface UserWithRelation {
         UserEntity getUser();
@@ -35,4 +53,15 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
         ) THEN true ELSE false END
     """)
     Boolean adminOfCourse(long courseId, long userId);
+
+
+    @Query(value = """
+            SELECT g FROM CourseEntity g JOIN ProjectEntity p ON g.id = p.courseId WHERE p.testId =?1
+            """)
+    List<CourseEntity> findCourseEntityByTestId(Long testId);
+
+    @Query(value = """
+            SELECT c FROM CourseEntity c JOIN GroupClusterEntity gc ON c.id = gc.courseId  JOIN GroupEntity g  ON gc.id = g.clusterId WHERE g.id = ?1""")
+    List<CourseEntity> findCourseEntityByGroupId(Long groupId);
+
 }

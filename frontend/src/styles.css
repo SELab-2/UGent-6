@@ -13,6 +13,10 @@ html {
   color: #00325a;
 }
 
+.dark-theme, .dodona-theme {
+  background-color: #111;
+}
+
 .dodona-theme .ant-layout-header .ant-btn {
   background-color: rgba(255, 255, 255, 0.1);
 }
@@ -64,6 +68,17 @@ html {
 
 .show-actions-on-hover:hover .ant-list-item-action {
   opacity: 1;
+  
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('\theme\fonts\JetBrainsMono-Regular.ttf') format('truetype');
+}
+
+
+.ant-popconfirm-description {
+  max-width: 250px;
 }
 
 /* *************************** Landing page *************************** */
@@ -88,64 +103,88 @@ html {
   background-color: #eee;
 }
 
+.logo-item {
+  display: block;
+  position: relative;
+
+}
+
+.logo-item > img {
+  width: inherit;
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  transition: all 0.4s;
+
+}
+
 .ugent-logo {
   width: 110px;
-  margin: 0 auto;
-  display: block;
   rotate: 5deg;
-  position: relative;
   top: -120px;
-  left: 320px;
+  left: 620px;
+}
+
+.ugent-logo > img:hover {
+  transform: rotate(15deg);
 }
 
 .code-logo {
   width: 100px;
-  margin: 0 auto;
-  display: block;
-  position: relative;
   top: -450px;
-  left: 250px;
-  rotate: -10deg;
-}
-
-.js-logo {
-  width: 70px;
-  margin: 0 auto;
-  display: block;
-  position: relative;
-  top: -500px;
-  left: 100px;
-  rotate: 10deg;
-}
-
-.docker-logo {
-  width: 100px;
-  margin: 0 auto;
-  display: block;
-  position: relative;
-  top: -500px;
   left: 550px;
   rotate: -10deg;
 }
 
+.code-logo:hover > img:hover {
+  transform: rotate(-10deg);
+}
+
+.js-logo {
+  width: 70px;
+  top: -500px;
+  left: 400px;
+  rotate: 10deg;
+}
+
+.js-logo:hover > img:hover {
+  transform: rotate(15deg);
+}
+
+.docker-logo {
+  width: 100px;
+  top: -500px;
+  left: 880px;
+  rotate: -10deg;
+}
+
+.docker-logo:hover > img:hover {
+  transform: rotate(20deg);
+}
+
 .py-logo {
   width: 80px;
-  margin: 0 auto;
-  display: block;
-  position: relative;
   top: -400px;
-  left: 480px;
+  left: 780px;
   rotate: 10deg;
+}
+
+.py-logo:hover > img:hover {
+  transform: rotate(-10deg);
 }
 
 .c-logo {
   width: 80px;
-  margin: 0 auto;
-  display: block;
-  position: relative;
   top: -450px;
-  left: 200px;
+  left: 500px;
   rotate: -10deg;
+}
+
+.c-logo:hover  > img:hover {
+  transform: rotate(20deg);
 }
 
 .blob-image {
@@ -164,40 +203,26 @@ html {
 
 /* if window width is smaller than 1000 px */
 @media screen and (max-width: 1200px) {
-  .landing-page-btn {
-    padding: 12px 25px;
-    font-size: 1.4rem;
-  }
 
-  .ugent-logo {
+
+  .ugent-logo,.code-logo,.js-logo,.docker-logo,.py-logo,.c-logo    {
     display: none;
   }
 
-  .code-logo {
-    display: none;
-  }
-
-  .js-logo {
-    display: none;
-  }
-
-  .docker-logo {
-    display: none;
-  }
-
-  .py-logo {
-    display: none;
-  }
-
-  .c-logo {
-    display: none;
-  }
-
+ 
   .blob-image {
     top: 400px;
   }
 
   .landing-title {
     padding: 0 2rem;
+  }
+}
+
+
+
+@media screen and (max-width: 600px) {
+  .nav-logo {
+    display: none;
   }
 }

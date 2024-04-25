@@ -1,30 +1,42 @@
 package com.ugent.pidgeon.model.json;
 
 public class LastGroupSubmissionJson {
-    private String groupUrl;
-    private String submissionUrl;
+
+    private SubmissionJson submission;
+    private GroupJson group;
+    private GroupFeedbackJson feedback;
 
     public LastGroupSubmissionJson() {
     }
 
-    public LastGroupSubmissionJson(String groupUrl, String submissionUrl) {
-        this.groupUrl = groupUrl;
-        this.submissionUrl = submissionUrl;
+    public LastGroupSubmissionJson(SubmissionJson submission, GroupJson group, GroupFeedbackJson feedback) {
+        this.submission = submission;
+        this.group = group;
+        this.feedback = feedback;
     }
 
-    public String getGroupUrl() {
-        return groupUrl;
+
+    public SubmissionJson getSubmission() {
+        return submission;
     }
 
-    public void setGroupUrl(String groupUrl) {
-        this.groupUrl = groupUrl;
+    public void setSubmission(SubmissionJson submission) {
+        this.submission = submission;
     }
 
-    public String getSubmissionUrl() {
-        return submissionUrl;
+    public GroupJson getGroup() {
+        return group;
     }
 
-    public void setSubmissionUrl(String submissionUrl) {
-        this.submissionUrl = submissionUrl;
+    public void setGroup(GroupJson group) {
+        this.group = group;
+    }
+
+    public GroupFeedbackJson getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(GroupFeedbackJson feedback) {
+        this.feedback = feedback;
     }
 }

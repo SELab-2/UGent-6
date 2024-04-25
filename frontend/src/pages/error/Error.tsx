@@ -2,6 +2,7 @@ import React  from "react";
 import { AppRoutes } from "../../@types/routes"
 import {useTranslation} from "react-i18next";
 import {Button, Result, Space, Typography} from "antd";
+import { Link, useNavigate } from "react-router-dom";
 
 
 interface ErrorPageProps {
@@ -12,6 +13,7 @@ interface ErrorPageProps {
 const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
     const { t } = useTranslation()
     const { Title, Text } = Typography;
+    const navigate = useNavigate()
 
     let title:string = "";
     let status: "403" | "404" | "500"  = "404";
@@ -25,8 +27,8 @@ const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
 
     const textMapping: { [key: number]: string} = {
         404: t("error.404_message"),
-        403: t("error.404_message"),
-        500: t("error.404_message")
+        403: t("error.403_message"),
+        500: t("error.500_message")
     }
 
     // Add default message to error page when no error message was provided
@@ -51,7 +53,8 @@ const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
             <Space direction="vertical">
                 <Title>{title}</Title>
                 <Text>{errorMessage}</Text>
-                <Button type="primary" href={AppRoutes.HOME}>{t("error.homepage")}</Button>
+               
+                <Button onClick={()=> navigate(-1)} type="primary" >{t("error.homepage")}</Button>
             </Space>
         </Result>
     );

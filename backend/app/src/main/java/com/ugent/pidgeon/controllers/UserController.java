@@ -2,71 +2,179 @@ package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.CourseWithRelationJson;
 import com.ugent.pidgeon.model.json.UserJson;
+import com.ugent.pidgeon.model.json.UserUpdateJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.StringMatcher;
+import com.ugent.pidgeon.util.UserUtil;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.logging.Logger;
 
 @RestController
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserUtil userUtil;
 
-    @GetMapping(ApiRoutes.USER_BASE_PATH + "/{userid}")
-    @Roles({UserRole.student, UserRole.teacher})
+    /**
+     * Function to get a user by id
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod GET
+     * @ApiPath /api/user/{userid}
+     * @AllowedRoles student
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723824">apiDog documentation</a>
+     * @return user object
+     */
+    @GetMapping(ApiRoutes.USERS_BASE_PATH + "/{userid}")
+    @Roles({UserRole.student})
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
-        UserEntity user = auth.getUserEntity();
-        if (user.getId() != userid && user.getRole() != UserRole.teacher) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You does not have access to this user");
+        UserEntity requester = auth.getUserEntity();
+        if (requester.getId() != userid) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to this user");
         }
 
-        UserJson res = userRepository.findById(userid).map(UserJson::new).orElse(null);
-        if (res == null) {
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        UserEntity user = userUtil.getUserIfExists(userid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+
+        UserJson res = new UserJson(user);
 
         return ResponseEntity.ok().body(res);
     }
 
+    @GetMapping(ApiRoutes.USERS_BASE_PATH)
+    @Roles({UserRole.admin})
+    public ResponseEntity<Object> getUsersByNameOrSurname(
+        @RequestParam(value="email", required = false) String email,
+        @RequestParam(value = "name", required = false) String name,
+        @RequestParam(value = "surname", required = false) String surname
+    ) {
+        if (email != null) {
 
-    @GetMapping(ApiRoutes.USER_COURSES_BASE_PATH)
-    @Roles({UserRole.student, UserRole.teacher})
-    public ResponseEntity<Object> getUserCourses(@PathVariable("userid") Long userid,Auth auth) {
-        UserEntity user = auth.getUserEntity();
-        if (userid != user.getId() && user.getRole() != UserRole.teacher) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have access to this user's courses");
+            UserEntity user = userRepository.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
+            }
+            if (name != null && !user.getName().toLowerCase().contains(name.toLowerCase())) {
+                return ResponseEntity.ok().body(new ArrayList<>());
+            } else if (surname != null && !user.getSurname().toLowerCase().contains(surname.toLowerCase())) {
+                return ResponseEntity.ok().body(new ArrayList<>());
+            }
+
+            return ResponseEntity.ok().body(List.of(new UserJson(user)));
         }
 
-        List<UserRepository.CourseIdWithRelation> courses = userRepository.findCourseIdsByUserId(userid);
+        if ((name == null || name.length() < 3) && (surname == null || surname.length() < 3)) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
+        }
 
-        List<CourseWithRelationJson> userCourses = courses.stream().map(
-                c -> new CourseWithRelationJson(
-                        ApiRoutes.COURSE_BASE_PATH+"/" + c.getCourseId(),
-                            c.getRelation(),
-                            c.getName(),
-                            c.getCourseId()
+        UserEntity user = null;
+        if (name == null) name = "";
+        if (surname == null) surname = "";
 
-                )).toList();
+        List<UserEntity> usersByName = userRepository.findByName(name, surname);
 
-        return ResponseEntity.ok().body(userCourses);
+
+        return ResponseEntity.ok().body(usersByName.stream().map(UserJson::new).toList());
     }
-    @GetMapping(ApiRoutes.USER_AUTH_PATH)
+
+
+    @GetMapping(ApiRoutes.LOGGEDIN_USER_PATH)
     @Roles({UserRole.student, UserRole.teacher})
-    public ResponseEntity<Object> getUserByAzureId(Auth auth) {
+    public ResponseEntity<Object> getLoggedInUser(Auth auth) {
         UserEntity res = auth.getUserEntity();
+
         UserJson userJson = new UserJson(res);
         return ResponseEntity.ok().body(userJson);
     }
 
+
+    private ResponseEntity<?> doUserUpdate(UserEntity user, UserUpdateJson json) {
+        user.setName(json.getName());
+        user.setSurname(json.getSurname());
+        user.setEmail(json.getEmail());
+        user.setRole(json.getRoleAsEnum());
+        userRepository.save(user);
+        return ResponseEntity.ok().body(new UserJson(user));
+    }
+
+    /**
+     * Function to edit a user by id
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod PUT
+     * @ApiPath /api/user/{userid}
+     * @AllowedRoles admin
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693479">apiDog documentation</a>
+     * @return string
+     */
+    @PutMapping(ApiRoutes.USERS_BASE_PATH + "/{userid}")
+    @Roles({UserRole.admin})
+    public ResponseEntity<?> updateUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
+
+        CheckResult<UserEntity> checkResult = userUtil.checkForUserUpdateJson(userid, userUpdateJson);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        return doUserUpdate(checkResult.getData(), userUpdateJson);
+    }
+
+    /**
+     * Function to edit a user by id
+     *
+     * @param userid identifier of a user
+     * @param auth   authentication object
+     * @HttpMethod PATCH
+     * @ApiPath /api/user/{userid}
+     * @AllowedRoles admin
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693481">apiDog documentation</a>
+     * @return string
+     */
+    @PatchMapping(ApiRoutes.USERS_BASE_PATH + "/{userid}")
+    @Roles({UserRole.admin})
+    public ResponseEntity<?> patchUserById(@PathVariable("userid") Long userid, @RequestBody UserUpdateJson userUpdateJson, Auth auth) {
+        UserEntity user = userUtil.getUserIfExists(userid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        if (userUpdateJson.getName() == null) {
+            userUpdateJson.setName(user.getName());
+        }
+        if (userUpdateJson.getSurname() == null) {
+            userUpdateJson.setSurname(user.getSurname());
+        }
+        if (userUpdateJson.getEmail() == null) {
+            userUpdateJson.setEmail(user.getEmail());
+        }
+
+        Logger.getGlobal().info(userUpdateJson.getRole());
+        if (userUpdateJson.getRole() == null) {
+            userUpdateJson.setRole(user.getRole().toString());
+        }
+
+        CheckResult<UserEntity> checkResult = userUtil.checkForUserUpdateJson(userid, userUpdateJson);
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        return doUserUpdate(user, userUpdateJson);
+    }
 
 }

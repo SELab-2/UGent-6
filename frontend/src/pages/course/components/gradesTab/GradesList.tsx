@@ -1,18 +1,20 @@
 import { Button, List, Typography } from "antd"
 import { FC } from "react"
-import { GroupFeedback } from "./GradesCard"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../../@types/routes"
+import { CourseGradesType } from "./GradesCard"
 
-const GradesList: FC<{ feedback: GroupFeedback[], courseId:number }> = ({ feedback,courseId }) => {
+const GradesList: FC<{ feedback: CourseGradesType[]; courseId: number }> = ({ feedback, courseId }) => {
   const { t } = useTranslation()
-  
+  const navigate = useNavigate()
 
+  
   return (
     <>
       <List
-        dataSource={feedback}
+      locale={ {emptyText: t("course.noFeedback")} }
+        dataSource={feedback.filter(s => s.groupFeedback !== null)}
         header={
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div>
@@ -28,21 +30,23 @@ const GradesList: FC<{ feedback: GroupFeedback[], courseId:number }> = ({ feedba
           <List.Item
             actions={[
               <Typography.Text>
-                {score.score} / {score.project.maxScore}
+                {score.groupFeedback!.score} / {score.maxScore}
               </Typography.Text>,
             ]}
           >
             <List.Item.Meta
-              title={<div>
-                <Link to={AppRoutes.PROJECT.replace(":courseId",courseId.toString()).replace(":projectId",score.project.projectId.toString())}>
-                <Typography.Link  >
-                {score.project.name}
-              </Typography.Link>
-
-                  
-                </Link>
-                </div>}
-              description={score.feedback}
+              title={
+                <div>
+                  <Button
+                    style={{ padding: 0, margin: 0, fontWeight: 600 }}
+                    type="link"
+                    onClick={() => navigate(AppRoutes.PROJECT.replace(":courseId", courseId.toString()).replace(":projectId", score.projectId.toString()))}
+                  >
+                    {score.projectName}
+                  </Button>
+                </div>
+              }
+              description={score.groupFeedback!.feedback}
             />
           </List.Item>
         )}

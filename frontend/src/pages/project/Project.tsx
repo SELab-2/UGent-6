@@ -1,19 +1,20 @@
-import { Button, Card, Col, Row, Space, Spin, Tooltip, theme } from "antd"
-import { useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../../@types/requests"
-import Markdown from "react-markdown"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
-import useApp from "../../hooks/useApp"
-import { PlusOutlined } from "@ant-design/icons"
+import { Button, Card, Tabs, TabsProps, Tooltip, theme } from "antd"
+import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
-import { AppRoutes } from "../../@types/routes"
-import GroupsCard from "../course/components/groupTab/GroupsCard"
-import SubmissionCard from "./components/SubmissionCard"
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
+import SubmissionCard from "./components/SubmissionTab"
 import useCourse from "../../hooks/useCourse"
-import GroupCard from "./components/GroupCard"
 import useProject from "../../hooks/useProject"
+import ScoreCard from "./components/ScoreTab"
+import CourseAdminView from "../../hooks/CourseAdminView"
+import { DeleteOutlined, DownloadOutlined, HeatMapOutlined, InfoCircleOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
+import { useMemo, useState } from "react"
+import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
+import GroupTab from "./components/GroupTab"
+import { AppRoutes } from "../../@types/routes"
+import SubmissionsTab from "./components/SubmissionsTab"
+import MarkdownTextfield from "../../components/input/MarkdownTextfield"
+import apiCall from "../../util/apiFetch"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -22,95 +23,158 @@ export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 const Project = () => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
-  const app = useApp()
   const course = useCourse()
   const { projectId } = useParams()
   const project = useProject()
-  
- 
+  const courseAdmin = useIsCourseAdmin()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.hash.slice(1) || "description")
 
-  const CodeBlock = {
-    code({ children, className, node, ...rest }: any) {
-      const match = /language-(\w+)/.exec(className || "")
-      return match ? (
-        <SyntaxHighlighter
-          {...rest}
-          PreTag="div"
-          children={String(children).replace(/\n$/, "")}
-          language={match[1]}
-          style={app.theme === "light" ? oneLight : oneDark}
-        />
-      ) : (
-        <code
-          {...rest}
-          className={className}
-        >
-          {children}
-        </code>
-      )
-    },
-  }
-
-  // if (!project) {
-  //   return (
-  //     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-  //       <Spin size="large" />
-  //     </div>
-  //   )
-  // }
   const now = Date.now()
   const deadline = new Date(project?.deadline ?? "").getTime()
-  return (
-    <div style={{ margin: "3rem 0", width: "100%" }}>
-      <Row
-        justify="center"
-        gutter={[32, 32]}
-        style={{ width: "100%" }}
-      >
-        <Col
-          lg={16}
-          md={16}
-          sm={24}
-          xs={24}
-        >
-          <Card
-            styles={{
-              header: {
-                background: token.colorPrimaryBg,
-              },
-              title: {
-                fontSize: "1.1em",
-              },
-              body: {
-                textWrap: "wrap",
-              },
-            }}
-            style={{ width: "100%", marginBottom: "3rem" }}
-            title={project?.name}
-            loading={!project}
-          >
-            {project && <Markdown components={CodeBlock}>{project.description}</Markdown>}
-          </Card>
-        </Col>
-        <Col
-          lg={8}
-          md={8}
-          sm={24}
-          xs={24}
-        >
-          <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
-            <span>
-              <SubmissionCard
-                projectId={Number(projectId)}
-                courseId={course.courseId}
-                allowNewSubmission={now < deadline}
-              />
-            </span>
-          </Tooltip>
 
-          <GroupCard />
-        </Col>
-      </Row>
+  const items: TabsProps["items"] = useMemo(() => {
+    const items: TabsProps["items"] = [
+      {
+        key: "description",
+        label: t("home.projects.description"),
+        icon: <InfoCircleOutlined />,
+        children: project && (
+          <div style={{display:"flex",justifyContent:"center",width:"100%"}}>
+            <div style={{maxWidth:"800px",width:"100%"}}>
+            <MarkdownTextfield content={project.description} />
+
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "groups",
+        label: t("course.groups"),
+        icon: <TeamOutlined />,
+        children: <GroupTab />,
+      },
+      {
+        key: "submissions",
+        label: t("project.submissions"),
+        icon: <SendOutlined />,
+        children: courseAdmin ? (
+          <span>
+            <SubmissionsTab />
+          </span>
+        ) : (
+          <SubmissionCard
+            projectId={Number(projectId)}
+            courseId={course.courseId}
+          />
+        ),
+      },
+    ]
+
+    if (!courseAdmin) {
+      items.push({
+        key: "score",
+        label: t("course.score"),
+        children: <ScoreCard />,
+      })
+    }
+
+    return items
+  }, [project, course, courseAdmin])
+
+  const changeTab = (key: string) => {
+    navigate(`#${key}`)
+    setActiveTab(key)
+  }
+
+  const handleNewSubmission = () => {
+    navigate(AppRoutes.NEW_SUBMISSION.replace(AppRoutes.PROJECT + "/", ""))
+  }
+
+  const deleteProject = async () => {
+    if (!project || !course) return console.error("project is undefined")
+    await apiCall.delete(ApiRoutes.PROJECT, undefined, { id: project!.projectId + "" })
+
+    navigate(AppRoutes.COURSE.replace(":courseId", course.courseId + ""))
+  }
+
+  return (
+    <div style={{ margin: "3rem 0", width: "100%", paddingBottom: "3rem" }}>
+      <Card
+        styles={{
+          header: {
+            background: token.colorPrimaryBg,
+          },
+          title: {
+            fontSize: "1.1em",
+          },
+          body: {
+            textWrap: "wrap",
+            padding: "0.5rem",
+          },
+        }}
+        style={{ width: "100%", marginBottom: "3rem" }}
+        title={project?.name}
+        loading={!project}
+        extra={
+          courseAdmin ? (
+            <>
+              <Link to="tests">
+                <Button
+                  type="primary"
+                  icon={<HeatMapOutlined />}
+                  style={{ marginLeft: "1rem" }}
+                >
+                  {t("project.tests.toTests")}
+                </Button>
+              </Link>
+              <Link to="edit">
+                <Button
+                  type="primary"
+                  icon={<SettingFilled />}
+                  style={{ marginLeft: "1rem" }}
+                >
+                  {t("project.options")}
+                </Button>
+              </Link>
+              <Button
+                style={{ marginLeft: "1rem" }}
+                type="primary"
+                onClick={deleteProject}
+                danger
+                icon={<DeleteOutlined />}
+              />
+            </>
+          ) : (
+            <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
+              <span>
+                <Button
+                  disabled={now > deadline}
+                  type="primary"
+                  onClick={handleNewSubmission}
+                  icon={<PlusOutlined />}
+                >
+                  {t("project.newSubmission")}
+                </Button>
+              </span>
+            </Tooltip>
+          )
+        }
+      >
+        <Tabs
+          activeKey={activeTab}
+          onChange={changeTab}
+          items={items}
+          tabBarExtraContent={
+            activeTab === "submissions" ? (
+              <CourseAdminView>
+                <Button icon={<DownloadOutlined />}>{t("project.downloadSubmissions")}</Button>
+              </CourseAdminView>
+            ) : null
+          }
+        />
+      </Card>
     </div>
   )
 }

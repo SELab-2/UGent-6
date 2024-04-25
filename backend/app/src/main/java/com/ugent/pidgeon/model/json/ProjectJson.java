@@ -1,36 +1,45 @@
 package com.ugent.pidgeon.model.json;
 
-import java.sql.Timestamp;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.ugent.pidgeon.postgre.models.OffsetDateTimeSerializer;
+
+
+import java.time.OffsetDateTime;
+
+
 
 public class ProjectJson {
 
     private String name;
     private String description;
     private Long groupClusterId;
-    private Long testId;
-    private boolean visible;
+    private Boolean visible;
     private Integer maxScore;
-    private Timestamp deadline;
 
-    public ProjectJson(String name, String description, Long groupClusterId, Long testId, boolean visible, Integer maxScore, Timestamp deadline) {
+    @JsonSerialize(using = OffsetDateTimeSerializer.class)
+    private OffsetDateTime deadline;
+
+    public ProjectJson(String name, String description, Long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
         this.name = name;
         this.description = description;
         this.groupClusterId = groupClusterId;
-        this.testId = testId;
         this.visible = visible;
         this.maxScore = maxScore;
         this.deadline = deadline;
+    }
+
+    public ProjectJson() {
     }
 
     public String getName() {
         return name;
     }
 
-    public Timestamp getDeadline() {
+    public OffsetDateTime getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(Timestamp deadline) {
+    public void setDeadline(OffsetDateTime deadline) {
         this.deadline = deadline;
     }
 
@@ -54,19 +63,12 @@ public class ProjectJson {
         this.groupClusterId = groupClusterId;
     }
 
-    public Long getTestId() {
-        return testId;
-    }
 
-    public void setTestId(Long testId) {
-        this.testId = testId;
-    }
-
-    public boolean isVisible() {
+    public Boolean isVisible() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisible(Boolean visible) {
         this.visible = visible;
     }
 

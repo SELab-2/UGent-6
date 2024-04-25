@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
+import com.ugent.pidgeon.postgre.models.GroupFeedbackId;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface GroupFeedbackRepository extends JpaRepository<GroupFeedbackEntity, Long> {
+public interface GroupFeedbackRepository extends JpaRepository<GroupFeedbackEntity, GroupFeedbackId> {
 
     @Query(value = "SELECT * FROM group_feedback WHERE group_id = ?1 AND project_id = ?2", nativeQuery = true)
     GroupFeedbackEntity getGroupFeedback(long groupId, long projectId);

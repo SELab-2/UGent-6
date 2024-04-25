@@ -1,11 +1,10 @@
 import { Button, Space, Table, TableProps } from "antd"
 import { FC, useMemo } from "react"
-import { ApiRoutes, GET_Responses } from "../../../@types/requests"
+import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
 import useAppApi from "../../../hooks/useAppApi"
 import ProjectInfo from "./ProjectInfo"
 import ProjectStatusTag from "./ProjectStatusTag"
-import useIsTeacher from "../../../hooks/useIsTeacher"
 import GroupProgress from "./GroupProgress"
 import { Link } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
@@ -15,27 +14,23 @@ export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }> = ({ projects,ignoreColumns }) => {
   const { t } = useTranslation()
   const { modal } = useAppApi()
-  const isTeacher = useIsTeacher()
 
   const columns: TableProps<ProjectType>["columns"] = useMemo(
     () => {
       let columns:TableProps<ProjectType>["columns"] = [
       {
         title: t("home.projects.name"),
-        dataIndex: "name",
         key: "name",
-        render: (text: string, project) => {
-          return (
+        render: (project:ProjectType) => (
             <Link to={AppRoutes.PROJECT.replace(":courseId", project.course.courseId + "").replace(":projectId", project.projectId + "")}>
               <Button
                 type="link"
                 style={{ fontWeight: "bold" }}
               >
-                {text}
+                {project.name}
               </Button>
             </Link>
           )
-        },
       },
       {
         title: t("home.projects.course"),
@@ -59,25 +54,15 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
 
       {
         // volcano, geekblue,green
-        title: isTeacher ? t("home.projects.groupProgress") : t("home.projects.projectStatus"),
-        key: "status",
-        render: () =>
-          isTeacher ? (
+        title: t("home.projects.projectStatus"),
+        key:"status",
+        render: (project:ProjectType) =>
+          !project.status ? (
             <GroupProgress
-              usersCompleted={Math.floor(Math.random() * 121)}
-              userCount={121}
+              usersCompleted={project.progress.completed}
+              userCount={project.progress.total}
             />
-          ) : Math.random() > 0.5 ? (
-            <ProjectStatusTag
-              icon
-              status="completed"
-            />
-          ) : (
-            <ProjectStatusTag
-              icon
-              status="notStarted"
-            />
-          ),
+          ) : <ProjectStatusTag status={project.status} />, 
       },
       {
         key: "action",
@@ -86,10 +71,10 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
             <Button
               onClick={() =>
                 modal.info({
+                  width: "1000px",
+                  
                   styles: {
-                    content: {
-                      width: "600px",
-                    },
+                   
                   },
                   title: e.name,
                   content: <ProjectInfo project={e} />,
@@ -111,7 +96,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
     }
     return columns
   },
-    [t, modal, isTeacher]
+    [t, modal, projects]
   )
 
 
@@ -121,7 +106,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
         emptyText: t("home.projects.noProjects"),
       }}
       loading={projects == null}
-      dataSource={(projects??[]).map((p) => ({ ...p, key: p.projectId }))}
+      dataSource={projects??[]}
       columns={columns}
     />
   )

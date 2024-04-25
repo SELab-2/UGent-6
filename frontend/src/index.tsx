@@ -15,7 +15,6 @@ msalInstance.initialize().then(() => {
     msalInstance.setActiveAccount(accounts[0])
   }
 
-  console.log(accounts);
 
   msalInstance.addEventCallback((event: EventMessage) => {
     if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
@@ -27,10 +26,8 @@ msalInstance.initialize().then(() => {
 
   const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
   root.render(
-    <React.StrictMode>
       <BrowserRouter>
       <App pca={msalInstance} />
       </BrowserRouter>
-    </React.StrictMode>
   )
 })
