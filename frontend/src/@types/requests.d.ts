@@ -66,6 +66,7 @@ export type POST_Responses = {
 
   [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE],
   [ApiRoutes.PROJECT_CREATE]: GET_Responses[ApiRoutes.PROJECT]
+  [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBERS]
 
 }
 
