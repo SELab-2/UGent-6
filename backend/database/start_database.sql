@@ -17,7 +17,7 @@ CREATE TABLE courses (
     course_id SERIAL PRIMARY KEY,
     course_name VARCHAR(100) NOT NULL,
     description TEXT,
-    integer coure_year,
+    course_year INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     archived_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
     join_key TEXT
