@@ -10,7 +10,7 @@ INSERT INTO users (name, surname, email, azure_id, role) VALUES
                                                              ('Charlie', 'Davis', 'charlie.davis@example.com', 'token_5', 'teacher');
 
 -- Inserting into `courses`
-INSERT INTO courses (course_id,course_name, description, coures_year) VALUES
+INSERT INTO courses (course_id,course_name, description, course_year) VALUES
                                                              (1,'Math 101', 'Introduction to Mathematics',2023),
                                                              (2,'Science 101', 'Basics of Scientific Method',2023),
                                                              (3,'History 101', 'World History Overview',2023),

@@ -1,7 +1,6 @@
 package com.ugent.pidgeon.postgre.models;
 
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.time.OffsetDateTime;
 
