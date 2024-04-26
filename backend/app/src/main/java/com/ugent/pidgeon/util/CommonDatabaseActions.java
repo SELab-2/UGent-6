@@ -2,6 +2,7 @@ package com.ugent.pidgeon.util;
 
 
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +42,8 @@ public class CommonDatabaseActions {
   private FileRepository fileRepository;
   @Autowired
   private CourseRepository courseRepository;
+  @Autowired
+  private CourseUserRepository courseUserRepository;
 
 
     /**
@@ -134,8 +138,11 @@ public class CommonDatabaseActions {
                 if (testEntity == null) {
                     return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
                 }
-                return deleteTestById(projectEntity, testEntity);
+                CheckResult<Void> delRes =  deleteTestById(projectEntity, testEntity);
+                return delRes;
             }
+
+
 
             return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
@@ -171,8 +178,6 @@ public class CommonDatabaseActions {
      */
     public CheckResult<Void> deleteTestById(ProjectEntity projectEntity, TestEntity testEntity) {
         try {
-            projectEntity.setTestId(null);
-            projectRepository.save(projectEntity);
             testRepository.deleteById(testEntity.getId())   ;
             CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
             if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
@@ -209,7 +214,7 @@ public class CommonDatabaseActions {
      * @param course course to copy
      * @return CheckResult with the status of the copy and the new course
      */
-    public CheckResult<CourseEntity> copyCourse(CourseEntity course) {
+    public CheckResult<CourseEntity> copyCourse(CourseEntity course, long userId) {
         // Copy the course
         CourseEntity newCourse = new CourseEntity(course.getName(), course.getDescription());
         // Change the createdAt, archivedAt and joinKey
@@ -252,6 +257,10 @@ public class CommonDatabaseActions {
             }
         }
 
+        // Add user to course
+        CourseUserEntity courseUserEntity = new CourseUserEntity(newCourse.getId(), userId, CourseRelation.creator);
+        courseUserRepository.save(courseUserEntity);
+
         return new CheckResult<>(HttpStatus.OK, "", newCourse);
     }
 
@@ -267,6 +276,7 @@ public class CommonDatabaseActions {
             groupCluster.getName(),
             groupCluster.getGroupAmount()
         );
+        newGroupCluster.setCreatedAt(OffsetDateTime.now());
 
         newGroupCluster = groupClusterRepository.save(newGroupCluster);
         if (copyGroups) {

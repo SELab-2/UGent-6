@@ -268,8 +268,6 @@ public class CourseController {
             }
 
             List<GroupClusterEntity> clusters = groupClusterRepository.findByCourseId(courseId);
-            Optional<GroupClusterEntity> individualCluster = groupClusterRepository.findIndividualClusterByCourseId(courseId);
-            individualCluster.ifPresent(clusters::add);
 
             // Delete all groupclusters linked to the course
             for (GroupClusterEntity groupCluster : clusters) {
@@ -678,5 +676,31 @@ public class CourseController {
         courseRepository.save(course);
         return ResponseEntity.ok("");
     }
+
+    @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/copy")
+    @Roles({UserRole.teacher})
+    @Transactional
+    public ResponseEntity<?> copyCourse(@PathVariable long courseId, Auth auth) {
+        try {
+            CheckResult<Pair<CourseEntity, CourseRelation>> checkResult = courseUtil.getCourseIfUserInCourse(courseId, auth.getUserEntity());
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+            }
+            if (!checkResult.getData().getSecond().equals(CourseRelation.creator)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the creator of a course can delete it");
+            }
+
+            CourseEntity course = checkResult.getData().getFirst();
+
+            CheckResult<CourseEntity> copyCheckRes = commonDatabaseActions.copyCourse(course, auth.getUserEntity().getId());
+            CourseEntity newCourse = copyCheckRes.getData();
+
+            return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(newCourse, courseUtil.getJoinLink(newCourse.getJoinKey(), "" + newCourse.getId()), false));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    
 
 }
