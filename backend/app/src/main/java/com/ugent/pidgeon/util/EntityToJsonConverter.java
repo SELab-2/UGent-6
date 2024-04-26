@@ -33,6 +33,8 @@ public class EntityToJsonConverter {
     private CourseUserRepository courseUserRepository;
     @Autowired
     private SubmissionRepository submissionRepository;
+  @Autowired
+  private ClusterUtil clusterUtil;
 
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
@@ -186,7 +188,10 @@ public class EntityToJsonConverter {
             }
         }
 
-
+        Long clusterId = project.getGroupClusterId();
+        if (clusterUtil.isIndividualCluster(clusterId)) {
+            clusterId = null;
+        }
         return new ProjectResponseJson(
                 courseEntityToCourseReference(course),
                 project.getDeadline(),
@@ -198,7 +203,8 @@ public class EntityToJsonConverter {
                 project.getMaxScore(),
                 project.isVisible(),
                 new ProjectProgressJson(completed, total),
-                groupId
+                groupId,
+                clusterId
         );
     }
 
