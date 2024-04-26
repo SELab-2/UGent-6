@@ -551,19 +551,25 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         CourseUserEntity courseUserEntity = checkResult.getData();
-        courseUserEntity.setRelation(request.getRelationAsEnum());
-        courseUserRepository.save(courseUserEntity);
+        if (courseUserEntity.getRelation().equals(request.getRelationAsEnum())) {
+            return ResponseEntity.ok().build();
+        }
+
         if (request.getRelationAsEnum().equals(CourseRelation.enrolled)) {
             UserEntity user = userUtil.getUserIfExists(requestwithid.getUserId());
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
             commonDatabaseActions.createNewIndividualClusterGroup(courseId, user);
-        } else {
+        } else if (courseUserEntity.getRelation().equals(CourseRelation.enrolled)){
             if (!commonDatabaseActions.removeIndividualClusterGroup(courseId, requestwithid.getUserId())) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to remove user from individual group, contact admin.");
             }
         }
+
+        courseUserEntity.setRelation(request.getRelationAsEnum());
+        courseUserRepository.save(courseUserEntity);
+
         return ResponseEntity.ok().build();
     }
 
