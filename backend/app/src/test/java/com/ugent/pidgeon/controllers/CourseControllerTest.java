@@ -120,7 +120,7 @@ public class CourseControllerTest extends ControllerTest {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
         when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", "", OffsetDateTime.now()));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now()));
 
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -217,7 +217,7 @@ public class CourseControllerTest extends ControllerTest {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
         when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", "", OffsetDateTime.now()));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now()));
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(new CourseEntity(), CourseRelation.course_admin)));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))
@@ -287,7 +287,8 @@ public class CourseControllerTest extends ControllerTest {
                 1,
                 true,
                 new ProjectProgressJson(1, 1),
-                1L
+                1L,
+            1L
         ));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
                 .andExpect(status().isOk());
@@ -429,17 +430,18 @@ public class CourseControllerTest extends ControllerTest {
     public void testUpdateCourseMember() throws Exception {
         String request = "{\"userId\": 1, \"relation\": \"enrolled\"}";
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).
-                thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.enrolled)));
+                thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.course_admin)));
         when(userUtil.getUserIfExists(anyLong())).thenReturn(new UserEntity("name", "surname", "email", UserRole.teacher, "id"));
+        when(commonDatabaseActions.removeIndividualClusterGroup(anyLong(), anyLong())).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isOk());
 
         when(courseUtil.canUpdateUserInCourse(anyLong(), any(), any(), any())).
-                thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 1, CourseRelation.course_admin)));
+                thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseUserEntity(1, 3, CourseRelation.enrolled)));
         when(commonDatabaseActions.removeIndividualClusterGroup(anyLong(), anyLong())).thenReturn(false);
-        request = "{\"userId\": 1, \"relation\": \"course_admin\"}";
+        request = "{\"relation\": \"course_admin\"}";
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1/members/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
