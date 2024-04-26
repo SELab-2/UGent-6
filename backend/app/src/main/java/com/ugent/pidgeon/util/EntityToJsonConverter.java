@@ -33,6 +33,8 @@ public class EntityToJsonConverter {
     private CourseUserRepository courseUserRepository;
     @Autowired
     private SubmissionRepository submissionRepository;
+  @Autowired
+  private ClusterUtil clusterUtil;
 
 
     public GroupJson groupEntityToJson(GroupEntity groupEntity) {
@@ -93,7 +95,8 @@ public class EntityToJsonConverter {
                 ApiRoutes.COURSE_BASE_PATH + "/" + course.getId() + "/members",
                 hideKey ? null : joinLink,
                 hideKey ? null : course.getJoinKey(),
-                course.getArchivedAt()
+                course.getArchivedAt(),
+                course.getCreatedAt()
         );
     }
 
@@ -105,7 +108,8 @@ public class EntityToJsonConverter {
                 course.getName(),
                 course.getId(),
                 course.getArchivedAt(),
-                memberCount
+                memberCount,
+                course.getCreatedAt()
         );
     }
 
@@ -186,7 +190,10 @@ public class EntityToJsonConverter {
             }
         }
 
-
+        Long clusterId = project.getGroupClusterId();
+        if (clusterUtil.isIndividualCluster(clusterId)) {
+            clusterId = null;
+        }
         return new ProjectResponseJson(
                 courseEntityToCourseReference(course),
                 project.getDeadline(),
@@ -198,7 +205,8 @@ public class EntityToJsonConverter {
                 project.getMaxScore(),
                 project.isVisible(),
                 new ProjectProgressJson(completed, total),
-                groupId
+                groupId,
+                clusterId
         );
     }
 

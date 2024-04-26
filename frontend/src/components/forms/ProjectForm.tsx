@@ -6,13 +6,16 @@ import GeneralFormTab from "./projectFormTabs/GeneralFormTab"
 import GroupsFormTab from "./projectFormTabs/GroupsFormTab"
 import StructureFormTab from "./projectFormTabs/StructureFormTab"
 import DockerFormTab from "./projectFormTabs/DockerFormTab"
+import { useLocation, useNavigate } from "react-router-dom"
 
 const VisibleTab: FC<PropsWithChildren<{ visible: boolean }>> = ({ visible, children }) => {
   return <div style={{ display: visible ? "block" : "none" }}>{children}</div>
 }
 
-const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardProps; activeTab: string; onTabChange: (t: string) => void }>> = ({ children, cardProps, activeTab, onTabChange,form }) => {
+const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardProps; }>> = ({ children, cardProps, form }) => {
   const { t } = useTranslation()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const tabs: TabsProps["items"] = [
     {
@@ -30,9 +33,15 @@ const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardPr
     {
       key: "tests",
       label: t("project.change.tests"),
-      forceRender: true,
     },
   ]
+
+
+  const onTabChange = (key: string) => {
+    navigate(`#${key}`)
+  }
+
+  const activeTab = location.hash.slice(1) || "general"
 
   // Note: we need to render all tabs, even if they are not visible. Otherwise the form cannot get its values
   return (
@@ -43,6 +52,8 @@ const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardPr
       tabProps={{
         size: "middle",
         activeKey: activeTab,
+        defaultActiveKey:location.hash.slice(1) || "general"
+
       }}
       onTabChange={onTabChange}
     >

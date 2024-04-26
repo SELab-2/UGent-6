@@ -12,6 +12,7 @@ export enum ApiRoutes {
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
+  COURSE_LEAVE = "api/courses/:courseId/leave",
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -57,6 +58,12 @@ export type POST_Requests = {
     [ApiRoutes.GROUP_MEMBERS]: {
       id: number
     }
+
+  [ApiRoutes.COURSE_CLUSTERS]: {
+    name: string
+    capacity: number
+    groupCount: number
+  }
 }
 
 /**
@@ -67,6 +74,7 @@ export type POST_Responses = {
   [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE],
   [ApiRoutes.PROJECT_CREATE]: GET_Responses[ApiRoutes.PROJECT]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBERS]
+  [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER]
 
 }
 
@@ -77,6 +85,7 @@ export type DELETE_Requests = {
   [ApiRoutes.COURSE]: undefined
   [ApiRoutes.PROJECT]: undefined
   [ApiRoutes.GROUP_MEMBER]: undefined
+  [ApiRoutes.COURSE_LEAVE]: undefined
 }
 
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { Button, Form, Card } from "antd"
 import { useTranslation } from "react-i18next"
 import { ProjectFormData, ProjectError } from "./components/ProjectCreateService"
@@ -18,7 +18,9 @@ const ProjectCreate: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<ProjectError | null>(null) // Gebruik ProjectError type voor error state
-  const [activeTab, setActiveTab] = useState("general")
+  const location = useLocation()
+
+
   const { message } = useAppApi()
 
   const handleCreation = async () => {
@@ -49,10 +51,10 @@ const ProjectCreate: React.FC = () => {
 
   const onInvalid: FormProps<ProjectFormData>["onFinishFailed"] = (e) => {
     const errField = e.errorFields[0].name[0]
-    if (errField === "groupClusterId") setActiveTab("groups")
-    else if (errField === "structure") setActiveTab("structure")
-    else if (errField === "dockerScript" || errField === "dockerImage" || errField === "sjabloon") setActiveTab("tests")
-    else setActiveTab("general")
+    if (errField === "groupClusterId") navigate("#groups")
+    else if (errField === "structure") navigate("#structure")
+    else if (errField === "dockerScript" || errField === "dockerImage" || errField === "sjabloon") navigate("#tests")
+    else navigate("#general")
   }
 
   return (
@@ -82,8 +84,7 @@ const ProjectCreate: React.FC = () => {
       >
         <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
           <ProjectForm
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
+
             form={form}
             cardProps={{
               title: t("project.change.title"),

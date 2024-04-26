@@ -115,7 +115,15 @@
       "groups": "Groups",
       "structure": "Structure",
       "tests": "Tests",
-      "update": "Update project"
+      "update": "Update project",
+      "newGroupCluster": "Add a new group cluster",
+      "makeCluster": "Create group cluster",
+      "clusterName": "Cluster name",
+      "amountOfGroups": "Amount of groups",
+      "groupSize": "Group size",
+      "groupSizeTooltip": "How many users should be in each group?",
+      "groupSizeMessage": "Group size must be greater than 0 " ,
+      "amountOfGroupsMessage": "Amount of groups must be greater than 0 "
     },
     "tests": {
       "title": "Tests for {{projectName}}",
@@ -194,7 +202,11 @@
     "noMembersFound": "No members found",
     "noGroupMembers": "No members in this group",
     "leftGroup": "You have left the group",
-    "joinedGroup": "You have joined the group"
+    "joinedGroup": "You have joined the group",
+    "leave": "Leave Course",
+    "leaveConfirm": "Are you sure you want to leave this course?",
+    "leaveSuccess": "Left course successfully",
+    "leaveFail": "Failed to leave the course"
   },
   "cancel": "Cancel",
   "ok": "OK",

@@ -120,7 +120,15 @@
       "tests": "Testen",
       "fileStructure": "Bestand structuur",
       "fileStructurePreview": "Bestand structuur preview",
-      "update": "Project aanpassen"
+      "update": "Project aanpassen",
+      "newGroupCluster": "Voeg een nieuwe groep cluster toe",
+      "makeCluster": "Groep cluster aanmaken",
+      "clusterName": "Cluster naam",
+      "amountOfGroups": "Aantal groepen",
+      "groupSize": "Groeps grootte",
+      "groupSizeTooltip": "Hoeveel leden kunnen in 1 groep?",
+      "groupSizeMessage": "Groeps grootte moet groter dan 0 zijn",
+      "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn"
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
@@ -198,7 +206,11 @@
     "noMembersFound": "Geen leden gevonden",
     "noGroupMembers": "Deze groep heeft geen leden",
     "leftGroup": "Groep verlaten",
-    "joinedGroup": "Groepslid geworden"
+    "joinedGroup": "Groepslid geworden",
+    "leave": "Vak verlaten",
+    "leaveConfirm": "Ben je zeker dat je dit vak wil verlaten?",
+    "leaveSuccess": "Vak succesvol verlaten",
+    "leaveFail": "Het lukte niet om het vak te verlaten"
   },
   "cancel": "Annuleren",
   "ok": "Ok",
