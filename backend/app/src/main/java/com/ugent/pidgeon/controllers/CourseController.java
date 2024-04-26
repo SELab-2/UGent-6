@@ -115,6 +115,7 @@ public class CourseController {
             // Get current time and convert to SQL Timestamp
             OffsetDateTime currentTimestamp = OffsetDateTime.now();
             courseEntity.setCreatedAt(currentTimestamp);
+            courseEntity.setJoinKey(UUID.randomUUID().toString());
             // Save course
             courseRepository.save(courseEntity);
 
