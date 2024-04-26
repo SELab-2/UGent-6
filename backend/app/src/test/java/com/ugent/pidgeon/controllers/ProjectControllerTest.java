@@ -197,7 +197,7 @@ public class ProjectControllerTest {
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, OffsetDateTime.now()),
         OffsetDateTime.MAX,
         "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-        1L));
+        1L, 1L));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjectById(2L, auth);
@@ -251,7 +251,7 @@ public class ProjectControllerTest {
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, OffsetDateTime.now()),
         OffsetDateTime.MAX,
         "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-        1L));
+        1L, 1L));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjectById(2L, auth);
@@ -305,7 +305,7 @@ public class ProjectControllerTest {
         new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, OffsetDateTime.now()),
         OffsetDateTime.MAX,
         "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-        1L));
+        1L, 1L));
 
     // Call controller method
     ResponseEntity<?> response = projectController.getProjectById(2L, auth);
@@ -566,7 +566,7 @@ public class ProjectControllerTest {
             new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, OffsetDateTime.now()),
             OffsetDateTime.MAX,
             "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-            1L));
+            1L, 1L));
     // Call controller method
     ResponseEntity<?> responseEntity = projectController.putProjectById(projectId, projectJson,
         auth);
@@ -613,7 +613,7 @@ public class ProjectControllerTest {
             new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L, OffsetDateTime.now()),
             OffsetDateTime.MAX,
             "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-            1L));
+            1L, 1L));
     // Call controller method
     ResponseEntity<?> responseEntity = projectController.patchProjectById(projectId, projectJson,
         auth);

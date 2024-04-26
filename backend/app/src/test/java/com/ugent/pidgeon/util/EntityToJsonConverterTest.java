@@ -34,6 +34,9 @@ public class EntityToJsonConverterTest {
   private GroupClusterRepository groupClusterRepository;
 
   @Mock
+  private ClusterUtil clusterUtil;
+
+  @Mock
   private GroupRepository groupRepository;
 
   @Mock
