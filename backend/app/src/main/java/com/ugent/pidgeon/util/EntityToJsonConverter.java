@@ -96,7 +96,8 @@ public class EntityToJsonConverter {
                 hideKey ? null : joinLink,
                 hideKey ? null : course.getJoinKey(),
                 course.getArchivedAt(),
-                course.getCreatedAt()
+                course.getCreatedAt(),
+                course.getCourseYear()
         );
     }
 

@@ -120,7 +120,7 @@ public class CourseControllerTest extends ControllerTest {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
         when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now()));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now(), 2013));
 
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -217,7 +217,7 @@ public class CourseControllerTest extends ControllerTest {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
         when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now()));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now(), 2023));
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(new CourseEntity(), CourseRelation.course_admin)));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))

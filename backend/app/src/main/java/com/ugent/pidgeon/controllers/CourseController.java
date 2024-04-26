@@ -111,7 +111,7 @@ public class CourseController {
             }
 
             // Create new course
-            CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription(), courseJson.getCourseYear());
+            CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription(), courseJson.getYear());
             // Get current time and convert to SQL Timestamp
             OffsetDateTime currentTimestamp = OffsetDateTime.now();
             courseEntity.setCreatedAt(currentTimestamp);
@@ -143,7 +143,7 @@ public class CourseController {
         }
         courseEntity.setName(courseJson.getName());
         courseEntity.setDescription(courseJson.getDescription());
-        courseEntity.setCourseYear(courseJson.getCourseYear());
+        courseEntity.setCourseYear(courseJson.getYear());
         if (courseJson.getArchived() != null) {
             courseEntity.setArchivedAt(courseJson.getArchived() ? OffsetDateTime.now() : null);
         }
@@ -192,8 +192,8 @@ public class CourseController {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
 
-            if (courseJson.getName() == null && courseJson.getDescription() == null && courseJson.getCourseYear() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name or description is required");
+            if (courseJson.getName() == null && courseJson.getDescription() == null && courseJson.getYear() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name, description or year is required");
             }
 
             CourseEntity courseEntity = checkResult.getData();
@@ -203,8 +203,8 @@ public class CourseController {
             if (courseJson.getDescription() == null) {
                 courseJson.setDescription(courseEntity.getDescription());
             }
-            if (courseJson.getCourseYear() == null) {
-                courseJson.setCourseYear(courseEntity.getCourseYear());
+            if (courseJson.getYear() == null) {
+                courseJson.setYear(courseEntity.getCourseYear());
             }
 
             return doCourseUpdate(courseEntity, courseJson, user);
