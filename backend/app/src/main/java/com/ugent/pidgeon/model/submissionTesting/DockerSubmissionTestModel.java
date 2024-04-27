@@ -16,7 +16,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 
 public class DockerSubmissionTestModel {
@@ -48,6 +51,11 @@ public class DockerSubmissionTestModel {
     createFolder(); // Create the folder after we// generate tmp folder of project
     // Configure container with volume bindings
     container.withHostConfig(new HostConfig().withBinds(new Bind(localMountFolder, sharedVolume)));
+
+    // Init directories in the shared folder
+    new File(localMountFolder + "input/").mkdirs();
+    new File(localMountFolder + "output/").mkdirs();
+    new File(localMountFolder + "artifacts/").mkdirs();
   }
 
 
@@ -62,25 +70,44 @@ public class DockerSubmissionTestModel {
       e.printStackTrace();
     }
   }
-
-  public DockerTestOutput runSubmission(String script) throws InterruptedException {
-    return runSubmission(script, new File[0]);
+  // function for deleting shared docker files, only use after catching the artifacts
+  public void cleanUp() {
+    removeFolder();
   }
 
-  private void runContainer(String script, File[] inputFiles, ResultCallback.Adapter<Frame> callback) {
-
-    // Init directories in the shared folder
-    new File(localMountFolder + "input/").mkdirs();
-    new File(localMountFolder + "output/").mkdirs();
-
-    // Copy input files to the shared folder
-    for (File file : inputFiles) {
+  public void addInputFiles(File[] files){
+    for (File file : files) {
       try {
         FileUtils.copyFileToDirectory(file, new File(localMountFolder + "input/"));
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
+  }
+
+  public void addZipInputFiles(ZipFile zipFile){
+    Enumeration<? extends ZipEntry> entries = zipFile.entries();
+    while (entries.hasMoreElements()) {
+      ZipEntry entry = entries.nextElement();
+      File entryDestination = new File(localMountFolder + "input/", entry.getName());
+      if (entry.isDirectory()) {
+        entryDestination.mkdirs();
+      } else {
+        File parent = entryDestination.getParentFile();
+        if (parent != null) {
+          parent.mkdirs();
+        }
+        try {
+          FileUtils.copyInputStreamToFile(zipFile.getInputStream(entry), entryDestination);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  private void runContainer(String script, ResultCallback.Adapter<Frame> callback) {
+
 
     // Configure and start the container
     container.withCmd("/bin/sh", "-c", script);
@@ -107,7 +134,7 @@ public class DockerSubmissionTestModel {
 
   }
 
-  public DockerTestOutput runSubmission(String script, File[] inputFiles)
+  public DockerTestOutput runSubmission(String script)
       {
 
     List<String> consoleLogs = new ArrayList<>();
@@ -117,7 +144,7 @@ public class DockerSubmissionTestModel {
         consoleLogs.add(new String(item.getPayload()));
       }
     };
-    runContainer(script, inputFiles, callback);
+    runContainer(script, callback);
 
     boolean allowPush;
 
@@ -133,15 +160,12 @@ public class DockerSubmissionTestModel {
       allowPush = false;
     }
 
-    // Cleanup
-    removeFolder();
     return new DockerTestOutput(consoleLogs, allowPush);
   }
 
-  public DockerTemplateTestResult runSubmissionWithTemplate(String script, String template,
-      File[] inputFiles) throws InterruptedException {
+  public DockerTemplateTestResult runSubmissionWithTemplate(String script, String template)  {
 
-    runContainer(script, inputFiles, new Adapter<>());
+    runContainer(script, new Adapter<>());
 
     // execute dockerClient and await
 
@@ -171,8 +195,6 @@ public class DockerSubmissionTestModel {
       }
     }
 
-    // Cleanup
-    removeFolder();
 
     // Check if allowed
     boolean allowed = true;
@@ -225,6 +247,15 @@ public class DockerSubmissionTestModel {
     return templateEntry;
   }
 
+  public List<File> getArtifacts(){
+    List<File> files = new ArrayList<>();
+    File[] filesInFolder = new File(localMountFolder + "artifacts/").listFiles();
+    if(filesInFolder != null){
+      files.addAll(Arrays.asList(filesInFolder));
+    }
+    return files;
+  }
+
   public static void addDocker(String imageName) {
     DockerClient dockerClient = DockerClientInstance.getInstance();
 
@@ -247,4 +278,5 @@ public class DockerSubmissionTestModel {
       System.out.println("Failed removing docker image: " + e.getMessage());
     }
   }
+
 }
