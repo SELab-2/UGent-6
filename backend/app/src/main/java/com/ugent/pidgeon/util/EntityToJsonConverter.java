@@ -110,7 +110,8 @@ public class EntityToJsonConverter {
                 course.getId(),
                 course.getArchivedAt(),
                 memberCount,
-                course.getCreatedAt()
+                course.getCreatedAt(),
+                course.getCourseYear()
         );
     }
 

@@ -19,7 +19,7 @@ public class CourseEntity {
     private String description;
 
     @Column(name = "course_year", nullable = true)
-    private int courseYear;
+    private Integer courseYear;
 
 
     @Column(name = "created_at")
