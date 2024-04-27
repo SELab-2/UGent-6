@@ -216,7 +216,7 @@ public class CommonDatabaseActions {
      */
     public CheckResult<CourseEntity> copyCourse(CourseEntity course, long userId) {
         // Copy the course
-        CourseEntity newCourse = new CourseEntity(course.getName(), course.getDescription());
+        CourseEntity newCourse = new CourseEntity(course.getName(), course.getDescription(), course.getCourseYear());
         // Change the createdAt, archivedAt and joinKey
         newCourse.setCreatedAt(OffsetDateTime.now());
         newCourse.setArchivedAt(null);
