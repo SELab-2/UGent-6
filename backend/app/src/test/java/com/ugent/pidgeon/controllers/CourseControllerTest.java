@@ -176,7 +176,8 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testPatchCourse() throws Exception {
         String courseJson = "{\"name\": null, \"description\": \"description\"}";
-        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseEntity()));
+        CourseEntity courseEntity = new CourseEntity("name", "description",2024);
+        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", courseEntity));
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseRepository.save(any())).thenReturn(null);
 
