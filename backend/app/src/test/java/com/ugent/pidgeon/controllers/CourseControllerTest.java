@@ -112,7 +112,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testCreateCourse() throws Exception {
-        String courseJson = "{\"name\": \"test\", \"description\": \"description\"}";
+        String courseJson = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024}";
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseRepository.save(any())).thenReturn(null);
         when(courseUserRepository.save(any())).thenReturn(null);
@@ -120,7 +120,7 @@ public class CourseControllerTest extends ControllerTest {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
         when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now()));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now(), 2013));
 
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,7 +144,7 @@ public class CourseControllerTest extends ControllerTest {
     // This function also tests all lines of doCourseUpdate
     @Test
     public void testUpdateCourse() throws Exception {
-        String courseJson = "{\"name\": \"test\", \"description\": \"description\"}";
+        String courseJson = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024}";
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseEntity()));
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
@@ -176,7 +176,8 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testPatchCourse() throws Exception {
         String courseJson = "{\"name\": null, \"description\": \"description\"}";
-        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", new CourseEntity()));
+        CourseEntity courseEntity = new CourseEntity("name", "description",2024);
+        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", courseEntity));
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseRepository.save(any())).thenReturn(null);
 
@@ -217,7 +218,7 @@ public class CourseControllerTest extends ControllerTest {
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
         when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(new CourseWithInfoJson(0L, "", "", new UserReferenceJson("", "", 0L),
-                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now()));
+                        new ArrayList<>(), "", "", "", OffsetDateTime.now(), OffsetDateTime.now(), 2023));
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(new CourseEntity(), CourseRelation.course_admin)));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))
@@ -270,7 +271,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetProjectsByCourseId() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         List<ProjectEntity> projects = Arrays.asList(new ProjectEntity(), new ProjectEntity());
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
@@ -301,7 +302,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testJoinCourse() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.checkJoinLink(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any())).thenReturn(true);
@@ -320,7 +321,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetJoinKey() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.checkJoinLink(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/join/1908"))
@@ -333,7 +334,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testJoinCourseNoKey() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.checkJoinLink(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         when(commonDatabaseActions.createNewIndividualClusterGroup(anyLong(), any())).thenReturn(true);
@@ -347,7 +348,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetCourseJoinKeyNoKey() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.checkJoinLink(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/join"))
@@ -456,7 +457,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetCourseMembers() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(course, CourseRelation.course_admin)));
@@ -474,7 +475,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetCourseKey() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
@@ -487,7 +488,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetAndCreateCourseKey() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))
@@ -500,7 +501,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testDeleteCourseKey() throws Exception {
-        CourseEntity course = new CourseEntity("name", "descripton");
+        CourseEntity course = new CourseEntity("name", "descripton",2024);
         course.setId(1);
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1/joinKey"))

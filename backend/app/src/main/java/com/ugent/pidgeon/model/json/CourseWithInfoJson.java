@@ -13,6 +13,7 @@ public record CourseWithInfoJson (
         String joinUrl,
         String joinKey,
         OffsetDateTime archivedAt,
-        OffsetDateTime createdAt
+        OffsetDateTime createdAt,
+        Integer year
 ) {}
 
