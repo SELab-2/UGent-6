@@ -56,7 +56,7 @@ public class CourseController {
      */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH)
     @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getUserCourses(Auth auth, @RequestParam(value="archived", required = false) Boolean archived) {
+    public ResponseEntity<?> getUserCourses(Auth auth, @RequestParam(value = "archived", required = false) Boolean archived) {
         long userID = auth.getUserEntity().getId();
         try {
             Logger.getGlobal().info("Archived: " + archived);
@@ -111,7 +111,7 @@ public class CourseController {
             }
 
             // Create new course
-            CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription());
+            CourseEntity courseEntity = new CourseEntity(courseJson.getName(), courseJson.getDescription(), courseJson.getYear());
             // Get current time and convert to SQL Timestamp
             OffsetDateTime currentTimestamp = OffsetDateTime.now();
             courseEntity.setCreatedAt(currentTimestamp);
@@ -143,6 +143,7 @@ public class CourseController {
         }
         courseEntity.setName(courseJson.getName());
         courseEntity.setDescription(courseJson.getDescription());
+        courseEntity.setCourseYear(courseJson.getYear());
         if (courseJson.getArchived() != null) {
             courseEntity.setArchivedAt(courseJson.getArchived() ? OffsetDateTime.now() : null);
         }
@@ -191,8 +192,8 @@ public class CourseController {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
 
-            if (courseJson.getName() == null && courseJson.getDescription() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name or description is required");
+            if (courseJson.getName() == null && courseJson.getDescription() == null && courseJson.getYear() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name, description or year is required");
             }
 
             CourseEntity courseEntity = checkResult.getData();
@@ -201,6 +202,9 @@ public class CourseController {
             }
             if (courseJson.getDescription() == null) {
                 courseJson.setDescription(courseEntity.getDescription());
+            }
+            if (courseJson.getYear() == null) {
+                courseJson.setYear(courseEntity.getCourseYear());
             }
 
             return doCourseUpdate(courseEntity, courseJson, user);
@@ -232,7 +236,6 @@ public class CourseController {
 
         return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId()), relation.equals(CourseRelation.enrolled)));
     }
-
 
 
     /**
@@ -317,7 +320,7 @@ public class CourseController {
         if (relation.equals(CourseRelation.enrolled)) {
             projects = projects.stream().filter(ProjectEntity::isVisible).toList();
         }
-        List<ProjectResponseJson> projectResponseJsons =  projects.stream().map(projectEntity ->
+        List<ProjectResponseJson> projectResponseJsons = projects.stream().map(projectEntity ->
                 entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, course, user)
         ).toList();
 
@@ -338,7 +341,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to individual group, contact admin.");
         }
         courseUserRepository.save(new CourseUserEntity(courseId, user.getId(), CourseRelation.enrolled));
-        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(),"" + course.getId()), false));
+        return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(course, courseUtil.getJoinLink(course.getJoinKey(), "" + course.getId()), false));
     }
 
     private ResponseEntity<?> getJoinLinkGetResponseEntity(long courseId, String courseKey, UserEntity user) {
@@ -358,8 +361,8 @@ public class CourseController {
     /**
      * Function to join course with key
      *
-     * @param auth authentication object of the requesting user
-     * @param courseId ID of the course to join
+     * @param auth      authentication object of the requesting user
+     * @param courseId  ID of the course to join
      * @param courseKey key of the course to join
      * @return ResponseEntity with a statuscode and no body
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698810">apiDog documentation</a>
@@ -376,8 +379,8 @@ public class CourseController {
     /**
      * Function to get course information for joining course with key
      *
-     * @param auth authentication object of the requesting user
-     * @param courseId ID of the course to get the join key from
+     * @param auth      authentication object of the requesting user
+     * @param courseId  ID of the course to get the join key from
      * @param courseKey key of the course to get the join key from
      * @return ResponseEntity with a statuscode and a JSON object containing the course information
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698818">apiDog documentation</a>
@@ -394,7 +397,7 @@ public class CourseController {
     /**
      * Function to join course without key
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to join
      * @return ResponseEntity with a statuscode and no body
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698821">apiDog documentation</a>
@@ -411,7 +414,7 @@ public class CourseController {
     /**
      * Function to get course information for joining course without key
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to get the join key from
      * @return ResponseEntity with a statuscode and a JSON object containing the course information
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698822">apiDog documentation</a>
@@ -429,7 +432,7 @@ public class CourseController {
      * Function to leave a course
      *
      * @param courseId ID of the course to leave
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @return ResponseEntity with a statuscode and no body
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698775">apiDog documentation</a>
      * @HttpMethod DELETE
@@ -464,9 +467,9 @@ public class CourseController {
     /**
      * Function to remove a different user from a course
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to leave
-     * @param userId JSON object containing the user id
+     * @param userId   JSON object containing the user id
      * @return ResponseEntity with a statuscode and no body
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883724">apiDog documentation</a>
      * @HttpMethod DELETE
@@ -494,9 +497,9 @@ public class CourseController {
     /**
      * Function to add a different user to a course
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to add the user to
-     * @param request JSON object containing the user id and relation
+     * @param request  JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883723">apiDog documentation</a>
      * @HttpMethod POST
@@ -529,9 +532,9 @@ public class CourseController {
     /**
      * Function to update the relation of a user in a course
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to update the user in
-     * @param request JSON object containing the user id and relation
+     * @param request  JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883731">apiDog documentation</a>
      * @HttpMethod PATCH
@@ -575,7 +578,7 @@ public class CourseController {
     /**
      * Function to get all members of a course
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to get the members from
      * @return ResponseEntity with a JSON object containing the members of the course
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724006">apiDog documentation</a>
@@ -608,7 +611,7 @@ public class CourseController {
     /**
      * Function to get the join link of a course
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to get the join link from
      * @return ResponseEntity with the join link of the course
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698763">apiDog documentation</a>
@@ -627,10 +630,11 @@ public class CourseController {
     }
 
     // Function for invalidating the previous key and generating a new one, can be useful when starting a new year.
+
     /**
      * Function to generate a new join link for a course
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to generate the join link for
      * @return ResponseEntity with the new join link of the course
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6691656">apiDog documentation</a>
@@ -656,7 +660,7 @@ public class CourseController {
     /**
      * Function to remove the joinKey from the joinLink of a course
      *
-     * @param auth authentication object of the requesting user
+     * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to remove the join link from
      * @return ResponseEntity with the new join link of the course (without the key)
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698823">apiDog documentation</a>
