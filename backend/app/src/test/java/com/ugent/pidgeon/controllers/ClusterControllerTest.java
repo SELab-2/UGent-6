@@ -68,13 +68,7 @@ public class ClusterControllerTest extends ControllerTest{
 
     @BeforeEach
     public void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(clusterController)
-                .defaultRequest(MockMvcRequestBuilders.get("/**")
-                        .with(request -> {
-                            request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication());
-                            return request;
-                        }))
-                .build();
+        setUpController(clusterController);
 
         courseEntity = new CourseEntity("name", "description",2024);
         groupClusterEntity = new GroupClusterEntity(1L, 20, "clustername", 5);

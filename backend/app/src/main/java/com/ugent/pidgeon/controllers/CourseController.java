@@ -59,7 +59,6 @@ public class CourseController {
     public ResponseEntity<?> getUserCourses(Auth auth, @RequestParam(value = "archived", required = false) Boolean archived) {
         long userID = auth.getUserEntity().getId();
         try {
-            Logger.getGlobal().info("Archived: " + archived);
             List<UserRepository.CourseIdWithRelation> userCourses = new ArrayList<>();
             if (archived == null || !archived) {
                 userCourses.addAll(userRepository.findCourseIdsByUserId(userID));
@@ -67,6 +66,7 @@ public class CourseController {
             if (archived == null || archived) {
                 userCourses.addAll(userRepository.findArchivedCoursesByUserId(userID));
             }
+
             // Retrieve course entities based on user courses
             List<CourseWithRelationJson> courseJSONObjects = userCourses.stream()
                     .map(courseWithRelation -> {
@@ -79,7 +79,10 @@ public class CourseController {
                     )
                     .filter(Objects::nonNull)
                     .toList();
+            for (CourseWithRelationJson courseJson: courseJSONObjects) {
+                Logger.getGlobal().info("UserCourses: " + courseJson);
 
+            }
             // Return the JSON string in ResponseEntity
             return ResponseEntity.ok(courseJSONObjects);
         } catch (Exception e) {
@@ -117,7 +120,7 @@ public class CourseController {
             courseEntity.setCreatedAt(currentTimestamp);
             courseEntity.setJoinKey(UUID.randomUUID().toString());
             // Save course
-            courseRepository.save(courseEntity);
+            courseEntity = courseRepository.save(courseEntity);
 
             // Add user as course creator
             CourseUserEntity courseUserEntity = new CourseUserEntity(courseEntity.getId(), userId, CourseRelation.creator);
@@ -147,7 +150,7 @@ public class CourseController {
         if (courseJson.getArchived() != null) {
             courseEntity.setArchivedAt(courseJson.getArchived() ? OffsetDateTime.now() : null);
         }
-        courseRepository.save(courseEntity);
+        courseEntity = courseRepository.save(courseEntity);
         return ResponseEntity.ok(entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, courseUtil.getJoinLink(courseEntity.getJoinKey(), "" + courseEntity.getId()), false));
     }
 
