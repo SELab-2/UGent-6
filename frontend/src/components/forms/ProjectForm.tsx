@@ -61,7 +61,7 @@ const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardPr
         <GeneralFormTab />
       </VisibleTab>
       <VisibleTab visible={activeTab === "groups"}>
-        <GroupsFormTab />
+        <GroupsFormTab form={form} />
       </VisibleTab>
       <VisibleTab visible={activeTab === "structure"}>
         <StructureFormTab form={form}/>

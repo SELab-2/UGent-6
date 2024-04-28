@@ -125,9 +125,9 @@
       "makeCluster": "Groep cluster aanmaken",
       "clusterName": "Cluster naam",
       "amountOfGroups": "Aantal groepen",
-      "groupSize": "Groeps grootte",
+      "groupSize": "Groep grootte",
       "groupSizeTooltip": "Hoeveel leden kunnen in 1 groep?",
-      "groupSizeMessage": "Groeps grootte moet groter dan 0 zijn",
+      "groupSizeMessage": "Groep grootte moet groter dan 0 zijn",
       "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn"
     },
     "tests": {

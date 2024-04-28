@@ -5,7 +5,6 @@ import { ApiRoutes, GET_Responses, POST_Requests } from "../../../@types/request
 import apiCall from "../../../util/apiFetch"
 import { FC } from "react"
 import { ClusterType } from "../../course/components/groupTab/GroupsCard"
-import { useParams } from "react-router-dom"
 
 const GroupClusterModalContent: FC<{ onClose: () => void; onClusterCreated: (cluster: ClusterType) => void,courseId:number|string }> = ({courseId,onClose,onClusterCreated}) => {
   const { t } = useTranslation()
