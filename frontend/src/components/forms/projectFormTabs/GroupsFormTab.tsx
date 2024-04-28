@@ -8,6 +8,8 @@ import apiCall from "../../../util/apiFetch"
 import { ApiRoutes } from "../../../@types/requests.d"
 import { ClusterType } from "../../../pages/course/components/groupTab/GroupsCard"
 import { Spin } from "antd"
+import GroupList from "../../../pages/course/components/groupTab/GroupList"
+import GroupMembersTransfer from "../../other/GroupMembersTransfer"
 
 const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -21,11 +23,14 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   useEffect(() => {
     if (selectedClusterId == null) setSelectedCluster(null)
     else {
-      apiCall.get(ApiRoutes.CLUSTER, { id: selectedClusterId }).then((response) => {
-        setSelectedCluster(response.data)
-      })
+      fetchCluster()
     }
   }, [selectedClusterId])
+
+  const fetchCluster = async () => {
+    const response = await apiCall.get(ApiRoutes.CLUSTER, { id: selectedClusterId })
+    setSelectedCluster(response.data)
+  }
 
   return (
     <>
@@ -40,11 +45,15 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         />
       </Form.Item>
 
-      {selectedClusterId != null && (
+      {selectedClusterId != null && courseId && (
         <>
           {selectedCluster ? (
             <>
-              <br />
+              <GroupMembersTransfer
+                groups={selectedCluster.groups}
+                onChanged={fetchCluster}
+                courseId={courseId}
+              />
             </>
           ) : (
             <Spin />

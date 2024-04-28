@@ -128,7 +128,10 @@
       "groupSize": "Groep grootte",
       "groupSizeTooltip": "Hoeveel leden kunnen in 1 groep?",
       "groupSizeMessage": "Groep grootte moet groter dan 0 zijn",
-      "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn"
+      "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn",
+      "selectGroup": "Selecteer een groep",
+      "noMembersinGroup": "Geen leden in deze groep",
+      "searchUser": "Zoek gebruiker"
     },
     "tests": {
       "title": "Testen voor {{projectName}}",

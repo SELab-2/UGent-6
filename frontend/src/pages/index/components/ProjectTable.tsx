@@ -88,6 +88,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
       loading={projects == null}
       dataSource={projects??[]}
       columns={columns}
+      rowKey={(project) => project.projectId}
     />
   )
 }

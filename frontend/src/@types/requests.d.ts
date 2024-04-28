@@ -210,7 +210,7 @@ export type GET_Responses = {
     name: string;
     capacity: number;
     groupCount: number;
-    created_at: Timestamp;
+    createdAt: Timestamp;
     groups: GET_Responses[ApiRoutes.GROUP][]
     courseUrl: ApiRoutes.COURSE
   }

@@ -123,7 +123,10 @@
       "groupSize": "Group size",
       "groupSizeTooltip": "How many users should be in each group?",
       "groupSizeMessage": "Group size must be greater than 0 " ,
-      "amountOfGroupsMessage": "Amount of groups must be greater than 0 "
+      "amountOfGroupsMessage": "Amount of groups must be greater than 0 ",
+      "selectGroup": "Select a group",
+      "noMembersinGroup": "No members in this group",
+      "searchUser": "Search user"
     },
     "tests": {
       "title": "Tests for {{projectName}}",
