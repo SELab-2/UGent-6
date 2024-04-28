@@ -691,7 +691,7 @@ public class CourseController {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
             if (!checkResult.getData().getSecond().equals(CourseRelation.creator)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the creator of a course can delete it");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only the creator of a course can copy it");
             }
 
             CourseEntity course = checkResult.getData().getFirst();
