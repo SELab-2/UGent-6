@@ -2,7 +2,15 @@ package com.ugent.pidgeon.util;
 
 
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
+import java.nio.file.Path;
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +38,12 @@ public class CommonDatabaseActions {
     private TestRepository testRepository;
     @Autowired
     private FileUtil fileUtil;
+  @Autowired
+  private FileRepository fileRepository;
+  @Autowired
+  private CourseRepository courseRepository;
+  @Autowired
+  private CourseUserRepository courseUserRepository;
 
 
     /**
@@ -124,8 +138,11 @@ public class CommonDatabaseActions {
                 if (testEntity == null) {
                     return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
                 }
-                return deleteTestById(projectEntity, testEntity);
+                CheckResult<Void> delRes =  deleteTestById(projectEntity, testEntity);
+                return delRes;
             }
+
+
 
             return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
@@ -161,8 +178,6 @@ public class CommonDatabaseActions {
      */
     public CheckResult<Void> deleteTestById(ProjectEntity projectEntity, TestEntity testEntity) {
         try {
-            projectEntity.setTestId(null);
-            projectRepository.save(projectEntity);
             testRepository.deleteById(testEntity.getId())   ;
             CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
             if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
@@ -190,6 +205,191 @@ public class CommonDatabaseActions {
             return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting cluster", null);
+        }
+    }
+
+
+    /**
+     * Copy a course and all its related data. Assumes that permissions are already checked
+     * @param course course to copy
+     * @return CheckResult with the status of the copy and the new course
+     */
+    public CheckResult<CourseEntity> copyCourse(CourseEntity course, long userId) {
+        // Copy the course
+        CourseEntity newCourse = new CourseEntity(course.getName(), course.getDescription(), course.getCourseYear());
+        // Change the createdAt, archivedAt and joinKey
+        newCourse.setCreatedAt(OffsetDateTime.now());
+        newCourse.setArchivedAt(null);
+        newCourse.setJoinKey(UUID.randomUUID().toString());
+
+        newCourse = courseRepository.save(newCourse);
+
+        Map<Long, Long> groupClusterMap = new HashMap<>();
+        // Copy the group(clusters) linked to the course
+        GroupClusterEntity groupCluster = groupClusterRepository.findIndividualClusterByCourseId(
+            course.getId()).orElse(null);
+        if (groupCluster != null) {
+            CheckResult<GroupClusterEntity> checkResult = copyGroupCluster(groupCluster, newCourse.getId(), false);
+            if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+            }
+            groupClusterMap.put(groupCluster.getId(), checkResult.getData().getId());
+        } else {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying course", null);
+        }
+
+        List<GroupClusterEntity> groupClusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(course.getId());
+        for (GroupClusterEntity cluster : groupClusters) {
+            CheckResult<GroupClusterEntity> checkResult = copyGroupCluster(cluster,
+                newCourse.getId(), true);
+            if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+            }
+            groupClusterMap.put(cluster.getId(), checkResult.getData().getId());
+        }
+
+        // Copy the projects linked to the course
+        List<ProjectEntity> projects = projectRepository.findByCourseId(course.getId());
+        for (ProjectEntity project : projects) {
+            CheckResult<ProjectEntity> checkResult = copyProject(project, newCourse.getId(), groupClusterMap.get(project.getGroupClusterId()));
+            if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+            }
+        }
+
+        // Add user to course
+        CourseUserEntity courseUserEntity = new CourseUserEntity(newCourse.getId(), userId, CourseRelation.creator);
+        courseUserRepository.save(courseUserEntity);
+
+        return new CheckResult<>(HttpStatus.OK, "", newCourse);
+    }
+
+    /**
+     * Copy a group cluster and all its related data. Assumes that permissions are already checked
+     * @param groupCluster group cluster that needs to be copied
+     * @return CheckResult with the status of the copy and the new group cluster
+     */
+    public CheckResult<GroupClusterEntity> copyGroupCluster(GroupClusterEntity groupCluster, long courseId, boolean copyGroups) {
+        GroupClusterEntity newGroupCluster = new GroupClusterEntity(
+            courseId,
+            groupCluster.getMaxSize(),
+            groupCluster.getName(),
+            groupCluster.getGroupAmount()
+        );
+        newGroupCluster.setCreatedAt(OffsetDateTime.now());
+
+        newGroupCluster = groupClusterRepository.save(newGroupCluster);
+        if (copyGroups) {
+            List<GroupEntity> groups = groupRepository.findAllByClusterId(groupCluster.getId());
+            for (GroupEntity group : groups) {
+                GroupEntity newGroup = new GroupEntity(group.getName(), newGroupCluster.getId());
+                groupRepository.save(newGroup);
+            }
+        }
+
+        return new CheckResult<>(HttpStatus.OK, "", newGroupCluster);
+    }
+
+
+
+    /**
+     * Copy a project and all its related data. Assumes that permissions are already checked
+     * @param project project that needs to be copied
+     * @param courseId id of the course the project is linked to
+     * @param clusterId id of the cluster the project is linked to
+     * @return CheckResult with the status of the copy and the new project
+     */
+    public CheckResult<ProjectEntity> copyProject(ProjectEntity project, long courseId, long clusterId) {
+        // Copy the project
+        ProjectEntity newProject = new ProjectEntity(
+            courseId,
+            project.getName(),
+            project.getDescription(),
+            clusterId,
+            null,
+            project.isVisible(),
+            project.getMaxScore(),
+            project.getDeadline());
+
+        newProject = projectRepository.save(newProject);
+
+
+        // Copy the test linked to the project
+        if (project.getTestId() != null) {
+            TestEntity test = testRepository.findById(project.getTestId()).orElse(null);
+            if (test != null) {
+                CheckResult<TestEntity> checkResult = copyTest(test, newProject.getId());
+                if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                    return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+                }
+                newProject.setTestId(checkResult.getData().getId());
+                newProject = projectRepository.save(newProject);
+            } else {
+                return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying project", null);
+            }
+        }
+
+
+        return new CheckResult<>(HttpStatus.OK, "", newProject);
+    }
+
+    /**
+     * Copy a test and all its related data. Assumes that permissions are already checked
+     * @param test test that needs to be copied
+     * @param projectId id of the project the test is linked to
+     * @return CheckResult with the status of the copy and the new test
+     */
+    public CheckResult<TestEntity> copyTest(TestEntity test, long projectId) {
+        // Copy the test
+        TestEntity newTest = new TestEntity(
+            test.getDockerImage(),
+            test.getDockerTestId(),
+            test.getStructureTestId()
+        );
+
+        // Copy the files linked to the test
+        try {
+            FileEntity dockerFile = fileRepository.findById(test.getDockerTestId()).orElse(null);
+            FileEntity structureFile = fileRepository.findById(test.getStructureTestId()).orElse(null);
+            if (dockerFile == null || structureFile == null) {
+                return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying test", null);
+            }
+
+            CheckResult<FileEntity> copyDockRes = copyTestFile(dockerFile, projectId);
+            if (!copyDockRes.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(copyDockRes.getStatus(), copyDockRes.getMessage(), null);
+            }
+            newTest.setDockerTestId(copyDockRes.getData().getId());
+
+            CheckResult<FileEntity> copyStructRes = copyTestFile(structureFile, projectId);
+            if (!copyStructRes.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(copyStructRes.getStatus(), copyStructRes.getMessage(), null);
+            }
+            newTest.setStructureTestId(copyStructRes.getData().getId());
+        } catch (Exception e) {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying test", null);
+        }
+
+        newTest = testRepository.save(newTest);
+        return new CheckResult<>(HttpStatus.OK, "", newTest);
+    }
+
+
+    /**
+     * Copy a file and all its related data. Assumes that permissions are already checked
+     * @param file file to copy
+     * @param projectId id of the project the file is linked to
+     * @return CheckResult with the status of the copy and the new file
+     */
+    public CheckResult<FileEntity> copyTestFile(FileEntity file, long projectId) {
+        // Copy the file
+        try {
+            Path newPath = Filehandler.copyTest(Path.of(file.getPath()), projectId);
+            FileEntity newFile = new FileEntity(newPath.getFileName().toString(), newPath.toString(), file.getUploadedBy());
+            newFile = fileRepository.save(newFile);
+            return new CheckResult<>(HttpStatus.OK, "", newFile);
+        } catch (Exception e) {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying file", null);
         }
     }
 }

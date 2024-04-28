@@ -6,13 +6,17 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.http.MethodNotSupportedException;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -43,6 +47,24 @@ public class GlobalErrorHandler {
     HttpStatus status = HttpStatus.NOT_FOUND;
     return ResponseEntity.status(status).body(new ApiErrorReponse(OffsetDateTime.now(), status.value(), status.getReasonPhrase(),
         "Endpoint doesn't exist", path));
+  }
+
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<ApiErrorReponse> handleMethodNotSupportedException(HttpServletRequest request, Exception ex) {
+    logError(ex);
+    String path = request.getRequestURI();
+    HttpStatus status = HttpStatus.METHOD_NOT_ALLOWED;
+    return ResponseEntity.status(status).body(new ApiErrorReponse(OffsetDateTime.now(), status.value(), status.getReasonPhrase(),
+        "Method not supported", path));
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiErrorReponse> handleMethodArgumentTypeMismatchException(HttpServletRequest request, Exception ex) {
+    logError(ex);
+    String path = request.getRequestURI();
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+    return ResponseEntity.status(status).body(new ApiErrorReponse(OffsetDateTime.now(), status.value(), status.getReasonPhrase(),
+        "Invalid url argument type", path));
   }
 
   @ExceptionHandler(Exception.class)
