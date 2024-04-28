@@ -44,6 +44,8 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-devtools"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 // tasks.named('test',Test) {
