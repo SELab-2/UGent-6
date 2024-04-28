@@ -28,6 +28,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -179,12 +181,16 @@ public class ClusterControllerTest extends ControllerTest{
 
     @Test
     public void testPatchCluster() throws Exception {
-        String request = "{\"name\": null, \"capacity\": null}";
+
         /* If the user is an admin of the cluster and the json is valid, the cluster is updated */
+        String originalname = groupClusterEntity.getName();
+        Integer originalcapacity = groupClusterEntity.getMaxSize();
             /* If fields are null they are not updated */
+        String request = "{\"name\": null, \"capacity\": null}";
         when(clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(anyLong(), any()))
                 .thenReturn(new CheckResult<>(HttpStatus.OK, "", groupClusterEntity));
         when(clusterUtil.checkGroupClusterUpdateJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(groupClusterRepository.save(groupClusterEntity)).thenReturn(groupClusterEntity);
         when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity)).thenReturn(groupClusterJson);
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.CLUSTER_BASE_PATH + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -192,14 +198,16 @@ public class ClusterControllerTest extends ControllerTest{
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(groupClusterJson)));
+        assertEquals(originalname, groupClusterEntity.getName());
+        assertEquals(originalcapacity, groupClusterEntity.getMaxSize());
+
             /* If fields are not null they are updated */
         request = "{\"name\": \"newclustername\", \"capacity\": 22}";
         GroupClusterEntity copy = new GroupClusterEntity(1L, 20, "newclustername", 5);
         when(clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(anyLong(), any()))
-                .thenReturn(new CheckResult<>(HttpStatus.OK, "", copy));
-        copy.setName("newclustername");
-        copy.setMaxSize(22);
+                .thenReturn(new CheckResult<>(HttpStatus.OK, "", groupClusterEntity));
         GroupClusterJson updated = new GroupClusterJson(1L, "newclustername", 22, 5, OffsetDateTime.now(), Collections.emptyList(), "");
+        when(groupClusterRepository.save(groupClusterEntity)).thenReturn(copy);
         when(entityToJsonConverter.clusterEntityToClusterJson(copy)).thenReturn(updated);
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.CLUSTER_BASE_PATH + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -207,6 +215,8 @@ public class ClusterControllerTest extends ControllerTest{
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(updated)));
+        assertNotEquals(originalname, groupClusterEntity.getName());
+        assertNotEquals(originalcapacity, groupClusterEntity.getMaxSize());
 
         /* If the json is invalid, the corresponding status code is returned */
         when(clusterUtil.checkGroupClusterUpdateJson(any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));

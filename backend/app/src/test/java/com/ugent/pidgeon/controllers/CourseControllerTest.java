@@ -34,6 +34,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -272,15 +276,93 @@ public class CourseControllerTest extends ControllerTest {
     // This function also tests all lines of doCourseUpdate
     @Test
     public void testUpdateCourse() throws Exception {
-        String courseJson = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024}";
+            String courseJson = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024}";
+            /* If admin and valid json, update course and return 200 */
+            when(courseUtil.getCourseIfAdmin(anyLong(), any())).
+                    thenReturn(new CheckResult<>(HttpStatus.OK, "", activeCourse));
+            CourseEntity updatedEntity = new CourseEntity("test", "description",2024);
+            CourseWithInfoJson updatedJson = new CourseWithInfoJson(
+                activeCourse.getId(),
+                "test",
+                "description",
+                new UserReferenceJson("", "", 0L),
+                new ArrayList<>(),
+                "",
+                "",
+                "",
+                OffsetDateTime.now(),
+                OffsetDateTime.now(),
+                2023
+            );
+            when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+            when(courseUtil.getJoinLink(any(), any())).thenReturn("");
+            when(courseRepository.save(any())).thenReturn(updatedEntity);
+            when(entityToJsonConverter.courseEntityToCourseWithInfo(updatedEntity, "", false)).thenReturn(updatedJson);
+            activeCourse.setArchivedAt(OffsetDateTime.now());
+            OffsetDateTime originalArchivedAt = activeCourse.getArchivedAt();
+            mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(courseJson))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(content().json(objectMapper.writeValueAsString(updatedJson)));
+            assertEquals(originalArchivedAt, activeCourse.getArchivedAt());
+            activeCourse.setArchivedAt(null);
+
+
+            /* If courseJson has archived field, update archived accordingly */
+            String courseJsonWithArchivedTrue = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024, \"archived\": \"true\"}";
+            mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(courseJsonWithArchivedTrue))
+                    .andExpect(status().isOk());
+            assertNotNull(activeCourse.getArchivedAt());
+
+
+            String courseJsonWithArchivedFalse = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024, \"archived\": \"false\"}";
+            mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(courseJsonWithArchivedFalse))
+                    .andExpect(status().isOk());
+            assertNull(activeCourse.getArchivedAt());
+
+
+            /* If invalid json, return corresponding statuscode */
+            when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+            mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(courseJson))
+                    .andExpect(status().isIAmATeapot());
+
+            /* If not admin, return 403 */
+            when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
+            mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(courseJson))
+                    .andExpect(status().isForbidden());
+
+            /* If error occurs, return 500 */
+            when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenThrow(new RuntimeException());
+            mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(courseJson))
+                    .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void testPatchCourse() throws Exception {
+        
         /* If admin and valid json, update course and return 200 */
+        String originalName = activeCourse.getName();
+        String originalDescription = activeCourse.getDescription();
+        Integer originalYear = activeCourse.getCourseYear();
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).
-                thenReturn(new CheckResult<>(HttpStatus.OK, "", activeCourse));
-        CourseEntity updatedEntity = new CourseEntity("test", "description",2024);
+            thenReturn(new CheckResult<>(HttpStatus.OK, "", activeCourse));
+        CourseEntity updatedEntity = new CourseEntity("test", "description2",2024);
         CourseWithInfoJson updatedJson = new CourseWithInfoJson(
             activeCourse.getId(),
             "test",
-            "description",
+            "description2",
             new UserReferenceJson("", "", 0L),
             new ArrayList<>(),
             "",
@@ -292,70 +374,73 @@ public class CourseControllerTest extends ControllerTest {
         );
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseUtil.getJoinLink(any(), any())).thenReturn("");
-        when(courseRepository.save(any())).thenReturn(updatedEntity);
+        when(courseRepository.save(activeCourse)).thenReturn(updatedEntity);
         when(entityToJsonConverter.courseEntityToCourseWithInfo(updatedEntity, "", false)).thenReturn(updatedJson);
-        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isOk());
+            /* If field is not present, do not update it */
+        String patchCourseJson = "{\"name\": \"test\"}";
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(patchCourseJson))
+            .andExpect(status().isOk());
+        assertNotEquals(originalName, activeCourse.getName());
+        assertEquals(originalDescription, activeCourse.getDescription());
+        assertEquals(originalYear, activeCourse.getCourseYear());
+        assertNull(activeCourse.getArchivedAt());
+            /* If fields are present, update them */
+        String requestJson = "{\"name\": \"test2\", \"description\": \"description2\",\"courseYear\" : 2034}";
+        originalName = activeCourse.getName();
+        activeCourse.setArchivedAt(OffsetDateTime.now());
+        OffsetDateTime originalArchivedAt = activeCourse.getArchivedAt();
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(updatedJson)));
+        assertNotEquals(originalName, activeCourse.getName());
+        assertNotEquals(originalDescription, activeCourse.getDescription());
+        assertNotEquals(originalYear, activeCourse.getCourseYear());
+        assertEquals(originalArchivedAt, activeCourse.getArchivedAt());
+        activeCourse.setArchivedAt(null);
 
 
+        /* If courseJson has archived field, update archived accordingly */
+        String courseJsonWithArchivedTrue = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024, \"archived\": \"true\"}";
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(courseJsonWithArchivedTrue))
+            .andExpect(status().isOk());
+        assertNotNull(activeCourse.getArchivedAt());
+
+
+        String courseJsonWithArchivedFalse = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024, \"archived\": \"false\"}";
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(courseJsonWithArchivedFalse))
+            .andExpect(status().isOk());
+        assertNull(activeCourse.getArchivedAt());
+
+
+        /* If invalid json, return corresponding statuscode */
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isIAmATeapot());
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+            .andExpect(status().isIAmATeapot());
 
+        /* If not admin, return 403 */
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+            .andExpect(status().isForbidden());
 
         /* If error occurs, return 500 */
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenThrow(new RuntimeException());
-        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    public void testPatchCourse() throws Exception {
-        String courseJson = "{\"name\": null, \"description\": \"description\"}";
-        CourseEntity courseEntity = new CourseEntity("name", "description",2024);
-        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", courseEntity));
-        when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
-        when(courseRepository.save(any())).thenReturn(null);
-
         mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isOk());
-
-        courseJson = "{\"name\": \"name\", \"description\": null}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isOk());
-
-        courseJson = "{\"name\": null, \"description\": null}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isBadRequest());
-
-        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isForbidden());
-
-        when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenThrow(new RuntimeException());
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isInternalServerError());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+            .andExpect(status().isInternalServerError());
 
     }
 

@@ -164,7 +164,7 @@ public class ClusterController {
         }
         clusterEntity.setMaxSize(clusterJson.getCapacity());
         clusterEntity.setName(clusterJson.getName());
-        groupClusterRepository.save(clusterEntity);
+        clusterEntity = groupClusterRepository.save(clusterEntity);
         return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity));
     }
 
