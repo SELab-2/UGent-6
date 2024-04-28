@@ -68,6 +68,7 @@
     "confirmationText": "Are you sure you want to change the role of {{name}} to {{role}}?"
   },
   "project": {
+    "userName": "name",
     "submissions": "Submissions",
     "newSubmission": "New submission",
     "files": "Files",

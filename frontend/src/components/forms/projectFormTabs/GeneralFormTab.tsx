@@ -1,10 +1,12 @@
-import { DatePicker, Form, Input, Switch } from "antd"
+import { DatePicker, Form, FormInstance, Input, Switch, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import { FC } from "react"
 import MarkdownEditor from "../../input/MarkdownEditor"
 
-const GeneralFormTab:FC = () => {
+const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
+  const description = Form.useWatch("description", form)
+  console.log(description)
 
   return (
     <>
@@ -15,14 +17,12 @@ const GeneralFormTab:FC = () => {
       >
         <Input />
       </Form.Item>
-      <Form.Item
-        label={t("project.change.description")}
-        name="description"
-        rules={[{ required: true, message: t("project.change.descriptionMessage") }]}
-      >
-        <MarkdownEditor/>
-      </Form.Item>
-      
+
+    <Typography.Text>
+        {t("project.change.description")}
+    </Typography.Text>
+      <MarkdownEditor value={description} maxLength={5000}  />
+
       <Form.Item
         label={t("project.change.visible")}
         required

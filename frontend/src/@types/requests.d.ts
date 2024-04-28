@@ -94,6 +94,7 @@ export type DELETE_Requests = {
  */
 export type PUT_Requests = {
   [ApiRoutes.COURSE]: POST_Requests[ApiRoutes.COURSE]
+  [ApiRoutes.PROJECT]: ProjectFormData
 
 }
 
@@ -101,6 +102,7 @@ export type PUT_Requests = {
 
 export type PUT_Responses = {
   [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
+  [ApiRoutes.PROJECT]: GET_Responses[ApiRoutes.PROJECT]
 }
 
 

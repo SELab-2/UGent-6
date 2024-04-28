@@ -72,6 +72,7 @@
   },
 
   "project": {
+    "userName":"Naam",
     "submissions": "Indieningen",
     "newSubmission": "Nieuwe indiening",
     "files": "Bestanden",

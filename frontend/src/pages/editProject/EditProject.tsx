@@ -1,5 +1,4 @@
-
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button, Form, Card } from "antd"
 import { useTranslation } from "react-i18next"
@@ -9,30 +8,36 @@ import { EditFilled, PlusOutlined } from "@ant-design/icons"
 import { FormProps } from "antd/lib"
 import { ProjectError, ProjectFormData } from "../projectCreate/components/ProjectCreateService"
 import useProject from "../../hooks/useProject"
-import dayjs from 'dayjs';
-
+import dayjs from "dayjs"
+import apiCall from "../../util/apiFetch"
+import { ApiRoutes } from "../../@types/requests.d"
+import { AppRoutes } from "../../@types/routes"
+import { ProjectContext } from "../../router/ProjectRoutes"
 
 const EditProject: React.FC = () => {
   const [form] = Form.useForm<ProjectFormData>()
   const { t } = useTranslation()
-  const { courseId } = useParams<{ courseId: string }>()
+  const { courseId,projectId } = useParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<ProjectError | null>(null) // Gebruik ProjectError type voor error state
-  const [activeTab, setActiveTab] = useState("general")
+  const navigate = useNavigate()
   const project = useProject()
-  
+  const { updateProject } = useContext(ProjectContext)
+
   const handleCreation = async () => {
     const values: ProjectFormData = form.getFieldsValue()
     console.log(values)
 
-    if (!courseId) return console.error("courseId is undefined")
+    if (!courseId || !projectId) return console.error("courseId or projectId is undefined")
     setLoading(true)
 
     try {
-
+      const result = await apiCall.put(ApiRoutes.PROJECT, values, { id: projectId })
+      updateProject(result.data)
+      navigate(AppRoutes.PROJECT.replace(":projectId", result.data.projectId.toString()).replace(":courseId", courseId)) // Navigeer naar het nieuwe project
     } catch (error: any) {
+      console.log(error);
       // Vang netwerkfouten op
-    
     } finally {
       setLoading(false)
     }
@@ -40,14 +45,13 @@ const EditProject: React.FC = () => {
 
   const onInvalid: FormProps<ProjectFormData>["onFinishFailed"] = (e) => {
     const errField = e.errorFields[0].name[0]
-    if (errField === "groupClusterId") setActiveTab("groups")
-    else if (errField === "structure") setActiveTab("structure")
-    else if (errField === "dockerScript" || errField === "dockerImage" || errField === "sjabloon") setActiveTab("tests")
-    else setActiveTab("general")
+    if (errField === "groupClusterId") navigate("#groups")
+    else if (errField === "structure") navigate("#structure")
+    else if (errField === "dockerScript" || errField === "dockerImage" || errField === "sjabloon") navigate("#tests")
+    else navigate("#general")
   }
 
-
-  if(!project) return <></>
+  if (!project) return <></>
   return (
     <>
       {error && (
@@ -75,8 +79,6 @@ const EditProject: React.FC = () => {
       >
         <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
           <ProjectForm
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             form={form}
             cardProps={{
               title: t("project.change.updateTitle", { name: project.name }),

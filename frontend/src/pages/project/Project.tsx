@@ -51,7 +51,7 @@ const Project = () => {
     ]
 
     // if individual project -> do not show groups tab
-    if (project) {
+    if (project?.clusterId) {
       items.push({
         key: "groups",
         label: t("course.groups"),
