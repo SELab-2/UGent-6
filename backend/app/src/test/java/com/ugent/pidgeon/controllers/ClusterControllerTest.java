@@ -148,14 +148,17 @@ public class ClusterControllerTest extends ControllerTest{
     //This function also tests doGroupClusterUpdate
     @Test
     public void testUpdateCluster() throws Exception {
-        String request = "{\"name\": \"newclustername\", \"capacity\": 20}";
+        String request = "{\"name\": \"newclustername\", \"capacity\": 22}";
+        String originalname = groupClusterEntity.getName();
+        Integer originalcapacity = groupClusterEntity.getMaxSize();
         /* If the user is an admin of the cluster, the cluster isn't individual and the json is valid, the cluster is updated */
         GroupClusterEntity copy = new GroupClusterEntity(1L, 20, "newclustername", 5);
         when(clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(anyLong(), any()))
-                .thenReturn(new CheckResult<>(HttpStatus.OK, "", copy));
+                .thenReturn(new CheckResult<>(HttpStatus.OK, "", groupClusterEntity));
         when(clusterUtil.checkGroupClusterUpdateJson(any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         copy.setName("newclustername");
         GroupClusterJson updated = new GroupClusterJson(1L, "newclustername", 20, 5, OffsetDateTime.now(), Collections.emptyList(), "");
+        when(groupClusterRepository.save(groupClusterEntity)).thenReturn(copy);
         when(entityToJsonConverter.clusterEntityToClusterJson(copy)).thenReturn(updated);
         mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -163,6 +166,8 @@ public class ClusterControllerTest extends ControllerTest{
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(updated)));
+        assertNotEquals(originalname, groupClusterEntity.getName());
+        assertNotEquals(originalcapacity, groupClusterEntity.getMaxSize());
 
         /* If the json is invalid, the corresponding status code is returned */
         when(clusterUtil.checkGroupClusterUpdateJson(any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
