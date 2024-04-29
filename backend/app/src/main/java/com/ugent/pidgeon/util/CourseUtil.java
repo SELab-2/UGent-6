@@ -6,6 +6,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -260,8 +261,9 @@ public class CourseUtil {
         }
 
 
-        if (courseJson.getName() == null || courseJson.getDescription() == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "name and description are required", null);
+        if (courseJson.getName() == null || courseJson.getDescription() == null || courseJson.getYear() == null) {
+            Logger.getGlobal().info(""+ courseJson.getYear());
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "name, description and year are required", null);
         }
 
         if (courseJson.getName().isBlank()) {

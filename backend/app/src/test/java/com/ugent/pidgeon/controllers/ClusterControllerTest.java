@@ -63,7 +63,7 @@ public class ClusterControllerTest extends ControllerTest{
                         }))
                 .build();
 
-        courseEntity = new CourseEntity("name", "description");
+        courseEntity = new CourseEntity("name", "description",2024);
         groupClusterEntity = new GroupClusterEntity(1L, 20, "clustername", 5);
         groupEntity = new GroupEntity("groupName", 1L);
     }

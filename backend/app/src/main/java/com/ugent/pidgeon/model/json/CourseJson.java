@@ -8,10 +8,13 @@ public class CourseJson{
 
     private Boolean isArchived;
 
-    public CourseJson(String name, String description, Boolean isArchived) {
+    private Integer year;
+
+    public CourseJson(String name, String description, Boolean isArchived, Integer courseYear) {
         this.name = name;
         this.description = description;
         this.isArchived = isArchived;
+        this.year = courseYear;
     }
 
     public String getName() {
@@ -36,6 +39,14 @@ public class CourseJson{
 
     public void setArchived(Boolean isArchived) {
         this.isArchived = isArchived;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer courseYear) {
+        this.year = courseYear;
     }
 }
 
