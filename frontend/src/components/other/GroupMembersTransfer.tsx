@@ -105,23 +105,47 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
     setSelectedGroup(group)
   }
 
+
+  const randomizeGroups = () => {
+      if(!courseMembers) {
+        return
+      }
+      let randomGroups: Record<string, string[]> = {}
+
+      let members = [...courseMembers]
+      members = members.sort(() => Math.random() - 0.5)
+      for (let i = 0; i < groups.length; i++) {
+        const group = groups[i]
+        const groupMembers = members.splice(0, group.capacity)
+        // @ts-ignore //TODO: fix the types so i can remove the ts ignore
+        randomGroups[group.groupId] = groupMembers.map((m) => m.user.userId)
+      }
+      console.log(randomGroups);
+      setTargetKeys(randomGroups)
+  }
+console.log("---->",selectedGroup?.groupId);
   const renderFooter: TransferProps["footer"] = (_, info) => {
-    if (info?.direction === "left") return null
     // Filter `option.label` match the user type `input`
     const filterOption = (input: string, option?: { label: string }) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
 
     return (
       <div style={{ margin: "0.5rem", textAlign: "center" }}>
-        <Select
-          showSearch
-          value={selectedGroup?.groupId}
-          placeholder={t("project.change.selectGroup")}
-          optionFilterProp="children"
-          onChange={changeGroup}
-          filterOption={filterOption}
-          style={{width:"100%"}}
-          options={groups.map((g) => ({ label: g.name, value: g.groupId }))}
-        />
+        {
+          info?.direction === "left" ? <Button disabled={!courseMembers} onClick={randomizeGroups}>{t("project.change.randomizeGroups")}</Button>:
+          <Select
+            showSearch
+            value={selectedGroup?.groupId}
+            placeholder={t("project.change.selectGroup")}
+            optionFilterProp="children"
+            onChange={changeGroup}
+            filterOption={filterOption}
+            style={{width:"100%"}}
+            options={groups.map((g) => ({ label: g.name, value: g.groupId }))}
+          />
+        }
+
+
+
       </div>
     )
   }

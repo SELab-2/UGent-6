@@ -128,7 +128,8 @@
       "selectGroup": "Select a group",
       "noMembersinGroup": "No members in this group",
       "searchUser": "Search user",
-      "groupFull": "The group has more members than the group capacity"
+      "groupFull": "The group has more members than the group capacity",
+      "randomizeGroups": "Create random groups"
     },
     "tests": {
       "title": "Tests for {{projectName}}",

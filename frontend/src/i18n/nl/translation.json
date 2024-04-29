@@ -133,7 +133,8 @@
       "selectGroup": "Selecteer een groep",
       "noMembersinGroup": "Geen leden in deze groep",
       "searchUser": "Zoek gebruiker",
-      "groupFull": "De groep bevat meer leden dan groeps capaciteit"
+      "groupFull": "De groep bevat meer leden dan groeps capaciteit",
+      "randomizeGroups": "Maak random groepen"
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
