@@ -127,7 +127,8 @@
       "amountOfGroupsMessage": "Amount of groups must be greater than 0 ",
       "selectGroup": "Select a group",
       "noMembersinGroup": "No members in this group",
-      "searchUser": "Search user"
+      "searchUser": "Search user",
+      "groupFull": "The group has more members than the group capacity"
     },
     "tests": {
       "title": "Tests for {{projectName}}",

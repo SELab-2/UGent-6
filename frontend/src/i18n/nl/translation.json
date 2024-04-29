@@ -132,7 +132,8 @@
       "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn",
       "selectGroup": "Selecteer een groep",
       "noMembersinGroup": "Geen leden in deze groep",
-      "searchUser": "Zoek gebruiker"
+      "searchUser": "Zoek gebruiker",
+      "groupFull": "De groep bevat meer leden dan groeps capaciteit"
     },
     "tests": {
       "title": "Testen voor {{projectName}}",

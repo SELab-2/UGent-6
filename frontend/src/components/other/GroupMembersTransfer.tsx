@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react"
 import { GroupType } from "../../pages/project/components/GroupTab"
 
-import { Button, Select, Space, Switch, Table, Transfer } from "antd"
+import { Alert, Button, Select, Space, Switch, Table, Transfer } from "antd"
 import type { GetProp, SelectProps, TableColumnsType, TableProps, TransferProps } from "antd"
 import apiCall from "../../util/apiFetch"
 import { ApiRoutes } from "../../@types/requests.d"
@@ -18,7 +18,7 @@ interface TableTransferProps extends TransferProps<TransferItem> {
 }
 
 // Customize Table Transfer
-const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: TableTransferProps & { emptyText: string }) => (
+const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: TableTransferProps & { emptyText: string, warning?:string }) => (
   <Transfer {...restProps}>
     {({ direction, filteredItems, onItemSelect, onItemSelectAll, selectedKeys: listSelectedKeys, disabled: listDisabled }) => {
       const columns = direction === "left" ? leftColumns : rightColumns
@@ -32,7 +32,8 @@ const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: T
         selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT, Table.SELECTION_NONE],
       }
 
-      return (
+      return (<>
+      {restProps.warning && <Alert style={{margin:"1rem 0.5rem"}} type="warning" message={restProps.warning} />}
         <Table
           locale={{
             emptyText,
@@ -51,7 +52,7 @@ const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: T
             },
           })}
         />
-      )
+   </>   )
     }}
   </Transfer>
 )
@@ -141,6 +142,7 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
     return courseMembers.filter((u) => !users.has(u.user.userId.toString()))
   },[selectedGroup,courseMembers])
 
+  const overCapacity = selectedGroup && (targetKeys[selectedGroup.groupId]?.length??0) >  selectedGroup.capacity
 
   return (
     <>
@@ -158,7 +160,9 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
         filterOption={(inputValue, item) => item.user.name!.indexOf(inputValue) !== -1}
         leftColumns={columns}
         rightColumns={columns}
+        warning={overCapacity ? t("project.change.groupFull") : undefined}
         footer={renderFooter}
+        status={overCapacity ? "warning": undefined}
       />
     </>
   )
