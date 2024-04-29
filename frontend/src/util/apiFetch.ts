@@ -4,7 +4,7 @@ import { msalInstance } from "../index"
 import { AxiosRequestConfig } from "axios"
 import { msalConfig } from "../auth/AuthConfig"
 
-const serverHost = window.location.origin.includes("localhost") ? "http://localhost:8080" : window.location.origin
+const serverHost =  window.location.origin.includes("localhost") ? "http://localhost:8080" : window.location.origin
 let accessToken: string | null = null
 let tokenExpiry: Date | null = null
 
@@ -64,8 +64,6 @@ async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", rou
 
   return axios(config)
 }
-
-export type POST_Error<T extends keyof POST_Requests> =  AxiosError<POST_Responses[T], POST_Responses[T]>
 
 const apiCall = {
   get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues)                                  => apiFetch("GET", route,undefined,pathValues) as Promise<AxiosResponse<GET_Responses[T]>>,

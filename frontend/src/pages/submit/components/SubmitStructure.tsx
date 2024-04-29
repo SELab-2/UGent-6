@@ -1,6 +1,6 @@
 import { Tree } from "antd"
 import type { TreeDataNode } from "antd"
-import { FC } from "react"
+import { FC, memo, useMemo } from "react"
 
 const treeData: TreeDataNode[] = [
   {
@@ -63,15 +63,31 @@ const treeData: TreeDataNode[] = [
   },
 ]
 
+type TreeDataOutput = { tree: TreeDataNode[] | null; error: string | null }
+
+function generateTreeData(structure: string): TreeDataOutput {
+  let tree: TreeDataNode[] = []
+  if (!structure) return { tree: null, error: "No structure" }
+
+  return {
+    tree: treeData,
+    error: null,
+  }
+}
+
 const SubmitStructure: FC<{ structure: string }> = ({ structure }) => {
+  const treeData: { tree: TreeDataNode[] | null; error: string | null } = generateTreeData(structure)
+
+  
+  if (!treeData.tree) return null
   return (
     <Tree.DirectoryTree
       multiple
       defaultExpandAll
       selectable={false}
-      treeData={treeData}
+      treeData={treeData.tree}
     />
   )
 }
 
-export default SubmitStructure
+export default memo(SubmitStructure)

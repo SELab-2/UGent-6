@@ -34,17 +34,17 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
       title={courseProjects.course.name}
       style={{ width: 300,height:"100%" }}
       actions={[
-        <Tooltip title={t("home.projects.userCourseCount", { count: 2 })}>
+        <Tooltip title={t(courseProjects.course.memberCount > 1? "home.projects.userCourseCount_plural": "home.projects.userCourseCount", { count: courseProjects.course.memberCount })}>
           <span>
             <Statistic
               valueStyle={{ fontSize: "1em", color: token.colorTextLabel }}
               prefix={<TeamOutlined />}
-              value={72}
+              value={courseProjects.course.memberCount}
             />
           </span>
         </Tooltip>,
 
-        <Tooltip title={t("home.projects.activeProjects_plural", { count:courseProjects.projects.length })}>
+        <Tooltip title={t(courseProjects.projects.length > 1 ? "home.projects.activeProjects_plural": "home.projects.activeProjects", { count:courseProjects.projects.length })}>
           <span>
             <Statistic
               valueStyle={{ fontSize: "1em", color: token.colorTextLabel }}

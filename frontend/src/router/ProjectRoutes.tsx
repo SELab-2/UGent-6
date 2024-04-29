@@ -6,6 +6,7 @@ import { ApiRoutes } from "../@types/requests.d"
 
 type ProjectContextType = {
   project: ProjectType | null
+  updateProject: (project: ProjectType) => void
 }
 
 export const ProjectContext = createContext<ProjectContextType>({} as ProjectContextType)
@@ -35,8 +36,12 @@ const ProjectRoutes = () => {
     }
   }, [projectId])
 
+  const updateProject = (project: ProjectType) => {
+    setProject(project)
+  }
+
   return (
-    <ProjectContext.Provider value={{ project }}>
+    <ProjectContext.Provider value={{ project,updateProject }}>
       <Outlet />
     </ProjectContext.Provider>
   )

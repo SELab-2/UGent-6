@@ -20,5 +20,6 @@ public record ProjectResponseJson(
         Integer maxScore,
         boolean visible,
         ProjectProgressJson progress,
-        Long groupId
+        Long groupId,
+        Long clusterId
 ) {}

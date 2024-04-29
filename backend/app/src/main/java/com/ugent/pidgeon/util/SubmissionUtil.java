@@ -1,8 +1,10 @@
 package com.ugent.pidgeon.util;
 
+import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ public class SubmissionUtil {
     private SubmissionRepository submissionRepository;
     @Autowired
     private GroupUtil groupUtil;
+  @Autowired
+  private GroupClusterRepository groupClusterRepository;
 
 
     /**
@@ -69,16 +73,29 @@ public class SubmissionUtil {
      * @return CheckResult with the status of the check and the group id
      */
     public CheckResult<Long> checkOnSubmit(long projectId, UserEntity user) {
-        Long groupId = groupRepository.groupIdByProjectAndUser(projectId, user.getId());
-
         if (!projectUtil.userPartOfProject(projectId, user.getId())) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "You aren't part of this project", null);
         }
+
+        Long groupId = groupRepository.groupIdByProjectAndUser(projectId, user.getId());
+        if (groupId == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "User is not part of a group for this project", null);
+        }
+        GroupEntity group = groupUtil.getGroupIfExists(groupId).getData();
+        if (group == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not found", null);
+        }
+
+        if (groupClusterRepository.inArchivedCourse(group.getClusterId())) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot submit for a project in an archived course", null);
+        }
+
 
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
         if (projectCheck.getStatus() != HttpStatus.OK) {
             return new CheckResult<> (projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
+
         ProjectEntity project = projectCheck.getData();
         OffsetDateTime time = OffsetDateTime.now();
         Logger.getGlobal().info("Time: " + time + " Deadline: " + project.getDeadline());

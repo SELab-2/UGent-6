@@ -22,7 +22,7 @@ const Sidebar: FC = () => {
     () => [
       {
         key: "courses",
-        label: t("home.yourCourses"),
+        label: t("home.allCourses"),
         type: "sub1",
         children: (courses??[]).map((c) => ({
           key: c.courseId,

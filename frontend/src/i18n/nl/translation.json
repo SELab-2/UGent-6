@@ -8,9 +8,18 @@
     "dark": "Donker",
     "light": "Licht"
   },
+  "courses":{
+    "courses": "Vakken",
+    "searchCourse": "Zoek vak",
+    "member": "lid",
+    "members": "leden",
+    "archived": "Gearchiveerd",
+    "noCourses": "Geen vakken gevonden"
+  },
   "home": {
-    "yourCourses": "Vakken",
-    "myCourses": "Mijn vakken",
+    "allCourses": "Alle vakken",
+    "yourCourses": "Ingeschreven vakken",
+    "myCourses": "Beheerde vakken",
     "createCourse": "Vak aanmaken",
     "courseName": "Vak naam",
     "courseDescription": "Beschrijving",
@@ -41,8 +50,10 @@
       "activeProjects": "{{count}} actief project",
       "activeProjects_plural": "{{count}} actieve projecten",
       "submit": "Inleveren",
-      "userCourseCount": "{{count}} gebruikers in dit vak"
-    }
+      "userCourseCount_plural": "{{count}} gebruikers in dit vak",
+      "userCourseCount": "{{count}} gebruiker in dit vak"
+    },
+    "moreCourses": "Alle vakken"
   },
   "profile": {
     "student": "Student aan Universiteit Gent",
@@ -55,11 +66,13 @@
     "student": "Student",
     "teacher": "Professor",
     "admin": "Admin",
+    "course_admin": "Assistent",
     "confirmation": "Bevestiging",
     "confirmationText": "Bent u zeker dat u de rol van {{name}} wilt aanpassen naar {{role}}?"
   },
 
   "project": {
+    "userName":"Naam",
     "submissions": "Indieningen",
     "newSubmission": "Nieuwe indiening",
     "files": "Bestanden",
@@ -76,19 +89,20 @@
     "status": "Status",
     "feedback": "Feedback",
     "groupEmpty": "Geen leden in deze groep",
-    "testFailed": "Testen gefaalt",
-    "structureFailed": "Structuur testen gefaalt",
+    "testFailed": "Testen gefaald",
+    "structureFailed": "Structuur testen gefaald",
     "passed": "Geslaagd",
     "notSubmitted": "Niet ingediend",
     "submissionTime": "Indienings tijd",
     "noSubmissions": "Geen indieningen",
     "loadingSubmissions": "Indieningen laden...",
-    "options": "Opties",
+    "options": "Aanpassen",
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",
+      "updateTitle": "{{name}} aanpassen",
       "nameMessage": "Vul de naam van het project in",
       "description": "Beschrijving",
       "descriptionMessage": "Vul de beschrijving van het project in",
@@ -100,7 +114,25 @@
       "deadline": "Deadline",
       "create": "Project aanmaken",
       "success": "Project succesvol aangemaakt",
-      "groupClusterIdTooltip": "Selecteer geen groep om een individueel project te maken. "
+      "groupClusterIdTooltip": "Selecteer geen groep om een individueel project te maken. ",
+      "general": "Algemeen",
+      "groups": "Groepen",
+      "structure": "Structuur",
+      "tests": "Testen",
+      "fileStructure": "Bestand structuur",
+      "fileStructurePreview": "Bestand structuur preview",
+      "update": "Project aanpassen",
+      "newGroupCluster": "Voeg een nieuwe groep cluster toe",
+      "makeCluster": "Groep cluster aanmaken",
+      "clusterName": "Cluster naam",
+      "amountOfGroups": "Aantal groepen",
+      "groupSize": "Groep grootte",
+      "groupSizeTooltip": "Hoeveel leden kunnen in 1 groep?",
+      "groupSizeMessage": "Groep grootte moet groter dan 0 zijn",
+      "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn",
+      "selectGroup": "Selecteer een groep",
+      "noMembersinGroup": "Geen leden in deze groep",
+      "searchUser": "Zoek gebruiker"
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
@@ -175,7 +207,14 @@
     "createCourse":"Vak aanmaken",
     "changesSaved": "Aanpassingen opgeslagen",
     "noFeedback": "Nog geen feedback beschikbaar",
-    "noMembersFound": "Geen leden gevonden"
+    "noMembersFound": "Geen leden gevonden",
+    "noGroupMembers": "Deze groep heeft geen leden",
+    "leftGroup": "Groep verlaten",
+    "joinedGroup": "Groepslid geworden",
+    "leave": "Vak verlaten",
+    "leaveConfirm": "Ben je zeker dat je dit vak wil verlaten?",
+    "leaveSuccess": "Vak succesvol verlaten",
+    "leaveFail": "Het lukte niet om het vak te verlaten"
   },
   "cancel": "Annuleren",
   "ok": "Ok",
@@ -189,5 +228,9 @@
     "404_message" : "Sorry, de pagina die je bezocht bestaat niet.",
     "500_message": "Sorry, er ging iets mis."
 
+  },
+  "components": {
+    "write": "Aanpassen",
+    "preview": "Voorvertoning"
   }
 }

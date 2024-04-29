@@ -12,6 +12,7 @@ export enum ApiRoutes {
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
+  COURSE_LEAVE = "api/courses/:courseId/leave",
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -38,7 +39,7 @@ export enum ApiRoutes {
   TEST = "api/test",
   USER = "api/users/:id",
   USERS = "api/users",
-  USER_AUTH = "api/auth",
+  USER_AUTH = "api/user",
 }
 
 export type Timestamp = string
@@ -53,6 +54,16 @@ export type POST_Requests = {
   }
   [ApiRoutes.PROJECT_CREATE]:
       ProjectFormData
+
+    [ApiRoutes.GROUP_MEMBERS]: {
+      id: number
+    }
+
+  [ApiRoutes.COURSE_CLUSTERS]: {
+    name: string
+    capacity: number
+    groupCount: number
+  }
 }
 
 /**
@@ -62,6 +73,8 @@ export type POST_Responses = {
 
   [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE],
   [ApiRoutes.PROJECT_CREATE]: GET_Responses[ApiRoutes.PROJECT]
+  [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBERS]
+  [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER]
 
 }
 
@@ -71,6 +84,8 @@ export type POST_Responses = {
 export type DELETE_Requests = {
   [ApiRoutes.COURSE]: undefined
   [ApiRoutes.PROJECT]: undefined
+  [ApiRoutes.GROUP_MEMBER]: undefined
+  [ApiRoutes.COURSE_LEAVE]: undefined
 }
 
 
@@ -79,6 +94,7 @@ export type DELETE_Requests = {
  */
 export type PUT_Requests = {
   [ApiRoutes.COURSE]: POST_Requests[ApiRoutes.COURSE]
+  [ApiRoutes.PROJECT]: ProjectFormData
 
 }
 
@@ -86,6 +102,7 @@ export type PUT_Requests = {
 
 export type PUT_Responses = {
   [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
+  [ApiRoutes.PROJECT]: GET_Responses[ApiRoutes.PROJECT]
 }
 
 
@@ -146,6 +163,7 @@ export type GET_Responses = {
     }
     deadline: Timestamp
     description: string
+    clusterId: number | null;
     projectId: number
     name: string
     submissionUrl: ApiRoutes.PROJECT_GROUP_SUBMISSIONS
@@ -176,7 +194,7 @@ export type GET_Responses = {
   [ApiRoutes.GROUP_MEMBER]: {
     email: string
     name: string
-    id: number
+    userId: number
   }
   [ApiRoutes.USERS]: {
     name: string
@@ -194,7 +212,7 @@ export type GET_Responses = {
     name: string;
     capacity: number;
     groupCount: number;
-    created_at: Timestamp;
+    createdAt: Timestamp;
     groups: GET_Responses[ApiRoutes.GROUP][]
     courseUrl: ApiRoutes.COURSE
   }
@@ -206,6 +224,8 @@ export type GET_Responses = {
     teacher: CourseTeacher
     assistents: CourseTeacher[]
     joinUrl: string
+    archivedAt: Timestamp | null // null if not archived
+    createdAt: Timestamp
   }
   [ApiRoutes.COURSE_MEMBERS]: {
     relation: CourseRelation,
@@ -226,6 +246,8 @@ export type GET_Responses = {
     courseId:number, 
     name:string, 
     relation: CourseRelation,
+    memberCount: number, 
+    archivedAt: Timestamp | null, // null if not archived
     url:string
   }[],
   //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]
@@ -241,7 +263,7 @@ export type GET_Responses = {
     projectUrl: string,
     projectId: number,
     maxScore: number,
-    groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE]
+    groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE] | null
   }[]
 
   [ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK]: string | null  // Null if no feedback is given

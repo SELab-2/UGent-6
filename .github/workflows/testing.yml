@@ -11,4 +11,4 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
-      - run: gradle test -p backend/app/
+      - run: gradle unitTests -p backend/app/

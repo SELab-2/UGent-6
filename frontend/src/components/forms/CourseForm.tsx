@@ -1,4 +1,4 @@
-import { Form, FormInstance, Input } from "antd"
+import { Form, FormInstance, Input, Typography } from "antd"
 import { FC, PropsWithChildren } from "react"
 import { useTranslation } from "react-i18next"
 import MarkdownEditor from "../input/MarkdownEditor"
@@ -7,6 +7,7 @@ import MarkdownEditor from "../input/MarkdownEditor"
 
 const CourseForm:FC<{form:FormInstance} & PropsWithChildren> = ({form,children}) => {
   const { t } = useTranslation()
+  const description = Form.useWatch("description", form)
 
   return (
     <Form form={form} layout="vertical" validateTrigger="onBlur">
@@ -21,16 +22,15 @@ const CourseForm:FC<{form:FormInstance} & PropsWithChildren> = ({form,children})
         />
       </Form.Item>
 
-      <Form.Item
-        rules={[{ max: 2000, message: t("home.courseDescriptionMaxLength") }]}
-        label={t("home.courseDescription")}
-        name="description"
-      >
+      <Typography.Text>
+        {t("project.change.description")}
+    </Typography.Text>
         <MarkdownEditor
-          maxLength={2000}
+          maxLength={5000}
+          value={description}
           placeholder={t("home.courseDescription")}
+          
         />
-      </Form.Item>
       {children}
     </Form>
   )

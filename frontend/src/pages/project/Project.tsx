@@ -7,7 +7,7 @@ import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
 import CourseAdminView from "../../hooks/CourseAdminView"
-import { DeleteOutlined, DownloadOutlined, HeatMapOutlined, InfoOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
+import { DeleteOutlined, DownloadOutlined, HeatMapOutlined, InfoCircleOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
@@ -39,38 +39,42 @@ const Project = () => {
       {
         key: "description",
         label: t("home.projects.description"),
-        icon: <InfoOutlined />,
+        icon: <InfoCircleOutlined />,
         children: project && (
-          <div style={{display:"flex",justifyContent:"center",width:"100%"}}>
-            <div style={{maxWidth:"800px",width:"100%"}}>
-            <MarkdownTextfield content={project.description} />
-
+          <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+            <div style={{ maxWidth: "800px", width: "100%" }}>
+              <MarkdownTextfield content={project.description} />
             </div>
           </div>
         ),
       },
-      {
+    ]
+
+    // if individual project -> do not show groups tab
+    if (project?.clusterId) {
+      items.push({
         key: "groups",
         label: t("course.groups"),
         icon: <TeamOutlined />,
         children: <GroupTab />,
-      },
-      {
-        key: "submissions",
-        label: t("project.submissions"),
-        icon: <SendOutlined />,
-        children: courseAdmin ? (
-          <span>
-            <SubmissionsTab />
-          </span>
-        ) : (
-          <SubmissionCard
-            projectId={Number(projectId)}
-            courseId={course.courseId}
-          />
-        ),
-      },
-    ]
+      })
+    }
+
+    items.push({
+      key: "submissions",
+      label: t("project.submissions"),
+      icon: <SendOutlined />,
+      children: courseAdmin ? (
+        <span>
+          <SubmissionsTab />
+        </span>
+      ) : (
+        <SubmissionCard
+          projectId={Number(projectId)}
+          courseId={course.courseId}
+        />
+      ),
+    })
 
     if (!courseAdmin) {
       items.push({
@@ -120,15 +124,7 @@ const Project = () => {
         extra={
           courseAdmin ? (
             <>
-              <Link to="tests">
-                <Button
-                  type="primary"
-                  icon={<HeatMapOutlined />}
-                  style={{ marginLeft: "1rem" }}
-                >
-                  {t("project.tests.toTests")}
-                </Button>
-              </Link>
+  
               <Link to="edit">
                 <Button
                   type="primary"
@@ -150,7 +146,7 @@ const Project = () => {
             <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
               <span>
                 <Button
-                  disabled={now < deadline}
+                  disabled={now > deadline}
                   type="primary"
                   onClick={handleNewSubmission}
                   icon={<PlusOutlined />}

@@ -60,22 +60,22 @@ public class CommonDatabaseActions {
     /**
      * Create a new individual cluster group for course
      * @param courseId id of the course
-     * @param userId id of the user
+     * @param user user to add to the group
      * @return true if the group was created successfully
      */
-    public boolean createNewIndividualClusterGroup(long courseId, long userId) {
+    public boolean createNewIndividualClusterGroup(long courseId, UserEntity user) {
         GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
         if (groupClusterEntity == null) {
             return false;
         }
         // Create new group for the cluster
-        GroupEntity groupEntity = new GroupEntity("", groupClusterEntity.getId());
+        GroupEntity groupEntity = new GroupEntity(user.getName() + " " + user.getSurname(), groupClusterEntity.getId());
         groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() + 1);
         groupClusterRepository.save(groupClusterEntity);
         groupEntity = groupRepository.save(groupEntity);
 
         // Add user to the group
-        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), userId);
+        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), user.getId());
         groupUserRepository.save(groupUserEntity);
         return true;
     }
@@ -119,11 +119,15 @@ public class CommonDatabaseActions {
 
             projectRepository.delete(projectEntity);
 
-            TestEntity testEntity = testRepository.findById(projectEntity.getTestId()).orElse(null);
-            if (testEntity == null) {
-                return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
+            if (projectEntity.getTestId() != null) {
+                TestEntity testEntity = testRepository.findById(projectEntity.getTestId()).orElse(null);
+                if (testEntity == null) {
+                    return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
+                }
+                return deleteTestById(projectEntity, testEntity);
             }
-            return deleteTestById(projectEntity, testEntity);
+
+            return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting project", null);

@@ -223,8 +223,8 @@ public class GroupFeedbackController {
         List<GroupFeedbackJsonWithProject> grades = new ArrayList<>();
         for (ProjectEntity project : projects) {
             Long GroupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
-            if (GroupId == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not part of this course");
+            if (GroupId == null) { // Student not yet in a group for this project
+              grades.add(entityToJsonConverter.groupFeedbackEntityToJsonWithProject(null, project));
             }
             CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.getGroupFeedbackIfExists(GroupId, project.getId());
             if (checkResult.getStatus() != HttpStatus.OK) {

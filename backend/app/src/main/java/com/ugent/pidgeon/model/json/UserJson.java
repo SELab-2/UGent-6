@@ -81,13 +81,13 @@ public class UserJson {
     }
 
     public String getUrl() {
-        return ApiRoutes.USER_BASE_PATH + "/" + id;
+        return ApiRoutes.USERS_BASE_PATH + "/" + id;
     }
 
     public void setUrl(String s){}
 
     public String getCourseUrl() {
-        return ApiRoutes.USER_BASE_PATH + "/" + id+"/courses";
+        return ApiRoutes.COURSE_BASE_PATH;
     }
     public void setCourseUrl(String s){}
 

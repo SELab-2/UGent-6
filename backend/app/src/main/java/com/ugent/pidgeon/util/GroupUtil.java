@@ -23,6 +23,8 @@ public class GroupUtil {
     private ClusterUtil clusterUtil;
     @Autowired
     private ProjectUtil projectUtil;
+  @Autowired
+  private UserUtil userUtil;
 
 
     /**
@@ -58,7 +60,7 @@ public class GroupUtil {
      * @return CheckResult with the status of the check
      */
     public CheckResult<Void> isAdminOfGroup(long groupId, UserEntity user) {
-        if (!groupRepository.isAdminOfGroup(groupId, user.getId()) && !user.getRole().equals(UserRole.admin)) {
+        if (!groupRepository.isAdminOfGroup(user.getId(), groupId) && !user.getRole().equals(UserRole.admin)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not an admin of this group", null);
         }
         return new CheckResult<>(HttpStatus.OK, "", null);
@@ -108,7 +110,18 @@ public class GroupUtil {
             if (!groupRepository.userAccessToGroup(userId, groupId)) {
                 return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not part of the course", null);
             }
+            if (groupClusterRepository.inArchivedCourse(group.getClusterId())) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot join a group in an archived course", null);
+            }
         }
+
+        UserEntity userToAdd = userUtil.getUserIfExists(userId);
+        if (userToAdd == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "User not found", null);
+        }
+
+
+
 
         if (groupClusterRepository.userInGroupForCluster(group.getClusterId(), userId)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is already in a group for this cluster", null);
@@ -126,6 +139,10 @@ public class GroupUtil {
         }
         if (clusterUtil.isIndividualCluster(group.getClusterId())) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot add user to individual group", null);
+        }
+
+        if (isAdminOfGroup(groupId, userToAdd).getStatus() == HttpStatus.OK) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot add a course admin to a group", null);
         }
 
         return new CheckResult<>(HttpStatus.OK, "", null);
@@ -147,6 +164,10 @@ public class GroupUtil {
             CheckResult<Void> admin = isAdminOfGroup(groupId, user);
             if (admin.getStatus() != HttpStatus.OK) {
                 return admin;
+            }
+        } else {
+            if (groupClusterRepository.inArchivedCourse(group.getClusterId())) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot leave a group in an archived course", null);
             }
         }
         if (!groupRepository.userInGroup(groupId, userId)) {

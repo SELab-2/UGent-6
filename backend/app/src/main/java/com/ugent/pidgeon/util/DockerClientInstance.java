@@ -22,7 +22,7 @@ public class DockerClientInstance {
 
     if (dockerClient == null) {
       DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-          .withDockerHost("tcp://dind:2375").build();
+          .withDockerHost("tcp://10.5.0.4:2375").build();
       DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
           .dockerHost(config.getDockerHost())
           .sslConfig(config.getSSLConfig())

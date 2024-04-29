@@ -8,20 +8,26 @@ export type GroupType = GET_Responses[ApiRoutes.PROJECT_GROUPS][number]
 
 const GroupTab: FC<{}> = () => {
   const [groups, setGroups] = useState<null | GroupType[]>(null)
- const {projectId} = useParams()
+  const { projectId } = useParams()
 
   useEffect(() => {
     //TODO: perform get request to api/projects/{projectid}/groups
-    if(!projectId) return console.error("No projectId found")
-    apiCall.get(ApiRoutes.PROJECT_GROUPS,{id:projectId}).then((res) => {
-      console.log(res.data)
-      setGroups(res.data)
-    })
-  
+
+    fetchGroups()
   }, [])
 
+  const fetchGroups = async () => {
+    if (!projectId) return console.error("No projectId found")
+    const res = await apiCall.get(ApiRoutes.PROJECT_GROUPS, { id: projectId })
+    console.log(res.data)
+    setGroups(res.data)
+  }
+
   return (
-      <GroupList groups={groups}  capacity={10}/>
+    <GroupList
+      groups={groups}
+      onChanged={fetchGroups}
+    />
   )
 }
 

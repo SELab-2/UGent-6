@@ -13,6 +13,7 @@ const Home = () => {
   const { t } = useTranslation()
   const [projects, setProjects] = useState<ProjectsType | null>(null)
   const [open, setOpen] = useState(false)
+  
 
   useEffect(() => {
     apiCall.get(ApiRoutes.PROJECTS).then((res) => {

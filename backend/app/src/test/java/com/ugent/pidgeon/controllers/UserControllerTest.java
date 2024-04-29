@@ -47,20 +47,20 @@ public class UserControllerTest extends ControllerTest {
   @Test
   public void testGetUserById() throws Exception {
     when(userUtil.getUserIfExists(anyLong())).thenReturn(userEntity);
-    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USER_BASE_PATH + "/1"))
+    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USERS_BASE_PATH + "/1"))
         .andExpect(status().isOk());
 
     when(userUtil.getUserIfExists(anyLong())).thenReturn(null);
-    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USER_BASE_PATH + "/1"))
+    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USERS_BASE_PATH + "/1"))
         .andExpect(status().isNotFound());
 
-    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USER_BASE_PATH + "/2"))
+    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USERS_BASE_PATH + "/2"))
         .andExpect(status().isForbidden());
   }
 
   @Test
   public void testGetUserByAzureId() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.USER_AUTH_PATH))
+    mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.LOGGEDIN_USER_PATH))
         .andExpect(status().isOk());
   }
 
@@ -69,14 +69,14 @@ public class UserControllerTest extends ControllerTest {
     String request = "{\"name\":\"John\",\"surname\":\"Doe\",\"email\":\"john@example.com\",\"role\":\"admin\"}";
     when(userUtil.checkForUserUpdateJson(anyLong(), any())).
         thenReturn(new CheckResult<>(HttpStatus.OK, "", userEntity));
-    mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.USER_BASE_PATH + "/1")
+    mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.USERS_BASE_PATH + "/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isOk());
 
     when(userUtil.checkForUserUpdateJson(anyLong(), any())).
         thenReturn(new CheckResult<>(HttpStatus.BAD_REQUEST, "", null));
-    mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.USER_BASE_PATH + "/1")
+    mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.USERS_BASE_PATH + "/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isBadRequest());
@@ -88,20 +88,20 @@ public class UserControllerTest extends ControllerTest {
     when(userUtil.getUserIfExists(anyLong())).thenReturn(userEntity);
     when(userUtil.checkForUserUpdateJson(anyLong(), any()))
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", userEntity));
-    mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.USER_BASE_PATH + "/1")
+    mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.USERS_BASE_PATH + "/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isOk());
 
     when(userUtil.checkForUserUpdateJson(anyLong(), any()))
         .thenReturn(new CheckResult<>(HttpStatus.BAD_REQUEST, "", null));
-    mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.USER_BASE_PATH + "/1")
+    mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.USERS_BASE_PATH + "/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isBadRequest());
 
     when(userUtil.getUserIfExists(anyLong())).thenReturn(null);
-    mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.USER_BASE_PATH + "/1")
+    mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.USERS_BASE_PATH + "/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isNotFound());

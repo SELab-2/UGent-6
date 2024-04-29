@@ -8,13 +8,22 @@
     "dark": "Dark",
     "light": "Light"
   },
+  "courses":{
+    "courses": "Vakken",
+    "searchCourse": "Search course",
+    "member": "member",
+    "members": "members",
+    "archived":"Archived",
+    "noCourses": "No courses found"
+  },
   "home": {
-    "yourCourses": "Courses",
+    "allCourses": "All courses",
+    "yourCourses": "Enrolled courses",
     "createCourse": "Create course",
     "courseName": "Course name",
     "courseDescription": "Description",
     "yourProjects": "Projects",
-    "myCourses": "My courses",
+    "myCourses": "Managed courses",
     "noCourses": "You're not in any courses yet, you can join a course by opening a course join link.",
     "courseNameRequired": "Course name is required",
     "courseNameMaxLength": "Course name must be less than 50 characters",
@@ -39,8 +48,10 @@
       "completeProgress": "{{count}} / {{total}} completed",
       "activeProjects": "{{count}} active project",
       "activeProjects_plural": "{{count}} active projects",
-      "userCourseCount": "{{count}} users are in this course"
-    }
+      "userCourseCount": "{{count}} user is in this course",
+      "userCourseCount_plural": "{{count}} users are in this course"
+    },
+    "moreCourses": "All courses"
   },
   "profile": {
     "student": "Student at Ghent University",
@@ -52,10 +63,12 @@
     "student": "Student",
     "teacher": "Teacher",
     "admin": "Admin",
+    "course_admin": "Assistant",
     "confirmation": "Confirmation",
     "confirmationText": "Are you sure you want to change the role of {{name}} to {{role}}?"
   },
   "project": {
+    "userName": "name",
     "submissions": "Submissions",
     "newSubmission": "New submission",
     "files": "Files",
@@ -80,11 +93,12 @@
     "submissionTime": "Submission time",
     "noSubmissions": "No submissions",
     "loadingSubmissions": "Loading submissions...",
-    "options": "Options",
+    "options": "Update",
     "groupMembers": "Group members",
     "newProject": "New project",
     "change": {
       "title": "Create project",
+      "updateTitle": "Update {{name}}",
       "name": "Name",
       "nameMessage": "Please enter Project Name",
       "description": "Description",
@@ -97,7 +111,23 @@
       "deadline": "Deadline",
       "create": "Create project",
       "success": "Project successfully created ",
-      "groupClusterIdTooltip": "Select no group to create an individual project. "
+      "groupClusterIdTooltip": "Select no group to create an individual project. ",
+      "general": "General",
+      "groups": "Groups",
+      "structure": "Structure",
+      "tests": "Tests",
+      "update": "Update project",
+      "newGroupCluster": "Add a new group cluster",
+      "makeCluster": "Create group cluster",
+      "clusterName": "Cluster name",
+      "amountOfGroups": "Amount of groups",
+      "groupSize": "Group size",
+      "groupSizeTooltip": "How many users should be in each group?",
+      "groupSizeMessage": "Group size must be greater than 0 " ,
+      "amountOfGroupsMessage": "Amount of groups must be greater than 0 ",
+      "selectGroup": "Select a group",
+      "noMembersinGroup": "No members in this group",
+      "searchUser": "Search user"
     },
     "tests": {
       "title": "Tests for {{projectName}}",
@@ -116,7 +146,9 @@
       "structureTemplateHeader": "Structure",
       "dockerImageHeader": "Docker image",
       "dockerScriptHeader": "Docker script",
-      "modeHeader": "Template"
+      "modeHeader": "Template",
+      "fileStructure": "File structure",
+      "fileStructurePreview": "File structure preview"
     },
     "noScore": "No score available",
     "noFeedback": "No feedback provided"
@@ -171,7 +203,14 @@
     "courseDeleted": "Course successfully deleted",
     "createCourse": "Create course",
     "noFeedback": "You have no grades yet",
-    "noMembersFound": "No members found"
+    "noMembersFound": "No members found",
+    "noGroupMembers": "No members in this group",
+    "leftGroup": "You have left the group",
+    "joinedGroup": "You have joined the group",
+    "leave": "Leave Course",
+    "leaveConfirm": "Are you sure you want to leave this course?",
+    "leaveSuccess": "Left course successfully",
+    "leaveFail": "Failed to leave the course"
   },
   "cancel": "Cancel",
   "ok": "OK",
@@ -184,5 +223,9 @@
     "404_message": "Sorry, the page you visited does not exist.",
     "500_message": "Sorry, Something went wrong"
   },
-  "goBack": "Go back"
+  "goBack": "Go back",
+  "components": {
+    "write": "Write",
+    "preview": "Preview"
+  }
 }
