@@ -196,10 +196,6 @@ public class CourseController {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
 
-            if (courseJson.getName() == null && courseJson.getDescription() == null && courseJson.getYear() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name, description or year is required");
-            }
-
             CourseEntity courseEntity = checkResult.getData();
             if (courseJson.getName() == null) {
                 courseJson.setName(courseEntity.getName());

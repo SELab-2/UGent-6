@@ -491,12 +491,16 @@ public class CourseControllerTest extends ControllerTest {
             .andExpect(status().isOk());
         assertNull(activeCourse.getArchivedAt());
 
-        /* If no fields are present, return 400 */
+        /* If no fields are present, change nothing */
         String emptyJson = "{\"ietswatnietboeit\": \"test\"}";
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(emptyJson))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isOk());
+        assertEquals("test", activeCourse.getName());
+        assertEquals("description", activeCourse.getDescription());
+        assertEquals(2024, activeCourse.getCourseYear());
+
 
 
         /* If invalid json, return corresponding statuscode */
