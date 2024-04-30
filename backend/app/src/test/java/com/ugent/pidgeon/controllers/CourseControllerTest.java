@@ -17,6 +17,7 @@ import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.postgre.repository.UserRepository.CourseIdWithRelation;
 import com.ugent.pidgeon.util.*;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -233,12 +234,24 @@ public class CourseControllerTest extends ControllerTest {
     public void testCreateCourse() throws Exception {
         String courseJson = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024}";
         /* If everything is correct, return 200 */
-        when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(courseUtil.checkCourseJson(argThat(
+            json -> json.getName().equals("test") &&
+                json.getDescription().equals("description") &&
+                json.getYear() == 2024
+        ), eq(getMockUser()), eq(null))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(courseRepository.save(any())).thenReturn(activeCourse);
-        when(courseUserRepository.save(any())).thenReturn(null);
-        when(groupClusterRepository.save(any())).thenReturn(null);
-        when(courseUtil.getJoinLink(any(), any())).thenReturn("");
-        when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
+        when(courseUserRepository.save(argThat(
+            courseUser -> courseUser.getCourseId() == activeCourse.getId() &&
+                courseUser.getUserId() == getMockUser().getId() &&
+                courseUser.getRelation().equals(CourseRelation.creator)
+        ))).thenReturn(null);
+        when(groupClusterRepository.save(argThat(
+            groupCluster -> groupCluster.getCourseId() == activeCourse.getId() &&
+                groupCluster.getMaxSize() == 1 &&
+                groupCluster.getGroupAmount() == 0
+        ))).thenReturn(null);
+        when(courseUtil.getJoinLink(activeCourse.getJoinKey(), ""+activeCourse.getId())).thenReturn("");
+        when(entityToJsonConverter.courseEntityToCourseWithInfo(activeCourse, "", false)).
                 thenReturn(activeCourseJson);
 
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
@@ -258,8 +271,6 @@ public class CourseControllerTest extends ControllerTest {
                 groupCluster.getMaxSize() == 1 &&
                 groupCluster.getGroupAmount() == 0
         ));
-        verify(entityToJsonConverter, times(1)).courseEntityToCourseWithInfo(activeCourse, "", false);
-        verify(courseUtil, times(1)).getJoinLink(activeCourse.getJoinKey(), "" + activeCourse.getId());
 
         /* If user is not a teacher, return 403 */
         setMockUserRoles(UserRole.student);
@@ -270,6 +281,7 @@ public class CourseControllerTest extends ControllerTest {
         setMockUserRoles(UserRole.teacher);
 
         /* If course json is invalid, return 400 */
+        reset(courseUtil);
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.BAD_REQUEST, "", null));
         when(courseUtil.checkCourseJson(any(), any(),any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
         mockMvc.perform(MockMvcRequestBuilders.post(ApiRoutes.COURSE_BASE_PATH)
@@ -382,8 +394,7 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testPatchCourse() throws Exception {
-        
-        /* If admin and valid json, update course and return 200 */
+        String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId();
         String originalName = activeCourse.getName();
         String originalDescription = activeCourse.getDescription();
         Integer originalYear = activeCourse.getCourseYear();
@@ -401,43 +412,63 @@ public class CourseControllerTest extends ControllerTest {
             OffsetDateTime.now(),
             2023
         );
-        when(courseUtil.getCourseIfAdmin(anyLong(), any())).
+        /* If admin and valid json, update course and return 200 */
+        when(courseUtil.getCourseIfAdmin(activeCourse.getId(), getMockUser())).
             thenReturn(new CheckResult<>(HttpStatus.OK, "", activeCourse));
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
-        when(courseUtil.getJoinLink(any(), any())).thenReturn("");
+        when(courseUtil.getJoinLink(activeCourse.getJoinKey(), ""+activeCourse.getId())).thenReturn("");
         when(courseRepository.save(activeCourse)).thenReturn(updatedEntity);
         when(entityToJsonConverter.courseEntityToCourseWithInfo(updatedEntity, "", false)).thenReturn(updatedJson);
             /* If field is not present, do not update it */
         String patchCourseJson = "{\"name\": \"test\"}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchCourseJson))
             .andExpect(status().isOk());
+        String finalOriginalDescription = originalDescription;
+        verify(courseUtil, times(1)).checkCourseJson(argThat(
+              json -> json.getName().equals("test") &&
+                  json.getDescription().equals(finalOriginalDescription) &&
+                  Objects.equals(json.getYear(), originalYear)
+          ), eq(getMockUser()), eq(activeCourse.getId()));
         assertNotEquals(originalName, activeCourse.getName());
         assertEquals(originalDescription, activeCourse.getDescription());
         assertEquals(originalYear, activeCourse.getCourseYear());
         assertNull(activeCourse.getArchivedAt());
         originalName = activeCourse.getName();
+
         String patchCourseJsonNoName =  "{\"description\": \"description88\"}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchCourseJsonNoName))
             .andExpect(status().isOk());
+        String finalOriginalName = originalName;
+        verify(courseUtil, times(1)).checkCourseJson(argThat(
+                json -> json.getName().equals(finalOriginalName) &&
+                    json.getDescription().equals("description88") &&
+                    Objects.equals(json.getYear(), originalYear)
+            ), eq(getMockUser()), eq(activeCourse.getId()));
         assertEquals(originalName, activeCourse.getName());
         assertNotEquals(originalDescription, activeCourse.getDescription());
         assertEquals(originalYear, activeCourse.getCourseYear());
         assertNull(activeCourse.getArchivedAt());
+
             /* If fields are present, update them */
         String requestJson = "{\"name\": \"test2\", \"description\": \"description2\",\"courseYear\" : 2034}";
         originalDescription = activeCourse.getDescription();
         activeCourse.setArchivedAt(OffsetDateTime.now());
         OffsetDateTime originalArchivedAt = activeCourse.getArchivedAt();
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(updatedJson)));
+        verify(courseUtil, times(1)).checkCourseJson(argThat(
+            json -> json.getName().equals("test2") &&
+                json.getDescription().equals("description2") &&
+                json.getYear() == 2034
+        ), eq(getMockUser()), eq(activeCourse.getId()));
         assertNotEquals(originalName, activeCourse.getName());
         assertNotEquals(originalDescription, activeCourse.getDescription());
         assertNotEquals(originalYear, activeCourse.getCourseYear());
@@ -446,7 +477,7 @@ public class CourseControllerTest extends ControllerTest {
 
         /* If courseJson has archived field, update archived accordingly */
         String courseJsonWithArchivedTrue = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024, \"archived\": \"true\"}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(courseJsonWithArchivedTrue))
             .andExpect(status().isOk());
@@ -454,7 +485,7 @@ public class CourseControllerTest extends ControllerTest {
 
 
         String courseJsonWithArchivedFalse = "{\"name\": \"test\", \"description\": \"description\",\"courseYear\" : 2024, \"archived\": \"false\"}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(courseJsonWithArchivedFalse))
             .andExpect(status().isOk());
@@ -462,7 +493,7 @@ public class CourseControllerTest extends ControllerTest {
 
         /* If no fields are present, return 400 */
         String emptyJson = "{\"ietswatnietboeit\": \"test\"}";
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(emptyJson))
             .andExpect(status().isBadRequest());
@@ -470,21 +501,21 @@ public class CourseControllerTest extends ControllerTest {
 
         /* If invalid json, return corresponding statuscode */
         when(courseUtil.checkCourseJson(any(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
             .andExpect(status().isIAmATeapot());
 
         /* If not admin, return 403 */
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
             .andExpect(status().isForbidden());
 
         /* If error occurs, return 500 */
         when(courseUtil.getCourseIfAdmin(anyLong(), any())).thenThrow(new RuntimeException());
-        mockMvc.perform(MockMvcRequestBuilders.patch(ApiRoutes.COURSE_BASE_PATH + "/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
             .andExpect(status().isInternalServerError());
@@ -494,83 +525,88 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetCourseByCourseId() throws Exception {
+        String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId();
         /* If user is admin, return course with joinKey information */
-        when(courseUtil.getJoinLink(any(), any())).thenReturn("");
+        when(courseUtil.getJoinLink(activeCourse.getJoinKey(), ""+activeCourse.getId())).thenReturn("");
         when(entityToJsonConverter.courseEntityToCourseWithInfo(any(), any(), anyBoolean())).
                 thenReturn(activeCourseJson);
-        when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
+        when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(), getMockUser())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.course_admin)));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(activeCourseJson)));
         verify(entityToJsonConverter, times(1)).courseEntityToCourseWithInfo(activeCourse, "", false);
 
         /* If user is not admin, return course without joinKey information */
-        when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
+        when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(), getMockUser())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.enrolled)));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1")).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get(url)).andExpect(status().isOk());
         verify(entityToJsonConverter, times(1)).courseEntityToCourseWithInfo(activeCourse, "", true);
 
         /* If course is not found, or user no acces return corresponding status */
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
                 thenReturn(new CheckResult<>(HttpStatus.NOT_FOUND, "", new Pair<>(null, null)));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isNotFound());
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any(UserEntity.class))).
                 thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", new Pair<>(null, null)));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1")).andExpect(status().isForbidden());
+        mockMvc.perform(MockMvcRequestBuilders.get(url)).andExpect(status().isForbidden());
     }
 
 
     @Test
     public void testDeleteCourse() throws Exception {
+        String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId();
+
         /* If user is the creator of the course, delete succeeds and also deletes linked projects & coursses */
         ProjectEntity project = new ProjectEntity(1, "name", "description", 1L, 1L, true, 20, OffsetDateTime.now());
         GroupClusterEntity groupCluster = new GroupClusterEntity(1L, 20, "cluster", 5);
-        when(courseUtil.getCourseIfUserInCourse(anyLong(), any())).
+        when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(), getMockUser())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.creator)));
-        when(courseRepository.findAllProjectsByCourseId(anyLong())).thenReturn(List.of(project));
+        when(courseRepository.findAllProjectsByCourseId(activeCourse.getId())).thenReturn(List.of(project));
         when(commonDatabaseActions.deleteProject(project.getId())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
-        when(groupClusterRepository.findByCourseId(anyLong())).thenReturn(List.of(groupCluster));
+        when(groupClusterRepository.findByCourseId(activeCourse.getId())).thenReturn(List.of(groupCluster));
         when(commonDatabaseActions.deleteClusterById(groupCluster.getId())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         CourseUserEntity courseUser = new CourseUserEntity(1L, 1L, CourseRelation.creator);
         List<CourseUserEntity> courseUsers = List.of(courseUser);
         when(courseUserRepository.findAllUsersByCourseId(activeCourse.getId())).thenReturn(courseUsers);
         doNothing().when(courseUserRepository).deleteAll(anyIterable());
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isOk());
         verify(courseUserRepository, times(1)).deleteAll(courseUsers);
 
         /* If something goes wrong while deleting a cluster or project, return corresponding status */
         when(commonDatabaseActions.deleteClusterById(anyLong())).thenReturn(new CheckResult<>(HttpStatus.NO_CONTENT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1"))
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isNoContent());
 
         when(commonDatabaseActions.deleteProject(anyLong())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1"))
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isIAmATeapot());
 
         /* If user isn't in course or course doesn't exist return corresponding status */
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.BAD_REQUEST, "", new Pair<>(null, null)));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1"))
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isBadRequest());
 
         /* If user isn't the creator of the course, return 403 */
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any())).
                 thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(new CourseEntity(), CourseRelation.enrolled)));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1"))
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isForbidden());
 
         /* If a unexpected error occurs, return 500 */
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any())).thenThrow(new RuntimeException());
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.COURSE_BASE_PATH + "/1"))
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isInternalServerError());
     }
 
 
     @Test
     public void testGetProjectsByCourseId() throws Exception {
+        String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/projects";
+
         Pair<CourseEntity, CourseRelation> creatorPair = new Pair<>(activeCourse, CourseRelation.creator);
         Pair<CourseEntity, CourseRelation> enrolledPair = new Pair<>(activeCourse, CourseRelation.enrolled);
         ProjectEntity project = new ProjectEntity(1, "name", "description", 1L, 1L, true, 20, OffsetDateTime.now());
@@ -589,36 +625,35 @@ public class CourseControllerTest extends ControllerTest {
             1L
         );
         /* If user is in course, return projects */
-        when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
+        when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(),getMockUser()))
             .thenReturn(new CheckResult<>(HttpStatus.OK, "", creatorPair));
 
-        when(projectRepository.findByCourseId(anyLong())).thenReturn(List.of(project));
         List<ProjectEntity> projects = List.of(project);
-        when(projectRepository.findByCourseId(anyLong())).thenReturn(projects);
+        when(projectRepository.findByCourseId(activeCourse.getId())).thenReturn(projects);
         when(entityToJsonConverter.projectEntityToProjectResponseJson(project, activeCourse, getMockUser())).thenReturn(projectJson);
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(List.of(projectJson))));
 
         /* If a project isn't visible, and user role is student, it should not be returned */
         project.setVisible(false);
-        when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
+        when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(), getMockUser()))
             .thenReturn(new CheckResult<>(HttpStatus.OK, "", enrolledPair));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("[]"));
-        when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
+        when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(), getMockUser()))
             .thenReturn(new CheckResult<>(HttpStatus.OK, "", creatorPair));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(List.of(projectJson))));
 
         /* If user not in course, or course doesn't exit or any other check fails, return corresponding status */
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/1/projects"))
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isIAmATeapot());
     }
 
@@ -674,6 +709,9 @@ public class CourseControllerTest extends ControllerTest {
 
     @Test
     public void testGetJoinInformation() throws Exception {
+        String urlWithKey = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join/1908";
+        String urlWithoutKey = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join";
+
         CourseEntity course = activeCourse;
         CourseJoinInformationJson courseJoinInformationJson = new CourseJoinInformationJson(
             activeCourse.getName(),
@@ -682,28 +720,28 @@ public class CourseControllerTest extends ControllerTest {
         /* If join key is correct, course is not archived and no error occurs, return 200 */
         when(courseUtil.checkJoinLink(activeCourse.getId(), "1908", getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
         when(courseUtil.checkJoinLink(activeCourse.getId(), null, getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", course));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join/1908"))
+        mockMvc.perform(MockMvcRequestBuilders.get(urlWithKey))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(courseJoinInformationJson)));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join"))
+      mockMvc.perform(MockMvcRequestBuilders.get(urlWithoutKey))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(courseJoinInformationJson)));
 
         /* If course is archived, reutrn 403 */
         activeCourse.setArchivedAt(OffsetDateTime.now());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join/1908"))
+        mockMvc.perform(MockMvcRequestBuilders.get(urlWithKey))
             .andExpect(status().isForbidden());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join"))
+        mockMvc.perform(MockMvcRequestBuilders.get(urlWithoutKey))
             .andExpect(status().isForbidden());
         activeCourse.setArchivedAt(null);
 
         /* If join key check fails return corresponding status */
         when(courseUtil.checkJoinLink(anyLong(), any(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join/1908"))
+        mockMvc.perform(MockMvcRequestBuilders.get(urlWithKey))
             .andExpect(status().isIAmATeapot());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/join"))
+        mockMvc.perform(MockMvcRequestBuilders.get(urlWithoutKey))
             .andExpect(status().isIAmATeapot());
     }
 
