@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react"
 import Home from "../../../pages/index/Home"
-import "../../mocks"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests"
 import { UserCourseType } from "../../../providers/UserProvider"
 
@@ -17,6 +16,7 @@ jest.mock("react-syntax-highlighter/dist/esm/styles/prism",()=> ({
   oneDark: {},
   oneLight: {}
 }))
+
 
 jest.mock('react-markdown', () => ({
   Markdown: () => null,
@@ -49,7 +49,7 @@ jest.mock("../../../hooks/useUser", () => ({
   __esModule: true, // this property makes it work
   default: () => {
     const user: GET_Responses[ApiRoutes.USER] = { courseUrl: "/api/courses", projects_url: "/api/projects/1", url: "/api/users/12", role: "teacher", email: "test@gmail.com", id: 12, name: "Bob", surname: "test" }
-    const courses: UserCourseType[] = [{courseId:1,name:"Course 1", relation: "enrolled", url:"/api/courses/1"}]
+    const courses: UserCourseType[] = [{courseId:1,name:"Course 1", relation: "enrolled",memberCount : 3, url:"/api/courses/1",archivedAt: null}]
     return {
       user,
       setUser: () => {},
@@ -66,7 +66,7 @@ test("rendersHome without crashing", () => {
 
 
   })
-  
+
 test("displays courses", () => {
   render(<Home />)
   expect(screen.getByText("home.yourCourses")).toBeInTheDocument()

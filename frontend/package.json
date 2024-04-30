@@ -37,21 +37,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "jest"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "jsdom",
-    "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|webp|svg)$": "<rootDir>/__mocks__/fileMock.js",
-      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(jest-)?@azure/msal-react)"
-    ],
-    "testMatch": [
-      "**/?(*.)+(spec|test).ts?(x)"
-    ]
+    "test": "jest --watchALL --coverage"
   },
   "eslintConfig": {
     "extends": [
@@ -72,11 +58,14 @@
     ]
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.24.5",
     "@testing-library/react": "^14.2.2",
     "@types/react-syntax-highlighter": "^15.5.11",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "ts-jest": "^29.1.2"
+    "jest-transform-stub": "^2.0.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2"
   }
 }
