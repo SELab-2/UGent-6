@@ -22,6 +22,8 @@
     "myCourses": "Beheerde vakken",
     "createCourse": "Vak aanmaken",
     "courseName": "Vak naam",
+    "academicYear": "Academiejaar",
+    "academicYearRequired": "Academiejaar is verplicht",
     "courseDescription": "Beschrijving",
     "yourProjects": "Projecten",
     "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",

@@ -24,6 +24,8 @@
     "courseDescription": "Description",
     "yourProjects": "Projects",
     "myCourses": "Managed courses",
+    "academicYear": "Academic year",
+    "academicYearRequired": "Academic year is required",
     "noCourses": "You're not in any courses yet, you can join a course by opening a course join link.",
     "courseNameRequired": "Course name is required",
     "courseNameMaxLength": "Course name must be less than 50 characters",
