@@ -225,6 +225,7 @@ export type GET_Responses = {
     assistents: CourseTeacher[]
     joinUrl: string
     archivedAt: Timestamp | null // null if not archived
+    year: number
     createdAt: Timestamp
   }
   [ApiRoutes.COURSE_MEMBERS]: {
@@ -248,6 +249,7 @@ export type GET_Responses = {
     relation: CourseRelation,
     memberCount: number, 
     archivedAt: Timestamp | null, // null if not archived
+    year: number // Year of the course
     url:string
   }[],
   //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]

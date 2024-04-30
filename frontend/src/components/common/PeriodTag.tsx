@@ -3,9 +3,9 @@ import { FC } from "react";
 
 
 // 
-const PeriodTag:FC<{start: string, end:string|null }> = ({start, end}) => {
+const PeriodTag:FC<{year: number }> = ({year}) => {
 
-  return <Tag color="blue">{new Date(start).getFullYear()} - {end ? new Date(end).getFullYear()+1 :(new Date().getFullYear()+1) }</Tag> 
+  return <Tag color="blue">{year} - {year+1}</Tag> 
 }
 
 export default PeriodTag;

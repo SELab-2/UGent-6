@@ -90,8 +90,7 @@ const Course: FC = () => {
           style={{ marginBottom: "0.5rem" }}
         >
           <PeriodTag
-            start={course.createdAt}
-            end={course.archivedAt}
+            year={course.year}
           />
           <Tag
             key={course.teacher.url}
@@ -99,6 +98,9 @@ const Course: FC = () => {
           >
             {course.teacher.name} {course.teacher.surname}
           </Tag>
+          {
+            course.archivedAt && <Tag color="purple">{t("course.archived")}</Tag>
+          }
         </Space>
         <br />
         <Tabs
