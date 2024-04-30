@@ -27,6 +27,7 @@ const StructureFormTab: FC<{ form: FormInstance }> = ({ form }) => {
               const end = e.currentTarget.selectionEnd
               e.currentTarget.value = e.currentTarget.value.substring(0, start) + "\t" + e.currentTarget.value.substring(end)
               e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 1
+              form.setFieldValue("structure", e.currentTarget.value)
             }
           }}
         />

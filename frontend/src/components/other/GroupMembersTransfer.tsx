@@ -123,7 +123,7 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
       console.log(randomGroups);
       setTargetKeys(randomGroups)
   }
-console.log("---->",selectedGroup?.groupId);
+
   const renderFooter: TransferProps["footer"] = (_, info) => {
     // Filter `option.label` match the user type `input`
     const filterOption = (input: string, option?: { label: string }) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())

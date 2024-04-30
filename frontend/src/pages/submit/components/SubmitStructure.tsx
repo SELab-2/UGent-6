@@ -22,20 +22,20 @@ function getPrefixLength(line: string): number {
   return prefixLength;
 }
 
-function parseSubmissionTemplate(lines: string[], prefix="",key=0): TreeNode[] {
+function parseSubmissionTemplate(lines: string[], prefix="",key=""): TreeNode[] {
     let children: TreeNode[] = [];
 
     while(lines.length > 0 ) {
-      key++
       const leadingWhitespaces = getPrefixLength(lines[0])
       if( leadingWhitespaces < prefix.length) break
-
-        const line = lines.shift()?.trimEnd();
+      
+      const line = lines.shift()?.trimEnd();
+      let newKey = key + line
         if (!line?.length) continue; // ignore empty lines
         let node:TreeNode  = {
           title: line.trim(),
           isLeaf: true,
-          key: key.toString(),
+          key: newKey,
           style:  undefined,
           children: [] 
         }
@@ -54,7 +54,7 @@ function parseSubmissionTemplate(lines: string[], prefix="",key=0): TreeNode[] {
           if(lines[0]) {
             const nextLineWhitespaces = getPrefixLength(lines[0])
             if(nextLineWhitespaces > leadingWhitespaces) {
-              node.children = parseSubmissionTemplate(lines,lines[0].substring(0,nextLineWhitespaces),key );
+              node.children = parseSubmissionTemplate(lines,lines[0].substring(0,nextLineWhitespaces),newKey );
             }
           }
         }
