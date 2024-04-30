@@ -57,39 +57,19 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
         title: t("home.projects.projectStatus"),
         key:"status",
         render: (project:ProjectType) =>
-          !project.status ? (
-            <GroupProgress
-              usersCompleted={project.progress.completed}
-              userCount={project.progress.total}
-            />
-          ) : <ProjectStatusTag status={project.status} />, 
-      },
-      {
-        key: "action",
-        render: (e) => (
-          <Space size="middle">
-            <Button
-              onClick={() =>
-                modal.info({
-                  width: "1000px",
-                  
-                  styles: {
-                   
-                  },
-                  title: e.name,
-                  content: <ProjectInfo project={e} />,
-                })
-              }
-              type="link"
-            >
-              {t("home.projects.showMore")}
-            </Button>
-
-            {/* {!isTeacher && <Button type="link">{t("home.projects.submit")}</Button>} */}
-          </Space>
+          project.status  && <ProjectStatusTag status={project.status } />, 
+      },{
+        title: t("home.projects.groupProgress"),
+        key: "progress",
+        render: (project:ProjectType) => (
+          <GroupProgress
+          usersCompleted={project.progress.completed}
+          userCount={project.progress.total}
+        />
         ),
-      },
+      }
     ]
+
   
     if(ignoreColumns) {
       columns  = columns.filter((c) => !ignoreColumns.includes(c.key as string))
@@ -108,6 +88,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
       loading={projects == null}
       dataSource={projects??[]}
       columns={columns}
+      rowKey={(project) => project.projectId}
     />
   )
 }

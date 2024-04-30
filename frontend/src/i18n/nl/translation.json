@@ -8,7 +8,16 @@
     "dark": "Donker",
     "light": "Licht"
   },
+  "courses":{
+    "courses": "Vakken",
+    "searchCourse": "Zoek vak",
+    "member": "lid",
+    "members": "leden",
+    "archived": "Gearchiveerd",
+    "noCourses": "Geen vakken gevonden"
+  },
   "home": {
+    "allCourses": "Alle vakken",
     "yourCourses": "Ingeschreven vakken",
     "myCourses": "Beheerde vakken",
     "createCourse": "Vak aanmaken",
@@ -41,8 +50,10 @@
       "activeProjects": "{{count}} actief project",
       "activeProjects_plural": "{{count}} actieve projecten",
       "submit": "Inleveren",
-      "userCourseCount": "{{count}} gebruikers in dit vak"
-    }
+      "userCourseCount_plural": "{{count}} gebruikers in dit vak",
+      "userCourseCount": "{{count}} gebruiker in dit vak"
+    },
+    "moreCourses": "Alle vakken"
   },
   "profile": {
     "student": "Student aan Universiteit Gent",
@@ -61,6 +72,7 @@
   },
 
   "project": {
+    "userName":"Naam",
     "submissions": "Indieningen",
     "newSubmission": "Nieuwe indiening",
     "files": "Bestanden",
@@ -84,12 +96,13 @@
     "submissionTime": "Indienings tijd",
     "noSubmissions": "Geen indieningen",
     "loadingSubmissions": "Indieningen laden...",
-    "options": "Opties",
+    "options": "Aanpassen",
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",
+      "updateTitle": "{{name}} aanpassen",
       "nameMessage": "Vul de naam van het project in",
       "description": "Beschrijving",
       "descriptionMessage": "Vul de beschrijving van het project in",
@@ -101,7 +114,27 @@
       "deadline": "Deadline",
       "create": "Project aanmaken",
       "success": "Project succesvol aangemaakt",
-      "groupClusterIdTooltip": "Selecteer geen groep om een individueel project te maken. "
+      "groupClusterIdTooltip": "Selecteer geen groep om een individueel project te maken. ",
+      "general": "Algemeen",
+      "groups": "Groepen",
+      "structure": "Structuur",
+      "tests": "Testen",
+      "fileStructure": "Bestand structuur",
+      "fileStructurePreview": "Bestand structuur preview",
+      "update": "Project aanpassen",
+      "newGroupCluster": "Voeg een nieuwe groep cluster toe",
+      "makeCluster": "Groep cluster aanmaken",
+      "clusterName": "Cluster naam",
+      "amountOfGroups": "Aantal groepen",
+      "groupSize": "Groep grootte",
+      "groupSizeTooltip": "Hoeveel leden kunnen in 1 groep?",
+      "groupSizeMessage": "Groep grootte moet groter dan 0 zijn",
+      "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn",
+      "selectGroup": "Selecteer een groep",
+      "noMembersinGroup": "Geen leden in deze groep",
+      "searchUser": "Zoek gebruiker",
+      "groupFull": "De groep bevat meer leden dan groeps capaciteit",
+      "randomizeGroups": "Maak random groepen"
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
@@ -197,5 +230,9 @@
     "404_message" : "Sorry, de pagina die je bezocht bestaat niet.",
     "500_message": "Sorry, er ging iets mis."
 
+  },
+  "components": {
+    "write": "Aanpassen",
+    "preview": "Voorvertoning"
   }
 }

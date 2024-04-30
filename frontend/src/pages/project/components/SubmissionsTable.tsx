@@ -29,7 +29,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
   const columns: TableProps<ProjectSubmissionsType>["columns"] = useMemo(() => {
     return [
       {
-        title: t("project.group"),
+        title: project?.clusterId ? t("project.group") : t("project.userName"),
         dataIndex: "group",
         key:"group",
         render: (g) => <Typography.Text>{g.name}</Typography.Text>,
@@ -93,12 +93,12 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
             </Typography.Paragraph>
               </div>
            
-            <Typography.Text strong>{t("project.groupMembers")}</Typography.Text>
+            {project?.clusterId && <><Typography.Text strong>{t("project.groupMembers")}</Typography.Text>
             <List
               locale={{ emptyText: t("project.groupEmpty") }}
               dataSource={g.group.members ?? []}
               renderItem={GroupMember}
-            />
+            /></>}
           </>
         ),
       }}

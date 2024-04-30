@@ -58,6 +58,12 @@ export type POST_Requests = {
     [ApiRoutes.GROUP_MEMBERS]: {
       id: number
     }
+
+  [ApiRoutes.COURSE_CLUSTERS]: {
+    name: string
+    capacity: number
+    groupCount: number
+  }
 }
 
 /**
@@ -67,6 +73,8 @@ export type POST_Responses = {
 
   [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE],
   [ApiRoutes.PROJECT_CREATE]: GET_Responses[ApiRoutes.PROJECT]
+  [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBERS]
+  [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER]
 
 }
 
@@ -86,6 +94,7 @@ export type DELETE_Requests = {
  */
 export type PUT_Requests = {
   [ApiRoutes.COURSE]: POST_Requests[ApiRoutes.COURSE]
+  [ApiRoutes.PROJECT]: ProjectFormData
 
 }
 
@@ -93,6 +102,7 @@ export type PUT_Requests = {
 
 export type PUT_Responses = {
   [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
+  [ApiRoutes.PROJECT]: GET_Responses[ApiRoutes.PROJECT]
 }
 
 
@@ -153,6 +163,7 @@ export type GET_Responses = {
     }
     deadline: Timestamp
     description: string
+    clusterId: number | null;
     projectId: number
     name: string
     submissionUrl: ApiRoutes.PROJECT_GROUP_SUBMISSIONS
@@ -201,7 +212,7 @@ export type GET_Responses = {
     name: string;
     capacity: number;
     groupCount: number;
-    created_at: Timestamp;
+    createdAt: Timestamp;
     groups: GET_Responses[ApiRoutes.GROUP][]
     courseUrl: ApiRoutes.COURSE
   }
@@ -213,6 +224,8 @@ export type GET_Responses = {
     teacher: CourseTeacher
     assistents: CourseTeacher[]
     joinUrl: string
+    archivedAt: Timestamp | null // null if not archived
+    createdAt: Timestamp
   }
   [ApiRoutes.COURSE_MEMBERS]: {
     relation: CourseRelation,
@@ -233,6 +246,8 @@ export type GET_Responses = {
     courseId:number, 
     name:string, 
     relation: CourseRelation,
+    memberCount: number, 
+    archivedAt: Timestamp | null, // null if not archived
     url:string
   }[],
   //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]

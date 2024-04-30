@@ -4,9 +4,12 @@ import CourseCard from "./CourseCard"
 import { FC, useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
-import { PlusOutlined } from "@ant-design/icons"
+import { PlusOutlined, RightOutlined } from "@ant-design/icons"
 import { ProjectsType } from "../Home"
 import TeacherView from "../../../hooks/TeacherView"
+import { useNavigate } from "react-router-dom"
+import AppRouter from "../../../router/AppRouter"
+import { AppRoutes } from "../../../@types/routes"
 
 export type CourseProjectsType = {
   [courseId: string]: {
@@ -19,15 +22,20 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
   const { courses } = useUser()
   const [courseProjects, setCourseProjects] = useState<CourseProjectsType | null>(null)
   const [adminCourseProjects, setAdminCourseProjects] = useState<CourseProjectsType | null>(null)
+  const [archivedCourses, setArchivedCourses] = useState<boolean>(false)
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (courses === null || projects === null) return () => {}
     let courseProjects: CourseProjectsType = {}
     let adminCourseProjects: CourseProjectsType = {}
     let ignore = false
+    let hasArchivedCourses = false
 
     courses.forEach((course) => {
+      if(course.archivedAt) return hasArchivedCourses = true; // We don't want to show archived courses
+
       if (course.relation === "enrolled") {
         courseProjects[course.courseId] = { course: course, projects: [] }
       } else {
@@ -49,6 +57,7 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
 
     setCourseProjects(courseProjects)
     setAdminCourseProjects(adminCourseProjects)
+    setArchivedCourses(hasArchivedCourses)
 
     return () => (ignore = true)
   }, [courses, projects])
@@ -66,14 +75,22 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
           }}
         >
           {t("home.yourCourses")}
-          <TeacherView>
+         {adminCourseProjectsArray.length === 0 && <TeacherView>
             <Button
               onClick={onOpenNew}
               type="text"
               style={{ marginLeft: "1rem" }}
               icon={<PlusOutlined />}
             />
-          </TeacherView>
+          </TeacherView>}
+
+          {(archivedCourses || courseProjectsArray.length > 2) && <Button
+              type="link"
+              style={{ float: "right" }}
+              onClick={() => navigate("/courses?role=enrolled")}
+            >
+              {t("home.moreCourses")} <RightOutlined />
+            </Button>}
         </Typography.Title>
       )}
 
@@ -128,6 +145,14 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
                 />
               </TeacherView>
             )}
+
+            {(archivedCourses || adminCourseProjectsArray.length > 2 )&& <Button
+              type="link"
+              style={{ float: "right" }}
+              onClick={() => navigate(AppRoutes.COURSES+"?role=admin")}
+            >
+              {t("home.moreCourses")} <RightOutlined />
+            </Button>}
           </Typography.Title>
           <Space
             className="small-scroll-bar"

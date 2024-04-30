@@ -1,49 +1,43 @@
-import React, { useState } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
+import React, { useContext, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { Button, Form, Card } from "antd"
 import { useTranslation } from "react-i18next"
-import { ProjectFormData, ProjectError } from "./components/ProjectCreateService"
 import Error from "../error/Error"
-import ProjectCreateService from "./components/ProjectCreateService"
 import ProjectForm from "../../components/forms/ProjectForm"
-import { AppRoutes } from "../../@types/routes"
-import useAppApi from "../../hooks/useAppApi"
-import { PlusOutlined } from "@ant-design/icons"
+import { EditFilled, PlusOutlined } from "@ant-design/icons"
 import { FormProps } from "antd/lib"
+import { ProjectError, ProjectFormData } from "../projectCreate/components/ProjectCreateService"
+import useProject from "../../hooks/useProject"
+import dayjs from "dayjs"
+import apiCall from "../../util/apiFetch"
+import { ApiRoutes } from "../../@types/requests.d"
+import { AppRoutes } from "../../@types/routes"
+import { ProjectContext } from "../../router/ProjectRoutes"
 
-const ProjectCreate: React.FC = () => {
+const EditProject: React.FC = () => {
   const [form] = Form.useForm<ProjectFormData>()
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { courseId } = useParams<{ courseId: string }>()
+  const { courseId,projectId } = useParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<ProjectError | null>(null) // Gebruik ProjectError type voor error state
-  const location = useLocation()
-
-
-  const { message } = useAppApi()
+  const navigate = useNavigate()
+  const project = useProject()
+  const { updateProject } = useContext(ProjectContext)
 
   const handleCreation = async () => {
     const values: ProjectFormData = form.getFieldsValue()
     console.log(values)
 
-    if (!courseId) return console.error("courseId is undefined")
+    if (!courseId || !projectId) return console.error("courseId or projectId is undefined")
     setLoading(true)
 
     try {
-      // Roep createProject aan en controleer op fouten
-      const result = await ProjectCreateService.createProject(courseId, values)
-      if (result.code === 200) {
-        message.success(t("project.change.success")) // Toon een succesbericht
-        navigate(AppRoutes.PROJECT.replace(":projectId", result.project!.projectId.toString()).replace(":courseId", courseId)) // Navigeer naar het nieuwe project
-      } else setError(result) // Sla de fout op in de state
+      const result = await apiCall.put(ApiRoutes.PROJECT, values, { id: projectId })
+      updateProject(result.data)
+      navigate(AppRoutes.PROJECT.replace(":projectId", result.data.projectId.toString()).replace(":courseId", courseId)) // Navigeer naar het nieuwe project
     } catch (error: any) {
+      console.log(error);
       // Vang netwerkfouten op
-      setError({
-        code: 500, // Interne serverfoutcode
-        message: error.message || "Unknown error occurred",
-        project: null,
-      })
     } finally {
       setLoading(false)
     }
@@ -57,6 +51,7 @@ const ProjectCreate: React.FC = () => {
     else navigate("#general")
   }
 
+  if (!project) return <></>
   return (
     <>
       {error && (
@@ -69,12 +64,12 @@ const ProjectCreate: React.FC = () => {
 
       <Form
         initialValues={{
-          name: "",
-          description: "",
-          groupClusterId: undefined,
-          visible: false, // Stel de standaardwaarde in op false
-          maxScore: 20,
-          deadline: null,
+          name: project.name,
+          description: project.description,
+          groupClusterId: project.clusterId,
+          visible: project.visible,
+          maxScore: project.maxScore,
+          deadline: dayjs(project.deadline),
         }}
         form={form}
         onFinishFailed={onInvalid}
@@ -84,19 +79,18 @@ const ProjectCreate: React.FC = () => {
       >
         <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
           <ProjectForm
-
             form={form}
             cardProps={{
-              title: t("project.change.title"),
+              title: t("project.change.updateTitle", { name: project.name }),
               extra: (
                 <Form.Item style={{ textAlign: "center", margin: 0 }}>
                   <Button
                     type="primary"
                     htmlType="submit"
-                    icon={<PlusOutlined />}
+                    icon={<EditFilled />}
                     loading={loading}
                   >
-                    {t("project.change.create")}
+                    {t("project.change.update")}
                   </Button>
                 </Form.Item>
               ),
@@ -108,4 +102,4 @@ const ProjectCreate: React.FC = () => {
   )
 }
 
-export default ProjectCreate
+export default EditProject
