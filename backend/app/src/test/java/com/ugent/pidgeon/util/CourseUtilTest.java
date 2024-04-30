@@ -48,7 +48,7 @@ public class CourseUtilTest {
   public void setUp() {
     user = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
     user.setId(1L);
-    course = new CourseEntity("name", "description");
+    course = new CourseEntity("name", "description",2024);
     course.setId(1L);
     course.setJoinKey("key");
     cuEnrolled = new CourseUserEntity(1L, 1L, CourseRelation.enrolled);
@@ -141,14 +141,14 @@ public class CourseUtilTest {
 
   @Test
   public void testCheckCourseJson() throws Exception {
-    CourseJson courseJson = new CourseJson("name", "description", null);
+    CourseJson courseJson = new CourseJson("name", "description", null,2023);
     CheckResult<Void> result = courseUtil.checkCourseJson(courseJson, user, null);
     assertEquals(HttpStatus.OK, result.getStatus());
 
     courseJson.setDescription(null);
     result = courseUtil.checkCourseJson(courseJson, user, null);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-    assertEquals("name and description are required", result.getMessage());
+    assertEquals("name, description and year are required", result.getMessage());
 
     courseJson.setDescription("description");
     courseJson.setName("");

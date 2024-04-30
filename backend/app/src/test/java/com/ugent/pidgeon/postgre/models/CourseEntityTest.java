@@ -55,7 +55,7 @@ public class CourseEntityTest {
   public void testConstructor() {
     String name = "Test Course";
     String description = "Test Description";
-    CourseEntity course = new CourseEntity(name, description);
+    CourseEntity course = new CourseEntity(name, description,2024);
     assertEquals(name, course.getName());
     assertEquals(description, course.getDescription());
   }

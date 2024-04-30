@@ -34,6 +34,9 @@ public class EntityToJsonConverterTest {
   private GroupClusterRepository groupClusterRepository;
 
   @Mock
+  private ClusterUtil clusterUtil;
+
+  @Mock
   private GroupRepository groupRepository;
 
   @Mock
@@ -73,6 +76,7 @@ public class EntityToJsonConverterTest {
     courseEntity = new CourseEntity();
     courseEntity.setId(1L);
     courseEntity.setName("Test Course");
+    courseEntity.setCourseYear(2024);
 
     projectEntity = new ProjectEntity();
     projectEntity.setId(1L);
