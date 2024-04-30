@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next"
 import SubmitForm from "./components/SubmitForm"
 import SubmitStructure from "./components/SubmitStructure"
 import { useNavigate } from "react-router-dom"
+import React, { useState, useRef} from 'react';
+
 
 const Submit = () => {
   const { t } = useTranslation()
@@ -10,7 +12,34 @@ const Submit = () => {
 
   const navigate = useNavigate()
 
+  // file upload system
+  const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedFile(event.target.files?.[0]);
+  }
+
+  const handleFileUpload = async () => {
+    if (!selectedFile){
+      return alert("Please select a file to upload");
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile as Blob); // Blob atm ma mss is er iets da het moet zijn voor de backend
+
+    const response = await fetch('https://selab2-6.ugent.be/api/submissions/submit', { // juiste url nog toevoegen en body info enzo
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (response.ok) {
+      alert("File uploaded successfully");
+    } else {
+      alert("Failed to upload file");
+    }
+      
+  }
   return (
     <>
       <div>
