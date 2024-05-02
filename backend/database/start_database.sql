@@ -49,11 +49,14 @@ CREATE TABLE files (
 );
 
 -- A id for the docker test and an id for the file test id
+-- docker test is enabled if script is not null
+-- docker test is in simple mode if template is null
 CREATE TABLE tests (
     test_id SERIAL PRIMARY KEY,
     docker_image VARCHAR(256),
-    docker_test INT REFERENCES files(file_id),
-    structure_test_id INT REFERENCES files(file_id)
+    docker_test_script TEXT,
+    docker_test_template TEXT,
+    structure_template TEXT
 );
 
 
@@ -105,6 +108,7 @@ CREATE TABLE submissions (
     docker_accepted BOOLEAN NOT NULL,
     structure_feedback TEXT,
     docker_feedback TEXT,
+    tests_finished BOOLEAN DEFAULT FALSE,
     submission_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

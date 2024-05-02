@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubtestResult;
-import com.ugent.pidgeon.model.submissionTesting.DockerTemplateTestResult;
+import com.ugent.pidgeon.model.submissionTesting.DockerTemplateTestOutput;
 import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -114,7 +114,7 @@ public class DockerSubmissionTestTest {
     // Load docker container
     DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
     stm.addInputFiles(files);
-    DockerTemplateTestResult result = stm.runSubmissionWithTemplate(script, template);
+    DockerTemplateTestOutput result = stm.runSubmissionWithTemplate(script, template);
 
     // Extract subtests
     List<DockerSubtestResult> results = result.getSubtestResults();

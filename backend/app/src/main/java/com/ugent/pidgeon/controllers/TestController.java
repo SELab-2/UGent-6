@@ -88,12 +88,14 @@ public class TestController {
             long projectId,
             UserEntity user,
             String dockerImage,
-            MultipartFile dockerTest,
-            MultipartFile structureTest,
+            String dockerScript,
+            String dockerTemplate,
+            String structureTemplate,
             HttpMethod httpMethod
     ) {
 
-        CheckResult<Pair<TestEntity, ProjectEntity>> checkResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerTest, structureTest, httpMethod);
+        //CheckResult<Pair<TestEntity, ProjectEntity>> checkResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerTest, structureTest, httpMethod);
+
         if (!checkResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }

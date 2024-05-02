@@ -163,7 +163,7 @@ public class DockerSubmissionTestModel {
     return new DockerTestOutput(consoleLogs, allowPush);
   }
 
-  public DockerTemplateTestResult runSubmissionWithTemplate(String script, String template)  {
+  public DockerTemplateTestOutput runSubmissionWithTemplate(String script, String template)  {
 
     runContainer(script, new Adapter<>());
 
@@ -205,7 +205,7 @@ public class DockerSubmissionTestModel {
       }
     }
 
-    return new DockerTemplateTestResult(results, allowed);
+    return new DockerTemplateTestOutput(results, allowed);
   }
 
   private static DockerSubtestResult getDockerSubtestResult(String entry) {

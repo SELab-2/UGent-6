@@ -6,6 +6,9 @@ import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
+import com.ugent.pidgeon.model.submissionTesting.DockerOutput;
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
+import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -30,7 +33,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipFile;
 
 @RestController
-public class SubmissionController {
+public class    SubmissionController {
 
     @Autowired
     private GroupRepository groupRepository;
@@ -58,18 +61,41 @@ public class SubmissionController {
 
 
     private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
-        // Get the test file from the server
-        FileEntity testfileEntity = fileRepository.findById(testEntity.getStructureTestId()).orElse(null);
-        if (testfileEntity == null) {
+        // There is no structure test for this project
+        if(testEntity.getStructureTemplate() == null){
             return null;
         }
-        String testfile = Filehandler.getStructureTestString(Path.of(testfileEntity.getPath()));
+        String structureTemplateString = testEntity.getStructureTemplate();
 
         // Parse the file
         SubmissionTemplateModel model = new SubmissionTemplateModel();
-        model.parseSubmissionTemplate(testfile);
-
+        model.parseSubmissionTemplate(structureTemplateString);
         return model.checkSubmission(file);
+    }
+
+    private DockerOutput runDockerTest(ZipFile file, TestEntity testEntity) throws IOException {
+
+        // Get the test file from the server
+        String testScript = testEntity.getDockerTestScript();
+        String testTemplate = testEntity.getDockerTestTemplate();
+        String image = testEntity.getDockerImage();
+
+        // The first script must always be null, otherwise there is nothing to run on the container
+        if(testScript == null){
+            return null;
+        }
+
+        // Init container and add input files
+        DockerSubmissionTestModel model = new DockerSubmissionTestModel(image);
+        model.addZipInputFiles(file);
+
+        if(testTemplate == null){
+            // This docker test is configured in the simple mode (store test console logs)
+            return model.runSubmission(testScript);
+        }else{
+            // This docker test is configured in the template mode (store json with feedback)
+            return model.runSubmissionWithTemplate(testScript, testTemplate);
+        }
     }
 
     /**
@@ -170,7 +196,6 @@ public class SubmissionController {
 
         long groupId = checkResult.getData();
 
-        //TODO: execute the docker tests onces these are implemented
         try {
             //Save the file entry in the database to get the id
             FileEntity fileEntity = new FileEntity("", "", userId);
@@ -203,24 +228,38 @@ public class SubmissionController {
 
             // Run structure tests
             TestEntity testEntity = testRepository.findByProjectId(projectid).orElse(null);
-            SubmissionTemplateModel.SubmissionResult testresult;
+            SubmissionTemplateModel.SubmissionResult structureTestResult;
+            DockerOutput dockerOutput;
             if (testEntity == null) {
-                Logger.getLogger("SubmissionController").info("no test");
-                testresult = new SubmissionTemplateModel.SubmissionResult(true, "No structure requirements for this project.");
+                Logger.getLogger("SubmissionController").info("no tests");
+                submission.setStructureFeedback("No specific structure requested for this project.");
+                submission.setStructureAccepted(true);
             } else {
-                testresult = runStructureTest(new ZipFile(savedFile), testEntity);
-            }
-            if (testresult == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while running tests: test files not found");
+
+                // Check file structure
+                structureTestResult = runStructureTest(new ZipFile(savedFile), testEntity);
+                if (structureTestResult == null) {
+                    submission.setStructureFeedback(
+                        "No specific structure requested for this project.");
+                    submission.setStructureAccepted(true);
+                } else {
+                    submission.setStructureAccepted(structureTestResult.passed);
+                    submission.setStructureFeedback(structureTestResult.feedback);
+                }
+                // Check if docker tests succeed
+                dockerOutput = runDockerTest(new ZipFile(savedFile), testEntity);
+                if (dockerOutput == null) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Error while running docker tests.");
+                }
+                // Representation of dockerOutput, this will be a json(easily displayable in frontend) if it is a template test
+                // or a string if it is a simple test
+                submission.setDockerFeedback(dockerOutput.toString());
+                submission.setDockerAccepted(dockerOutput.isAllowed());
             }
             submissionRepository.save(submissionEntity);
-            // Update the submission with the test resultsetAccepted
-            submission.setStructureAccepted(testresult.passed);
+            // Update the dataabse
             submission = submissionRepository.save(submission);
-
-            // Update the submission with the test feedbackfiles
-            submission.setDockerFeedback("TEMP DOCKER FEEDBACK");
-            submission.setStructureFeedback(testresult.feedback);
             submissionRepository.save(submission);
 
             return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submissionEntity));
