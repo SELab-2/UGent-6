@@ -82,7 +82,7 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
   const onChange: TableTransferProps["onChange"] = (nextTargetKeys) => {
     if (!selectedGroup) return console.error("No group selected")
     setTargetKeys((curr) => ({ ...curr, [selectedGroup?.groupId]: nextTargetKeys }))
-    // TODO: make api call
+    // TODO: make api call here or when pressing save
   }
 
   const columns: TableColumnsType<CourseMemberType> = [
@@ -143,9 +143,6 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
             options={groups.map((g) => ({ label: g.name, value: g.groupId }))}
           />
         }
-
-
-
       </div>
     )
   }
@@ -159,13 +156,11 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
     const selectedGroupId = selectedGroup.groupId.toString()
     for(const groupId in targetKeys) {
       if(groupId === selectedGroupId) continue
-
       targetKeys[groupId]?.forEach((key) => users.add(key.toString()))
     }
 
     return courseMembers.filter((u) => !users.has(u.user.userId.toString()))
-  },[selectedGroup,courseMembers])
-
+  },[selectedGroup,courseMembers,groups,targetKeys])
   const overCapacity = selectedGroup && (targetKeys[selectedGroup.groupId]?.length??0) >  selectedGroup.capacity
 
   return (

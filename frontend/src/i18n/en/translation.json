@@ -98,6 +98,7 @@
     "options": "Update",
     "groupMembers": "Group members",
     "newProject": "New project",
+    "scoreTooHigh": "Score is higher than maximum score",
     "change": {
       "title": "Create project",
       "updateTitle": "Update {{name}}",

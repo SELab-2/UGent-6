@@ -5,16 +5,17 @@ import { DownOutlined, UserDeleteOutlined } from "@ant-design/icons"
 import { CourseMemberType } from "./MemberCard"
 import useIsCourseAdmin from "../../../../hooks/useIsCourseAdmin"
 import { MenuProps } from "antd/lib"
-import { CourseRelation } from "../../../../@types/requests"
+import { ApiRoutes, CourseRelation } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
 import { CourseContext } from "../../../../router/CourseRoutes"
+import apiCall from "../../../../util/apiFetch"
+import { useParams } from "react-router-dom"
 
-
-
-const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) => {
+const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: CourseMemberType[]) => void }> = ({ members, onChange }) => {
   const { t } = useTranslation()
   const isCourseAdmin = useIsCourseAdmin()
   const relation = useContext(CourseContext).member.relation
+  const { courseId } = useParams()
 
   const { user } = useUser()
 
@@ -23,6 +24,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
       key: "creator",
       label: t("editRole.teacher"),
       disabled: true,
+      style: { display: "none" },
     },
     {
       key: "course_admin",
@@ -30,25 +32,33 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
     },
     {
       key: "enrolled",
-      label:  t("editRole.student"),
+      label: t("editRole.student"),
     },
   ]
-  
+
   const rolesNames = {
     creator: t("editRole.teacher"),
     course_admin: t("editRole.course_admin"),
     enrolled: t("editRole.student"),
   }
 
-
-  const removeUserFromCourse = (userId: number) => {
-    //TODO: make request
+  const removeUserFromCourse = async (userId: number) => {
+    if (!courseId) return
+    //TODO: test this
+    const req = await apiCall.delete(ApiRoutes.COURSE_MEMBER, undefined, { userId, courseId })
+    console.log(req.data)
+    const newMembers = members?.filter((m) => m.user.userId !== userId)
+    onChange(newMembers ?? [])
   }
 
-  const onRoleChange = (userId: number, role: CourseRelation) => {
-    // TODO: make request
+  const onRoleChange = async (userId: number, role: CourseRelation) => {
+    // TODO: test this 
+    if(!courseId) return
+    const response = await apiCall.patch(ApiRoutes.COURSE_MEMBER, {relation: role}, { userId, courseId })
+    console.log(response.data);
+    onChange(response.data)
+    
   }
-
 
   return (
     <List
@@ -75,7 +85,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null }> = ({ members }) =>
                 <Button
                   danger
                   key="remove"
-                  disabled={u.user.userId === user?.id && relation === "creator" }
+                  disabled={u.user.userId === user?.id && relation === "creator"}
                   icon={<UserDeleteOutlined />}
                 />
               </Tooltip>

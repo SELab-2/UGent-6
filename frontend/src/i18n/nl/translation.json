@@ -101,6 +101,7 @@
     "options": "Aanpassen",
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
+    "scoreTooHigh": "Score is hoger dan maximum score",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",

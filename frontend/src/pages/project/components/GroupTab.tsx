@@ -11,8 +11,6 @@ const GroupTab: FC<{}> = () => {
   const { projectId } = useParams()
 
   useEffect(() => {
-    //TODO: perform get request to api/projects/{projectid}/groups
-
     fetchGroups()
   }, [])
 

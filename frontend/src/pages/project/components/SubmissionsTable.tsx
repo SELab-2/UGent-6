@@ -8,22 +8,57 @@ import useProject from "../../../hooks/useProject"
 import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
 import { Link, useParams } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
+import apiCall from "../../../util/apiFetch"
+import { ApiRoutes, PUT_Requests } from "../../../@types/requests.d"
+import useAppApi from "../../../hooks/useAppApi"
 
 const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number]) => {
-  return <List.Item>{name }</List.Item>
+  return <List.Item>{name}</List.Item>
 }
 
-const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = ({ submissions }) => {
+const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onChange: (s: ProjectSubmissionsType[]) => void }> = ({ submissions, onChange }) => {
   const { t } = useTranslation()
   const project = useProject()
-  const {courseId} = useParams()
+  const { courseId, projectId } = useParams()
+  const { message } = useAppApi()
 
-  const updateScore = (s: ProjectSubmissionsType, score: string) => {
-    // TODO: update score
+  const updateTable = async (groupId: number, feedback: Partial<PUT_Requests[ApiRoutes.PROJECT_SCORE]>) => {
+    console.log(projectId, submissions, groupId)
+    if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found")
+
+    const response = await apiCall.patch(ApiRoutes.PROJECT_SCORE, feedback, { id: projectId, groupId })
+    const data = response.data
+    console.log(data)
+    const newSubmissions: ProjectSubmissionsType[] = submissions.map((s) => {
+      if (s.group.groupId !== groupId) return s
+      return {
+        ...s,
+        feedback: {
+          ...s.feedback,
+          ...data,
+        },
+      }
+    })
+
+    onChange(newSubmissions)
   }
 
-  const updateFeedback = (s: ProjectSubmissionsType, feedback: string) => {
+  const updateScore = async (s: ProjectSubmissionsType, scoreStr: string) => {
+    // TODO: update score
+    if (!projectId || !project) return console.error("No projectId or project found")
+    scoreStr = scoreStr.trim()
+    let score: number | null
+    if (scoreStr === "") score = null
+    else score = parseFloat(scoreStr)
+    if (isNaN(score as number)) score = null
+    if (score !== null && score > project.maxScore) return message.error(t("project.scoreTooHigh"))
+    await updateTable(s.group.groupId, { score })
+  }
+
+  const updateFeedback = async (s: ProjectSubmissionsType, feedback: string) => {
     // TODO: update feedback
+
+    await updateTable(s.group.groupId, { feedback })
   }
 
   const columns: TableProps<ProjectSubmissionsType>["columns"] = useMemo(() => {
@@ -31,35 +66,47 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       {
         title: project?.clusterId ? t("project.group") : t("project.userName"),
         dataIndex: "group",
-        key:"group",
+        key: "group",
         render: (g) => <Typography.Text>{g.name}</Typography.Text>,
         description: "test",
       },
       {
         title: t("project.submission"),
-        key:"submissionId",
-        render: (s:ProjectSubmissionsType) => <Link to={AppRoutes.SUBMISSION.replace(":submissionId", s.submission?.submissionId+"").replace(":projectId", s.submission?.projectId+"").replace(":courseId", courseId!)}><Button type="link">#{s.submission?.submissionId}</Button></Link>,
+        key: "submissionId",
+        render: (s: ProjectSubmissionsType) => (
+          <Link
+            to={AppRoutes.SUBMISSION.replace(":submissionId", s.submission?.submissionId + "")
+              .replace(":projectId", s.submission?.projectId + "")
+              .replace(":courseId", courseId!)}
+          >
+            <Button type="link">#{s.submission?.submissionId}</Button>
+          </Link>
+        ),
       },
       {
         title: t("project.status"),
         dataIndex: "submission",
-        key:"submissionStatus",
-        render: (s) => <Typography.Text><SubmissionStatusTag status={createStatusBitVector(s)}/> </Typography.Text>
+        key: "submissionStatus",
+        render: (s) => (
+          <Typography.Text>
+            <SubmissionStatusTag status={createStatusBitVector(s)} />{" "}
+          </Typography.Text>
+        ),
       },
       {
         title: t("project.submissionTime"),
         dataIndex: "submission",
-        key:"submission",
-        render: (time:ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
+        key: "submission",
+        render: (time: ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
       },
       {
-        title: `Score (${project?.maxScore ?? ""})`,
-        key:"score",
-        render: (s: ProjectSubmissionsType) => <Typography.Text editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}>{s.feedback?.score ?? "-"}</Typography.Text>,
+        title: `Score (/${project?.maxScore ?? ""})`,
+        key: "score",
+        render: (s: ProjectSubmissionsType) => <Typography.Text type={!s.feedback || !project || s.feedback.score === null || s.feedback.score < project.maxScore/2  ? "danger" : undefined} editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}>{s.feedback?.score ?? "-"}</Typography.Text>,
       },
       {
         title: "Download",
-        key:"download",
+        key: "download",
         render: () => (
           <Button
             type="text"
@@ -69,8 +116,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
         align: "center",
       },
     ]
-  }, [t,project])
-
+  }, [t, project, submissions])
   return (
     <Table
       loading={submissions === null}
@@ -79,29 +125,34 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null }> = (
       expandable={{
         expandedRowRender: (g) => (
           <>
-          <div style={{marginBottom:"3rem"}}>
-
-            <Typography.Text strong>{t("project.feedback")}:</Typography.Text>
-            <br/><br/>
-            <Typography.Paragraph
-              editable={{
-                autoSize: { maxRows: 5, minRows: 3 },
-                onChange: (value)=> updateFeedback(g, value),
-              }}
+            <div style={{ marginBottom: "3rem" }}>
+              <Typography.Text strong>{t("project.feedback")}:</Typography.Text>
+              <br />
+              <br />
+              <Typography.Paragraph
+                editable={{
+                  autoSize: { maxRows: 5, minRows: 3 },
+                  onChange: (value) => updateFeedback(g, value),
+                }}
               >
-              {g.feedback?.feedback || "-"}
-            </Typography.Paragraph>
-              </div>
-           
-            {project?.clusterId && <><Typography.Text strong>{t("project.groupMembers")}</Typography.Text>
-            <List
-              locale={{ emptyText: t("project.groupEmpty") }}
-              dataSource={g.group.members ?? []}
-              renderItem={GroupMember}
-            /></>}
+                {g.feedback?.feedback || "-"}
+              </Typography.Paragraph>
+            </div>
+
+            {project?.clusterId && (
+              <>
+                <Typography.Text strong>{t("project.groupMembers")}</Typography.Text>
+                <List
+                  locale={{ emptyText: t("project.groupEmpty") }}
+                  dataSource={g.group.members ?? []}
+                  renderItem={GroupMember}
+                />
+              </>
+            )}
           </>
         ),
       }}
+      rowKey={(l) => l.group.groupId}
       pagination={false}
       columns={columns}
     />
