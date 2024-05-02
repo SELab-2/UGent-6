@@ -9,7 +9,6 @@ export enum ApiRoutes {
   
   COURSE = "api/courses/:courseId",
   COURSE_MEMBERS = "api/courses/:courseId/members",
-  COURSE_MEMBER = "api/courses/:courseId/members/:userId",
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
@@ -39,7 +38,7 @@ export enum ApiRoutes {
 
   TEST = "api/test",
   USER = "api/users/:id",
-  USERS = "api/users",
+  USERS = "api/users?:params",
   USER_AUTH = "api/user",
 }
 
@@ -87,29 +86,31 @@ export type DELETE_Requests = {
   [ApiRoutes.PROJECT]: undefined
   [ApiRoutes.GROUP_MEMBER]: undefined
   [ApiRoutes.COURSE_LEAVE]: undefined
-  [ApiRoutes.COURSE_MEMBER]: undefined
 }
 
 
 /**
- * the body of the PUT & PATCH requests
+ * the body of the PUT requests
  */
 export type PUT_Requests = {
   [ApiRoutes.COURSE]: POST_Requests[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT]: ProjectFormData
-  [ApiRoutes.COURSE_MEMBER]: { relation: CourseRelation }
-  [ApiRoutes.PROJECT_SCORE]: { score: number | null , feedback: string}
+  [ApiRoutes.USER]: {
+    name: string
+    surname: string
+    email: string
+    role: UserRole
+  }
 }
 
-
-
+/**
+ * The response you get from the PUT request
+ */
 export type PUT_Responses = {
   [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT]: GET_Responses[ApiRoutes.PROJECT]
-  [ApiRoutes.COURSE_MEMBER]: GET_Responses[ApiRoutes.COURSE_MEMBERS]
-  [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
+  [ApiRoutes.USER]: GET_Responses[ApiRoutes.USER]
 }
-
 
 type CourseTeacher = {
   name: string
@@ -203,11 +204,12 @@ export type GET_Responses = {
   }
   [ApiRoutes.USERS]: {
     name: string
-    userId: number
+    surname: string
+    id: number
     url: string
     email: string
     role: UserRole
-  }
+  }[]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
 
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][]

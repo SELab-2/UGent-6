@@ -62,6 +62,15 @@
     "editRole": "Edit a user's role"
   },
   "editRole": {
+    "email": "Email",
+    "name": "Name",
+    "surname": "Surname",
+    "search": "Search",
+    "emailError": "Please enter a valid email",
+    "nameError": "Name must be at least 3 characters long",
+    "surnameError": "Surname must be at least 3 characters long",
+    "searchTutorial": "Enter a name, surname, or email and press \"Search\" to find users.",
+    "noUsersFound": "No users found",
     "student": "Student",
     "teacher": "Teacher",
     "admin": "Admin",
@@ -98,7 +107,6 @@
     "options": "Update",
     "groupMembers": "Group members",
     "newProject": "New project",
-    "scoreTooHigh": "Score is higher than maximum score",
     "change": {
       "title": "Create project",
       "updateTitle": "Update {{name}}",
