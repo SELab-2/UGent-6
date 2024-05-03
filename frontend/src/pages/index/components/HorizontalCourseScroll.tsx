@@ -87,7 +87,7 @@ const HorizontalCourseScroll: FC<{ projects: ProjectsType | null; onOpenNew: () 
           {(archivedCourses || courseProjectsArray.length > 2) && <Button
               type="link"
               style={{ float: "right" }}
-              onClick={() => navigate("/courses?role=enrolled")}
+              onClick={() => navigate(+AppRoutes.COURSES+"?role=enrolled")}
             >
               {t("home.moreCourses")} <RightOutlined />
             </Button>}
