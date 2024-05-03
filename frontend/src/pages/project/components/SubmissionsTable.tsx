@@ -23,7 +23,6 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const { message } = useAppApi()
 
   const updateTable = async (groupId: number, feedback: Partial<PUT_Requests[ApiRoutes.PROJECT_SCORE]>) => {
-    console.log(projectId, submissions, groupId)
     if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found")
 
     const response = await apiCall.patch(ApiRoutes.PROJECT_SCORE, feedback, { id: projectId, groupId })
@@ -44,7 +43,6 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   }
 
   const updateScore = async (s: ProjectSubmissionsType, scoreStr: string) => {
-    // TODO: update score
     if (!projectId || !project) return console.error("No projectId or project found")
     scoreStr = scoreStr.trim()
     let score: number | null
@@ -56,9 +54,12 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   }
 
   const updateFeedback = async (s: ProjectSubmissionsType, feedback: string) => {
-    // TODO: update feedback
 
     await updateTable(s.group.groupId, { feedback })
+  }
+
+  const downloadFile = async (s: ProjectSubmissionsType) => {
+    // TODO: implement this
   }
 
   const columns: TableProps<ProjectSubmissionsType>["columns"] = useMemo(() => {
@@ -102,13 +103,21 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
       {
         title: `Score (/${project?.maxScore ?? ""})`,
         key: "score",
-        render: (s: ProjectSubmissionsType) => <Typography.Text type={!s.feedback || !project || s.feedback.score === null || s.feedback.score < project.maxScore/2  ? "danger" : undefined} editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}>{s.feedback?.score ?? "-"}</Typography.Text>,
+        render: (s: ProjectSubmissionsType) => (
+          <Typography.Text
+            type={!s.feedback || !project || s.feedback.score === null || s.feedback.score < project.maxScore / 2 ? "danger" : undefined}
+            editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}
+          >
+            {s.feedback?.score ?? "-"}
+          </Typography.Text>
+        ),
       },
       {
         title: "Download",
         key: "download",
-        render: () => (
+        render: (s: ProjectSubmissionsType) => (
           <Button
+            onClick={() => downloadFile(s)}
             type="text"
             icon={<DownloadOutlined />}
           />
