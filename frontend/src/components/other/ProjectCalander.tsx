@@ -1,5 +1,5 @@
 import { Badge, BadgeProps, Calendar } from "antd";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { ProjectType } from "../../pages/project/Project";
@@ -15,14 +15,23 @@ const projectStatusToBadge:Record<ProjectStatus, BadgeProps['status']> = {
   incorrect: "error",
 }
 
+type ProjectWithDeadlineDay = ProjectType & { deadlineDay: Dayjs };
+
 const ProjectCalander:FC< {projects: ProjectType[]|null}> = ({projects}) => {
+
+  const projectsWithDeadlineDay: ProjectWithDeadlineDay[] = useMemo(() => {
+    if (!projects) return [];
+
+    return projects.map(project => ({
+      ...project,
+      deadlineDay: dayjs(project.deadline),
+    }));
+  }, [projects]);
 
 
   const getListData = (value: Dayjs) => {
-    if (!projects) return [];
-
-    return projects.filter(project => 
-      dayjs(project.deadline).isSame(value, 'day')
+    return projectsWithDeadlineDay.filter(project => 
+      project.deadlineDay.isSame(value, 'day')
     );
   }
   
