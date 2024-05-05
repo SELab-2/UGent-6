@@ -1,9 +1,9 @@
-import { Button, Space, Table, TableProps } from "antd"
+import { Button, Table, TableProps } from "antd"
 import { FC, useMemo } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
+import i18n from 'i18next'
 import useAppApi from "../../../hooks/useAppApi"
-import ProjectInfo from "./ProjectInfo"
 import ProjectStatusTag from "./ProjectStatusTag"
 import GroupProgress from "./GroupProgress"
 import { Link } from "react-router-dom"
@@ -36,14 +36,18 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
         title: t("home.projects.course"),
         dataIndex: "course",
         key: "course",
-        render: (course: ProjectType["course"]) => course.name,
+        sorter: (a: ProjectType, b: ProjectType) => a.course.name.localeCompare(b.course.name),
+        sortDirections: ['ascend', 'descend'],
+        render: (course: ProjectType["course"]) => course.name
       },
       {
         title: t("home.projects.deadline"),
         dataIndex: "deadline",
         key: "deadline",
+        sorter: (a: ProjectType, b: ProjectType) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
+        sortDirections: ['ascend', "descend"],
         render: (text: string) =>
-          new Date(text).toLocaleString(undefined, {
+          new Date(text).toLocaleString(i18n.language, {
             year: "numeric",
             month: "long",
             day: "numeric",
