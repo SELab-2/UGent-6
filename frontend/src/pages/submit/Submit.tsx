@@ -6,6 +6,7 @@ import {useNavigate, useParams} from "react-router-dom"
 import React, {useState, useRef} from 'react';
 import apiCall from "../../util/apiFetch";
 import {ApiRoutes} from "../../@types/requests.d";
+import JSZip from 'jszip';
 
 const Submit = () => {
     const {t} = useTranslation()
@@ -14,18 +15,28 @@ const Submit = () => {
     const [fileAdded, setFileAdded] = useState(false);
     const navigate = useNavigate()
 
-const onSubmit = async (values: any) => {
-  console.log("Received values of form: ", values)
-  const file = values[t("project.addFiles")][0].originFileObj
-  if (!file) {
-    console.error("No file selected")
-    return
-  }
-  const formData = new FormData()
-  formData.append("file", file)
-  if (!projectId) return;
-  const response = await apiCall.post(ApiRoutes.PROJECT_SUBMIT, formData, {id: projectId})
-}
+    const onSubmit = async (values: any) => {
+        console.log("Received values of form: ", values)
+        const file = values[t("project.addFiles")][0].originFileObj
+        if (!file) {
+            console.error("No file selected")
+            return
+        }
+        const formData = new FormData()
+
+        if (file.type === 'application/zip') {
+            formData.append("file", file);
+        } else {
+            const zip = new JSZip();
+            zip.file(file.name, file);
+            const content = await zip.generateAsync({type: "blob"});
+            formData.append("file", content, "files.zip");
+        }
+
+        if (!projectId) return;
+        const response = await apiCall.post(ApiRoutes.PROJECT_SUBMIT, formData, {id: projectId})
+        console.log(response)
+    }
     return (
         <>
             <div>
