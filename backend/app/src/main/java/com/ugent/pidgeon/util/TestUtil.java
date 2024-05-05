@@ -2,6 +2,7 @@ package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.controllers.ApiRoutes;
 import com.ugent.pidgeon.model.json.TestJson;
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
@@ -31,12 +32,13 @@ public class TestUtil {
     }
 
     /**
-     * Check if a user can get update a test
+     * Check if a user can update a test
      * @param projectId id of the project
      * @param user user that wants to update the test
      * @param dockerImage docker image for the test
-     * @param dockerTest docker test file
-     * @param structureTest structure test file
+     * @param dockerScript docker script for the test
+     * @param dockerTemplate docker template for the test
+     * @param structureTemplate structure template for the test
      * @param httpMethod http method used to update the test
      * @return CheckResult with the status of the check and the test and project
      */
@@ -44,8 +46,9 @@ public class TestUtil {
             long projectId,
             UserEntity user,
             String dockerImage,
-            MultipartFile dockerTest,
-            MultipartFile structureTest,
+            String dockerScript,
+            String dockerTemplate,
+            String structureTemplate,
             HttpMethod httpMethod
     ) {
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, user);
@@ -67,10 +70,20 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.CONFLICT, "Tests already exist for this project", null);
         }
 
-        if (!httpMethod.equals(HttpMethod.PATCH)) {
-            if (dockerImage == null || dockerTest == null || structureTest == null) {
-                return new CheckResult<>(HttpStatus.BAD_REQUEST, "Missing parameters: dockerimage (string), dockertest (file), structuretest (file) are required", null);
-            }
+        if(httpMethod.equals(HttpMethod.POST) && dockerImage != null && dockerScript == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script is required in a docker test.", null);
+        }
+
+        if(httpMethod.equals(HttpMethod.PATCH) && dockerScript != null && testEntity.getDockerImage() == null && dockerImage == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "No docker image is configured for this test", null);
+        }
+
+        if(httpMethod.equals(HttpMethod.PATCH) && dockerImage != null && testEntity.getDockerTestScript() == null && dockerScript == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "No docker test script is configured for this test", null);
+        }
+
+        if(dockerTemplate != null && DockerSubmissionTestModel.isValidTemplate(dockerTemplate)) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Invalid docker template", null);
         }
 
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, projectEntity));

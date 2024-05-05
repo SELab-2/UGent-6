@@ -24,10 +24,9 @@ public class TestEntity {
     @Column(name = "structure_template")
     private String structureTemplate;
 
-    public TestEntity(long id, String dockerImage, String docker_test_script,
+    public TestEntity(String dockerImage, String docker_test_script,
         String dockerTestTemplate,
         String structureTemplate) {
-        this.id = id;
         this.dockerImage = dockerImage;
         this.dockerTestScript = docker_test_script;
         this.dockerTestTemplate = dockerTestTemplate;

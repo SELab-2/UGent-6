@@ -66,12 +66,9 @@ public class TestUtilTest {
     // Mock the testRepository.findByProjectId method to return an Optional of testEntity
     when(testRepository.findByProjectId(anyLong())).thenReturn(Optional.of(testEntity));
 
-    // Create a mock MultipartFile
-    MultipartFile mockFile = mock(MultipartFile.class);
-
     // Call the checkForTestUpdate method
     CheckResult<Pair<TestEntity, ProjectEntity>> result = testUtil.checkForTestUpdate(1L,
-        userEntity, "dockerImage", mockFile, mockFile, HttpMethod.POST);
+        userEntity, "dockerImage", "", null, null, HttpMethod.POST);
 
     // Assert the result
     assertEquals(HttpStatus.OK, result.getStatus());

@@ -73,7 +73,7 @@ public class    SubmissionController {
         return model.checkSubmission(file);
     }
 
-    private DockerOutput runDockerTest(ZipFile file, TestEntity testEntity) throws IOException {
+    private DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath) throws IOException {
 
         // Get the test file from the server
         String testScript = testEntity.getDockerTestScript();
@@ -88,6 +88,15 @@ public class    SubmissionController {
         // Init container and add input files
         DockerSubmissionTestModel model = new DockerSubmissionTestModel(image);
         model.addZipInputFiles(file);
+
+        // Copy artifacts to the destination
+        List<File> artifacts = model.getArtifacts();
+
+        // filehandler copy zips
+        Filehandler.copyFilesAsZip(artifacts, outputPath);
+
+        // cleanup docker
+        model.cleanUp();
 
         if(testTemplate == null){
             // This docker test is configured in the simple mode (store test console logs)
@@ -247,7 +256,7 @@ public class    SubmissionController {
                     submission.setStructureFeedback(structureTestResult.feedback);
                 }
                 // Check if docker tests succeed
-                dockerOutput = runDockerTest(new ZipFile(savedFile), testEntity);
+                dockerOutput = runDockerTest(new ZipFile(savedFile), testEntity, Filehandler.getSubmissionPath(projectid, groupId, submission.getId()));
                 if (dockerOutput == null) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Error while running docker tests.");

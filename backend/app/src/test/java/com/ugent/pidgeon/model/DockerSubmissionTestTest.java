@@ -36,7 +36,7 @@ public class DockerSubmissionTestTest {
   // Check if we can catch the console output of a script.
   @Test
   void scriptSucceeds() throws InterruptedException {
-    DockerSubmissionTestModel.addDocker("fedora:latest");
+    DockerSubmissionTestModel.installImage("fedora:latest");
     // Load docker container
     DockerSubmissionTestModel stm = new DockerSubmissionTestModel("fedora");
     // Run script
@@ -48,7 +48,7 @@ public class DockerSubmissionTestTest {
   @Test
   void scriptFails() throws InterruptedException {
     //make sure docker image is installed
-    DockerSubmissionTestModel.addDocker("fedora:latest");
+    DockerSubmissionTestModel.installImage("fedora:latest");
     // Load docker container
     DockerSubmissionTestModel stm = new DockerSubmissionTestModel("fedora");
     // Run script
@@ -60,7 +60,7 @@ public class DockerSubmissionTestTest {
 
   @Test
   void catchesConsoleLogs() throws InterruptedException {
-    DockerSubmissionTestModel.addDocker("alpine:latest");
+    DockerSubmissionTestModel.installImage("alpine:latest");
     // Load docker container
     DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
     // Run script
@@ -75,7 +75,7 @@ public class DockerSubmissionTestTest {
 
   @Test
   void correctlyReceivesInputFiles() throws InterruptedException {
-    DockerSubmissionTestModel.addDocker("alpine:latest");
+    DockerSubmissionTestModel.installImage("alpine:latest");
     // Load docker container
     DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
 
@@ -110,7 +110,7 @@ public class DockerSubmissionTestTest {
             "/shared/input/HelloWorld.sh > /shared/output/HelloWorld;" +
             "/shared/input/HelloWorld2.sh > /shared/output/HelloWorld2";
 
-    DockerSubmissionTestModel.addDocker("alpine:latest");
+    DockerSubmissionTestModel.installImage("alpine:latest");
     // Load docker container
     DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
     stm.addInputFiles(files);
@@ -179,6 +179,20 @@ public class DockerSubmissionTestTest {
     // run and check if zipfile was properly received
     assertEquals( "Hello Happy World!", output.logs.get(0));
 
+  }
+  @Test
+  void dockerImageDoesNotExist(){
+    assertFalse(DockerSubmissionTestModel.imageExists("BADUBADUBADUBADUBADUBADUB"));
+    assertTrue(DockerSubmissionTestModel.imageExists("alpine:latest"));
+  }
+
+  @Test
+  void isValidTemplate(){
+    assertFalse(DockerSubmissionTestModel.isValidTemplate("This is not a valid template"));
+    assertTrue(DockerSubmissionTestModel.isValidTemplate("@HelloWorld\n" +
+        ">Description=\"Test for hello world!\"\n" +
+        ">Required\n" +
+        "HelloWorld!"));
   }
 
 }

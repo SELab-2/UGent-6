@@ -2,6 +2,9 @@ package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.tika.Tika;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
@@ -208,6 +211,34 @@ public class Filehandler {
             return Files.readString(path);
         } catch (IOException e) {
             throw new IOException("Error while reading testfile: " + e.getMessage());
+        }
+    }
+
+    /**
+     * A function for copying internally made lists of files, to a required path.
+     * @param files list of files to copy
+     * @param path path to copy the files to
+     * @throws IOException if an error occurs while copying the files
+     */
+    public static void copyFilesAsZip(List<File> files, Path path) throws IOException {
+
+        // Write directly to a zip file in the path variable
+        File zipFile = new File(path.toString());
+
+        // Create a ZIP file
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
+            for (File file : files) {
+                // add file to zip
+                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                FileInputStream fileInputStream = new FileInputStream(file);
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = fileInputStream.read(buffer)) > 0) {
+                    zipOutputStream.write(buffer, 0, len);
+                }
+                fileInputStream.close();
+                zipOutputStream.closeEntry();
+            }
         }
     }
 }

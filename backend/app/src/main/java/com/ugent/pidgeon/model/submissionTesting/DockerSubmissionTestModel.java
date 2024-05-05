@@ -70,12 +70,13 @@ public class DockerSubmissionTestModel {
       e.printStackTrace();
     }
   }
+
   // function for deleting shared docker files, only use after catching the artifacts
   public void cleanUp() {
     removeFolder();
   }
 
-  public void addInputFiles(File[] files){
+  public void addInputFiles(File[] files) {
     for (File file : files) {
       try {
         FileUtils.copyFileToDirectory(file, new File(localMountFolder + "input/"));
@@ -85,7 +86,7 @@ public class DockerSubmissionTestModel {
     }
   }
 
-  public void addZipInputFiles(ZipFile zipFile){
+  public void addZipInputFiles(ZipFile zipFile) {
     Enumeration<? extends ZipEntry> entries = zipFile.entries();
     while (entries.hasMoreElements()) {
       ZipEntry entry = entries.nextElement();
@@ -108,13 +109,12 @@ public class DockerSubmissionTestModel {
 
   private void runContainer(String script, ResultCallback.Adapter<Frame> callback) {
 
-
     // Configure and start the container
     container.withCmd("/bin/sh", "-c", script);
     CreateContainerResponse responseContainer = container.exec();
     String executionContainerID = responseContainer.getId(); // Use correct ID for operations
     dockerClient.startContainerCmd(executionContainerID).exec();
-    try{
+    try {
       dockerClient.logContainerCmd(executionContainerID)
           .withStdOut(true)
           .withStdErr(true)
@@ -122,7 +122,7 @@ public class DockerSubmissionTestModel {
           .withTailAll()
           .exec(callback)
           .awaitCompletion();
-    }catch (InterruptedException e){
+    } catch (InterruptedException e) {
       System.err.println("Failed to read output file. Push is denied.");
     }
 
@@ -134,8 +134,7 @@ public class DockerSubmissionTestModel {
 
   }
 
-  public DockerTestOutput runSubmission(String script)
-      {
+  public DockerTestOutput runSubmission(String script) {
 
     List<String> consoleLogs = new ArrayList<>();
     ResultCallback.Adapter<Frame> callback = new ResultCallback.Adapter<>() {
@@ -163,7 +162,7 @@ public class DockerSubmissionTestModel {
     return new DockerTestOutput(consoleLogs, allowPush);
   }
 
-  public DockerTemplateTestOutput runSubmissionWithTemplate(String script, String template)  {
+  public DockerTemplateTestOutput runSubmissionWithTemplate(String script, String template) {
 
     runContainer(script, new Adapter<>());
 
@@ -194,7 +193,6 @@ public class DockerSubmissionTestModel {
         e.printStackTrace();
       }
     }
-
 
     // Check if allowed
     boolean allowed = true;
@@ -247,16 +245,17 @@ public class DockerSubmissionTestModel {
     return templateEntry;
   }
 
-  public List<File> getArtifacts(){
+  public List<File> getArtifacts() {
     List<File> files = new ArrayList<>();
     File[] filesInFolder = new File(localMountFolder + "artifacts/").listFiles();
-    if(filesInFolder != null){
+    if (filesInFolder != null) {
       files.addAll(Arrays.asList(filesInFolder));
     }
     return files;
   }
 
-  public static void addDocker(String imageName) {
+
+  public static void installImage(String imageName) {
     DockerClient dockerClient = DockerClientInstance.getInstance();
 
     // Pull the Docker image (if not already present)
@@ -277,6 +276,45 @@ public class DockerSubmissionTestModel {
     } catch (Exception e) {
       System.out.println("Failed removing docker image: " + e.getMessage());
     }
+  }
+
+  public static boolean imageExists(String image) {
+    DockerClient dockerClient = DockerClientInstance.getInstance();
+    try {
+      dockerClient.inspectImageCmd(image).exec();
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean isValidTemplate(String template) {
+    // lines with @ should be the first of a string
+    // @ is always the first character
+    // ">" options under the template should be "required, optional or description="..."
+    String[] lines = template.split("\n");
+    if (lines[0].charAt(0) != '@') {
+      return false;
+    }
+    boolean isConfigurationLine = false;
+    for (String line : lines) {
+      if (line.charAt(0) == '@') {
+        isConfigurationLine = true;
+        continue;
+      }
+      if (isConfigurationLine) {
+        if (line.charAt(0) == '>') {
+          // option lines
+          if (!line.equalsIgnoreCase(">Required") && !line.equalsIgnoreCase(">Optional")
+              && !line.substring(0, 12).equalsIgnoreCase(">Description")) {
+            return false;
+          }
+        } else {
+          isConfigurationLine = false;
+        }
+      }
+    }
+    return true;
   }
 
 }

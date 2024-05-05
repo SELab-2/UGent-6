@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.util;
 
 
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,12 +164,11 @@ public class CommonDatabaseActions {
         try {
             projectEntity.setTestId(null);
             projectRepository.save(projectEntity);
-            testRepository.deleteById(testEntity.getId())   ;
-            CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
-            if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
-                return checkAndDeleteRes;
+            testRepository.deleteById(testEntity.getId());
+            if(!testRepository.imageIsUsed(testEntity.getDockerImage())){
+                DockerSubmissionTestModel.removeDockerImage(testEntity.getDockerImage());
             }
-            return fileUtil.deleteFileById(testEntity.getDockerTestId());
+            return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting test", null);
         }
