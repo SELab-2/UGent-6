@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -158,6 +159,7 @@ public class SubmissionController {
      * @ApiPath /api/projects/{projectid}/submit
      */
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit")
+    @Transactional
     //Route to submit a file, it accepts a multiform with the file and submissionTime
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> submitFile(@RequestParam("file") MultipartFile file, @PathVariable("projectid") long projectid, Auth auth) {
@@ -225,7 +227,8 @@ public class SubmissionController {
 
             return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submissionEntity));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
+            throw new RuntimeException(e);
+            //return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
         }
 
     }
