@@ -201,6 +201,34 @@ public class Filehandler {
     }
 
     /**
+     * Copy a file to the server project directory.
+     * @param sourceFilePath the path of the file to copy
+     * @param projectId the ID of the project
+     * @return the path of the copied file
+     * @throws IOException if an error occurs while copying the file
+     */
+    public static Path copyTest(Path sourceFilePath, long projectId) throws IOException {
+        // Check if the source file exists
+        if (!Files.exists(sourceFilePath)) {
+            throw new IOException("Source file does not exist");
+        }
+
+        // Create project directory if it doesn't exist
+        Path projectDirectory = getTestPath(projectId);
+        if (!Files.exists(projectDirectory)) {
+            Files.createDirectories(projectDirectory);
+        }
+
+        // Resolve destination file path
+        Path destinationFilePath = projectDirectory.resolve(sourceFilePath.getFileName());
+
+        // Copy the file to the project directory
+        Files.copy(sourceFilePath, destinationFilePath);
+
+        return destinationFilePath;
+    }
+
+    /**
      * Get the structure test file contents as string
      * @param path path of the structure test file
      * @return the structure test file contents as string
