@@ -39,10 +39,10 @@ public class UserController {
      * @return user object
      */
     @GetMapping(ApiRoutes.USERS_BASE_PATH + "/{userid}")
-    @Roles({UserRole.student})
+    @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<Object> getUserById(@PathVariable("userid") Long userid,Auth auth) {
         UserEntity requester = auth.getUserEntity();
-        if (requester.getId() != userid) {
+        if (requester.getId() != userid && requester.getRole() != UserRole.admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have access to this user");
         }
 
@@ -82,7 +82,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
         }
 
-        UserEntity user = null;
         if (name == null) name = "";
         if (surname == null) surname = "";
 
@@ -164,7 +163,6 @@ public class UserController {
             userUpdateJson.setEmail(user.getEmail());
         }
 
-        Logger.getGlobal().info(userUpdateJson.getRole());
         if (userUpdateJson.getRole() == null) {
             userUpdateJson.setRole(user.getRole().toString());
         }
