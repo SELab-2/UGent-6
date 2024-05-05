@@ -42,6 +42,7 @@
       "description": "Description",
       "course": "Course",
       "deadline": "Deadline",
+      "deadlineNotPassed": "Only show active projects",
       "showMore": "Show more",
       "submit": "Submit",
       "projectStatus": "Status",

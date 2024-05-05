@@ -42,6 +42,7 @@
       "description": "Beschrijving",
       "course": "Vak",
       "deadline": "Deadline",
+      "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
 
       "projectStatus": "Status",

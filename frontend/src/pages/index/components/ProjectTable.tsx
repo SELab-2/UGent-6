@@ -1,4 +1,4 @@
-import { Button, Table, TableProps } from "antd"
+import { Button, Table, TableProps} from "antd"
 import { FC, useMemo } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
@@ -46,6 +46,15 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
         key: "deadline",
         sorter: (a: ProjectType, b: ProjectType) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
         sortDirections: ['ascend', "descend"],
+        defaultSortOrder: "ascend",
+        // Filter projects with deadlines that have already passed
+        filters: [{ text: t('home.projects.deadlineNotPassed'), value: 'notPassed' }],
+        onFilter: (value: any, record: any) => {
+          const currentTimestamp = new Date().getTime();
+          const deadlineTimestamp = new Date(record.deadline).getTime();
+          return value === 'notPassed' ? deadlineTimestamp >= currentTimestamp : true;
+        },
+        defaultFilteredValue: ["notPassed"] ,
         render: (text: string) =>
           new Date(text).toLocaleString(i18n.language, {
             year: "numeric",
@@ -86,6 +95,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
 
   return (
     <Table
+      showSorterTooltip={{mouseEnterDelay: 1}}
       locale={{
         emptyText: t("home.projects.noProjects"),
       }}
