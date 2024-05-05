@@ -9,7 +9,6 @@ const SubmitForm: FC<{ form: FormInstance, setFileAdded: (added: boolean) => voi
     const {t} = useTranslation()
     const normFile = (e: any) => {
         console.log("Upload event:", e)
-        console.log("ye")
         if (Array.isArray(e)) {
             return e
         }
