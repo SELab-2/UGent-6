@@ -320,7 +320,7 @@ public class CommonDatabaseActions {
         if (project.getTestId() != null) {
             TestEntity test = testRepository.findById(project.getTestId()).orElse(null);
             if (test != null) {
-                CheckResult<TestEntity> checkResult = copyTest(test, newProject.getId());
+                CheckResult<TestEntity> checkResult = copyTest(test);
                 if (!checkResult.getStatus().equals(HttpStatus.OK)) {
                     return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
                 }
@@ -336,62 +336,20 @@ public class CommonDatabaseActions {
     }
 
     /**
-     * Copy a test and all its related data. Assumes that permissions are already checked
+     * Copy a test and all its related data. Assumes that permissions are already checked and that the parameters are valid.
      * @param test test that needs to be copied
-     * @param projectId id of the project the test is linked to
      * @return CheckResult with the status of the copy and the new test
      */
-    public CheckResult<TestEntity> copyTest(TestEntity test, long projectId) {
+    public CheckResult<TestEntity> copyTest(TestEntity test) {
         // Copy the test
         TestEntity newTest = new TestEntity(
             test.getDockerImage(),
-            test.getDockerTestId(),
-            test.getStructureTestId()
+            test.getDockerTestScript(),
+            test.getDockerTestTemplate(),
+            test.getStructureTemplate()
         );
-
-        // Copy the files linked to the test
-        try {
-            FileEntity dockerFile = fileRepository.findById(test.getDockerTestId()).orElse(null);
-            FileEntity structureFile = fileRepository.findById(test.getStructureTestId()).orElse(null);
-            if (dockerFile == null || structureFile == null) {
-                return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying test", null);
-            }
-
-            CheckResult<FileEntity> copyDockRes = copyTestFile(dockerFile, projectId);
-            if (!copyDockRes.getStatus().equals(HttpStatus.OK)) {
-                return new CheckResult<>(copyDockRes.getStatus(), copyDockRes.getMessage(), null);
-            }
-            newTest.setDockerTestId(copyDockRes.getData().getId());
-
-            CheckResult<FileEntity> copyStructRes = copyTestFile(structureFile, projectId);
-            if (!copyStructRes.getStatus().equals(HttpStatus.OK)) {
-                return new CheckResult<>(copyStructRes.getStatus(), copyStructRes.getMessage(), null);
-            }
-            newTest.setStructureTestId(copyStructRes.getData().getId());
-        } catch (Exception e) {
-            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying test", null);
-        }
 
         newTest = testRepository.save(newTest);
         return new CheckResult<>(HttpStatus.OK, "", newTest);
-    }
-
-
-    /**
-     * Copy a file and all its related data. Assumes that permissions are already checked
-     * @param file file to copy
-     * @param projectId id of the project the file is linked to
-     * @return CheckResult with the status of the copy and the new file
-     */
-    public CheckResult<FileEntity> copyTestFile(FileEntity file, long projectId) {
-        // Copy the file
-        try {
-            Path newPath = Filehandler.copyTest(Path.of(file.getPath()), projectId);
-            FileEntity newFile = new FileEntity(newPath.getFileName().toString(), newPath.toString(), file.getUploadedBy());
-            newFile = fileRepository.save(newFile);
-            return new CheckResult<>(HttpStatus.OK, "", newFile);
-        } catch (Exception e) {
-            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying file", null);
-        }
     }
 }
