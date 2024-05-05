@@ -14,7 +14,9 @@
     "member": "member",
     "members": "members",
     "archived":"Archived",
-    "noCourses": "No courses found"
+    "noCourses": "No courses found",
+    "sortAscending": "A to Z",
+    "sortDescending": "Z to A"
   },
   "home": {
     "allCourses": "All courses",

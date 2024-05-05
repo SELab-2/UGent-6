@@ -14,7 +14,9 @@
     "member": "lid",
     "members": "leden",
     "archived": "Gearchiveerd",
-    "noCourses": "Geen vakken gevonden"
+    "noCourses": "Geen vakken gevonden",
+    "sortAscending": "A tot Z",
+    "sortDescending": "Z tot A"
   },
   "home": {
     "allCourses": "Alle vakken",
