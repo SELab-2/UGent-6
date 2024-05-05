@@ -12,9 +12,9 @@ import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
-import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
+import { InboxOutlined, InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
 import PeriodTag from "../../components/common/PeriodTag"
-import LeaveCourseButton from "./components/LeaveCourse/LeaveCourseButton"
+import ExtraTabBtn from "./components/tabExtraBtn/ExtraTabBtn"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -90,8 +90,7 @@ const Course: FC = () => {
           style={{ marginBottom: "0.5rem" }}
         >
           <PeriodTag
-            start={course.createdAt}
-            end={course.archivedAt}
+            year={course.year}
           />
           <Tag
             key={course.teacher.url}
@@ -99,13 +98,17 @@ const Course: FC = () => {
           >
             {course.teacher.name} {course.teacher.surname}
           </Tag>
+          {
+            course.archivedAt && <Tag icon={<InboxOutlined />}
+            color="yellow">{t("course.archived")}</Tag>
+          }
         </Space>
         <br />
         <Tabs
           onChange={(k) => navigate(`#${k}`)}
           defaultActiveKey={location.hash.slice(1) || "1"}
           items={items}
-          tabBarExtraContent={<LeaveCourseButton courseId={course.courseId.toString()} />}
+          tabBarExtraContent={<ExtraTabBtn/>}
         />
       </div>
       <br />

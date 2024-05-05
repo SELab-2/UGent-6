@@ -20,11 +20,13 @@ const SubmissionsTab = () => {
     })
   }, [])
 
-  const handleDownloadSubmissions = () => {}
+  const handleDownloadSubmissions = () => {
+    // TODO: implement this!
+  }
 
   return (
     <>
-      <SubmissionsTable submissions={submissions} />
+      <SubmissionsTable submissions={submissions} onChange={setSubmissions}/>
     </>
   )
 }

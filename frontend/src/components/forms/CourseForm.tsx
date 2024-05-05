@@ -2,17 +2,24 @@ import { Form, FormInstance, Input, Typography } from "antd"
 import { FC, PropsWithChildren } from "react"
 import { useTranslation } from "react-i18next"
 import MarkdownEditor from "../input/MarkdownEditor"
+import AcademicYearSelect from "../common/AcademicYearSelect"
 
-
-
-const CourseForm:FC<{form:FormInstance} & PropsWithChildren> = ({form,children}) => {
+const CourseForm: FC<{ form: FormInstance } & PropsWithChildren> = ({ form, children }) => {
   const { t } = useTranslation()
   const description = Form.useWatch("description", form)
 
   return (
-    <Form form={form} layout="vertical" validateTrigger="onBlur">
+    <Form
+      form={form}
+      layout="vertical"
+      validateTrigger="onBlur"
+    >
       <Form.Item
-        rules={[{ required: true, message: t("home.courseNameRequired") }, { max: 50, message: t("home.courseNameMaxLength") },{ min: 3, message: t("home.courseNameMinLength") }]}
+        rules={[
+          { required: true, message: t("home.courseNameRequired") },
+          { max: 50, message: t("home.courseNameMaxLength") },
+          { min: 3, message: t("home.courseNameMinLength") },
+        ]}
         label={t("home.courseName")}
         name="name"
       >
@@ -22,15 +29,21 @@ const CourseForm:FC<{form:FormInstance} & PropsWithChildren> = ({form,children})
         />
       </Form.Item>
 
-      <Typography.Text>
-        {t("project.change.description")}
-    </Typography.Text>
-        <MarkdownEditor
-          maxLength={5000}
-          value={description}
-          placeholder={t("home.courseDescription")}
-          
-        />
+      <Typography.Text>{t("project.change.description")}</Typography.Text>
+      <MarkdownEditor
+        maxLength={5000}
+        value={description}
+        placeholder={t("home.courseDescription")}
+      />
+
+      <Form.Item
+        label={t("home.academicYear")}
+        name="year"
+        rules={[{ required: true, message: t("home.academicYearRequired") }]}
+      >
+        <AcademicYearSelect />
+      </Form.Item>
+
       {children}
     </Form>
   )

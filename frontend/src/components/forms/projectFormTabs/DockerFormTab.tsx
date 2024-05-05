@@ -54,7 +54,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
         <>
           <Form.Item
-            rules={[{ required: true, message: "Docker script is required" }]}
+            rules={[{ required: !dockerDisabled, message: "Docker script is required" }]}
             label="Docker script"
             name="dockerScript"
             tooltip="TODO write docs for this"
