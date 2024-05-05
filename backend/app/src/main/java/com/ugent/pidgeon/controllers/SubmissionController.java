@@ -266,6 +266,7 @@ public class    SubmissionController {
                 submission.setDockerFeedback(dockerOutput.toString());
                 submission.setDockerAccepted(dockerOutput.isAllowed());
             }
+            submission.setTestFinished(true);
             submissionRepository.save(submissionEntity);
             // Update the dataabse
             submission = submissionRepository.save(submission);

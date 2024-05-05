@@ -36,6 +36,9 @@ public class SubmissionEntity {
     @Column(name="docker_feedback")
     private String dockerFeedback;
 
+    @Column(name="test_finished")
+    private Boolean testFinished;
+
     public SubmissionEntity() {
     }
 
@@ -116,4 +119,13 @@ public class SubmissionEntity {
     public void setDockerFeedback(String dockerFeedbackFileId) {
         this.dockerFeedback = dockerFeedbackFileId;
     }
+
+    public Boolean getTestFinished() {
+        return testFinished;
+    }
+
+    public void setTestFinished(Boolean testFinished) {
+        this.testFinished = testFinished;
+    }
+
 }
