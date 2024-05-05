@@ -18,6 +18,9 @@ const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null }> = ({ sub
     {
       title: t("project.submission"),
       key: "submissionId",
+      sorter: (a: GroupSubmissionType, b: GroupSubmissionType) => {
+        return a.submissionId - b.submissionId
+      },
       render: (submission: GroupSubmissionType) => (
         <Link to={AppRoutes.SUBMISSION.replace(":courseId",courseId!).replace(":projectId",submission.projectId+"").replace(":submissionId",submission.submissionId+"")}>
           <Button type="link">#{submission.submissionId}</Button>
@@ -44,7 +47,7 @@ const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null }> = ({ sub
 
 
 
-  return ( <Table locale={{emptyText: t("project.noSubmissions")}} loading={submissions === null} dataSource={submissions||[]} columns={columns} rowKey="submissionId" />
+  return ( <Table locale={{emptyText: t("project.noSubmissions")}}  showSorterTooltip={{mouseEnterDelay: 1}} loading={submissions === null} dataSource={submissions||[]} columns={columns} rowKey="submissionId" />
   )
 }
 

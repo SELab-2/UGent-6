@@ -70,10 +70,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         key: "group",
         render: (g) => <Typography.Text>{g.name}</Typography.Text>,
         sorter: (a: ProjectSubmissionsType, b: ProjectSubmissionsType) => {
-          // Implement sorting logic for group column
-          const groupA = a.group.groupId
-          const groupB = b.group.groupId
-          return groupA - groupB;
+          return a.group.groupId - b.group.groupId
         },
         description: "test",
       },
