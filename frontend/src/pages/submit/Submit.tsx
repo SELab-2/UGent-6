@@ -17,21 +17,20 @@ const Submit = () => {
 
     const onSubmit = async (values: any) => {
         console.log("Received values of form: ", values)
-        const file = values[t("project.addFiles")][0].originFileObj
-        if (!file) {
-            console.error("No file selected")
+        const files = values.files.map((file: any) => file.originFileObj);
+        if (files.length === 0) {
+            console.error("No files selected")
             return
         }
+        console.log(files);
         const formData = new FormData()
 
-        if (file.type === 'application/zip') {
-            formData.append("file", file);
-        } else {
-            const zip = new JSZip();
+        const zip = new JSZip();
+        files.forEach((file: any) => {
             zip.file(file.name, file);
-            const content = await zip.generateAsync({type: "blob"});
-            formData.append("file", content, "files.zip");
-        }
+        });
+        const content = await zip.generateAsync({type: "blob"});
+        formData.append("file", content, "files.zip");
 
         if (!projectId) return;
         const response = await apiCall.post(ApiRoutes.PROJECT_SUBMIT, formData, {id: projectId})

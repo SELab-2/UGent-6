@@ -23,14 +23,17 @@ const SubmitForm: FC<{ form: FormInstance, setFileAdded: (added: boolean) => voi
     <Form form={form} layout="vertical" style={{height: "100%"}} onFinish={onFinish}>
 
             <Form.Item
-                name={t("project.addFiles")}
+                label={t("project.addFiles")}
+                name="files"
                 valuePropName="fileList"
                 getValueFromEvent={normFile}
                 style={{height: "100%"}}
             >
                 <Upload.Dragger
                     name="file"
+                    beforeUpload={() => false}
                     multiple={false}
+                    directory={true}
                     style={{height: "100%"}}
                     onChange={({file}) => {
                         if (file.status !== 'uploading') {

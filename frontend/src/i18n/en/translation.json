@@ -84,7 +84,7 @@
     "submit": "Submit",
     "back": "Cancel",
     "uploadAreaTitle": "Click or drag file to this area to upload",
-    "uploadAreaSubtitle": "Maximum file size is 10MB",
+    "uploadAreaSubtitle": "Maximum file size is 100MB",
     "deadlinePassed": "Deadline passed",
     "downloadSubmissions": "Download all submissions",
     "group": "Group",
