@@ -7,6 +7,7 @@ import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -48,9 +49,10 @@ public class TestUtil {
             String dockerImage,
             String dockerScript,
             String dockerTemplate,
-            String structureTemplate,
             HttpMethod httpMethod
     ) {
+
+
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, user);
         if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
             return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);

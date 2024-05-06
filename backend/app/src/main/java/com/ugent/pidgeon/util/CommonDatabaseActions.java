@@ -133,8 +133,6 @@ public class CommonDatabaseActions {
                 }
             }
 
-            projectRepository.delete(projectEntity);
-
             if (projectEntity.getTestId() != null) {
                 TestEntity testEntity = testRepository.findById(projectEntity.getTestId()).orElse(null);
                 if (testEntity == null) {
@@ -144,7 +142,7 @@ public class CommonDatabaseActions {
                 return delRes;
             }
 
-
+            projectRepository.delete(projectEntity);
 
             return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
@@ -179,16 +177,13 @@ public class CommonDatabaseActions {
      * @return CheckResult with the status of the deletion
      */
     public CheckResult<Void> deleteTestById(ProjectEntity projectEntity, TestEntity testEntity) {
-        try {
-            projectRepository.save(projectEntity);
-            testRepository.deleteById(testEntity.getId());
-            if(!testRepository.imageIsUsed(testEntity.getDockerImage())){
-                DockerSubmissionTestModel.removeDockerImage(testEntity.getDockerImage());
-            }
-            return new CheckResult<>(HttpStatus.OK, "", null);
-        } catch (Exception e) {
-            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting test", null);
+        projectEntity.setTestId(null);
+        projectRepository.save(projectEntity);
+        testRepository.deleteById(testEntity.getId());
+        if(!testRepository.imageIsUsed(testEntity.getDockerImage())){
+            DockerSubmissionTestModel.removeDockerImage(testEntity.getDockerImage());
         }
+        return new CheckResult<>(HttpStatus.OK, "", null);
     }
 
     /**

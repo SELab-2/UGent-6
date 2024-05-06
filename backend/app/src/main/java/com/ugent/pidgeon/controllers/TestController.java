@@ -97,7 +97,17 @@ public class TestController {
             HttpMethod httpMethod
     ) {
 
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, null, null, structureTemplate, httpMethod);
+        if (dockerImage != null && dockerImage.isBlank()) {
+            dockerImage = null;
+        }
+        if (dockerScript != null && dockerScript.isBlank()) {
+            dockerScript = null;
+        }
+        if (dockerTemplate != null && dockerTemplate.isBlank()) {
+            dockerTemplate = null;
+        }
+
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, null, null, httpMethod);
 
 
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
@@ -106,6 +116,11 @@ public class TestController {
 
         TestEntity testEntity = updateCheckResult.getData().getFirst();
         ProjectEntity projectEntity = updateCheckResult.getData().getSecond();
+
+        // Creating a test entry
+        if(httpMethod.equals(HttpMethod.POST)){
+            testEntity = new TestEntity();
+        }
 
         // delete test entry
         if(httpMethod.equals(HttpMethod.DELETE)){
@@ -123,8 +138,7 @@ public class TestController {
         }
 
         // Docker test
-        if(!(dockerImage == null && dockerScript == null && dockerTemplate == null)){
-
+        if(dockerImage != null){
             // update/install image if possible.
             DockerSubmissionTestModel.installImage(dockerImage);
             testEntity.setDockerImage(dockerImage);
@@ -134,11 +148,18 @@ public class TestController {
         }
 
         // save structure template
+        if (!httpMethod.equals(HttpMethod.PATCH) || structureTemplate != null) {
+            if (structureTemplate != null && structureTemplate.isBlank()) {
+                structureTemplate = null;
+            }
+        } else {
+            structureTemplate = testEntity.getStructureTemplate();
+        }
         testEntity.setStructureTemplate(structureTemplate);
-        projectEntity.setTestId(testEntity.getId());
 
         // save test entity
         testEntity = testRepository.save(testEntity);
+        projectEntity.setTestId(testEntity.getId());
         projectRepository.save(projectEntity); // make sure to update test id in project
 
         return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(testEntity, projectId));
@@ -267,7 +288,7 @@ public class TestController {
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteTestById(@PathVariable("projectid") long projectId, Auth auth) {
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null, null, HttpMethod.DELETE);
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null,  HttpMethod.DELETE);
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(updateCheckResult.getStatus()).body(updateCheckResult.getMessage());
         }
