@@ -36,6 +36,8 @@ public class TestController {
     private CommonDatabaseActions commonDatabaseActions;
     @Autowired
     private EntityToJsonConverter entityToJsonConverter;
+  @Autowired
+  private ProjectUtil projectUtil;
 
     /**
      * Function to update the tests of a project
@@ -148,7 +150,7 @@ public class TestController {
         }
 
         // save structure template
-        if (!httpMethod.equals(HttpMethod.PATCH) || structureTemplate != null) {
+        if (!httpMethod.equals(HttpMethod.PATCH) || (structureTemplate != null && !structureTemplate.isBlank())) {
             if (structureTemplate != null && structureTemplate.isBlank()) {
                 structureTemplate = null;
             }
@@ -264,14 +266,12 @@ public class TestController {
         return ResponseEntity.ok(propertyGetter.apply(testEntity));
     }
     public ResponseEntity<?> getTestProperty(long projectId, Auth auth, Function<TestEntity, String> propertyGetter) {
-        Optional<ProjectEntity> projectEntity = projectRepository.findById(projectId);
-        if(projectEntity.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
-
+        TestEntity testEntity = testUtil.getTestIfExists(projectId);
+        if (testEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
         }
-        Optional<TestEntity> testEntity = testRepository.findById(projectEntity.get().getTestId());
-      return testEntity.map(entity -> ResponseEntity.ok(propertyGetter.apply(entity)))
-          .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Test not found"));
+
+        return propertyGetter.apply(testEntity) == null ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test found") : ResponseEntity.ok(propertyGetter.apply(testEntity));
     }
 
 
