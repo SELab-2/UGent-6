@@ -8,6 +8,7 @@ public class StringMatcher {
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" +
                     "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
+
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
     /**
