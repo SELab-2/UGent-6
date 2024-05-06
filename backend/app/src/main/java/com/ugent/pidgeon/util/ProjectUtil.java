@@ -88,7 +88,7 @@ public class ProjectUtil {
   public CheckResult<Void> checkProjectJson(ProjectJson projectJson, long courseId) {
     if (projectJson.getName() == null ||
         projectJson.getDescription() == null ||
-        projectJson.getMaxScore() == null ||
+        projectJson.getMaxScore() == null || //TODO: maxScore shouldn't be required
         projectJson.getGroupClusterId() == null ||
         projectJson.getDeadline() == null) {
       return new CheckResult<>(HttpStatus.BAD_REQUEST,
