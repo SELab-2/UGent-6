@@ -119,6 +119,7 @@
       "visible": "Project zichtbaar maken",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in",
+      "maxScoreHelp": "Wat is de maximale score die je kunt behalen voor dit project? Als je het leeg laat, wordt het project niet beoordeeld",
       "deadline": "Deadline",
       "create": "Project aanmaken",
       "success": "Project succesvol aangemaakt",

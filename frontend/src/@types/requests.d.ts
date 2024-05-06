@@ -53,8 +53,15 @@ export type POST_Requests = {
     name: string
     description:string
   }
-  [ApiRoutes.PROJECT_CREATE]:
-      ProjectFormData
+  [ApiRoutes.PROJECT_CREATE]: {
+    name: string;
+    description: string;
+    groupClusterId: number;
+    testId: number | null;
+    visible: boolean;
+    maxScore: number;
+    deadline: Date | null;
+} 
 
     [ApiRoutes.GROUP_MEMBERS]: {
       id: number
@@ -173,7 +180,7 @@ export type GET_Responses = {
     name: string
     submissionUrl: ApiRoutes.PROJECT_GROUP_SUBMISSIONS
     testsUrl: string
-    maxScore:number
+    maxScore: number | null
     visible: boolean
     status?: ProjectStatus
     progress: {
@@ -269,7 +276,7 @@ export type GET_Responses = {
     projectName: string, 
     projectUrl: string,
     projectId: number,
-    maxScore: number,
+    maxScore: number | null,
     groupFeedback: GET_Responses[ApiRoutes.PROJECT_SCORE] | null
   }[]
 

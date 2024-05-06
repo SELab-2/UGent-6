@@ -31,7 +31,10 @@ const ProjectCreate: React.FC = () => {
 
     try {
       // Roep createProject aan en controleer op fouten
+    
       const result = await ProjectCreateService.createProject(courseId, values)
+
+
       if (result.code === 200) {
         message.success(t("project.change.success")) // Toon een succesbericht
         navigate(AppRoutes.PROJECT.replace(":projectId", result.project!.projectId.toString()).replace(":courseId", courseId)) // Navigeer naar het nieuwe project

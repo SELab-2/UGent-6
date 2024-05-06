@@ -6,7 +6,6 @@ import MarkdownEditor from "../../input/MarkdownEditor"
 const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const description = Form.useWatch("description", form)
-  console.log(description)
 
   return (
     <>
@@ -34,7 +33,8 @@ const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
       <Form.Item
         label={t("project.change.maxScore")}
         name="maxScore"
-        rules={[{ required: true, message: t("project.change.maxScoreMessage") }]}
+        tooltip={t("project.change.maxScoreHelp")}
+        rules={[{ required: false, message: t("project.change.maxScoreMessage") }]}
       >
         <Input
           min={1}

@@ -117,6 +117,7 @@
       "visible": "Make the project visible",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Please enter the maximum score for the project",
+      "maxScoreHelp": "What is the maximum achievable score for this project? Leaving it empty means the project won't be graded.",
       "deadline": "Deadline",
       "create": "Create project",
       "success": "Project successfully created ",

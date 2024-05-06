@@ -51,7 +51,7 @@ const ScoreCard = () => {
   return (
     <Card
       title="Score"
-      extra={[project && <Typography.Text key="score" strong>{score.score} / {project.maxScore}</Typography.Text>]}
+      extra={[project && !!project.maxScore && <Typography.Text key="score" strong>{score.score} / {project.maxScore}</Typography.Text>]}
     
     >
     
