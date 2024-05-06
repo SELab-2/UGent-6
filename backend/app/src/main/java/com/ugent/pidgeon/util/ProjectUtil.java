@@ -88,11 +88,10 @@ public class ProjectUtil {
   public CheckResult<Void> checkProjectJson(ProjectJson projectJson, long courseId) {
     if (projectJson.getName() == null ||
         projectJson.getDescription() == null ||
-        projectJson.getMaxScore() == null || //TODO: maxScore shouldn't be required
         projectJson.getGroupClusterId() == null ||
         projectJson.getDeadline() == null) {
       return new CheckResult<>(HttpStatus.BAD_REQUEST,
-          "name, description, maxScore and deadline are required fields", null);
+          "name, description and deadline are required fields", null);
     }
 
     if (projectJson.getName().isBlank()) {
@@ -109,8 +108,8 @@ public class ProjectUtil {
       return new CheckResult<>(HttpStatus.BAD_REQUEST, "Deadline is in the past", null);
     }
 
-    if (projectJson.getMaxScore() < 0) {
-      return new CheckResult<>(HttpStatus.BAD_REQUEST, "Max score cannot be negative", null);
+    if (projectJson.getMaxScore() != null && projectJson.getMaxScore() <= 0) {
+      return new CheckResult<>(HttpStatus.BAD_REQUEST, "Max score cannot be negative or zero", null);
     }
 
     return new CheckResult<>(HttpStatus.OK, "", null);
@@ -132,8 +131,7 @@ public class ProjectUtil {
 
     boolean studentof = projectRepository.userPartOfProject(projectId, user.getId());
     boolean isAdmin =
-        (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId,
-            user.getId()));
+        (user.getRole() == UserRole.admin);
 
     if (studentof || isAdmin) {
       return new CheckResult<>(HttpStatus.OK, "", project);

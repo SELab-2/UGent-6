@@ -116,6 +116,7 @@ public class GroupUtilTest {
     when(clusterUtil.isIndividualCluster(group.getClusterId())).thenReturn(false);
     CheckResult<GroupEntity> result = groupUtil.canUpdateGroup(group.getId(), mockUser);
     assertEquals(HttpStatus.OK, result.getStatus());
+    assertEquals(group, result.getData());
 
     /* Group is individual cluster */
     when(clusterUtil.isIndividualCluster(group.getClusterId())).thenReturn(true);
