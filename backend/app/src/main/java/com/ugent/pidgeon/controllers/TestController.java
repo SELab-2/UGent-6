@@ -8,6 +8,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -107,26 +108,16 @@ public class TestController {
         TestEntity testEntity = updateCheckResult.getData().getFirst();
         ProjectEntity projectEntity = updateCheckResult.getData().getSecond();
 
-        // delete test entry
-        if(httpMethod.equals(HttpMethod.DELETE)){
-            // first check if docker image is not used anywhere else
-            if(!testRepository.imageIsUsed(dockerImage)){
-                // image is no longer required for any tests
-                DockerSubmissionTestModel.removeDockerImage(dockerImage);
-            }
-
-            // delete test
-            testRepository.deleteById(testEntity.getId());
-            projectEntity.setTestId(null);
-            projectRepository.save(projectEntity);
-            return ResponseEntity.ok().build();
-        }
 
         // Docker test
         if(!(dockerImage == null && dockerScript == null && dockerTemplate == null)){
 
-            // update/install image if possible.
-            DockerSubmissionTestModel.installImage(dockerImage);
+            // update/install image if possible, do so in a seperate thread to reduce wait time.
+            CompletableFuture.runAsync(() -> {
+                if(dockerImage != null){
+                    DockerSubmissionTestModel.installImage(dockerImage);
+                }
+            });
             testEntity.setDockerImage(dockerImage);
 
             testEntity.setDockerTestScript(dockerScript);
