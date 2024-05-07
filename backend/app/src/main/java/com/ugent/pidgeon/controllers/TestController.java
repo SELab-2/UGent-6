@@ -61,7 +61,7 @@ public class TestController {
         @RequestParam(name = "structuretest", required = false) String structureTest,
         @PathVariable("projectid") long projectId,
         Auth auth) {
-        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, structureTest, dockerTemplate, HttpMethod.POST);
+        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest,  dockerTemplate,  structureTest, HttpMethod.POST);
     }
 
     @PatchMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
@@ -73,7 +73,7 @@ public class TestController {
         @RequestParam(name = "structuretest", required = false) String structureTest,
         @PathVariable("projectid") long projectId,
         Auth auth) {
-        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, structureTest, dockerTemplate, HttpMethod.PATCH);
+        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest,  dockerTemplate, structureTest, HttpMethod.PATCH);
     }
 
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
@@ -85,7 +85,7 @@ public class TestController {
             @RequestParam(name = "structuretest", required = false) String structureTest,
             @PathVariable("projectid") long projectId,
             Auth auth) {
-        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, structureTest, dockerTemplate, HttpMethod.PUT);
+        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, dockerTemplate, structureTest, HttpMethod.PUT);
     }
 
 
@@ -98,6 +98,9 @@ public class TestController {
             String structureTemplate,
             HttpMethod httpMethod
     ) {
+
+
+
 
         if (dockerImage != null && dockerImage.isBlank()) {
             dockerImage = null;
@@ -112,7 +115,13 @@ public class TestController {
             structureTemplate = null;
         }
 
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, null, null, httpMethod);
+      /* LOg arguments even if null */
+      System.out.println("dockerImage: " + dockerImage);
+      System.out.println("dockerScript: " + dockerScript);
+      System.out.println("dockerTemplate: " + dockerTemplate);
+      System.out.println("structureTemplate: " + structureTemplate);
+
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, httpMethod);
 
 
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
@@ -142,25 +151,23 @@ public class TestController {
             return ResponseEntity.ok().build();
         }
 
-        // Docker test
-        if(dockerImage != null){
-            // update/install image if possible.
-            DockerSubmissionTestModel.installImage(dockerImage);
-            testEntity.setDockerImage(dockerImage);
-
-            testEntity.setDockerTestScript(dockerScript);
-            testEntity.setDockerTestTemplate(dockerTemplate); // If present, the test is in template mode
+        //Update fields
+        if (dockerImage != null || !httpMethod.equals(HttpMethod.PATCH))  {
+          testEntity.setDockerImage(dockerImage);
+          if (dockerImage == null && !testRepository.imageIsUsed(dockerImage)) {
+            DockerSubmissionTestModel.removeDockerImage(dockerImage); //TODO: move this to different thread if takes a while
+          }
+        }
+        if (dockerScript != null || !httpMethod.equals(HttpMethod.PATCH)) {
+          testEntity.setDockerTestScript(dockerScript);
+        }
+        if (dockerTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
+          testEntity.setDockerTestTemplate(dockerTemplate);
+        }
+        if (structureTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
+          testEntity.setStructureTemplate(structureTemplate);
         }
 
-        // save structure template
-        if (!httpMethod.equals(HttpMethod.PATCH) || (structureTemplate != null && !structureTemplate.isBlank())) {
-            if (structureTemplate != null && structureTemplate.isBlank()) {
-                structureTemplate = null;
-            }
-        } else {
-            structureTemplate = testEntity.getStructureTemplate();
-        }
-        testEntity.setStructureTemplate(structureTemplate);
 
         // save test entity
         testEntity = testRepository.save(testEntity);

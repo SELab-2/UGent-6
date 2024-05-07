@@ -7,6 +7,7 @@ import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -51,7 +52,15 @@ public class TestUtil {
             String dockerTemplate,
             HttpMethod httpMethod
     ) {
-
+        /* Log arguments */
+        Logger logger = Logger.getGlobal();
+        logger.log(Level.INFO, "==========");
+        logger.log(Level.INFO, "projectId: " + projectId);
+        logger.log(Level.INFO, "user: " + user);
+        logger.log(Level.INFO, "dockerImage: " + dockerImage);
+        logger.log(Level.INFO, "dockerScript: " + dockerScript);
+        logger.log(Level.INFO, "dockerTemplate: " + dockerTemplate);
+        logger.log(Level.INFO, "httpMethod: " + httpMethod);
 
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, user);
         if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
@@ -72,8 +81,16 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.CONFLICT, "Tests already exist for this project", null);
         }
 
-        if(httpMethod.equals(HttpMethod.POST) && dockerImage != null && dockerScript == null) {
+        if(!httpMethod.equals(HttpMethod.PATCH) && dockerImage != null && dockerScript == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script is required in a docker test.", null);
+        }
+
+        if(!httpMethod.equals(HttpMethod.PATCH) && dockerScript != null && dockerImage == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A docker image is required in a docker test.", null);
+        }
+
+        if (!httpMethod.equals(HttpMethod.PATCH) && dockerTemplate != null && dockerScript == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script and image are required in a docker template test.", null);
         }
 
         if(httpMethod.equals(HttpMethod.PATCH) && dockerScript != null && testEntity.getDockerImage() == null && dockerImage == null) {

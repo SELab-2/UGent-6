@@ -253,7 +253,15 @@ public class Filehandler {
         // Write directly to a zip file in the path variable
         File zipFile = new File(path.toString());
 
-        // Create a ZIP file
+        Logger.getGlobal().info("Filexists: " + zipFile.exists());
+        if (zipFile.exists() && !zipFile.canWrite()) {
+            Logger.getGlobal().info("Setting writable");
+            boolean res = zipFile.setWritable(true);
+            if (!res) {
+                throw new IOException("Cannot write to zip file");
+            }
+        }
+
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
             for (File file : files) {
                 // add file to zip
