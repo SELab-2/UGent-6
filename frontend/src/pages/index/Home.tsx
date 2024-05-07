@@ -10,6 +10,7 @@ import ProjectTimeline from "../../components/other/ProjectTimeline"
 import { useLocalStorage } from "usehooks-ts"
 import { CalendarOutlined, NodeIndexOutlined, OrderedListOutlined, UnorderedListOutlined } from "@ant-design/icons"
 import ProjectCalander from "../../components/other/ProjectCalander"
+import CourseSection from "./components/CourseSection"
 
 export type ProjectsType = GET_Responses[ApiRoutes.COURSE_PROJECTS]
 
@@ -32,7 +33,7 @@ const Home = () => {
   return (
     <div>
       <div>
-        <HorizontalCourseScroll
+        <CourseSection
           projects={projects}
           onOpenNew={() => setOpen(true)}
         />
