@@ -14,6 +14,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -93,7 +94,10 @@ public class    SubmissionController {
         List<File> artifacts = model.getArtifacts();
 
         // filehandler copy zips
-        Filehandler.copyFilesAsZip(artifacts, outputPath);
+        if (!artifacts.isEmpty()) {
+            Filehandler.copyFilesAsZip(artifacts, outputPath);
+        }
+
 
         // cleanup docker
         model.cleanUp();
@@ -256,14 +260,14 @@ public class    SubmissionController {
                     submission.setStructureFeedback(structureTestResult.feedback);
                 }
                 // Check if docker tests succeed
-                dockerOutput = runDockerTest(new ZipFile(savedFile), testEntity, Filehandler.getSubmissionPath(projectid, groupId, submission.getId()));
+                dockerOutput = runDockerTest(new ZipFile(savedFile), testEntity, Filehandler.getSubmissionPath(projectid, groupId, submission.getId()).resolve("artifacts.zip"));
                 if (dockerOutput == null) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Error while running docker tests.");
                 }
                 // Representation of dockerOutput, this will be a json(easily displayable in frontend) if it is a template test
                 // or a string if it is a simple test
-                submission.setDockerFeedback(dockerOutput.toString());
+                submission.setDockerFeedback(dockerOutput.getFeedbackAsString());
                 submission.setDockerAccepted(dockerOutput.isAllowed());
             }
             submission.setTestFinished(true);
@@ -274,6 +278,7 @@ public class    SubmissionController {
 
             return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submissionEntity));
         } catch (Exception e) {
+            Logger.getGlobal().log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving file: " + e.getMessage());
         }
 

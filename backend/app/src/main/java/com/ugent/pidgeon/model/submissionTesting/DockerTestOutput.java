@@ -15,4 +15,9 @@ public class DockerTestOutput implements DockerOutput{
     public boolean isAllowed() {
         return allowed;
     }
+
+    @Override
+    public String getFeedbackAsString() {
+        return String.join("", logs);
+    }
 }

@@ -20,7 +20,7 @@ public class DockerTemplateTestOutput implements DockerOutput{
     this.allowed = allowed;
   }
   @Override
-  public String toString(){
+  public String getFeedbackAsString(){
     // json representation of the tests
     String subTestsJson = "[";
     for (DockerSubtestResult subtestResult : subtestResults) {

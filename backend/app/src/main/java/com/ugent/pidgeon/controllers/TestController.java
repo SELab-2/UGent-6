@@ -108,6 +108,9 @@ public class TestController {
         if (dockerTemplate != null && dockerTemplate.isBlank()) {
             dockerTemplate = null;
         }
+        if (structureTemplate != null && structureTemplate.isBlank()) {
+            structureTemplate = null;
+        }
 
         CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, null, null, httpMethod);
 
@@ -263,8 +266,12 @@ public class TestController {
             return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
         TestEntity testEntity = projectCheck.getData();
-        return ResponseEntity.ok(propertyGetter.apply(testEntity));
+        if (testEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
+        }
+        return propertyGetter.apply(testEntity) == null ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test found") : ResponseEntity.ok(propertyGetter.apply(testEntity));
     }
+
     public ResponseEntity<?> getTestProperty(long projectId, Auth auth, Function<TestEntity, String> propertyGetter) {
         TestEntity testEntity = testUtil.getTestIfExists(projectId);
         if (testEntity == null) {
