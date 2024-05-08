@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.controllers;
 
+import com.ugent.pidgeon.GlobalErrorHandler;
 import com.ugent.pidgeon.auth.RolesInterceptor;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.User;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
@@ -64,6 +66,7 @@ public class ControllerTest {
     protected void setUpController(Object controller) {
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .addInterceptors(rolesInterceptor)
+            .setControllerAdvice(new GlobalErrorHandler())
             .defaultRequest(MockMvcRequestBuilders.get("/**")
                 .with(request -> {
                     request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication());
