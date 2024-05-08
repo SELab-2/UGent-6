@@ -156,9 +156,14 @@ public class TestController {
           //Update fields
           if (dockerImage != null || !httpMethod.equals(HttpMethod.PATCH)) {
             testEntity.setDockerImage(dockerImage);
-            if (dockerImage == null && !testRepository.imageIsUsed(dockerImage)) {
-              DockerSubmissionTestModel.removeDockerImage(
-                  dockerImage); //TODO: move this to different thread if takes a while
+            if (!testRepository.imageIsUsed(dockerImage)) {
+              // Do it on a different thread
+              String finalDockerImage1 = dockerImage;
+              CompletableFuture.runAsync(() -> {
+                  DockerSubmissionTestModel.removeDockerImage(
+                      finalDockerImage1);
+              });
+
             }
           }
           if (dockerScript != null || !httpMethod.equals(HttpMethod.PATCH)) {

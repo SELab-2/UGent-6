@@ -292,6 +292,7 @@ public class DockerSubmissionTestModel {
     // lines with @ should be the first of a string
     // @ is always the first character
     // ">" options under the template should be "required, optional or description="..."
+    boolean atLeastOne = false; // Template should not be empty
     String[] lines = template.split("\n");
     if (lines[0].charAt(0) != '@') {
       return false;
@@ -299,6 +300,7 @@ public class DockerSubmissionTestModel {
     boolean isConfigurationLine = false;
     for (String line : lines) {
       if (line.charAt(0) == '@') {
+        atLeastOne = true;
         isConfigurationLine = true;
         continue;
       }
@@ -314,7 +316,7 @@ public class DockerSubmissionTestModel {
         }
       }
     }
-    return true;
+    return atLeastOne;
   }
 
 }

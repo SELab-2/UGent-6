@@ -40,7 +40,6 @@ public class TestUtil {
      * @param dockerImage docker image for the test
      * @param dockerScript docker script for the test
      * @param dockerTemplate docker template for the test
-     * @param structureTemplate structure template for the test
      * @param httpMethod http method used to update the test
      * @return CheckResult with the status of the check and the test and project
      */
@@ -85,8 +84,8 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script is required in a docker test.", null);
         }
 
-        if(!httpMethod.equals(HttpMethod.PATCH) && dockerScript != null && dockerImage == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A docker image is required in a docker test.", null);
+        if(!httpMethod.equals(HttpMethod.PATCH) && dockerScript != null && dockerImage == null && DockerSubmissionTestModel.imageExists(dockerImage)) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A valid docker image is required in a docker test.", null);
         }
 
         if (!httpMethod.equals(HttpMethod.PATCH) && dockerTemplate != null && dockerScript == null) {
