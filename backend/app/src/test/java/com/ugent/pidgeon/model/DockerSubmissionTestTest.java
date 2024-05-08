@@ -112,7 +112,7 @@ public class DockerSubmissionTestTest {
 
     DockerSubmissionTestModel.installImage("alpine:latest");
     // Load docker container
-    DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine");
+    DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine:latest");
     stm.addInputFiles(files);
     DockerTemplateTestOutput result = stm.runSubmissionWithTemplate(script, template);
 

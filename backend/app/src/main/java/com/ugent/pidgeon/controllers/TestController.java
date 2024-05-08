@@ -8,6 +8,8 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -136,45 +138,46 @@ public class TestController {
             testEntity = new TestEntity();
         }
 
-        // delete test entry
-        if(httpMethod.equals(HttpMethod.DELETE)){
-            // first check if docker image is not used anywhere else
-            if(!testRepository.imageIsUsed(dockerImage)){
-                // image is no longer required for any tests
-                DockerSubmissionTestModel.removeDockerImage(dockerImage);
+        // Docker test
+        if(!(dockerImage == null && dockerScript == null && dockerTemplate == null)) {
+
+          // update/install image if possible, do so in a seperate thread to reduce wait time.
+          String finalDockerImage = dockerImage;
+          CompletableFuture.runAsync(() -> {
+            if (finalDockerImage != null) {
+              DockerSubmissionTestModel.installImage(finalDockerImage);
             }
-
-            // delete test
-            testRepository.deleteById(testEntity.getId());
-            projectEntity.setTestId(null);
-            projectRepository.save(projectEntity);
-            return ResponseEntity.ok().build();
-        }
-
-        //Update fields
-        if (dockerImage != null || !httpMethod.equals(HttpMethod.PATCH))  {
+          });
           testEntity.setDockerImage(dockerImage);
-          if (dockerImage == null && !testRepository.imageIsUsed(dockerImage)) {
-            DockerSubmissionTestModel.removeDockerImage(dockerImage); //TODO: move this to different thread if takes a while
+
+          testEntity.setDockerTestScript(dockerScript);
+          testEntity.setDockerTestTemplate(
+              dockerTemplate); // If present, the test is in template mode
+          //Update fields
+          if (dockerImage != null || !httpMethod.equals(HttpMethod.PATCH)) {
+            testEntity.setDockerImage(dockerImage);
+            if (dockerImage == null && !testRepository.imageIsUsed(dockerImage)) {
+              DockerSubmissionTestModel.removeDockerImage(
+                  dockerImage); //TODO: move this to different thread if takes a while
+            }
+          }
+          if (dockerScript != null || !httpMethod.equals(HttpMethod.PATCH)) {
+            testEntity.setDockerTestScript(dockerScript);
+          }
+          if (dockerTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
+            testEntity.setDockerTestTemplate(dockerTemplate);
+          }
+          if (structureTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
+            testEntity.setStructureTemplate(structureTemplate);
           }
         }
-        if (dockerScript != null || !httpMethod.equals(HttpMethod.PATCH)) {
-          testEntity.setDockerTestScript(dockerScript);
-        }
-        if (dockerTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
-          testEntity.setDockerTestTemplate(dockerTemplate);
-        }
-        if (structureTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
-          testEntity.setStructureTemplate(structureTemplate);
-        }
 
+      // save test entity
+      testEntity = testRepository.save(testEntity);
+      projectEntity.setTestId(testEntity.getId());
+      projectRepository.save(projectEntity); // make sure to update test id in project
 
-        // save test entity
-        testEntity = testRepository.save(testEntity);
-        projectEntity.setTestId(testEntity.getId());
-        projectRepository.save(projectEntity); // make sure to update test id in project
-
-        return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(testEntity, projectId));
+      return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(testEntity, projectId));
 
     }
 
