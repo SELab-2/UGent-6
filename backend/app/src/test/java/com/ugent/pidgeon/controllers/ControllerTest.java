@@ -50,9 +50,14 @@ public class ControllerTest {
         SecurityContextHolder.getContext().setAuthentication(authUser);
 
         // Only stubbing necessary methods for the test
-        mockUser = new UserEntity();
+        mockUser = new UserEntity(
+            user.firstName,
+            user.lastName,
+            user.email,
+            UserRole.teacher,
+            user.oid
+        );
         mockUser.setId(1L);
-        mockUser.setRole(UserRole.teacher);
         authUser.setUserEntity(mockUser);
         lenient().when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser));
         lenient().when(userRepository.findCourseIdsByUserId(anyLong())).thenReturn(new ArrayList<>());
