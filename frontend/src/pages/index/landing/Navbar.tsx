@@ -1,10 +1,12 @@
-import { Space, Typography } from "antd"
-import { Link, useNavigate } from "react-router-dom"
+import { Typography } from "antd"
+import { useNavigate } from "react-router-dom"
 import LanguageDropdown from "../../../components/LanguageDropdown"
 import { FC } from "react"
+import {useTranslation} from "react-i18next";
 
 const Navbar: FC<{ onLogin: () => void }> = ({ onLogin }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <div style={{ height: "6rem", display: "flex", justifyContent: "space-between", margin: "2rem" }}>
@@ -27,7 +29,7 @@ const Navbar: FC<{ onLogin: () => void }> = ({ onLogin }) => {
             className="landing-page-btn"
             onClick={onLogin}
           >
-            Aanmelden
+            {t("nav.login")}
           </button>
         </div>
       </div>
