@@ -273,13 +273,14 @@ public class    SubmissionController {
             try {
               // Check if docker tests succeed
               DockerOutput dockerOutput = runDockerTest(new ZipFile(finalSavedFile), testEntity,
-                  Filehandler.getSubmissionPath(projectid, groupId, submission.getId()));
+                  Path.of(Filehandler.getSubmissionPath(projectid, groupId, submission.getId())
+                      + "/artifacts.zip"));
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
               // Representation of dockerOutput, this will be a json(easily displayable in frontend) if it is a template test
               // or a string if it is a simple test
-              submission.setDockerFeedback(dockerOutput.toString());
+              submission.setDockerFeedback(dockerOutput.getFeedbackAsString());
               submission.setDockerAccepted(dockerOutput.isAllowed());
 
               submission.setDockerTestState(0);
