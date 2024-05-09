@@ -11,6 +11,7 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ public class ClusterController {
     GroupClusterRepository groupClusterRepository;
     @Autowired
     GroupRepository groupRepository;
+
+    @Autowired
+    GroupMemberController groupMemberController;
 
     @Autowired
     private ClusterUtil clusterUtil;
@@ -167,6 +171,64 @@ public class ClusterController {
         groupClusterRepository.save(clusterEntity);
         return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity));
     }
+
+    /**
+     * Fills up the groups in a cluster by providing a map of groupids with lists of userids
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @param clusterFillJson ClusterFillJson object containing a map of all groups and their
+     *                        members of that cluster
+     * @return ResponseEntity<?>
+     * @HttpMethod PUT
+     * @ApiPath /api/clusters/{clusterid}/fill
+     * @AllowedRoles student, teacher
+     */
+    @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}/fill")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> fillCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody ClusterFillJson clusterFillJson) {
+        CheckResult<GroupClusterEntity> checkResult = clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(clusterid, auth.getUserEntity());
+
+        if (checkResult.getStatus() != HttpStatus.OK) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        GroupClusterEntity groupCluster = checkResult.getData();
+
+        ResponseEntity<?> response = getCluster(groupCluster.getId(), auth);
+        if(response.getStatusCode() != HttpStatus.OK){
+            return response;
+        }
+
+        GroupClusterJson clusterJson = (GroupClusterJson) response.getBody();
+        if(clusterJson == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster could not be found");
+        }
+
+        if(clusterFillJson.getClusterGroupMembers().keySet().size() > clusterJson.groupCount()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("provided more groups than are allowed in the cluster");
+        }
+
+        try {
+            for(GroupJson groupJson: clusterJson.groups()){
+                commonDatabaseActions.removeGroup(groupJson.getGroupId());
+            }
+
+            for(Long groupId: clusterFillJson.getClusterGroupMembers().keySet()){
+                Long[] users = clusterFillJson.getClusterGroupMembers().get(groupId);
+                GroupEntity groupEntity = new GroupEntity("group " + groupId, clusterJson.clusterId());
+                groupRepository.save(groupEntity);
+                for(Long userid: users){
+                    groupMemberController.addMemberToGroup(groupId, userid, auth);
+                }
+            }
+            return ResponseEntity.status(HttpStatus.OK).body("Filled group cluster successfully");
+        }catch (Exception e) {
+            Logger.getGlobal().severe(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
+        }
+    }
+
 
     @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
