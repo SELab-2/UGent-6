@@ -10,6 +10,7 @@ import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -166,17 +167,18 @@ public class TestController {
 
             }
           }
+
           if (dockerScript != null || !httpMethod.equals(HttpMethod.PATCH)) {
             testEntity.setDockerTestScript(dockerScript);
           }
           if (dockerTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
             testEntity.setDockerTestTemplate(dockerTemplate);
           }
-          if (structureTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
-            testEntity.setStructureTemplate(structureTemplate);
-          }
         }
 
+      if (structureTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
+        testEntity.setStructureTemplate(structureTemplate);
+      }
       // save test entity
       testEntity = testRepository.save(testEntity);
       projectEntity.setTestId(testEntity.getId());
