@@ -127,5 +127,26 @@ public class TestUtil {
         return new CheckResult<>(HttpStatus.OK, "", testEntity);
     }
 
+    public CheckResult<Pair<TestEntity, Boolean>> getTestWithAdminStatus(long projectId, UserEntity user) {
+        TestEntity testEntity = getTestIfExists(projectId);
+        if (testEntity == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "No tests found for project with id: " + projectId, null);
+        }
 
+        boolean userPartOfProject = projectUtil.userPartOfProject(projectId, user.getId());
+        if (!userPartOfProject) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "You are not part of this project", null);
+        }
+
+        boolean admin = false;
+
+        CheckResult<Void> isProjectAdmin = projectUtil.isProjectAdmin(projectId, user);
+        if (isProjectAdmin.getStatus().equals(HttpStatus.OK)) {
+            admin = true;
+        } else if (!isProjectAdmin.getStatus().equals(HttpStatus.FORBIDDEN)){
+            return new CheckResult<>(isProjectAdmin.getStatus(), isProjectAdmin.getMessage(), null);
+        }
+
+        return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, admin));
+    }
 }

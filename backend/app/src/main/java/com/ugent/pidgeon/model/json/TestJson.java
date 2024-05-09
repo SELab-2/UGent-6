@@ -3,17 +3,20 @@ package com.ugent.pidgeon.model.json;
 public class TestJson {
     private String projectUrl;
     private String dockerImage;
-    private String dockerTestUrl;
-    private String structureTestUrl;
+    private String dockerScript;
+    private String dockerTemplate;
+    private String structureTest;
 
     public TestJson() {
     }
 
-    public TestJson(String projectUrl, String dockerImage, String dockerTestUrl, String structureTestUrl) {
+    public TestJson(String projectUrl, String dockerImage, String dockerScript,
+        String dockerTemplate, String structureTest) {
         this.projectUrl = projectUrl;
         this.dockerImage = dockerImage;
-        this.dockerTestUrl = dockerTestUrl;
-        this.structureTestUrl = structureTestUrl;
+        this.dockerScript = dockerScript;
+      this.dockerTemplate = dockerTemplate;
+      this.structureTest = structureTest;
     }
 
     public String getProjectUrl() {
@@ -32,19 +35,27 @@ public class TestJson {
         this.dockerImage = dockerImage;
     }
 
-    public String getDockerTestUrl() {
-        return dockerTestUrl;
+    public String getDockerScript() {
+        return dockerScript;
     }
 
-    public void setDockerTestUrl(String dockerTestUrl) {
-        this.dockerTestUrl = dockerTestUrl;
+    public void setDockerScript(String dockerScript) {
+        this.dockerScript = dockerScript;
     }
 
-    public String getStructureTestUrl() {
-        return structureTestUrl;
+    public String getStructureTest() {
+        return structureTest;
     }
 
-    public void setStructureTestUrl(String structureTestUrl) {
-        this.structureTestUrl = structureTestUrl;
+    public void setStructureTest(String structureTest) {
+        this.structureTest = structureTest;
+    }
+
+    public String getDockerTemplate() {
+        return dockerTemplate;
+    }
+
+    public void setDockerTemplate(String dockerTemplate) {
+        this.dockerTemplate = dockerTemplate;
     }
 }

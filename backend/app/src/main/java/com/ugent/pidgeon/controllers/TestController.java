@@ -164,7 +164,6 @@ public class TestController {
                   DockerSubmissionTestModel.removeDockerImage(
                       finalDockerImage1);
               });
-
             }
           }
 
@@ -203,101 +202,18 @@ public class TestController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getTests(@PathVariable("projectid") long projectId, Auth auth) {
-        CheckResult<TestEntity> projectCheck = testUtil.getTestIfAdmin(projectId, auth.getUserEntity());
+        CheckResult<Pair<TestEntity, Boolean>> projectCheck = testUtil.getTestWithAdminStatus(projectId, auth.getUserEntity());
         if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
         }
-        TestEntity test = projectCheck.getData();
+        TestEntity test = projectCheck.getData().getFirst();
+        if (!projectCheck.getData().getSecond()) { // user is not an admin, hide script and image
+          test.setDockerTestScript(null);
+          test.setDockerImage(null);
+        }
         TestJson res  = entityToJsonConverter.testEntityToTestJson(test, projectId);
         return ResponseEntity.ok(res);
     }
-
-    /**
-     * Function to get the structure test file of a project
-     * @param projectId the id of the project to get the structure test file for
-     * @param auth the authentication object of the requesting user
-     * @HttpMethod GET
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6133750">apiDog documentation</a>
-     * @AllowedRoles teacher, student
-     * @ApiPath /api/projects/{projectid}/tests/structuretest
-     * @return ResponseEntity with the structure test file
-     */
-    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/structuretest")
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getStructureTestFile(@PathVariable("projectid") long projectId, Auth auth) {
-        return getTestProperty(projectId, auth, TestEntity::getStructureTemplate);
-    }
-
-    /**
-     * Function to get the docker test template of a project
-     * @param projectId the id of the project to get the docker test file for
-     * @param auth the authentication object of the requesting user
-     * @HttpMethod GET
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6133798">apiDog documentation</a>
-     * @AllowedRoles teacher, student
-     * @ApiPath /api/projects/{projectid}/tests/dockertest
-     * @return ResponseEntity with the docker test file
-     */
-    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertesttemplate")
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getDockerTestTemplate(@PathVariable("projectid") long projectId, Auth auth) {
-        return getTestProperty(projectId, auth, TestEntity::getDockerTestTemplate);
-    }
-
-    /**
-     * Function to get the docker test script of a project
-     * @param projectId the id of the project to get the docker test file for
-     * @param auth the authentication object of the requesting user
-     * @HttpMethod GET
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6133798">apiDog documentation</a>
-     * @AllowedRoles teacher, student
-     * @ApiPath /api/projects/{projectid}/tests/dockertest
-     * @return ResponseEntity with the docker test file
-     */
-    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertestscript")
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getDockerTestScript(@PathVariable("projectid") long projectId, Auth auth) {
-        return getTestPropertyCheckAdmin(projectId, auth, TestEntity::getDockerTestScript);
-    }
-
-    /**
-     * Function to get the docker image of a project test
-     * @param projectId the id of the project to get the docker test file for
-     * @param auth the authentication object of the requesting user
-     * @HttpMethod GET
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6133798">apiDog documentation</a>
-     * @AllowedRoles teacher, student
-     * @ApiPath /api/projects/{projectid}/tests/dockertest
-     * @return ResponseEntity with the docker test file
-     */
-    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/dockertestimage")
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getDockerTestImage(@PathVariable("projectid") long projectId, Auth auth) {
-        return getTestPropertyCheckAdmin(projectId, auth, TestEntity::getDockerImage);
-    }
-
-
-    public ResponseEntity<?> getTestPropertyCheckAdmin(long projectId, Auth auth, Function<TestEntity, String> propertyGetter) {
-        CheckResult<TestEntity> projectCheck = testUtil.getTestIfAdmin(projectId, auth.getUserEntity());
-        if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
-            return ResponseEntity.status(projectCheck.getStatus()).body(projectCheck.getMessage());
-        }
-        TestEntity testEntity = projectCheck.getData();
-        if (testEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
-        }
-        return propertyGetter.apply(testEntity) == null ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test found") : ResponseEntity.ok(propertyGetter.apply(testEntity));
-    }
-
-    public ResponseEntity<?> getTestProperty(long projectId, Auth auth, Function<TestEntity, String> propertyGetter) {
-        TestEntity testEntity = testUtil.getTestIfExists(projectId);
-        if (testEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tests found for project with id: " + projectId);
-        }
-
-        return propertyGetter.apply(testEntity) == null ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("No test found") : ResponseEntity.ok(propertyGetter.apply(testEntity));
-    }
-
 
     /**
      * Function to delete the tests of a project

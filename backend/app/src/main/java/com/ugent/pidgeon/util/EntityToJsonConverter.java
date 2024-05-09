@@ -258,9 +258,10 @@ public class EntityToJsonConverter {
     public TestJson testEntityToTestJson(TestEntity testEntity, long projectId) {
         return new TestJson(
                 ApiRoutes.PROJECT_BASE_PATH + "/" + projectId,
-                testEntity.getDockerImage(),
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/dockertest",
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/structuretest"
+            testEntity.getDockerImage(),
+            testEntity.getDockerTestScript(),
+            testEntity.getDockerTestTemplate(),
+            testEntity.getStructureTemplate()
         );
     }
 }
