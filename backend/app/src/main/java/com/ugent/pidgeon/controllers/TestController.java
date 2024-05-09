@@ -149,11 +149,7 @@ public class TestController {
               DockerSubmissionTestModel.installImage(finalDockerImage);
             }
           });
-          testEntity.setDockerImage(dockerImage);
 
-          testEntity.setDockerTestScript(dockerScript);
-          testEntity.setDockerTestTemplate(
-              dockerTemplate); // If present, the test is in template mode
           //Update fields
           if (dockerImage != null || !httpMethod.equals(HttpMethod.PATCH)) {
             testEntity.setDockerImage(dockerImage);

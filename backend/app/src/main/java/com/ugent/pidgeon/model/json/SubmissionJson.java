@@ -23,6 +23,7 @@ public class SubmissionJson {
 
 
     private DockerTestFeedbackJson dockerFeedback;
+    private String artifactUrl;
 
 
 
@@ -31,7 +32,8 @@ public class SubmissionJson {
 
     public SubmissionJson(
             long id, String projectUrl, String groupUrl, Long projectId, Long groupId, String fileUrl,
-            Boolean structureAccepted, OffsetDateTime submissionTime, String structureFeedbackUrl, DockerTestFeedbackJson dockerFeedback, String dockerStatus) {
+            Boolean structureAccepted, OffsetDateTime submissionTime, String structureFeedbackUrl, DockerTestFeedbackJson dockerFeedback, String dockerStatus,
+        String artifactUrl) {
         this.submissionId = id;
         this.projectUrl = projectUrl;
         this.groupUrl = groupUrl;
@@ -43,6 +45,7 @@ public class SubmissionJson {
         this.dockerFeedback = dockerFeedback;
         this.structureFeedback = structureFeedbackUrl;
         this.dockerStatus = dockerStatus;
+      this.artifactUrl = artifactUrl;
     }
 
     public long getSubmissionId() {
@@ -133,5 +136,13 @@ public class SubmissionJson {
 
     public void setDockerFeedback(DockerTestFeedbackJson dockerFeedback) {
         this.dockerFeedback = dockerFeedback;
+    }
+
+    public String getArtifactUrl() {
+        return artifactUrl;
+    }
+
+    public void setArtifactUrl(String artifactUrl) {
+        this.artifactUrl = artifactUrl;
     }
 }

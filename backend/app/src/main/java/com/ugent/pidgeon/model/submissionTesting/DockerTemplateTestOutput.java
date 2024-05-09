@@ -22,7 +22,7 @@ public class DockerTemplateTestOutput implements DockerOutput{
   @Override
   public String getFeedbackAsString(){
     //json representation of the tests
-    StringBuilder feedback = new StringBuilder("{subtests: [");
+    StringBuilder feedback = new StringBuilder("{\"subtests\": [");
     for (DockerSubtestResult subtestResult : subtestResults) {
       feedback.append(subtestResult.getFeedbackAsString()).append(",");
     }

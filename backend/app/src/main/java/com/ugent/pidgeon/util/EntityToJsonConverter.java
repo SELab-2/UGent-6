@@ -251,7 +251,8 @@ public class EntityToJsonConverter {
                 submission.getSubmissionTime(),
                 submission.getStructureFeedback(),
                 feedback,
-                submission.getDockerTestState().toString()
+                submission.getDockerTestState().toString(),
+            ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/artifacts"
         );
     }
 

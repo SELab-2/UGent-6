@@ -62,13 +62,14 @@ public class DockerSubtestResult implements DockerOutput {
 
     @Override
     public boolean isAllowed() {
-        return false;
+        return correct.equals(output);
     }
 
     @Override
     public String getFeedbackAsString() {
         // Display feedback as a json, only display testName and testDescription if they are not empty
         String testDescription = this.testDescription.isEmpty() ? "" : "\",\"testDescription\":\"" + this.testDescription;
-        return "{\"testName\":\"" + testName + testDescription + "\",\"correct\":\"" + correct + "\",\"output\":\"" + output + "\"}";
+        //TODO add allowed to json
+        return "{\"testName\":\"" + testName + testDescription + "\",\"correct\":\"" + correct + "\",\"output\":\"" + output + "\", \"required\":" + required + ", \"succes\": " + isAllowed() + "}";
     }
 }

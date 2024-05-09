@@ -237,11 +237,15 @@ public class DockerSubmissionTestModel {
         templateEntry.setRequired(true);
       } else if (currentOption.equalsIgnoreCase(">Optional")) {
         templateEntry.setRequired(false);
-      } else if (currentOption.substring(0, 12).equalsIgnoreCase(">Description")) {
+      } else if (currentOption.length() >=13 && currentOption.substring(0, 13).equalsIgnoreCase(">Description=")) {
         templateEntry.setTestDescription(currentOption.split("=\"")[1].split("\"")[0]);
       }
     }
-    templateEntry.setCorrect(entry.substring(lineIterator));
+    String substring = entry.substring(lineIterator);
+    if (substring.endsWith("\n")) {
+      substring = substring.substring(0, substring.length() - 1);
+    }
+    templateEntry.setCorrect(substring);
     return templateEntry;
   }
 
@@ -309,9 +313,10 @@ public class DockerSubmissionTestModel {
       }
       if (isConfigurationLine) {
         if (line.charAt(0) == '>') {
+          boolean isDescription = line.length() >= 13 && line.substring(0, 13).equalsIgnoreCase(">Description=");
           // option lines
           if (!line.equalsIgnoreCase(">Required") && !line.equalsIgnoreCase(">Optional")
-              && !line.substring(0, 12).equalsIgnoreCase(">Description")) {
+              && !isDescription) {
             return false;
           }
         } else {
