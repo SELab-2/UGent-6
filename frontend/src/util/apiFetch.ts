@@ -21,7 +21,7 @@ type ApiCallPathValues = {[param: string]: string | number}
  * const newCourse = await apiFetch("POST", ApiRoutes.COURSES, { name: "New Course" });
  *
  */
-async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", route: string, body?: any, pathValues?:ApiCallPathValues, headers?: {[header: string]: string}): Promise<AxiosResponse<any, any>> {
+async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", route: string, body?: any, pathValues?:ApiCallPathValues, headers?: {[header: string]: string}, config?: AxiosRequestConfig): Promise<AxiosResponse<any, any>> {
   const account = msalInstance.getActiveAccount()
 
   if (!account) {
@@ -56,18 +56,19 @@ async function apiFetch(method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH", rou
 
   const url = new URL(route, serverHost)
 
-const config: AxiosRequestConfig = {
-  method: method,
-  url: url.toString(),
-  headers: finalHeaders,
-  data: body instanceof FormData ? body : JSON.stringify(body),
-}
 
-  return axios(config)
+    const finalConfig: AxiosRequestConfig = {
+    method: method,
+    url: url.toString(),
+    headers: finalHeaders,
+    data: body instanceof FormData ? body : JSON.stringify(body),
+    ...config, // spread the config object to merge it with the existing configuration
+  }
+  return axios(finalConfig)
 }
 
 const apiCall = {
-  get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues, headers?: {[header: string]: string}) => apiFetch("GET", route, undefined, pathValues, headers) as Promise<AxiosResponse<GET_Responses[T]>>,
+  get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues, headers?: {[header: string]: string}, config?: AxiosRequestConfig) => apiFetch("GET", route, undefined, pathValues, headers, config) as Promise<AxiosResponse<GET_Responses[T]>>,
   post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T] | FormData, pathValues?:ApiCallPathValues, headers?: {[header: string]: string}) => apiFetch("POST", route, body, pathValues, headers) as Promise<AxiosResponse<POST_Responses[T]>>,
   put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T], pathValues?:ApiCallPathValues, headers?: {[header: string]: string}) => apiFetch("PUT", route, body, pathValues, headers) as Promise<AxiosResponse<PUT_Responses[T]>>,
   delete: async <T extends keyof DELETE_Requests>(route: T, body: DELETE_Requests[T], pathValues?:ApiCallPathValues, headers?: {[header: string]: string}) => apiFetch("DELETE", route, body, pathValues, headers),

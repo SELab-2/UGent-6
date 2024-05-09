@@ -27,7 +27,7 @@ const Submit = () => {
 
         const zip = new JSZip();
         files.forEach((file: any) => {
-            zip.file(file.name, file);
+            zip.file(file.webkitRelativePath || file.name, file);
         });
         const content = await zip.generateAsync({type: "blob"});
         formData.append("file", content, "files.zip");
@@ -35,7 +35,16 @@ const Submit = () => {
         if (!projectId) return;
         const response = await apiCall.post(ApiRoutes.PROJECT_SUBMIT, formData, {id: projectId})
         console.log(response)
+
+        const projectUrl = new URL(response.data.projectUrl, 'http://localhost:3001');
+
+        const courseUrl = new URL(projectUrl.origin + projectUrl.pathname.split('/').slice(0, 3).join('/'), 'http://localhost:3001');
+        const courseId = courseUrl.pathname.split('/')[2];
+
+        const submissionId = response.data.submissionId;
+        navigate(`/courses/${courseId}/projects/${projectId}/submissions/${submissionId}`);
     }
+
     return (
         <>
             <div>
