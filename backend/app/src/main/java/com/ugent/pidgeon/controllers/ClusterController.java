@@ -11,6 +11,7 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.util.Collections;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -207,6 +208,10 @@ public class ClusterController {
 
         if(clusterFillJson.getClusterGroupMembers().keySet().size() > clusterJson.groupCount()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("provided more groups than are allowed in the cluster");
+        }
+
+        if(clusterFillJson.getClusterGroupMembers().values().stream().anyMatch(members -> members.length > clusterJson.capacity())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("you made a group with too many members");
         }
 
         try {
