@@ -100,7 +100,7 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "No docker test script is configured for this test", null);
         }
 
-        if(dockerTemplate != null && DockerSubmissionTestModel.isValidTemplate(dockerTemplate)) {
+        if(dockerTemplate != null && !DockerSubmissionTestModel.isValidTemplate(dockerTemplate)) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "Invalid docker template", null);
         }
 

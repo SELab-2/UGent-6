@@ -68,7 +68,7 @@ public class TestUtilTest {
 
     // Call the checkForTestUpdate method
     CheckResult<Pair<TestEntity, ProjectEntity>> result = testUtil.checkForTestUpdate(1L,
-        userEntity, "dockerImage", "", null, null, HttpMethod.POST);
+        userEntity, "dockerImage", "", null,  HttpMethod.POST);
 
     // Assert the result
     assertEquals(HttpStatus.OK, result.getStatus());

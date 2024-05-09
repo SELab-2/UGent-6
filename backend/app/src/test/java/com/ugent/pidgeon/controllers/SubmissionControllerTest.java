@@ -85,7 +85,7 @@ public class SubmissionControllerTest extends ControllerTest {
         groupIds = List.of(1L);
         submissionJson = new SubmissionJson(1L, "projecturl", "groupurl", 1L,
                 1L, "fileurl", true, OffsetDateTime.MIN, true,
-                "structurefeedbackurl", "dockerfeedbackurl", 0);
+                "structurefeedbackurl", "dockerfeedbackurl", "running");
         groupJson = new GroupJson(1, 1L, "groupname", "groupclusterurl");
         groupFeedbackJson = new GroupFeedbackJson(0F, "feedback", 1L, 1L);
         groupEntity = new GroupEntity("groupname", 1L);

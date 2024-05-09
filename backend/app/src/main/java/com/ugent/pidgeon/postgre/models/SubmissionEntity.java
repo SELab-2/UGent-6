@@ -122,6 +122,9 @@ public class SubmissionEntity {
         this.dockerFeedback = dockerFeedbackFileId;
     }
     public DockerTestState getDockerTestState() {
+        if(dockerTestState == null) {
+            return DockerTestState.no_test;
+        }
         return switch (dockerTestState) {
             case "running" -> DockerTestState.running;
             case "finished" -> DockerTestState.finished;
