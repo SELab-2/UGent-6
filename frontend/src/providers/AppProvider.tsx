@@ -30,7 +30,7 @@ const AppProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const handleSetTheme = (theme: Themes) => {
     setTheme(theme)
-    document.body.classList.remove(Themes.LIGHT + "-theme", Themes.DARK + "-theme", Themes.DODONA + "-theme")
+    document.body.classList.remove(Themes.LIGHT + "-theme", Themes.DARK + "-theme")
     document.body.classList.add(theme + "-theme")
     window.localStorage.setItem("theme", theme)
   }
