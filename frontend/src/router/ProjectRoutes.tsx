@@ -3,7 +3,7 @@ import { ProjectType } from "../pages/project/Project"
 import { Outlet, useParams } from "react-router-dom"
 import apiCall from "../util/apiFetch"
 import { ApiRoutes } from "../@types/requests.d"
-import useApi from "../pages/index/components/useApi"
+import useApi from "../hooks/useApi"
 
 type ProjectContextType = {
   project: ProjectType | null

@@ -1,11 +1,11 @@
 import axios, { AxiosResponse } from "axios"
-import useAppApi from "../../../hooks/useAppApi"
+import useAppApi from "./useAppApi"
 import { useTranslation } from "react-i18next"
 import { Alert } from "antd"
 import { useContext } from "react"
-import { ErrorContext } from "../../../providers/ErrorProvider"
-import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Responses, PUT_Requests, PUT_Responses } from "../../../@types/requests"
-import { ApiCallPathValues, ApiMethods, apiFetch } from "../../../util/apiFetch"
+import { ErrorContext } from "../providers/ErrorProvider"
+import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Responses, PUT_Requests, PUT_Responses } from "../@types/requests"
+import { ApiCallPathValues, ApiMethods, apiFetch } from "../util/apiFetch"
 
 type FeedbackModes = "message" | "page" | "alert" | "none"
 type HandleErrorOptions = {
