@@ -249,10 +249,9 @@ public class Filehandler {
      * @throws IOException if an error occurs while copying the files
      */
     public static void copyFilesAsZip(List<File> files, Path path) throws IOException {
-
         // Write directly to a zip file in the path variable
         File zipFile = new File(path.toString());
-
+        System.out.println(zipFile.getAbsolutePath());
         Logger.getGlobal().info("Filexists: " + zipFile.exists());
         if (zipFile.exists() && !zipFile.canWrite()) {
             Logger.getGlobal().info("Setting writable");
