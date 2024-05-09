@@ -8,17 +8,15 @@ import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerOutput;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
-import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
+import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.zip.ZipException;
 import java.util.logging.Level;
-import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +31,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.zip.ZipFile;
 
@@ -63,9 +60,11 @@ public class    SubmissionController {
     private EntityToJsonConverter entityToJsonConverter;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
+  @Autowired
+  private TestUtil testUtil;
 
 
-    private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
+  private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
         // There is no structure test for this project
         if(testEntity.getStructureTemplate() == null){
             return null;
@@ -261,13 +260,21 @@ public class    SubmissionController {
           submission.setStructureAccepted(structureTestResult.passed);
           submission.setStructureFeedback(structureTestResult.feedback);
         }
-        // Define docker test as running
-        submission.setDockerTestState(DockerTestState.running);
+
+        if (testEntity.getDockerTestTemplate() != null) {
+          submission.setDockerType(DockerTestType.TEMPLATE);
+        } else if (testEntity.getDockerTestScript() != null) {
+          submission.setDockerType(DockerTestType.SIMPLE);
+        } else {
+          submission.setDockerType(DockerTestType.NONE);
+        }
 
         // save the first feedback, without docker feedback
         submissionRepository.save(submission);
 
         if (testEntity.getDockerTestScript() != null) {
+          // Define docker test as running
+          submission.setDockerTestState(DockerTestState.running);
           // run docker tests in background
           File finalSavedFile = savedFile;
           CompletableFuture.runAsync(() -> {
@@ -351,56 +358,7 @@ public class    SubmissionController {
         }
     }
 
-
-    public ResponseEntity<?> getFeedbackReponseEntity(long submissionid, Auth auth, Function<SubmissionEntity, String> feedbackGetter) {
-
-        CheckResult<SubmissionEntity> checkResult = submissionUtil.canGetSubmission(submissionid, auth.getUserEntity());
-        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
-            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
-        }
-        SubmissionEntity submission = checkResult.getData();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.TEXT_PLAIN));
-        return ResponseEntity.ok().headers(headers).body(feedbackGetter.apply(submission));
-    }
-
-    /**
-     * Function to get the structure feedback of a submission
-     *
-     * @param submissionid ID of the submission to get the feedback from
-     * @param auth         authentication object of the requesting user
-     * @return ResponseEntity with the feedback
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6195994">apiDog documentation</a>
-     * @HttpMethod GET
-     * @AllowedRoles teacher, student
-     * @ApiPath /api/submissions/{submissionid}/structurefeedback
-     */
-    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/structurefeedback")
-    //Route to get the structure feedback
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getStructureFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
-        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getStructureFeedback);
-    }
-
-    /**
-     * Function to get the docker feedback of a submission
-     *
-     * @param submissionid ID of the submission to get the feedback from
-     * @param auth         authentication object of the requesting user
-     * @return ResponseEntity with the feedback
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6195996">apiDog documentation</a>
-     * @HttpMethod GET
-     * @AllowedRoles teacher, student
-     * @ApiPath /api/submissions/{submissionid}/dockerfeedback
-     */
-    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/dockerfeedback") //Route to get the docker feedback
-    @Roles({UserRole.teacher, UserRole.student})
-    public ResponseEntity<?> getDockerFeedback(@PathVariable("submissionid") long submissionid, Auth auth) {
-        return getFeedbackReponseEntity(submissionid, auth, SubmissionEntity::getDockerFeedback);
-    }
-
-
+    
     /**
      * Function to delete a submission
      *

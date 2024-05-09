@@ -26,6 +26,7 @@ public class DockerTemplateTestOutput implements DockerOutput{
     for (DockerSubtestResult subtestResult : subtestResults) {
       feedback.append(subtestResult.getFeedbackAsString()).append(",");
     }
-    return feedback +  "\"allowed\": \"" + allowed + "\"}";
+    feedback.append("]");
+    return feedback.toString();
   }
 }
