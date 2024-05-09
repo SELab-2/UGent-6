@@ -33,7 +33,7 @@ const SubmitForm: FC<{ form: FormInstance, setFileAdded: (added: boolean) => voi
                     name="file"
                     beforeUpload={() => false}
                     multiple={false}
-                    directory={true}
+                    directory={false}
                     style={{height: "100%"}}
                     onChange={({file}) => {
                         if (file.status !== 'uploading') {
