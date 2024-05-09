@@ -30,7 +30,6 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
 
   const { t } = useTranslation()
-  const navigate = useNavigate()
 
   useEffect(() => {
     if (courses === null || projects === null) return () => {}
@@ -119,36 +118,11 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
         projects={filteredCourseProjects}
         onOpenNew={onOpenNew}
         showMore={archivedCourses || courseProjectsList.length > 2}
+        showPlus={!filteredAdminCourseProjects?.length}
         extra={YearDropdown}
         allOptions={showYourCourses}
       />}
-      {/* {filteredCourseProjects && filteredCourseProjects.length > 0 && (
-        <>
-          <Typography.Title
-            level={3}
-            style={{
-              paddingLeft: "2rem",
-              marginTop: 0,
-              paddingTop: 0,
-            }}
-          >
-            {t("home.yourCourses")}
-          </Typography.Title>
-          <Space
-            className="small-scroll-bar"
-            style={{ display: "flex", maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem", alignItems: "stretch" }}
-          >
-            {filteredCourseProjects.map((c) => (
-              <div
-                key={c.course.courseId}
-                style={{ height: "100%" }}
-              >
-                <CourseCard courseProjects={c} />
-              </div>
-            ))}
-          </Space>
-        </>
-      )} */}
+  
 
       { filteredAdminCourseProjects?.length && <HorizontalCourseScroll
         title={t("home.myCourses")}
@@ -156,54 +130,11 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
         onOpenNew={onOpenNew}
         showMore={archivedCourses || adminCourseProjectsList.length > 2}
         extra={YearDropdown}
+        showPlus={!!filteredAdminCourseProjects?.length}
         allOptions={!!filteredAdminCourseProjects?.length && !filteredCourseProjects?.length}
       />}
 
-      {/* {filteredAdminCourseProjects && filteredAdminCourseProjects.length > 0 && (
-        <>
-          <Typography.Title
-            level={3}
-            style={{
-              paddingLeft: "2rem",
-            }}
-          >
-            {t("home.myCourses")}
-
-            {courseProjects && (
-              <TeacherView>
-                <Button
-                  onClick={onOpenNew}
-                  type="text"
-                  style={{ marginLeft: "1rem", marginTop: 0, paddingTop: 0 }}
-                  icon={<PlusOutlined />}
-                />
-              </TeacherView>
-            )}
-
-            {(archivedCourses || filteredAdminCourseProjects.length > 2) && (
-              <Button
-                type="link"
-                style={{ float: "right" }}
-                onClick={() => navigate(AppRoutes.COURSES + "?role=admin")}
-              >
-                {t("home.moreCourses")} <RightOutlined />
-              </Button>
-            )}
-          </Typography.Title>
-          <Space
-            className="small-scroll-bar"
-            style={{ display: "flex", maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem", alignItems: "stretch" }}
-          >
-            {filteredAdminCourseProjects.map((c) => (
-              <CourseCard
-                key={c.course.courseId}
-                courseProjects={c}
-                adminView
-              />
-            ))}
-          </Space>
-        </>
-      )} */}
+     
 
       {filteredCourseProjects !== null && courseProjectsList.length === 0 && adminCourseProjectsList.length === 0 && (
         <Typography.Text

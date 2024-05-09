@@ -21,9 +21,9 @@ const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null }> = ({ sub
       sorter: (a: GroupSubmissionType, b: GroupSubmissionType) => {
         return a.submissionId - b.submissionId
       },
-      render: (submission: GroupSubmissionType) => (
+      render: (submission: GroupSubmissionType, _, index:number) => (
         <Link to={AppRoutes.SUBMISSION.replace(":courseId",courseId!).replace(":projectId",submission.projectId+"").replace(":submissionId",submission.submissionId+"")}>
-          <Button type="link">#{submission.submissionId}</Button>
+          <Button type="link">#{index+1}</Button>
         </Link>
       ),
     },
