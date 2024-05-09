@@ -188,33 +188,33 @@ public class ClusterController {
     @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}/fill")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> fillCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody ClusterFillJson clusterFillJson) {
-        CheckResult<GroupClusterEntity> checkResult = clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(clusterid, auth.getUserEntity());
+        try{
+            CheckResult<GroupClusterEntity> checkResult = clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(clusterid, auth.getUserEntity());
 
-        if (checkResult.getStatus() != HttpStatus.OK) {
-            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
-        }
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+            }
 
-        GroupClusterEntity groupCluster = checkResult.getData();
+            GroupClusterEntity groupCluster = checkResult.getData();
 
-        ResponseEntity<?> response = getCluster(groupCluster.getId(), auth);
-        if(response.getStatusCode() != HttpStatus.OK){
-            return response;
-        }
+            ResponseEntity<?> response = getCluster(groupCluster.getId(), auth);
+            if(response.getStatusCode() != HttpStatus.OK){
+                return response;
+            }
 
-        GroupClusterJson clusterJson = (GroupClusterJson) response.getBody();
-        if(clusterJson == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster could not be found");
-        }
+            GroupClusterJson clusterJson = (GroupClusterJson) response.getBody();
+            if(clusterJson == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster could not be found");
+            }
 
-        if(clusterFillJson.getClusterGroupMembers().keySet().size() > clusterJson.groupCount()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("provided more groups than are allowed in the cluster");
-        }
+            if(clusterFillJson.getClusterGroupMembers().keySet().size() > groupCluster.getGroupAmount()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("provided more groups than are allowed in the cluster");
+            }
 
-        if(clusterFillJson.getClusterGroupMembers().values().stream().anyMatch(members -> members.length > clusterJson.capacity())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("you made a group with too many members");
-        }
+            if(clusterFillJson.getClusterGroupMembers().values().stream().anyMatch(members -> members.length > groupCluster.getMaxSize())){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("you made a group with too many members");
+            }
 
-        try {
             for(GroupJson groupJson: clusterJson.groups()){
                 commonDatabaseActions.removeGroup(groupJson.getGroupId());
             }

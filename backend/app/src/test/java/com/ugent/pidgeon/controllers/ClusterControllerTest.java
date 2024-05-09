@@ -1,13 +1,15 @@
 package com.ugent.pidgeon.controllers;
 
+import com.ugent.pidgeon.model.json.GroupClusterJson;
+import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
-import com.ugent.pidgeon.postgre.repository.GroupUserRepository;
 import com.ugent.pidgeon.util.*;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +36,6 @@ public class ClusterControllerTest extends ControllerTest{
     GroupClusterRepository groupClusterRepository;
     @Mock
     GroupRepository groupRepository;
-    @Mock
-    GroupUserRepository groupUserRepository;
 
 
     @Mock
@@ -46,6 +46,8 @@ public class ClusterControllerTest extends ControllerTest{
     private CourseUtil courseUtil;
     @Mock
     private CommonDatabaseActions commonDatabaseActions;
+    @Mock
+    private GroupMemberController groupMemberController;
     @InjectMocks
     private ClusterController clusterController;
 
@@ -64,7 +66,7 @@ public class ClusterControllerTest extends ControllerTest{
                 .build();
 
         courseEntity = new CourseEntity("name", "description",2024);
-        groupClusterEntity = new GroupClusterEntity(1L, 20, "clustername", 5);
+        groupClusterEntity = new GroupClusterEntity(1L, 3, "clustername", 5);
         groupEntity = new GroupEntity("groupName", 1L);
     }
 
@@ -140,6 +142,66 @@ public class ClusterControllerTest extends ControllerTest{
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testFillCluster() throws Exception {
+        String request = "{\"clusterGroupMembers\":{\"1\":[1,2,3],\"2\":[],\"3\":[4]}}";
+
+        List<GroupJson> groupJsons = List.of(new GroupJson(3, 1L, "group 1", "groupclusterurl"));
+        GroupClusterJson groupClusterJson = new GroupClusterJson(1L, "test cluster",
+            3, 5, OffsetDateTime.now(), groupJsons, "courseurl");
+        when(clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(anyLong(), any()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", groupClusterEntity));
+        when(clusterUtil.getGroupClusterEntityIfNotIndividual(anyLong(), any()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", groupClusterEntity));
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity))
+            .thenReturn(groupClusterJson);
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH+"/1/fill")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+            .andExpect(status().isOk());
+
+        when(commonDatabaseActions.removeGroup(anyLong()))
+            .thenThrow(new RuntimeException("TEST ERROR"));
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH+"/1/fill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isInternalServerError());
+
+        // a group that is too big
+        request = "{\"clusterGroupMembers\":{\"1\":[1,2,3,6],\"2\":[],\"3\":[4]}}";
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH+"/1/fill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isBadRequest());
+        // too many groups
+        request = "{\"clusterGroupMembers\":{\"1\":[1,2,3],\"2\":[],\"3\":[4],\"4\":[],\"5\":[6],\"6\":[]}}";
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH+"/1/fill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isBadRequest());
+
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity))
+            .thenReturn(null);
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH+"/1/fill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isNotFound());
+
+        when(clusterUtil.getGroupClusterEntityIfNotIndividual(anyLong(), any()))
+            .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH+"/1/fill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isIAmATeapot());
+
+        when(clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(anyLong(), any()))
+            .thenReturn(new CheckResult<>(HttpStatus.UNAUTHORIZED, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.put(ApiRoutes.CLUSTER_BASE_PATH+"/1/fill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
