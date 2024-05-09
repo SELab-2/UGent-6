@@ -193,6 +193,13 @@ public class DockerSubmissionTestTest {
         ">Description=\"Test for hello world!\"\n" +
         ">Required\n" +
         "HelloWorld!"));
+    assertTrue(DockerSubmissionTestModel.isValidTemplate("@helloworld\n"
+        + ">required\n"
+        + ">description=\"Helloworldtest\"\n"
+        + "Hello World\n"
+        + "\n"
+        + "@helloworld2\n"
+        + "bruh\n"));
   }
 
 }

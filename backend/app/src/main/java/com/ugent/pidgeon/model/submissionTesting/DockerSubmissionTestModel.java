@@ -299,6 +299,9 @@ public class DockerSubmissionTestModel {
     }
     boolean isConfigurationLine = false;
     for (String line : lines) {
+      if(line.length() == 0){ // skip line if empty
+        continue;
+      }
       if (line.charAt(0) == '@') {
         atLeastOne = true;
         isConfigurationLine = true;
