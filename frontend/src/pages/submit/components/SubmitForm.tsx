@@ -5,6 +5,15 @@ import {useTranslation} from "react-i18next"
 import {Button} from "antd";
 import {Tree} from 'antd';
 import {CloseOutlined} from '@ant-design/icons';
+import { DataNode } from "antd/es/tree";
+
+type TreeNode = {
+    type: string;
+    title: string;
+    key: string;
+    children: TreeNode[];
+};
+
 
 const SubmitForm: FC<{
     form: FormInstance,
@@ -14,13 +23,7 @@ const SubmitForm: FC<{
 
     const {t} = useTranslation()
     const directoryInputRef = useRef<HTMLInputElement | null>(null);
-    const [directoryTree, setDirectoryTree] = useState([]);
-    type TreeNode = {
-        type: string;
-        title: string;
-        key: string;
-        children: TreeNode[];
-    };
+    const [directoryTree, setDirectoryTree] = useState<TreeNode[]>([]);
 
     const normFile = (e: any) => {
         console.log("Upload event:", e)
@@ -127,37 +130,41 @@ const SubmitForm: FC<{
             setFileAdded(true);
         }
     }
-    const renderTreeNodes = (data: TreeNode[]) =>
+    const renderTreeNodes = (data: TreeNode[]): DataNode[] =>
         data.map((item) => {
-            if (item.children) {
+            if (item.children?.length) {
                 return {
                     title: (
-                        <div>
+                        <span>
                             {item.title}
                             <Button
                                 type="text"
+                                size="small"
                                 icon={<CloseOutlined/>}
                                 onClick={() => removeNode(item.key)}
                                 style={{marginLeft: '8px'}}
                             />
-                        </div>
+                        </span>
                     ),
                     key: item.key,
                     children: renderTreeNodes(item.children),
+                    isLeaf:false
                 };
             }
 
             return {
+                isLeaf:true,
                 title: (
-                    <div>
+                    <>
                         {item.title}
                         <Button
                             type="text"
+                            size="small"
                             icon={<CloseOutlined/>}
                             onClick={() => removeNode(item.key)}
                             style={{marginLeft: '8px'}}
                         />
-                    </div>
+                    </>
                 ),
                 key: item.key,
             };
@@ -215,6 +222,7 @@ const SubmitForm: FC<{
 
                 <input
                     type="file"
+              
                     directory=""
                     webkitdirectory=""
                     mozdirectory=""
@@ -223,7 +231,8 @@ const SubmitForm: FC<{
                     onChange={onDirectoryUpload}
                 />
                 <div style={{overflowY: 'auto', maxHeight: '200px', marginTop: '16px'}}>
-                    <Tree
+                    <Tree.DirectoryTree
+                        selectable={false}
                         treeData={renderTreeNodes(directoryTree)}
                     />
                 </div>
