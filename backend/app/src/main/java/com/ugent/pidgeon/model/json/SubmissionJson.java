@@ -15,6 +15,7 @@ public class SubmissionJson {
 
     private Boolean structureAccepted;
     private Boolean dockerAccepted;
+    private String dockerStatus;
 
     @JsonSerialize(using = OffsetDateTimeSerializer.class)
     private OffsetDateTime submissionTime;
@@ -36,7 +37,7 @@ public class SubmissionJson {
 
     public SubmissionJson(
             long id, String projectUrl, String groupUrl, Long projectId, Long groupId, String fileUrl,
-            Boolean structureAccepted, OffsetDateTime submissionTime, Boolean dockerAccepted, String structureFeedbackUrl, String dockerFeedbackUrl) {
+            Boolean structureAccepted, OffsetDateTime submissionTime, Boolean dockerAccepted, String structureFeedbackUrl, String dockerFeedbackUrl, String dockerStatus) {
         this.submissionId = id;
         this.projectUrl = projectUrl;
         this.groupUrl = groupUrl;
@@ -48,6 +49,7 @@ public class SubmissionJson {
         this.dockerAccepted = dockerAccepted;
         this.structureFeedbackUrl = structureFeedbackUrl;
         this.dockerFeedbackUrl = dockerFeedbackUrl;
+        this.dockerStatus = dockerStatus;
     }
 
     public long getSubmissionId() {
@@ -128,5 +130,13 @@ public class SubmissionJson {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public String getDockerStatus() {
+        return dockerStatus;
+    }
+
+    public void setDockerStatus(String dockerStatus) {
+        this.dockerStatus = dockerStatus;
     }
 }

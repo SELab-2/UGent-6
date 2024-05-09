@@ -11,6 +11,7 @@ import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.DockerTestState;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
@@ -260,8 +261,8 @@ public class    SubmissionController {
           submission.setStructureAccepted(structureTestResult.passed);
           submission.setStructureFeedback(structureTestResult.feedback);
         }
-        // Define docker test as running (1)
-        submission.setDockerTestState(2);
+        // Define docker test as running
+        submission.setDockerTestState(DockerTestState.running);
 
         // save the first feedback, without docker feedback
         submissionRepository.save(submission);
@@ -273,23 +274,25 @@ public class    SubmissionController {
             try {
               // Check if docker tests succeed
               DockerOutput dockerOutput = runDockerTest(new ZipFile(finalSavedFile), testEntity,
-                  Filehandler.getSubmissionPath(projectid, groupId, submission.getId()));
+                  Filehandler.getSubmissionPath(projectid, groupId, submission.getId()).resolve("artifacts"));
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
               // Representation of dockerOutput, this will be a json(easily displayable in frontend) if it is a template test
               // or a string if it is a simple test
-              submission.setDockerFeedback(dockerOutput.toString());
+              submission.setDockerFeedback(dockerOutput.getFeedbackAsString());
               submission.setDockerAccepted(dockerOutput.isAllowed());
 
-              submission.setDockerTestState(0);
+              submission.setDockerTestState(DockerTestState.finished);
               submissionRepository.save(submission);
             } catch (Exception e) {
+              /* Log error */
+              Logger.getLogger("SubmissionController").log(Level.SEVERE, e.getMessage(), e);
 
               submission.setDockerFeedback("");
               submission.setDockerAccepted(false);
 
-              submission.setDockerTestState(-1);
+              submission.setDockerTestState(DockerTestState.aborted);
               submissionRepository.save(submission);
 
             }

@@ -36,6 +36,7 @@ out/
 .vscode/
 backend/app/data/*
 backend/data/*
+backend/tmp/*
 
 ### Secrets ###
 backend/app/src/main/resources/application-secrets.properties

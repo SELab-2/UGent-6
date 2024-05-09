@@ -2,7 +2,7 @@ package com.ugent.pidgeon.model.submissionTesting;
 
 import java.util.List;
 
-public class DockerTestOutput implements DockerOutput{
+public class DockerTestOutput implements DockerOutput {
     public List<String> logs;
     public Boolean allowed;
 
