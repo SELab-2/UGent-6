@@ -126,6 +126,10 @@ public class Filehandler {
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
+    static public Path getSubmissionAritfactPath(long projectid, long groupid, long submissionid) {
+        return getSubmissionPath(projectid, groupid, submissionid).resolve("artifacts.zip");
+    }
+
     /**
      * Get the path were a test is stored
      * @param projectid id of the project
@@ -141,6 +145,9 @@ public class Filehandler {
      * @return the file as a resource
      */
     public static Resource getFileAsResource(Path path) {
+        if (!Files.exists(path)) {
+            return null;
+        }
         File file =  path.toFile();
         return new FileSystemResource(file);
     }
@@ -164,15 +171,6 @@ public class Filehandler {
 
     }
 
-    /**
-     * Get a submission as a resource
-     * @param path path of the submission
-     * @return the submission as a resource
-     * @throws IOException if an error occurs while getting the submission
-     */
-    public static Resource getSubmissionAsResource(Path path) throws IOException {
-        return new InputStreamResource(new FileInputStream(path.toFile()));
-    }
 
     /**
      * Save a file to the server

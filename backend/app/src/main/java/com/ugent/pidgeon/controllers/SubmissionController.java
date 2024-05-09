@@ -105,7 +105,9 @@ public class    SubmissionController {
     List<File> artifacts = model.getArtifacts();
 
     // Copy all files as zip into the output directory
-    Filehandler.copyFilesAsZip(artifacts, outputPath);
+      if (artifacts != null && !artifacts.isEmpty()) {
+        Filehandler.copyFilesAsZip(artifacts, outputPath);
+      }
 
     // Cleanup garbage files and container
     model.cleanUp();
@@ -281,8 +283,7 @@ public class    SubmissionController {
             try {
               // Check if docker tests succeed
               DockerOutput dockerOutput = runDockerTest(new ZipFile(finalSavedFile), testEntity,
-                  Path.of(Filehandler.getSubmissionPath(projectid, groupId, submission.getId())
-                      + "/artifacts.zip"));
+                  Filehandler.getSubmissionAritfactPath(projectid, groupId, submission.getId()));
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
@@ -343,7 +344,10 @@ public class    SubmissionController {
 
         // Get the file from the server
         try {
-            Resource zipFile = Filehandler.getSubmissionAsResource(Path.of(file.getPath()));
+            Resource zipFile = Filehandler.getFileAsResource(Path.of(file.getPath()));
+            if (zipFile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found.");
+            }
 
             // Set headers for the response
             HttpHeaders headers = new HttpHeaders();
@@ -358,7 +362,37 @@ public class    SubmissionController {
         }
     }
 
-    
+    @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/artifacts") //Route to get a submission
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getSubmissionArtifacts(@PathVariable("submissionid") long submissionid, Auth auth) {
+        CheckResult<SubmissionEntity> checkResult = submissionUtil.canGetSubmission(submissionid, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+        SubmissionEntity submission = checkResult.getData();
+
+        // Get the file from the server
+        try {
+            Resource zipFile = Filehandler.getFileAsResource(Filehandler.getSubmissionAritfactPath(submission.getProjectId(), submission.getGroupId(), submission.getId()));
+            if (zipFile == null) {
+              return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No artifacts found for this submission.");
+            }
+            // Set headers for the response
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipFile.getFilename());
+            headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(zipFile);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
+
+
     /**
      * Function to delete a submission
      *
