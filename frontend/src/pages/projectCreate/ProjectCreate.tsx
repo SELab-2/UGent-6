@@ -18,7 +18,6 @@ const ProjectCreate: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<ProjectError | null>(null) // Gebruik ProjectError type voor error state
-  const location = useLocation()
 
 
   const { message } = useAppApi()

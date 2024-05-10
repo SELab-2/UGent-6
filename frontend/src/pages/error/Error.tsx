@@ -1,8 +1,9 @@
-import React  from "react";
+import React, { useContext }  from "react";
 import { AppRoutes } from "../../@types/routes"
 import {useTranslation} from "react-i18next";
 import {Button, Result, Space, Typography} from "antd";
 import { Link, useNavigate } from "react-router-dom";
+import { ErrorContext } from "../../providers/ErrorProvider";
 
 
 interface ErrorPageProps {
@@ -12,6 +13,7 @@ interface ErrorPageProps {
 
 const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
     const { t } = useTranslation()
+    const { setError} = useContext(ErrorContext) 
     const { Title, Text } = Typography;
     const navigate = useNavigate()
 
@@ -48,13 +50,18 @@ const Error: React.FC<ErrorPageProps> = ({ errorCode, errorMessage }) => {
         status = statusMapping[errorCode] || "404"
     }
 
+    const goBack = () => {
+        setError(null)
+        navigate(-1)
+    }
+
     return (
         <Result status={status}>
             <Space direction="vertical">
                 <Title>{title}</Title>
                 <Text>{errorMessage}</Text>
                
-                <Button onClick={()=> navigate(-1)} type="primary" >{t("error.homepage")}</Button>
+                <Button onClick={goBack} type="primary" >{t("error.homepage")}</Button>
             </Space>
         </Result>
     );

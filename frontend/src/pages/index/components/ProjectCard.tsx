@@ -26,7 +26,7 @@ const ProjectCard: FC<{ courseId?: number }> = ({ courseId }) => {
   return (
     <>
       <CourseAdminView>
-        <div style={{ textAlign: "right", paddingRight: "20px", paddingBottom: "10px" }}>
+        <div style={{ textAlign: "right",  paddingBottom: "10px" }}>
           <Button
             onClick={() => navigate(AppRoutes.PROJECT_CREATE.replace(":courseId", String(courseId)))}
             icon={<PlusOutlined />}

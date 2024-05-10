@@ -24,6 +24,7 @@ const SettingsCard: FC = () => {
 
   useEffect(() => {
     form.setFieldsValue(course)
+    form.setFieldValue("isArchived", !!course.archivedAt)
   }, [course])
 
   const saveCourse = async () => {
@@ -69,7 +70,7 @@ const SettingsCard: FC = () => {
       <div style={{ maxWidth: "600px", width: "100%" }}>
         <CourseForm form={form}>
           <Form.Item
-            name="archived"
+            name="isArchived"
             label={t("course.archived")}
             valuePropName="checked"
           >

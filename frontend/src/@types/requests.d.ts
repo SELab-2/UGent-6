@@ -9,6 +9,7 @@ export enum ApiRoutes {
   
   COURSE = "api/courses/:courseId",
   COURSE_MEMBERS = "api/courses/:courseId/members",
+  COURSE_MEMBER = "api/courses/:courseId/members/:userId",
   COURSE_PROJECTS = "api/courses/:id/projects",
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
@@ -86,16 +87,18 @@ export type DELETE_Requests = {
   [ApiRoutes.PROJECT]: undefined
   [ApiRoutes.GROUP_MEMBER]: undefined
   [ApiRoutes.COURSE_LEAVE]: undefined
+  [ApiRoutes.COURSE_MEMBER]: undefined
 }
 
 
 /**
- * the body of the PUT requests
+ * the body of the PUT & PATCH requests
  */
 export type PUT_Requests = {
   [ApiRoutes.COURSE]: POST_Requests[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT]: ProjectFormData
-
+  [ApiRoutes.COURSE_MEMBER]: { relation: CourseRelation }
+  [ApiRoutes.PROJECT_SCORE]: { score: number | null , feedback: string}
 }
 
 
@@ -103,6 +106,8 @@ export type PUT_Requests = {
 export type PUT_Responses = {
   [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT]: GET_Responses[ApiRoutes.PROJECT]
+  [ApiRoutes.COURSE_MEMBER]: GET_Responses[ApiRoutes.COURSE_MEMBERS]
+  [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
 }
 
 
@@ -225,6 +230,7 @@ export type GET_Responses = {
     assistents: CourseTeacher[]
     joinUrl: string
     archivedAt: Timestamp | null // null if not archived
+    year: number
     createdAt: Timestamp
   }
   [ApiRoutes.COURSE_MEMBERS]: {
@@ -248,6 +254,7 @@ export type GET_Responses = {
     relation: CourseRelation,
     memberCount: number, 
     archivedAt: Timestamp | null, // null if not archived
+    year: number // Year of the course
     url:string
   }[],
   //[ApiRoutes.PROJECT_GROUP]: GET_Responses[ApiRoutes.CLUSTER_GROUPS][number]

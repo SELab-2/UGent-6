@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react"
 import { GroupType } from "../../pages/project/components/GroupTab"
 
-import { Button, Select, Space, Switch, Table, Transfer } from "antd"
+import { Alert, Button, Select, Space, Switch, Table, Transfer } from "antd"
 import type { GetProp, SelectProps, TableColumnsType, TableProps, TransferProps } from "antd"
 import apiCall from "../../util/apiFetch"
 import { ApiRoutes } from "../../@types/requests.d"
@@ -18,7 +18,7 @@ interface TableTransferProps extends TransferProps<TransferItem> {
 }
 
 // Customize Table Transfer
-const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: TableTransferProps & { emptyText: string }) => (
+const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: TableTransferProps & { emptyText: string, warning?:string }) => (
   <Transfer {...restProps}>
     {({ direction, filteredItems, onItemSelect, onItemSelectAll, selectedKeys: listSelectedKeys, disabled: listDisabled }) => {
       const columns = direction === "left" ? leftColumns : rightColumns
@@ -32,7 +32,8 @@ const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: T
         selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT, Table.SELECTION_NONE],
       }
 
-      return (
+      return (<>
+      {restProps.warning && <Alert style={{margin:"1rem 0.5rem"}} type="warning" message={restProps.warning} />}
         <Table
           locale={{
             emptyText,
@@ -51,7 +52,7 @@ const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: T
             },
           })}
         />
-      )
+   </>   )
     }}
   </Transfer>
 )
@@ -81,7 +82,7 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
   const onChange: TableTransferProps["onChange"] = (nextTargetKeys) => {
     if (!selectedGroup) return console.error("No group selected")
     setTargetKeys((curr) => ({ ...curr, [selectedGroup?.groupId]: nextTargetKeys }))
-    // TODO: make api call
+    // TODO: make api call here or when pressing save
   }
 
   const columns: TableColumnsType<CourseMemberType> = [
@@ -104,23 +105,44 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
     setSelectedGroup(group)
   }
 
+
+  const randomizeGroups = () => {
+      if(!courseMembers) {
+        return
+      }
+      let randomGroups: Record<string, string[]> = {}
+
+      let members = [...courseMembers]
+      members = members.sort(() => Math.random() - 0.5)
+      for (let i = 0; i < groups.length; i++) {
+        const group = groups[i]
+        const groupMembers = members.splice(0, group.capacity)
+        // @ts-ignore //TODO: fix the types so i can remove the ts ignore
+        randomGroups[group.groupId] = groupMembers.map((m) => m.user.userId)
+      }
+      console.log(randomGroups);
+      setTargetKeys(randomGroups)
+  }
+
   const renderFooter: TransferProps["footer"] = (_, info) => {
-    if (info?.direction === "left") return null
     // Filter `option.label` match the user type `input`
     const filterOption = (input: string, option?: { label: string }) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
 
     return (
       <div style={{ margin: "0.5rem", textAlign: "center" }}>
-        <Select
-          showSearch
-          value={selectedGroup?.groupId}
-          placeholder={t("project.change.selectGroup")}
-          optionFilterProp="children"
-          onChange={changeGroup}
-          filterOption={filterOption}
-          style={{width:"100%"}}
-          options={groups.map((g) => ({ label: g.name, value: g.groupId }))}
-        />
+        {
+          info?.direction === "left" ? <Button disabled={!courseMembers} onClick={randomizeGroups}>{t("project.change.randomizeGroups")}</Button>:
+          <Select
+            showSearch
+            value={selectedGroup?.groupId}
+            placeholder={t("project.change.selectGroup")}
+            optionFilterProp="children"
+            onChange={changeGroup}
+            filterOption={filterOption}
+            style={{width:"100%"}}
+            options={groups.map((g) => ({ label: g.name, value: g.groupId }))}
+          />
+        }
       </div>
     )
   }
@@ -134,13 +156,12 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
     const selectedGroupId = selectedGroup.groupId.toString()
     for(const groupId in targetKeys) {
       if(groupId === selectedGroupId) continue
-
       targetKeys[groupId]?.forEach((key) => users.add(key.toString()))
     }
 
     return courseMembers.filter((u) => !users.has(u.user.userId.toString()))
-  },[selectedGroup,courseMembers])
-
+  },[selectedGroup,courseMembers,groups,targetKeys])
+  const overCapacity = selectedGroup && (targetKeys[selectedGroup.groupId]?.length??0) >  selectedGroup.capacity
 
   return (
     <>
@@ -158,7 +179,9 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
         filterOption={(inputValue, item) => item.user.name!.indexOf(inputValue) !== -1}
         leftColumns={columns}
         rightColumns={columns}
+        warning={overCapacity ? t("project.change.groupFull") : undefined}
         footer={renderFooter}
+        status={overCapacity ? "warning": undefined}
       />
     </>
   )

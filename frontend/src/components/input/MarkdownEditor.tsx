@@ -19,7 +19,9 @@ const MarkdownEditor: FC<{ value?: string | null; onChange?: (value: string) => 
               name="description"
             >
               <Input.TextArea
-                rows={4}
+                autoSize={{ minRows: 4, maxRows: 20 }}
+
+                
                 {...args}
               />
             </Form.Item>

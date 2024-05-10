@@ -1,5 +1,5 @@
 import { Alert, Form, Modal } from "antd"
-import { FC, useState } from "react"
+import { FC, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import CourseForm from "../../../components/forms/CourseForm"
 import apiCall from "../../../util/apiFetch"
@@ -19,6 +19,10 @@ const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ op
   const navigate = useNavigate()
   const {updateCourses} = useUser()
 
+
+  useEffect(()=> {
+    form.setFieldValue("year", new Date().getFullYear()-1)
+  },[])
 
   const onFinish = async () => {
     await form.validateFields()
