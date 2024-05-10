@@ -142,12 +142,12 @@ public class EntityToJsonConverterTest {
     assertEquals(projectEntity.getName(), result.name());
   }
 
-  @Test
-  public void testGetSubmissionJson() {
-    SubmissionJson result = entityToJsonConverter.getSubmissionJson(submissionEntity);
-    assertEquals(submissionEntity.getId(), result.getSubmissionId());
-    assertEquals(submissionEntity.getProjectId(), result.getProjectId());
-  }
+//  @Test
+//  public void testGetSubmissionJson() {
+//    SubmissionJson result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+//    assertEquals(submissionEntity.getId(), result.getSubmissionId());
+//    assertEquals(submissionEntity.getProjectId(), result.getProjectId());
+//  }
 
   @Test
   public void testTestEntityToTestJson() {

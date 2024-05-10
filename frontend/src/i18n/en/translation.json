@@ -1,8 +1,8 @@
 {
   "nav": {
     "profile": "Profile",
-    "login": "Login",
-    "logout": "Logout",
+    "login": "Log in",
+    "logout": "Log out",
     "accountSwitch": "Switch account",
     "theme": "Theme",
     "dark": "Dark",
