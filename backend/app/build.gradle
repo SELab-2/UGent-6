@@ -71,3 +71,15 @@ task unitTests (type: Test){
 
 }
 
+task allTest (type: Test) {
+
+	include '**'
+	useJUnitPlatform()
+	maxHeapSize = '1G'
+
+
+	testLogging {
+		events "passed"
+	}
+}
+

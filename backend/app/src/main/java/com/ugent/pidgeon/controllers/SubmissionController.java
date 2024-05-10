@@ -78,41 +78,48 @@ public class    SubmissionController {
     }
 
     private DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath) throws IOException {
+      // Get the test file from the server
+      String testScript = testEntity.getDockerTestScript();
+      String testTemplate = testEntity.getDockerTestTemplate();
+      String image = testEntity.getDockerImage();
 
-    // Get the test file from the server
-    String testScript = testEntity.getDockerTestScript();
-    String testTemplate = testEntity.getDockerTestTemplate();
-    String image = testEntity.getDockerImage();
-
-    // The first script must always be null, otherwise there is nothing to run on the container
-    if (testScript == null) {
-      return null;
-    }
-
-    // Init container and add input files
-    DockerSubmissionTestModel model = new DockerSubmissionTestModel(image);
-    model.addZipInputFiles(file);
-    DockerOutput output;
-
-    if (testTemplate == null) {
-      // This docker test is configured in the simple mode (store test console logs)
-      output = model.runSubmission(testScript);
-    } else {
-      // This docker test is configured in the template mode (store json with feedback)
-      output = model.runSubmissionWithTemplate(testScript, testTemplate);
-    }
-    // Get list of artifact files generated on submission
-    List<File> artifacts = model.getArtifacts();
-
-    // Copy all files as zip into the output directory
-      if (artifacts != null && !artifacts.isEmpty()) {
-        Filehandler.copyFilesAsZip(artifacts, outputPath);
+      // The first script must always be null, otherwise there is nothing to run on the container
+      if (testScript == null) {
+        return null;
       }
 
-    // Cleanup garbage files and container
-    model.cleanUp();
+      // Init container and add input files
+      DockerSubmissionTestModel model = new DockerSubmissionTestModel(image);
+      try {
 
-    return output;
+        model.addZipInputFiles(file);
+        DockerOutput output;
+
+        if (testTemplate == null) {
+          // This docker test is configured in the simple mode (store test console logs)
+          output = model.runSubmission(testScript);
+        } else {
+          // This docker test is configured in the template mode (store json with feedback)
+          output = model.runSubmissionWithTemplate(testScript, testTemplate);
+        }
+        // Get list of artifact files generated on submission
+        List<File> artifacts = model.getArtifacts();
+
+        // Copy all files as zip into the output directory
+        if (artifacts != null && !artifacts.isEmpty()) {
+          Filehandler.copyFilesAsZip(artifacts, outputPath);
+        }
+
+        // Cleanup garbage files and container
+        model.cleanUp();
+
+        return output;
+      } catch (Exception e) {
+        model.cleanUp();
+        throw new IOException("Error while running docker tests: " + e.getMessage());
+      }
+
+
 
   }
 
