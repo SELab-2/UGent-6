@@ -10,6 +10,7 @@ import com.ugent.pidgeon.postgre.repository.FileRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.Filehandler;
 import com.ugent.pidgeon.util.Pair;
@@ -62,6 +63,8 @@ public class TestControllerTest extends ControllerTest{
 
     @Mock
     private EntityToJsonConverter entityToJsonConverter;
+    @Mock
+    private CommonDatabaseActions commonDatabaseActions;
 
 
     @InjectMocks
@@ -105,11 +108,11 @@ public class TestControllerTest extends ControllerTest{
             test.getStructureTemplate()
         );
 
-        when(testRepository.imageIsUsed(any())).thenReturn(true);
     }
 
     @Test
     public void testUpdateTest() throws Exception {
+        when(testRepository.imageIsUsed(any())).thenReturn(true);
         String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests";
         String dockerImage = "dockerImage";
         String dockerTestScript = "dockerTestScript";
@@ -231,6 +234,7 @@ public class TestControllerTest extends ControllerTest{
 
     @Test
     public void testPutTest() throws Exception {
+        when(testRepository.imageIsUsed(any())).thenReturn(true);
         String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests";
 
         String originalDockerImage = test.getDockerImage();
@@ -388,6 +392,7 @@ public class TestControllerTest extends ControllerTest{
 
     @Test
     public void testGetPatch() throws Exception {
+        when(testRepository.imageIsUsed(any())).thenReturn(true);
         String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests";
 
         String dockerImage = "dockerImage";
@@ -513,6 +518,77 @@ public class TestControllerTest extends ControllerTest{
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
             .param("dockerimage", dockerImage)
         ).andExpect(status().isIAmATeapot());
+    }
 
+    @Test
+    public void testGetTest() throws Exception {
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests";
+
+        /* All checks succeed */
+        when(testUtil.getTestWithAdminStatus(project.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(test, true)));
+
+        when(entityToJsonConverter.testEntityToTestJson(test, project.getId())).thenReturn(testJson);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
+
+        /* Check succeed but user isn't admin */
+        when(testUtil.getTestWithAdminStatus(project.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(test, false)));
+
+        testJson.setDockerImage(null);
+        testJson.setDockerScript(null);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
+
+        /* Check fails */
+        when(testUtil.getTestWithAdminStatus(project.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
+
+        mockMvc.perform(MockMvcRequestBuilders.get(url));
+    }
+
+    @Test
+    public void testDeleteTest() throws Exception {
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests";
+
+        /* All checks succeed */
+        when(testUtil.checkForTestUpdate(
+            eq(project.getId()),
+            eq(getMockUser()),
+            eq(null),
+            eq(null),
+            eq(null),
+            eq(HttpMethod.DELETE)
+        )).thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(test, project)));
+
+        when(commonDatabaseActions.deleteTestById(project, test)).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isOk());
+
+        /* Deleting fails */
+        when(commonDatabaseActions.deleteTestById(project, test)).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isIAmATeapot());
+
+        /* Check fails */
+        when(testUtil.checkForTestUpdate(
+            eq(project.getId()),
+            eq(getMockUser()),
+            eq(null),
+            eq(null),
+            eq(null),
+            eq(HttpMethod.DELETE)
+        )).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isIAmATeapot());
     }
 }
