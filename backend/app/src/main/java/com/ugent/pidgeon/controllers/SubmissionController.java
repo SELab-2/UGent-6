@@ -60,67 +60,12 @@ public class    SubmissionController {
     private EntityToJsonConverter entityToJsonConverter;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
-  @Autowired
-  private TestUtil testUtil;
+    @Autowired
+    private TestUtil testUtil;
 
+    @Autowired
+    private TestRunner testRunner;
 
-  private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
-        // There is no structure test for this project
-        if(testEntity.getStructureTemplate() == null){
-            return null;
-        }
-        String structureTemplateString = testEntity.getStructureTemplate();
-
-        // Parse the file
-        SubmissionTemplateModel model = new SubmissionTemplateModel();
-        model.parseSubmissionTemplate(structureTemplateString);
-        return model.checkSubmission(file);
-    }
-
-    private DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath) throws IOException {
-      // Get the test file from the server
-      String testScript = testEntity.getDockerTestScript();
-      String testTemplate = testEntity.getDockerTestTemplate();
-      String image = testEntity.getDockerImage();
-
-      // The first script must always be null, otherwise there is nothing to run on the container
-      if (testScript == null) {
-        return null;
-      }
-
-      // Init container and add input files
-      DockerSubmissionTestModel model = new DockerSubmissionTestModel(image);
-      try {
-
-        model.addZipInputFiles(file);
-        DockerOutput output;
-
-        if (testTemplate == null) {
-          // This docker test is configured in the simple mode (store test console logs)
-          output = model.runSubmission(testScript);
-        } else {
-          // This docker test is configured in the template mode (store json with feedback)
-          output = model.runSubmissionWithTemplate(testScript, testTemplate);
-        }
-        // Get list of artifact files generated on submission
-        List<File> artifacts = model.getArtifacts();
-
-        // Copy all files as zip into the output directory
-        if (artifacts != null && !artifacts.isEmpty()) {
-          Filehandler.copyFilesAsZip(artifacts, outputPath);
-        }
-
-        // Cleanup garbage files and container
-        model.cleanUp();
-
-        return output;
-      } catch (Exception e) {
-        model.cleanUp();
-        throw new IOException("Error while running docker tests: " + e.getMessage());
-      }
-
-
-  }
 
     /**
      * Function to get a submission by its ID
@@ -223,7 +168,8 @@ public class    SubmissionController {
         try {
             //Save the file entry in the database to get the id
             FileEntity fileEntity = new FileEntity("", "", userId);
-            long fileid = fileRepository.save(fileEntity).getId();
+            fileEntity = fileRepository.save(fileEntity);
+            long fileid = fileEntity.getId();
 
             OffsetDateTime now = OffsetDateTime.now();
             SubmissionEntity submissionEntity = new SubmissionEntity(
@@ -259,7 +205,7 @@ public class    SubmissionController {
       } else {
 
         // Check file structure
-        structureTestResult = runStructureTest(new ZipFile(savedFile), testEntity);
+        structureTestResult = testRunner.runStructureTest(new ZipFile(savedFile), testEntity);
         if (structureTestResult == null) {
           submission.setStructureFeedback(
               "No specific structure requested for this project.");
@@ -285,11 +231,12 @@ public class    SubmissionController {
           submission.setDockerTestState(DockerTestState.running);
           // run docker tests in background
           File finalSavedFile = savedFile;
+          Path artifactPath = Filehandler.getSubmissionAritfactPath(projectid, groupId, submission.getId());
+
           CompletableFuture.runAsync(() -> {
             try {
               // Check if docker tests succeed
-              DockerOutput dockerOutput = runDockerTest(new ZipFile(finalSavedFile), testEntity,
-                  Filehandler.getSubmissionAritfactPath(projectid, groupId, submission.getId()));
+              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath);
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
@@ -315,8 +262,8 @@ public class    SubmissionController {
         }
       }
 
-      return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submissionEntity));
-    } catch (IOException ex) {
+      return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submission));
+    } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to save submissions on file server.");
     }

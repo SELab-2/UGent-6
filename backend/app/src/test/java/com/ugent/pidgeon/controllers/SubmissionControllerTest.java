@@ -7,26 +7,41 @@ import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
+import com.ugent.pidgeon.model.submissionTesting.DockerOutput;
+import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel.SubmissionResult;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
 import com.ugent.pidgeon.postgre.models.types.DockerTestType;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -34,13 +49,21 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @ExtendWith(MockitoExtension.class)
 public class SubmissionControllerTest extends ControllerTest {
+
     @Mock
     private GroupRepository groupRepository;
     @Mock
@@ -53,6 +76,8 @@ public class SubmissionControllerTest extends ControllerTest {
     private TestRepository testRepository;
     @Mock
     private GroupFeedbackRepository groupFeedbackRepository;
+    @Mock
+    private TestRunner testRunner;
 
     @Mock
     private SubmissionUtil submissionUtil;
@@ -79,7 +104,31 @@ public class SubmissionControllerTest extends ControllerTest {
     private MockMultipartFile mockMultipartFile;
     private FileEntity fileEntity;
     private LastGroupSubmissionJson lastGroupSubmissionJson;
+    private TestEntity testEntity;
 
+
+    public static File createTestFile() throws IOException {
+        // Create a temporary directory
+        File tempDir = Files.createTempDirectory("test-dir").toFile();
+
+        // Create a temporary file within the directory
+        File tempFile = File.createTempFile("test-file", ".zip", tempDir);
+
+        // Create some content to write into the zip file
+        String content = "Hello, this is a test file!";
+        byte[] bytes = content.getBytes();
+
+        // Write the content into a file inside the zip file
+        try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(tempFile))) {
+            ZipEntry entry = new ZipEntry("test.txt");
+            zipOut.putNextEntry(entry);
+            zipOut.write(bytes);
+            zipOut.closeEntry();
+        }
+
+        // Return the File object representing the zip file
+        return tempFile;
+    }
 
     @BeforeEach
     public void setup() {
@@ -98,20 +147,23 @@ public class SubmissionControllerTest extends ControllerTest {
             true,
             OffsetDateTime.MIN,
             "structureFeedback",
-                new DockerTestFeedbackJson(DockerTestType.NONE, "", true),
-            DockerTestState.running.toString(),
+            new DockerTestFeedbackJson(DockerTestType.NONE, "", true),
+            null,
             "artifacturl"
         );
         groupEntity = new GroupEntity("groupname", 99L);
         groupEntity.setId(submission.getGroupId());
         groupJson = new GroupJson(3, groupEntity.getId(), "groupname", "groupclusterurl");
 
-        groupFeedbackEntity = new GroupFeedbackEntity(groupEntity.getId(), submission.getProjectId(), 3F, "feedback");
-        groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(),
+        groupFeedbackEntity = new GroupFeedbackEntity(groupEntity.getId(),
+            submission.getProjectId(), 3F, "feedback");
+        groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(),
+            groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(),
             groupFeedbackEntity.getProjectId());
 
         byte[] fileContent = "Your file content".getBytes();
-        mockMultipartFile = new MockMultipartFile("file", "filename.txt", MediaType.TEXT_PLAIN_VALUE, fileContent);
+        mockMultipartFile = new MockMultipartFile("file", "filename.txt",
+            MediaType.TEXT_PLAIN_VALUE, fileContent);
         fileEntity = new FileEntity("name", "dir/name", 1L);
         fileEntity.setId(submission.getFileId());
 
@@ -120,6 +172,14 @@ public class SubmissionControllerTest extends ControllerTest {
             groupJson,
             groupFeedbackJson
         );
+
+        testEntity = new TestEntity(
+            "dockerImage",
+            "dockerTestScript",
+            "dockerTestTemplate",
+            "structureTemplate"
+        );
+
     }
 
     @Test
@@ -193,13 +253,152 @@ public class SubmissionControllerTest extends ControllerTest {
 
     @Test
     public void testSubmitFile() throws Exception {
-        //TODO: dit ook een correcte test laten uitvoeren met dummyfiles
-        when(submissionUtil.checkOnSubmit(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", 1L));
-        when(fileRepository.save(any())).thenReturn(fileEntity);
-        when(submissionRepository.save(any())).thenReturn(submission);
-        mockMvc.perform(MockMvcRequestBuilders.multipart(ApiRoutes.PROJECT_BASE_PATH + "/1/submit")
-                        .file(mockMultipartFile))
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId() + "/submit";
+        /* all checks succeed */
+        when(submissionUtil.checkOnSubmit(submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", groupEntity.getId()));
+        when(fileRepository.save(argThat(
+            file -> file.getUploadedBy() == getMockUser().getId()
+        ))).thenReturn(fileEntity);
+        when(submissionRepository.save(argThat(
+            sub -> {
+                Duration duration = Duration.between(sub.getSubmissionTime(), OffsetDateTime.now());
+                return sub.getProjectId() == submission.getProjectId() &&
+                    sub.getGroupId() == groupEntity.getId() &&
+                    sub.getFileId() == fileEntity.getId() &&
+                    duration.getSeconds() < 2;
+            }
+        ))).thenReturn(submission);
+        Path path = Path.of(fileEntity.getPath());
+        Path artifactPath = Path.of("artifactPath");
+        File file = createTestFile();
+        try (MockedStatic<Filehandler> mockedFileHandler = mockStatic(Filehandler.class)) {
+            mockedFileHandler.when(() -> Filehandler.getSubmissionPath(submission.getProjectId(), groupEntity.getId(), submission.getId())).thenReturn(path);
+            mockedFileHandler.when(() -> Filehandler.saveSubmission(path, mockMultipartFile)).thenReturn(file);
+            mockedFileHandler.when(() -> Filehandler.getSubmissionAritfactPath(anyLong(), anyLong(), anyLong())).thenReturn(artifactPath);
+
+            when(testRunner.runStructureTest(any(), eq(testEntity))).thenReturn(null);
+            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath))).thenReturn(null);
+
+            when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
+
+            when(testRepository.findByProjectId(submission.getProjectId())).thenReturn(Optional.of(testEntity));
+            when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
+
+            /* assertEquals(DockerTestState.running, submission.getDockerTestState()); */ // This executes too quickly so we can't test this
+
+            Thread.sleep(1000);
+
+            // File repository needs to save again after setting path
+            verify(fileRepository, times(1)).save(argThat(
+                f -> f.getId() == fileEntity.getId() && f.getPath().equals(fileEntity.getPath())
+            ));
+
+            // Submissions should be update 3 times, once for the initial save, once for structuretest, once for docker test.
+            // The first one is being checked by the when(...)
+            verify(submissionRepository, times(2)).save(argThat(
+                s -> s.getId() == submission.getId()
+            ));
+
+            assertEquals(DockerTestState.aborted, submission.getDockerTestState());
+
+            /* structuretestResult isn't null */
+            submission.setStructureAccepted(false);
+            submission.setStructureFeedback("");
+            SubmissionResult submissionResult = new SubmissionResult(true, "structureFeedback-test");
+            when(testRunner.runStructureTest(any(), eq(testEntity))).thenReturn(submissionResult);
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
+
+            assertTrue(submission.getStructureAccepted());
+            assertEquals("structureFeedback-test", submission.getStructureFeedback());
+
+            /* Correctly updates the dockertype */
+            testEntity.setDockerTestTemplate("dockerTestTemplate");
+            testEntity.setDockerTestScript("dockerTestScript");
+            submission.setDockerType(DockerTestType.NONE);
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
+            assertEquals(DockerTestType.TEMPLATE, submission.getDockerTestType());
+
+            testEntity.setDockerTestTemplate(null);
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
+            assertEquals(DockerTestType.SIMPLE, submission.getDockerTestType());
+
+            testEntity.setDockerTestScript(null);
+            testEntity.setDockerTestTemplate(null);
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
+            assertEquals(DockerTestType.NONE, submission.getDockerTestType());
+
+            /* A valid docker result is returned */
+            testEntity.setDockerImage("dockerImage");
+            testEntity.setDockerTestScript("dockerTestScript");
+            DockerOutput dockerOutput = new DockerTestOutput( List.of("dockerFeedback-test"), true);
+            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath))).thenReturn(dockerOutput);
+            submission.setDockerAccepted(false);
+            submission.setDockerFeedback("dockerFeedback-test");
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
+
+            Thread.sleep(1000);
+
+            assertTrue(submission.getDockerAccepted());
+            assertEquals("dockerFeedback-test", submission.getDockerFeedback());
+            assertEquals(DockerTestState.finished, submission.getDockerTestState());
+
+            /* No testEntity */
+            when(testRepository.findByProjectId(submission.getProjectId())).thenReturn(Optional.empty());
+            reset(testRunner);
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
+            verify(testRunner, times(0)).runStructureTest(any(), eq(testEntity));
+            verify(testRunner, times(0)).runDockerTest(any(), eq(testEntity), eq(artifactPath));
+
+            /* Unexpected error */
+            reset(fileRepository);
+            when(fileRepository.save(any())).thenThrow(new RuntimeException());
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
                 .andExpect(status().isInternalServerError());
+
+            /* CheckOnSUbmit fails */
+            when(submissionUtil.checkOnSubmit(submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                    .file(mockMultipartFile))
+                .andExpect(status().isIAmATeapot());
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
     }
 
 //    @Test
