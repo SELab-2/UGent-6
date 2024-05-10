@@ -118,12 +118,6 @@ public class TestController {
             structureTemplate = null;
         }
 
-      /* LOg arguments even if null */
-      System.out.println("dockerImage: " + dockerImage);
-      System.out.println("dockerScript: " + dockerScript);
-      System.out.println("dockerTemplate: " + dockerTemplate);
-      System.out.println("structureTemplate: " + structureTemplate);
-
         CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, httpMethod);
 
 
@@ -140,35 +134,35 @@ public class TestController {
         }
 
         // Docker test
-        if(!(dockerImage == null && dockerScript == null && dockerTemplate == null)) {
+        if(dockerImage != null) {
 
           // update/install image if possible, do so in a seperate thread to reduce wait time.
           String finalDockerImage = dockerImage;
           CompletableFuture.runAsync(() -> {
-            if (finalDockerImage != null) {
               DockerSubmissionTestModel.installImage(finalDockerImage);
-            }
           });
+        }
 
-          //Update fields
-          if (dockerImage != null || !httpMethod.equals(HttpMethod.PATCH)) {
-            testEntity.setDockerImage(dockerImage);
-            if (!testRepository.imageIsUsed(dockerImage)) {
-              // Do it on a different thread
-              String finalDockerImage1 = dockerImage;
-              CompletableFuture.runAsync(() -> {
-                  DockerSubmissionTestModel.removeDockerImage(
-                      finalDockerImage1);
-              });
-            }
-          }
+        String oldDockerImage = testEntity.getDockerImage();
 
-          if (dockerScript != null || !httpMethod.equals(HttpMethod.PATCH)) {
-            testEntity.setDockerTestScript(dockerScript);
+        //Update fields
+        if (dockerImage != null || !httpMethod.equals(HttpMethod.PATCH)) {
+          testEntity.setDockerImage(dockerImage);
+          if (!testRepository.imageIsUsed(dockerImage)) {
+            // Do it on a different thread
+            String finalDockerImage1 = dockerImage;
+            CompletableFuture.runAsync(() -> {
+                DockerSubmissionTestModel.removeDockerImage(
+                    finalDockerImage1);
+            });
           }
-          if (dockerTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
-            testEntity.setDockerTestTemplate(dockerTemplate);
-          }
+        }
+
+        if (dockerScript != null || !httpMethod.equals(HttpMethod.PATCH)) {
+          testEntity.setDockerTestScript(dockerScript);
+        }
+        if (dockerTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
+          testEntity.setDockerTestTemplate(dockerTemplate);
         }
 
       if (structureTemplate != null || !httpMethod.equals(HttpMethod.PATCH)) {
@@ -178,6 +172,18 @@ public class TestController {
       testEntity = testRepository.save(testEntity);
       projectEntity.setTestId(testEntity.getId());
       projectRepository.save(projectEntity); // make sure to update test id in project
+
+      // Uninstall dockerimage if necessary
+      if (oldDockerImage != null && !httpMethod.equals(HttpMethod.PATCH)) {
+        if (!testRepository.imageIsUsed(oldDockerImage)) {
+          // Do it on a different thread
+          String finalDockerImage1 = oldDockerImage;
+          CompletableFuture.runAsync(() -> {
+            DockerSubmissionTestModel.removeDockerImage(
+                finalDockerImage1);
+          });
+        }
+      }
 
       return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(testEntity, projectId));
 
