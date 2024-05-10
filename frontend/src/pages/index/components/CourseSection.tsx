@@ -113,7 +113,7 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
     <>
       {/* Dropdown for selecting year */}
 
-     {showYourCourses && <HorizontalCourseScroll
+     {!!showYourCourses && <HorizontalCourseScroll
         title={t("home.yourCourses")}
         projects={filteredCourseProjects}
         onOpenNew={onOpenNew}
@@ -125,7 +125,7 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
       />}
   
 
-      { filteredAdminCourseProjects?.length && <HorizontalCourseScroll
+      { !!filteredAdminCourseProjects?.length && <HorizontalCourseScroll
         title={t("home.myCourses")}
         projects={filteredAdminCourseProjects}
         onOpenNew={onOpenNew}

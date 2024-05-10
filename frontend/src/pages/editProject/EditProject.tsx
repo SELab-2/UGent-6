@@ -8,7 +8,7 @@ import { FormProps } from "antd/lib"
 import { ProjectFormData } from "../projectCreate/components/ProjectCreateService"
 import useProject from "../../hooks/useProject"
 import dayjs from "dayjs"
-import { ApiRoutes } from "../../@types/requests.d"
+import { ApiRoutes, GET_Responses, POST_Requests, POST_Responses } from "../../@types/requests.d"
 import { AppRoutes } from "../../@types/routes"
 import { ProjectContext } from "../../router/ProjectRoutes"
 import useApi from "../../hooks/useApi"
@@ -24,19 +24,32 @@ const EditProject: React.FC = () => {
   const navigate = useNavigate()
   const project = useProject()
   const { updateProject } = useContext(ProjectContext)
+  const [initialDockerValues, setInitialDockerValues] = useState<POST_Requests[ApiRoutes.PROJECT_TESTS] | null>(null)
 
   const updateDockerForm = async () => {
     if (!projectId) return
     const response = await API.GET(ApiRoutes.PROJECT_TESTS, { pathValues: { id: projectId } })
-    if(!response.success) return
 
-    const tests = response.response.data
-    form.setFieldsValue({
-      structureTest: tests.structureTest,
-      dockerTemplate: tests.dockerTemplate,
-      dockerScript: tests.dockerScript,
-      dockerImage: tests.dockerImage,
-    })
+    let formVals:POST_Requests[ApiRoutes.PROJECT_TESTS] ={
+      structureTest: null,
+      dockerTemplate: null,
+      dockerScript: null,
+      dockerImage: null,
+    }
+    if (response.success) {
+      const tests = response.response.data
+      formVals = {
+        structureTest: tests.structureTest ?? "",
+        dockerTemplate: tests.dockerTemplate ?? "",
+        dockerScript: tests.dockerScript ?? "",
+        dockerImage: tests.dockerImage ?? "",
+      }
+    }
+
+    form.setFieldsValue(formVals)
+
+    setInitialDockerValues(formVals)
+
   }
 
   useEffect(() => {

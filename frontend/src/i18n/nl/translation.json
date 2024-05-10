@@ -140,7 +140,7 @@
       "groupSizeMessage": "Groep grootte moet groter dan 0 zijn",
       "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn",
       "selectGroup": "Selecteer een groep",
-      "noMembersinGroup": "Geen leden in deze groep",
+      "noMembersinGroup": "Geen leden gevonden",
       "searchUser": "Zoek gebruiker",
       "groupFull": "De groep bevat meer leden dan toegestaan volgens de capacitiet",
       "randomizeGroups": "Maak willekeurige groepen"

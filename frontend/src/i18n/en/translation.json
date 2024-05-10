@@ -138,7 +138,7 @@
       "groupSizeMessage": "Group size must be greater than 0 " ,
       "amountOfGroupsMessage": "Amount of groups must be greater than 0 ",
       "selectGroup": "Select a group",
-      "noMembersinGroup": "No members in this group",
+      "noMembersinGroup": "No members found",
       "searchUser": "Search user",
       "groupFull": "The group has more members than the group capacity",
       "randomizeGroups": "Create random groups"

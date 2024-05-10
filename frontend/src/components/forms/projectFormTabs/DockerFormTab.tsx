@@ -34,7 +34,7 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
 }
 
 function isValidTemplate(template: string): string {
-  if(template === "") return "" // Template is optional
+  if(!template?.length) return "" // Template is optional
   let atLeastOne = false; // Template should not be empty
   const lines = template.split("\n");
   if (lines[0].charAt(0) !== '@') {

@@ -117,7 +117,7 @@ const useApi = ():UseApiType => {
       let status = 500
 
       if (axios.isAxiosError(err)) {
-        errMessage ||= err.response?.data.message || t("woops")
+        errMessage ||= err.response?.data.message || err.response?.data?.toString() || t("woops")
         status = err.response?.status || 500
       } else {
         errMessage ||= t("woops")
@@ -128,6 +128,7 @@ const useApi = ():UseApiType => {
       if (options.mode === "alert") {
         result.alert = (
           <Alert
+          style={{marginBottom:"0.5rem"}}
             type="error"
             message={errMessage}
           />
