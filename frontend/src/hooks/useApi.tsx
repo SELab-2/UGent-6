@@ -31,6 +31,13 @@ type HandleErrorReturn<T> =
       errorMessage?: string
     }
 
+export type UseApiType = {
+  GET: <T extends keyof GET_Responses>(route: T, o: { pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<GET_Responses[T]>>,
+  POST: <T extends keyof POST_Requests>(route: T, o: { body: POST_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<POST_Responses[T]>>,
+  PUT: <T extends keyof PUT_Requests>(route: T, o: { body: PUT_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>,
+  DELETE: <T extends keyof DELETE_Requests>(route: T, o: { body: DELETE_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<any>>,
+  PATCH: <T extends keyof PUT_Requests>(route: T, o: { body: Partial<PUT_Requests[T]>; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>
+};
 
 /**
  * 
@@ -68,7 +75,7 @@ type HandleErrorReturn<T> =
  * 
  * await POST(ApiRoutes.COURSES, {body: {name: "New Course"}, pathValues: {courseId: 1}},'alert')
  */
-const useApi = () => {
+const useApi = ():UseApiType => {
   const { message } = useAppApi()
   const { t } = useTranslation()
   const { setError } = useContext(ErrorContext)
@@ -139,11 +146,11 @@ const useApi = () => {
   }
 
   return {
-    GET: async <T extends keyof GET_Responses>(route: T, o: { pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => doApiCall("GET", route, o, options) as Promise<HandleErrorReturn<GET_Responses[T]>>,
-    POST: async <T extends keyof POST_Requests>(route: T, o: { body: POST_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => doApiCall("POST", route, o, options) as Promise<HandleErrorReturn<POST_Responses[T]>>,
-    PUT: async <T extends keyof PUT_Requests>(route: T, o: { body: PUT_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => doApiCall("PUT", route, o, options) as Promise<HandleErrorReturn<PUT_Responses[T]>>,
-    DELETE: async <T extends keyof DELETE_Requests>(route: T, o: { body: DELETE_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => doApiCall("DELETE", route, o, options),
-    PATCH: async <T extends keyof PUT_Requests>(route: T, o: { body: Partial<PUT_Requests[T]>; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => doApiCall("PATCH", route, o, options) as Promise<HandleErrorReturn<PUT_Responses[T]>>,
+    GET: async (route, o, options) => doApiCall("GET", route, o, options),
+    POST: async (route, o, options) => doApiCall("POST", route, o, options),
+    PUT: async (route, o, options) => doApiCall("PUT", route, o, options),
+    DELETE: async (route, o, options) => doApiCall("DELETE", route, o, options),
+    PATCH: async (route, o, options) => doApiCall("PATCH", route, o, options),
   }
 }
 

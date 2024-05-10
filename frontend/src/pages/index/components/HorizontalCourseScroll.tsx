@@ -8,7 +8,7 @@ import { AppRoutes } from "../../../@types/routes"
 import { CourseProjectList, CourseProjectsType } from "./CourseSection"
 import { useTranslation } from "react-i18next"
 
-const HorizontalCourseScroll: FC<{ title: string; projects: CourseProjectList | null; onOpenNew: () => void; showMore?: boolean; showPlus?:boolean, allOptions?: boolean; extra?: () => JSX.Element }> = ({ title, onOpenNew, projects, showMore, allOptions, extra,showPlus }) => {
+const HorizontalCourseScroll: FC<{ title: string; projects: CourseProjectList | null, type:string; onOpenNew: () => void; showMore?: boolean; showPlus?:boolean, allOptions?: boolean; extra?: () => JSX.Element }> = ({ title, onOpenNew, projects, showMore, allOptions, extra,showPlus,type }) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
@@ -44,7 +44,7 @@ const HorizontalCourseScroll: FC<{ title: string; projects: CourseProjectList | 
               <Button
                 type="link"
                 style={{ float: "right" }}
-                onClick={() => navigate(AppRoutes.COURSES + "?role=admin")}
+                onClick={() => navigate(AppRoutes.COURSES + "?role="+type)}
               >
                 {t("home.moreCourses")} <RightOutlined />
               </Button>

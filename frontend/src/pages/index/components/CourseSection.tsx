@@ -121,6 +121,7 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
         showPlus={!filteredAdminCourseProjects?.length}
         extra={YearDropdown}
         allOptions={showYourCourses}
+        type="enrolled"
       />}
   
 
@@ -132,6 +133,7 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
         extra={YearDropdown}
         showPlus={!!filteredAdminCourseProjects?.length}
         allOptions={!!filteredAdminCourseProjects?.length && !filteredCourseProjects?.length}
+        type="admin"
       />}
 
      
