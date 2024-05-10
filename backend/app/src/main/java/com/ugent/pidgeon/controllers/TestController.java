@@ -174,7 +174,7 @@ public class TestController {
       projectRepository.save(projectEntity); // make sure to update test id in project
 
       // Uninstall dockerimage if necessary
-      if (oldDockerImage != null && !httpMethod.equals(HttpMethod.PATCH)) {
+      if (oldDockerImage != null) {
         if (!testRepository.imageIsUsed(oldDockerImage)) {
           // Do it on a different thread
           String finalDockerImage1 = oldDockerImage;
