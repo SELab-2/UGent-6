@@ -332,7 +332,7 @@ public class    SubmissionController {
             }
             // Set headers for the response
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipFile.getFilename());
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=artifacts.zip" );
             headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
 
             return ResponseEntity.ok()

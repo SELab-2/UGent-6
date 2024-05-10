@@ -38,6 +38,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -58,6 +61,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -401,60 +405,127 @@ public class SubmissionControllerTest extends ControllerTest {
 
     }
 
-//    @Test
-//    public void testGetSubmissionFile() throws Exception {
-//        //TODO: dit ook een correcte test laten uitvoeren met dummyfiles
-//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-//        when(fileRepository.findById(anyLong())).thenReturn(Optional.of(fileEntity));
-//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
-//                .andExpect(status().isInternalServerError());
-//
-//        when(fileRepository.findById(anyLong())).thenReturn(Optional.empty());
-//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
-//                .andExpect(status().isNotFound());
-//
-//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
-//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
-//                .andExpect(status().isForbidden());
-//    }
+    @Test
+    public void testGetSubmissionFile() throws Exception {
+        try (MockedStatic<Filehandler> mockedFileHandler = mockStatic(Filehandler.class)) {
+            String url = ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file";
+            Path path = Path.of(fileEntity.getPath());
+            File file = createTestFile();
+            Resource mockedResource = new FileSystemResource(file);
 
-//    @Test
-//    public void testGetStructureFeedback() throws Exception {
-//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/structurefeedback"))
-//                .andExpect(status().isOk());
-//
-//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/structurefeedback"))
-//                .andExpect(status().isIAmATeapot());
-//    }
+            /* all checks succeed */
+            when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
+            when(fileRepository.findById(submission.getFileId())).thenReturn(Optional.of(fileEntity));
+            mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenReturn(mockedResource);
 
-//    @Test
-//    public void testGetDockerFeedback() throws Exception {
-//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/dockerfeedback"))
-//                .andExpect(status().isOk());
-//    }
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/zip"))
+                .andExpect(header().string(
+                    HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileEntity.getName()))
+                .andExpect(content().bytes(mockedResource.getInputStream().readAllBytes()));
+
+            /* Resource not found */
+            mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenReturn(null);
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isNotFound());
+
+            /* file not found */
+            when(fileRepository.findById(submission.getFileId())).thenReturn(Optional.empty());
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isNotFound());
+
+            /* Unexpected error */
+            when(fileRepository.findById(submission.getFileId())).thenReturn(Optional.of(fileEntity));
+            mockedFileHandler.reset();
+            mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenThrow(new RuntimeException());
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isInternalServerError());
+
+            /* User can't get submission */
+            when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isIAmATeapot());
+        }
+    }
+
+    @Test
+    public void testGetSubmissionArtifacts() throws Exception {
+        try (MockedStatic<Filehandler> mockedFileHandler = mockStatic(Filehandler.class)) {
+            String url = ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/artifacts";
+            Path path = Path.of("artifactPath");
+            File file = createTestFile();
+            Resource mockedResource = new FileSystemResource(file);
+
+            /* all checks succeed */
+            when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
+            mockedFileHandler.when(() -> Filehandler.getSubmissionAritfactPath(submission.getProjectId(), submission.getGroupId(), submission.getId())).thenReturn(path);
+            mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenReturn(mockedResource);
+
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/zip"))
+                .andExpect(header().string(
+                    HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=artifacts.zip"))
+                .andExpect(content().bytes(mockedResource.getInputStream().readAllBytes()));
+
+
+            /* Resource not found */
+            mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenReturn(null);
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isNotFound());
+
+            /* Unexpected error */
+            mockedFileHandler.reset();
+            mockedFileHandler.when(() -> Filehandler.getSubmissionAritfactPath(submission.getProjectId(), submission.getGroupId(), submission.getId())).thenThrow(new RuntimeException());
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isInternalServerError());
+
+            /* User can't get submission */
+            when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isIAmATeapot());
+        }
+    }
 
     @Test
     public void testDeleteSubmissionById() throws Exception {
-        when(submissionUtil.canDeleteSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.SUBMISSION_BASE_PATH + "/1"))
+        String url = ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId();
+        /* all checks succeed */
+        when(submissionUtil.canDeleteSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isOk());
 
-        when(submissionUtil.canDeleteSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.delete(ApiRoutes.SUBMISSION_BASE_PATH + "/1"))
+        verify(commonDatabaseActions, times(1)).deleteSubmissionById(submission.getId());
+
+        /* User can't delete submission */
+        when(submissionUtil.canDeleteSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
                 .andExpect(status().isIAmATeapot());
     }
 
     @Test
     public void testGetSubmissionsForGroup() throws Exception {
-        when(groupUtil.canGetProjectGroupData(anyLong(), anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions/1"))
-                .andExpect(status().isOk());
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId() + "/submissions/" + groupEntity.getId();
+        /* all checks succeed */
+        when(groupUtil.canGetProjectGroupData(groupEntity.getId(), submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(submissionRepository.findByProjectIdAndGroupId(submission.getProjectId(), groupEntity.getId())).thenReturn(List.of(submission));
+        when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(submissionJson))));
 
-        when(groupUtil.canGetProjectGroupData(anyLong(), anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions/1"))
+        /* No submissions */
+        when(submissionRepository.findByProjectIdAndGroupId(submission.getProjectId(), groupEntity.getId())).thenReturn(List.of());
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("[]"));
+
+        /* User can't get group */
+        when(groupUtil.canGetProjectGroupData(groupEntity.getId(), submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isIAmATeapot());
     }
 }
