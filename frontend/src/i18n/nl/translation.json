@@ -14,7 +14,9 @@
     "member": "Lid",
     "members": "Leden",
     "archived": "Gearchiveerd",
-    "noCourses": "Geen vakken gevonden"
+    "noCourses": "Geen vakken gevonden",
+    "sortAscending": "A tot Z",
+    "sortDescending": "Z tot A"
   },
   "home": {
     "allCourses": "Alle vakken",
@@ -42,6 +44,7 @@
       "description": "Beschrijving",
       "course": "Vak",
       "deadline": "Deadline",
+      "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
       "projectStatus": "Status",
       "status": {

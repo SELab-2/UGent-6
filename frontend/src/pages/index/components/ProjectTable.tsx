@@ -1,9 +1,9 @@
-import { Button, Space, Table, TableProps } from "antd"
+import { Button, Table, TableProps} from "antd"
 import { FC, useMemo } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
+import i18n from 'i18next'
 import useAppApi from "../../../hooks/useAppApi"
-import ProjectInfo from "./ProjectInfo"
 import ProjectStatusTag from "./ProjectStatusTag"
 import GroupProgress from "./GroupProgress"
 import { Link } from "react-router-dom"
@@ -36,14 +36,27 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
         title: t("home.projects.course"),
         dataIndex: "course",
         key: "course",
-        render: (course: ProjectType["course"]) => course.name,
+        sorter: (a: ProjectType, b: ProjectType) => a.course.name.localeCompare(b.course.name),
+        sortDirections: ['ascend', 'descend'],
+        render: (course: ProjectType["course"]) => course.name
       },
       {
         title: t("home.projects.deadline"),
         dataIndex: "deadline",
         key: "deadline",
+        sorter: (a: ProjectType, b: ProjectType) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
+        sortDirections: ['ascend', "descend"],
+        defaultSortOrder: "ascend",
+        // Filter projects with deadlines that have already passed
+        filters: [{ text: t('home.projects.deadlineNotPassed'), value: 'notPassed' }],
+        onFilter: (value: any, record: any) => {
+          const currentTimestamp = new Date().getTime();
+          const deadlineTimestamp = new Date(record.deadline).getTime();
+          return value === 'notPassed' ? deadlineTimestamp >= currentTimestamp : true;
+        },
+        defaultFilteredValue: ["notPassed"] ,
         render: (text: string) =>
-          new Date(text).toLocaleString(undefined, {
+          new Date(text).toLocaleString(i18n.language, {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -82,6 +95,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
 
   return (
     <Table
+      showSorterTooltip={{mouseEnterDelay: 1}}
       locale={{
         emptyText: t("home.projects.noProjects"),
       }}

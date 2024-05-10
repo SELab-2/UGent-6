@@ -14,7 +14,9 @@
     "member": "Member",
     "members": "Members",
     "archived":"Archived",
-    "noCourses": "No courses found"
+    "noCourses": "No courses found",
+    "sortAscending": "A to Z",
+    "sortDescending": "Z to A"
   },
   "home": {
     "allCourses": "All courses",
@@ -42,6 +44,7 @@
       "description": "Description",
       "course": "Course",
       "deadline": "Deadline",
+      "deadlineNotPassed": "Only show active projects",
       "showMore": "Show more",
       "submit": "Submit",
       "projectStatus": "Status",

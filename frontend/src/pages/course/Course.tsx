@@ -94,13 +94,13 @@ const Course: FC = () => {
           />
           <Tag
             key={course.teacher.url}
-            color="orange"
+            color="gold"
           >
             {course.teacher.name} {course.teacher.surname}
           </Tag>
           {
             course.archivedAt && <Tag icon={<InboxOutlined />}
-            color="yellow">{t("course.archived")}</Tag>
+            color="orange">{t("course.archived")}</Tag>
           }
         </Space>
         <br />

@@ -69,6 +69,9 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         dataIndex: "group",
         key: "group",
         render: (g) => <Typography.Text>{g.name}</Typography.Text>,
+        sorter: (a: ProjectSubmissionsType, b: ProjectSubmissionsType) => {
+          return a.group.groupId - b.group.groupId
+        },
         description: "test",
       },
       {
@@ -99,6 +102,12 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         dataIndex: "submission",
         key: "submission",
         render: (time: ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
+        sorter: (a: ProjectSubmissionsType, b: ProjectSubmissionsType) => {
+          // Implement sorting logic for submissionTime column
+          const timeA: any = a.submission?.submissionTime || 0;
+          const timeB: any = b.submission?.submissionTime || 0;
+          return timeA - timeB;
+        },
       },
       {
         title: `Score (/${project?.maxScore ?? ""})`,
@@ -128,6 +137,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   }, [t, project, submissions])
   return (
     <Table
+      showSorterTooltip={{mouseEnterDelay: 1}}
       loading={submissions === null}
       dataSource={submissions ?? []}
       locale={{ emptyText: submissions === null ? t("project.loadingSubmissions") : t("project.noSubmissions") }}
