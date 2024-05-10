@@ -39,7 +39,7 @@ public class TestEntityTest {
   public void testStructureTestId() {
     String template = "@Testone\nHello World!";
     testEntity.setStructureTemplate(template);
-    assertEquals(template, testEntity.getDockerTestScript());
+    assertEquals(template, testEntity.getStructureTemplate());
   }
 
   @Test

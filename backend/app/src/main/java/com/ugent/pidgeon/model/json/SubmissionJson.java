@@ -32,7 +32,7 @@ public class SubmissionJson {
 
     public SubmissionJson(
             long id, String projectUrl, String groupUrl, Long projectId, Long groupId, String fileUrl,
-            Boolean structureAccepted, OffsetDateTime submissionTime, String structureFeedbackUrl, DockerTestFeedbackJson dockerFeedback, String dockerStatus,
+            Boolean structureAccepted, OffsetDateTime submissionTime, String structureFeedback, DockerTestFeedbackJson dockerFeedback, String dockerStatus,
         String artifactUrl) {
         this.submissionId = id;
         this.projectUrl = projectUrl;
@@ -43,7 +43,7 @@ public class SubmissionJson {
         this.structureAccepted = structureAccepted;
         this.submissionTime = submissionTime;
         this.dockerFeedback = dockerFeedback;
-        this.structureFeedback = structureFeedbackUrl;
+        this.structureFeedback = structureFeedback;
         this.dockerStatus = dockerStatus;
       this.artifactUrl = artifactUrl;
     }

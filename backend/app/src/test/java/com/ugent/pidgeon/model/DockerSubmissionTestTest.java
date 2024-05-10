@@ -95,11 +95,11 @@ public class DockerSubmissionTestTest {
     String testOne = "@HelloWorld\n" +
         ">Description=\"Test for hello world!\"\n" +
         ">Required\n" +
-        "HelloWorld!";
+        "HelloWorld!\n";
     String testTwo = "@HelloWorld2\n" +
         ">Optional\n" +
         "HelloWorld2!\n";
-    String template = testOne + "\n" + testTwo;
+    String template = testOne + "\n" + testTwo + "\n";
 
     File[] files = new File[]{initTestFile("#!/bin/sh\necho 'HelloWorld!'", "HelloWorld.sh"),
         initTestFile("#!/bin/sh\necho 'HelloWorld2!'", "HelloWorld2.sh")};
@@ -162,7 +162,7 @@ public class DockerSubmissionTestTest {
     StringBuilder sb = new StringBuilder();
     sb.append("Hello Happy World!");
 
-    File f = new File("d:\\test.zip");
+    File f = new File("src/test/test-cases/DockerSubmissionTestTest/d__test.zip");
     ZipOutputStream out = new ZipOutputStream(new FileOutputStream(f));
     ZipEntry e = new ZipEntry("helloworld.txt");
     out.putNextEntry(e);
