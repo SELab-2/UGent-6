@@ -5,13 +5,15 @@ import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserId;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
-import java.util.Collections;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,10 @@ public class ClusterController {
     GroupClusterRepository groupClusterRepository;
     @Autowired
     GroupRepository groupRepository;
+    @Autowired
+    GroupMemberRepository groupMemberRepository;
+    @Autowired
+    CourseUserRepository courseUserRepository;
 
     @Autowired
     GroupMemberController groupMemberController;
@@ -202,26 +208,34 @@ public class ClusterController {
                 return response;
             }
 
-            GroupClusterJson clusterJson = (GroupClusterJson) response.getBody();
-            if(clusterJson == null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group cluster could not be found");
-            }
+            List<GroupEntity> groups = groupRepository.findAllByClusterId(clusterid);
 
-            if(clusterFillJson.getClusterGroupMembers().keySet().size() > groupCluster.getGroupAmount()){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("provided more groups than are allowed in the cluster");
-            }
 
             if(clusterFillJson.getClusterGroupMembers().values().stream().anyMatch(members -> members.length > groupCluster.getMaxSize())){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("you made a group with too many members");
             }
 
-            for(GroupJson groupJson: clusterJson.groups()){
-                commonDatabaseActions.removeGroup(groupJson.getGroupId());
+            for(long groupId: clusterFillJson.getClusterGroupMembers().keySet()){
+                GroupEntity group = groupRepository.findById(groupId).orElse(null);
+                if(group == null || group.getClusterId() != clusterid){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("your request contains illegal groups");
+                }
+                List<UserEntity> groupUsers = groupMemberRepository.findAllMembersByGroupId(groupId);
+                for(UserEntity user: groupUsers){
+                    CourseUserEntity courseUser = courseUserRepository.findById(new CourseUserId(groupCluster.getCourseId(), user.getId())).orElse(null);
+                    if(courseUser == null || courseUser.getRelation() != CourseRelation.enrolled){
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("your request contains illegal users");
+                    }
+                }
+            }
+
+            for(GroupEntity group: groups){
+                commonDatabaseActions.removeGroup(group.getId());
             }
 
             for(Long groupId: clusterFillJson.getClusterGroupMembers().keySet()){
                 Long[] users = clusterFillJson.getClusterGroupMembers().get(groupId);
-                GroupEntity groupEntity = new GroupEntity("group " + groupId, clusterJson.clusterId());
+                GroupEntity groupEntity = new GroupEntity("group " + groupId, clusterid);
                 groupRepository.save(groupEntity);
                 for(Long userid: users){
                     groupMemberController.addMemberToGroup(groupId, userid, auth);
