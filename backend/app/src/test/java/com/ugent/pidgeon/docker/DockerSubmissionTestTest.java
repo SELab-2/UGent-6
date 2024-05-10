@@ -1,4 +1,4 @@
-package com.ugent.pidgeon.model;
+package com.ugent.pidgeon.docker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

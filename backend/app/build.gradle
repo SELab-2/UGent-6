@@ -57,9 +57,9 @@ dependencies {
 
 task unitTests (type: Test){
 
-	exclude '**/DockerSubmissionTestTest'
+	exclude '**/docker'
 
-
+	
 	useJUnitPlatform()
        maxHeapSize = '1G'
 
