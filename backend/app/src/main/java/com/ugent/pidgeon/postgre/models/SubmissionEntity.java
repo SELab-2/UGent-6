@@ -1,5 +1,7 @@
 package com.ugent.pidgeon.postgre.models;
 
+import com.ugent.pidgeon.postgre.models.types.DockerTestType;
+import com.ugent.pidgeon.postgre.models.types.DockerTestState;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
@@ -35,6 +37,12 @@ public class SubmissionEntity {
 
     @Column(name="docker_feedback")
     private String dockerFeedback;
+
+    @Column(name="docker_test_state")
+    private String dockerTestState;
+
+    @Column(name="docker_type")
+    private String dockerType;
 
     public SubmissionEntity() {
     }
@@ -115,5 +123,36 @@ public class SubmissionEntity {
 
     public void setDockerFeedback(String dockerFeedbackFileId) {
         this.dockerFeedback = dockerFeedbackFileId;
+    }
+    public DockerTestState getDockerTestState() {
+        if(dockerTestState == null) {
+            return DockerTestState.no_test;
+        }
+        return switch (dockerTestState) {
+            case "running" -> DockerTestState.running;
+            case "finished" -> DockerTestState.finished;
+            case "aborted" -> DockerTestState.aborted;
+            default -> null;
+        };
+    }
+
+    public void setDockerTestState(DockerTestState dockerTestState) {
+        this.dockerTestState = dockerTestState.toString();
+    }
+
+    public DockerTestType getDockerTestType() {
+        if (dockerType == null) {
+            return DockerTestType.NONE;
+        }
+        return switch (dockerType) {
+            case "SIMPLE" -> DockerTestType.SIMPLE;
+            case "TEMPLATE" -> DockerTestType.TEMPLATE;
+            case "NONE" -> DockerTestType.NONE;
+            default -> null;
+        };
+    }
+
+    public void setDockerType(DockerTestType dockerType) {
+        this.dockerType = dockerType.toString();
     }
 }

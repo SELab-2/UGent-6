@@ -192,7 +192,7 @@
   "error": {
     "title": "Fout",
     "subtitle": "Er ging iets mis, probeer het later opnieuw.",
-    "homepage": "Naar Start",
+    "back": "Keer terug",
     "403_message": "Je bent niet bevoegd om deze pagina te bezoeken.",
     "404_message" : "Sorry, de pagina die je bezocht bestaat niet.",
     "500_message": "Sorry, er ging iets mis."

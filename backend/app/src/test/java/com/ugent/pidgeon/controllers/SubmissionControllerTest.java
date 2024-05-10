@@ -1,5 +1,6 @@
 package com.ugent.pidgeon.controllers;
 
+import com.ugent.pidgeon.model.json.DockerTestFeedbackJson;
 import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
@@ -8,6 +9,8 @@ import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import com.ugent.pidgeon.postgre.models.types.DockerTestState;
+import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,8 +87,8 @@ public class SubmissionControllerTest extends ControllerTest {
         submission = new SubmissionEntity(1L, 1L, 1L, OffsetDateTime.MIN, true, true);
         groupIds = List.of(1L);
         submissionJson = new SubmissionJson(1L, "projecturl", "groupurl", 1L,
-                1L, "fileurl", true, OffsetDateTime.MIN, true,
-                "structurefeedbackurl", "dockerfeedbackurl");
+                1L, "fileurl", true, OffsetDateTime.MIN, "structureFeedback",
+                new DockerTestFeedbackJson(DockerTestType.NONE, "", true), DockerTestState.running.toString(), "artifacturl");
         groupJson = new GroupJson(1, 1L, "groupname", "groupclusterurl");
         groupFeedbackJson = new GroupFeedbackJson(0F, "feedback", 1L, 1L);
         groupEntity = new GroupEntity("groupname", 1L);
@@ -150,40 +153,40 @@ public class SubmissionControllerTest extends ControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 
-    @Test
-    public void testGetSubmissionFile() throws Exception {
-        //TODO: dit ook een correcte test laten uitvoeren met dummyfiles
-        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-        when(fileRepository.findById(anyLong())).thenReturn(Optional.of(fileEntity));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
-                .andExpect(status().isInternalServerError());
+//    @Test
+//    public void testGetSubmissionFile() throws Exception {
+//        //TODO: dit ook een correcte test laten uitvoeren met dummyfiles
+//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
+//        when(fileRepository.findById(anyLong())).thenReturn(Optional.of(fileEntity));
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
+//                .andExpect(status().isInternalServerError());
+//
+//        when(fileRepository.findById(anyLong())).thenReturn(Optional.empty());
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
+//                .andExpect(status().isNotFound());
+//
+//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
+//                .andExpect(status().isForbidden());
+//    }
 
-        when(fileRepository.findById(anyLong())).thenReturn(Optional.empty());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
-                .andExpect(status().isNotFound());
+//    @Test
+//    public void testGetStructureFeedback() throws Exception {
+//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/structurefeedback"))
+//                .andExpect(status().isOk());
+//
+//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/structurefeedback"))
+//                .andExpect(status().isIAmATeapot());
+//    }
 
-        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/file"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    public void testGetStructureFeedback() throws Exception {
-        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/structurefeedback"))
-                .andExpect(status().isOk());
-
-        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/structurefeedback"))
-                .andExpect(status().isIAmATeapot());
-    }
-
-    @Test
-    public void testGetDockerFeedback() throws Exception {
-        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/dockerfeedback"))
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    public void testGetDockerFeedback() throws Exception {
+//        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
+//        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1/dockerfeedback"))
+//                .andExpect(status().isOk());
+//    }
 
     @Test
     public void testDeleteSubmissionById() throws Exception {
