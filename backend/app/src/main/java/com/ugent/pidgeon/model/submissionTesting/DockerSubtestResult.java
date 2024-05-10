@@ -1,6 +1,6 @@
 package com.ugent.pidgeon.model.submissionTesting;
 
-public class DockerSubtestResult {
+public class DockerSubtestResult implements DockerOutput {
     private String correct;
     private String output;
     private String testName;
@@ -58,5 +58,18 @@ public class DockerSubtestResult {
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    @Override
+    public boolean isAllowed() {
+        return correct.equals(output);
+    }
+
+    @Override
+    public String getFeedbackAsString() {
+        // Display feedback as a json, only display testName and testDescription if they are not empty
+        String testDescription = this.testDescription.isEmpty() ? "" : "\",\"testDescription\":\"" + this.testDescription;
+        //TODO add allowed to json
+        return "{\"testName\":\"" + testName + testDescription + "\",\"correct\":\"" + correct + "\",\"output\":\"" + output + "\", \"required\":" + required + ", \"succes\": " + isAllowed() + "}";
     }
 }

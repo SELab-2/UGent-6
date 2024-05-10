@@ -15,28 +15,42 @@ public class TestEntity {
     @Column(name = "docker_image")
     private String dockerImage;
 
-    @Column(name = "docker_test")
-    private long dockerTestId;
+    @Column(name = "docker_test_script")
+    private String dockerTestScript;
 
-    @Column(name = "structure_test_id")
-    private long structureTestId;
+    @Column(name = "docker_test_template")
+    private String dockerTestTemplate;
+
+    @Column(name = "structure_template")
+    private String structureTemplate;
+
+    public TestEntity(String dockerImage, String docker_test_script,
+        String dockerTestTemplate,
+        String structureTemplate) {
+        this.dockerImage = dockerImage;
+        this.dockerTestScript = docker_test_script;
+        this.dockerTestTemplate = dockerTestTemplate;
+        this.structureTemplate = structureTemplate;
+    }
 
     public TestEntity() {
+
     }
 
-    public TestEntity(String dockerImage, long dockerTestId, long structureTestId) {
-        this.dockerImage = dockerImage;
-        this.dockerTestId = dockerTestId;
-        this.structureTestId = structureTestId;
+    public String getDockerTestScript() {
+        return dockerTestScript;
     }
 
-
-    public void setId(Long id) {
-        this.id = id;
+    public void setDockerTestScript(String docker_test_script) {
+        this.dockerTestScript = docker_test_script;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getDockerImage() {
@@ -47,19 +61,19 @@ public class TestEntity {
         this.dockerImage = dockerImage;
     }
 
-    public long getDockerTestId() {
-        return dockerTestId;
+    public String getDockerTestTemplate() {
+        return dockerTestTemplate;
     }
 
-    public void setDockerTestId(long dockerTest) {
-        this.dockerTestId = dockerTest;
+    public void setDockerTestTemplate(String dockerTestTemplate) {
+        this.dockerTestTemplate = dockerTestTemplate;
     }
 
-    public long getStructureTestId() {
-        return structureTestId;
+    public String getStructureTemplate() {
+        return structureTemplate;
     }
 
-    public void setStructureTestId(long structureTestId) {
-        this.structureTestId = structureTestId;
+    public void setStructureTemplate(String structureTemplate) {
+        this.structureTemplate = structureTemplate;
     }
 }
