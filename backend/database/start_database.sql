@@ -108,8 +108,8 @@ CREATE TABLE submissions (
     docker_accepted BOOLEAN NOT NULL,
     structure_feedback TEXT,
     docker_feedback TEXT,
-    docker_test_state VARCHAR(10) DEFAULT "running",
-    docker_type VARCHAR(10) DEFAULT "simple",
+    docker_test_state VARCHAR(10) DEFAULT 'running',
+    docker_type VARCHAR(10) DEFAULT 'simple',
     submission_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
