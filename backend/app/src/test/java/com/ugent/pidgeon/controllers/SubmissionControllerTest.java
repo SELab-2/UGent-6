@@ -1,5 +1,7 @@
 package com.ugent.pidgeon.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ugent.pidgeon.CustomObjectMapper;
 import com.ugent.pidgeon.model.json.DockerTestFeedbackJson;
 import com.ugent.pidgeon.model.json.GroupFeedbackJson;
 import com.ugent.pidgeon.model.json.GroupJson;
@@ -32,7 +34,9 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +67,7 @@ public class SubmissionControllerTest extends ControllerTest {
     @InjectMocks
     private SubmissionController submissionController;
 
+    private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
     private SubmissionEntity submission;
     private List<Long> groupIds;
@@ -73,73 +78,117 @@ public class SubmissionControllerTest extends ControllerTest {
     private GroupFeedbackEntity groupFeedbackEntity;
     private MockMultipartFile mockMultipartFile;
     private FileEntity fileEntity;
+    private LastGroupSubmissionJson lastGroupSubmissionJson;
 
 
     @BeforeEach
     public void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(submissionController)
-                .defaultRequest(MockMvcRequestBuilders.get("/**")
-                        .with(request -> {
-                            request.setUserPrincipal(SecurityContextHolder.getContext().getAuthentication());
-                            return request;
-                        }))
-                .build();
-        submission = new SubmissionEntity(1L, 1L, 1L, OffsetDateTime.MIN, true, true);
-        groupIds = List.of(1L);
-        submissionJson = new SubmissionJson(1L, "projecturl", "groupurl", 1L,
-                1L, "fileurl", true, OffsetDateTime.MIN, "structureFeedback",
-                new DockerTestFeedbackJson(DockerTestType.NONE, "", true), DockerTestState.running.toString(), "artifacturl");
-        groupJson = new GroupJson(1, 1L, "groupname", "groupclusterurl");
-        groupFeedbackJson = new GroupFeedbackJson(0F, "feedback", 1L, 1L);
-        groupEntity = new GroupEntity("groupname", 1L);
-        groupFeedbackEntity = new GroupFeedbackEntity(1L, 1L, 0F, "feedback");
+        setUpController(submissionController);
+
+        submission = new SubmissionEntity(22, 45, 99L, OffsetDateTime.MIN, true, true);
+        submission.setId(56L);
+        groupIds = List.of(45L);
+        submissionJson = new SubmissionJson(
+            submission.getId(),
+            "projecturl",
+            "groupurl",
+            submission.getProjectId(),
+            submission.getGroupId(),
+            "fileurl",
+            true,
+            OffsetDateTime.MIN,
+            "structureFeedback",
+                new DockerTestFeedbackJson(DockerTestType.NONE, "", true),
+            DockerTestState.running.toString(),
+            "artifacturl"
+        );
+        groupEntity = new GroupEntity("groupname", 99L);
+        groupEntity.setId(submission.getGroupId());
+        groupJson = new GroupJson(3, groupEntity.getId(), "groupname", "groupclusterurl");
+
+        groupFeedbackEntity = new GroupFeedbackEntity(groupEntity.getId(), submission.getProjectId(), 3F, "feedback");
+        groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(),
+            groupFeedbackEntity.getProjectId());
+
         byte[] fileContent = "Your file content".getBytes();
         mockMultipartFile = new MockMultipartFile("file", "filename.txt", MediaType.TEXT_PLAIN_VALUE, fileContent);
         fileEntity = new FileEntity("name", "dir/name", 1L);
+        fileEntity.setId(submission.getFileId());
+
+        lastGroupSubmissionJson = new LastGroupSubmissionJson(
+            submissionJson,
+            groupJson,
+            groupFeedbackJson
+        );
     }
 
     @Test
     public void testGetSubmission() throws Exception {
-        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1"))
-                .andExpect(status().isOk());
+        String url = ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId();
+        /* all checks succeed */
+        when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
+        when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
 
-        when(submissionUtil.canGetSubmission(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.SUBMISSION_BASE_PATH + "/1"))
+        /* User can't get submission */
+        when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isIAmATeapot());
     }
 
     @Test
     public void testGetSubmissions() throws Exception {
-        List<LastGroupSubmissionJson> lastGroupSubmissionJsons = List.of(new LastGroupSubmissionJson(submissionJson, groupJson, groupFeedbackJson));
-        when(projectUtil.isProjectAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
-        when(projectRepository.findGroupIdsByProjectId(anyLong())).thenReturn(groupIds);
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.of(groupEntity));
-        when(entityToJsonConverter.groupEntityToJson(any())).thenReturn(groupJson);
-        when(groupFeedbackRepository.getGroupFeedback(anyLong(), anyLong())).thenReturn(groupFeedbackEntity);
-        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(Optional.of(submission));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
-                .andExpect(status().isOk());
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId() + "/submissions";
+        /* all checks succeed */
+        when(projectUtil.isProjectAdmin(submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(projectRepository.findGroupIdsByProjectId(submission.getProjectId())).thenReturn(groupIds);
+        when(groupRepository.findById(groupIds.get(0))).thenReturn(Optional.of(groupEntity));
+        when(entityToJsonConverter.groupEntityToJson(groupEntity)).thenReturn(groupJson);
+        when(groupFeedbackRepository.getGroupFeedback(groupEntity.getId(), submission.getProjectId())).thenReturn(groupFeedbackEntity);
+        when(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity)).thenReturn(groupFeedbackJson);
+        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(submission.getProjectId(), groupEntity.getId())).thenReturn(Optional.of(submission));
+        when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(lastGroupSubmissionJson))));
 
-        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(anyLong(), anyLong())).thenReturn(Optional.empty());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
-                .andExpect(status().isOk());
+        /* no submission */
+        when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(submission.getProjectId(), groupEntity.getId())).thenReturn(Optional.empty());
+        lastGroupSubmissionJson.setSubmission(null);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(lastGroupSubmissionJson))));
 
-        when(groupFeedbackRepository.getGroupFeedback(anyLong(), anyLong())).thenReturn(null);
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
-                .andExpect(status().isOk());
+        /* no feedback */
+        when(groupFeedbackRepository.getGroupFeedback(groupEntity.getId(), submission.getProjectId())).thenReturn(null);
+        lastGroupSubmissionJson.setFeedback(null);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(lastGroupSubmissionJson))));
 
-        when(groupRepository.findById(anyLong())).thenReturn(Optional.empty());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
+        /* Unexpected error */
+        when(projectUtil.isProjectAdmin(submission.getProjectId(), getMockUser())).thenThrow(new RuntimeException());
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isInternalServerError());
 
-        when(projectUtil.isProjectAdmin(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.BAD_REQUEST, "", null));
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
-                .andExpect(status().isBadRequest());
+        /* group not found */
+        reset(projectUtil);
+        when(projectUtil.isProjectAdmin(submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(groupRepository.findById(groupIds.get(0))).thenReturn(Optional.empty());
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+            .andExpect(status().isInternalServerError());
 
-        when(projectUtil.isProjectAdmin(anyLong(), any())).thenThrow(new RuntimeException());
-        mockMvc.perform(MockMvcRequestBuilders.get(ApiRoutes.PROJECT_BASE_PATH + "/1/submissions"))
-                .andExpect(status().isInternalServerError());
+        /* User can't get project */
+        when(projectUtil.isProjectAdmin(submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isIAmATeapot());
+
     }
 
     @Test
