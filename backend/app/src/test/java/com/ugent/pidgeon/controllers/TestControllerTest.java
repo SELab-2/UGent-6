@@ -3,6 +3,7 @@ package com.ugent.pidgeon.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.CustomObjectMapper;
 import com.ugent.pidgeon.model.json.TestJson;
+import com.ugent.pidgeon.model.json.TestUpdateJson;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
@@ -119,6 +120,13 @@ public class TestControllerTest extends ControllerTest{
         String dockerTestTemplate = "dockerTestTemplate";
         String structureTemplate = "structureTemplate";
 
+        TestUpdateJson testUpdateJson = new TestUpdateJson(
+            dockerImage,
+            dockerTestScript,
+            dockerTestTemplate,
+            structureTemplate
+        );
+
         TestJson testJson = new TestJson(
             "projectUrl",
             dockerImage,
@@ -146,11 +154,9 @@ public class TestControllerTest extends ControllerTest{
         when(entityToJsonConverter.testEntityToTestJson(test, project.getId())).thenReturn(testJson);
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
-            .param("dockerImage", dockerImage)
-            .param("dockerScript", dockerTestScript)
-            .param("dockerTemplate", dockerTestTemplate)
-            .param("structureTest", structureTemplate)
-        ).andExpect(status().isOk())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testUpdateJson))
+            ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
 
@@ -169,6 +175,12 @@ public class TestControllerTest extends ControllerTest{
             null,
             null,
             null
+        );
+        testUpdateJson = new TestUpdateJson(
+            dockerImageBlank,
+            dockerTestScriptBlank,
+            dockerTemplateBlank,
+            structureTemplateBlank
         );
         reset(testUtil);
         when(testUtil.checkForTestUpdate(
@@ -191,11 +203,9 @@ public class TestControllerTest extends ControllerTest{
         when(entityToJsonConverter.testEntityToTestJson(test, project.getId())).thenReturn(testJson);
 
         mockMvc.perform(MockMvcRequestBuilders.post(url)
-            .param("dockerImage", dockerImageBlank)
-            .param("dockerScript", dockerTestScriptBlank)
-            .param("dockerTemplate", dockerTemplateBlank)
-            .param("structureTest", structureTemplateBlank)
-        ).andExpect(status().isOk())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testUpdateJson))
+            ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
 
@@ -205,12 +215,19 @@ public class TestControllerTest extends ControllerTest{
         String dockerTemplateNull = null;
         String structureTemplateNull = null;
 
+        testUpdateJson = new TestUpdateJson(
+            dockerImageNull,
+            dockerTestScriptNull,
+            dockerTemplateNull,
+            structureTemplateNull
+        );
+
+        when(testRepository.imageIsUsed(any())).thenReturn(true);
+
         mockMvc.perform(MockMvcRequestBuilders.post(url)
-            .param("dockerImage", dockerImageNull)
-            .param("dockerScript", dockerTestScriptNull)
-            .param("dockerTemplate", dockerTemplateNull)
-            .param("structureTest", structureTemplateNull)
-        ).andExpect(status().isOk())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testUpdateJson))
+            ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
 
@@ -224,11 +241,16 @@ public class TestControllerTest extends ControllerTest{
             eq(HttpMethod.POST)
         )).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
 
+        testUpdateJson = new TestUpdateJson(
+            dockerImage,
+            dockerTestScript,
+            dockerTestTemplate,
+            structureTemplate
+        );
+
         mockMvc.perform(MockMvcRequestBuilders.post(url)
-            .param("dockerImage", dockerImage)
-            .param("dockerScript", dockerTestScript)
-            .param("dockerTemplate", dockerTestTemplate)
-            .param("structureTest", structureTemplate)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isIAmATeapot());
     }
 
@@ -246,6 +268,13 @@ public class TestControllerTest extends ControllerTest{
         String dockerTestScript = "dockerTestScript";
         String dockerTestTemplate = "dockerTestTemplate";
         String structureTemplate = "structureTemplate";
+
+        TestUpdateJson testUpdateJson = new TestUpdateJson(
+            dockerImage,
+            dockerTestScript,
+            dockerTestTemplate,
+            structureTemplate
+        );
 
         test.setDockerImage(null);
         test.setDockerTestScript(null);
@@ -273,11 +302,9 @@ public class TestControllerTest extends ControllerTest{
         when(entityToJsonConverter.testEntityToTestJson(test, project.getId())).thenReturn(testJson);
 
         mockMvc.perform(MockMvcRequestBuilders.put(url)
-            .param("dockerImage", dockerImage)
-            .param("dockerScript", dockerTestScript)
-            .param("dockerTemplate", dockerTestTemplate)
-            .param("structureTest", structureTemplate)
-        ).andExpect(status().isOk())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testUpdateJson))
+            ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
 
@@ -297,6 +324,13 @@ public class TestControllerTest extends ControllerTest{
         String dockerTestScriptBlank = "";
         String dockerTemplateBlank = "";
         String structureTemplateBlank = "";
+
+        testUpdateJson = new TestUpdateJson(
+            dockerImageBlank,
+            dockerTestScriptBlank,
+            dockerTemplateBlank,
+            structureTemplateBlank
+        );
 
         testJson = new TestJson(
             "projectUrl",
@@ -326,10 +360,8 @@ public class TestControllerTest extends ControllerTest{
         when(entityToJsonConverter.testEntityToTestJson(test, project.getId())).thenReturn(testJson);
 
         mockMvc.perform(MockMvcRequestBuilders.put(url)
-            .param("dockerImage", dockerImageBlank)
-            .param("dockerScript", dockerTestScriptBlank)
-            .param("dockerTemplate", dockerTemplateBlank)
-            .param("structureTest", structureTemplateBlank)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
@@ -352,11 +384,16 @@ public class TestControllerTest extends ControllerTest{
 
         when(testRepository.imageIsUsed(any())).thenReturn(true);
 
+        testUpdateJson = new TestUpdateJson(
+            dockerImageNull,
+            dockerTestScriptNull,
+            dockerTemplateNull,
+            structureTemplateNull
+        );
+
         mockMvc.perform(MockMvcRequestBuilders.put(url)
-            .param("dockerImage", dockerImageNull)
-            .param("dockerScript", dockerTestScriptNull)
-            .param("dockerTemplate", dockerTemplateNull)
-            .param("structureTest", structureTemplateNull)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
@@ -381,11 +418,16 @@ public class TestControllerTest extends ControllerTest{
             eq(HttpMethod.PUT)
         )).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
 
+        testUpdateJson = new TestUpdateJson(
+            dockerImage,
+            dockerTestScript,
+            dockerTestTemplate,
+            structureTemplate
+        );
+
         mockMvc.perform(MockMvcRequestBuilders.put(url)
-            .param("dockerImage", dockerImage)
-            .param("dockerScript", dockerTestScript)
-            .param("dockerTemplate", dockerTestTemplate)
-            .param("structureTest", structureTemplate)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isIAmATeapot());
 
     }
@@ -418,8 +460,16 @@ public class TestControllerTest extends ControllerTest{
         test.setDockerTestTemplate(null);
         test.setStructureTemplate(null);
 
+        TestUpdateJson testUpdateJson = new TestUpdateJson(
+            dockerImage,
+            null,
+            null,
+            null
+        );
+
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
-            .param("dockerImage", dockerImage)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
@@ -442,9 +492,16 @@ public class TestControllerTest extends ControllerTest{
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
+        testUpdateJson = new TestUpdateJson(
+            null,
+            dockerTestScript,
+            null,
+            null
+        );
 
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
-            .param("dockerScript", dockerTestScript)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
@@ -467,8 +524,16 @@ public class TestControllerTest extends ControllerTest{
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
+        testUpdateJson = new TestUpdateJson(
+            null,
+            null,
+            dockerTestTemplate,
+            null
+        );
+
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
-            .param("dockerTemplate", dockerTestTemplate)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
@@ -491,8 +556,16 @@ public class TestControllerTest extends ControllerTest{
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
+        testUpdateJson = new TestUpdateJson(
+            null,
+            null,
+            null,
+            structureTemplate
+        );
+
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
-            .param("structureTest", structureTemplate)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
@@ -515,8 +588,16 @@ public class TestControllerTest extends ControllerTest{
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
 
+        testUpdateJson = new TestUpdateJson(
+            dockerImage,
+            null,
+            null,
+            null
+        );
+
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
-            .param("dockerImage", dockerImage)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(testUpdateJson))
         ).andExpect(status().isIAmATeapot());
     }
 
