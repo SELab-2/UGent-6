@@ -111,8 +111,7 @@ export type PUT_Requests = {
   [ApiRoutes.PROJECT]: ProjectFormData
   [ApiRoutes.COURSE_MEMBER]: { relation: CourseRelation }
   [ApiRoutes.PROJECT_SCORE]: { score: number | null , feedback: string},
-  [ApiRoutes.PROJECT_TESTS]: Omit<GET_Responses[ApiRoutes.PROJECT_TESTS], "projectId">
-
+  [ApiRoutes.PROJECT_TESTS]: POST_Requests[ApiRoutes.PROJECT_TESTS]
 }
 
 

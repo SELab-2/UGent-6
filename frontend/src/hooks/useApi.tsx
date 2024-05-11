@@ -35,7 +35,7 @@ export type UseApiType = {
   GET: <T extends keyof GET_Responses>(route: T, o: { pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<GET_Responses[T]>>,
   POST: <T extends keyof POST_Requests>(route: T, o: { body: POST_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<POST_Responses[T]>>,
   PUT: <T extends keyof PUT_Requests>(route: T, o: { body: PUT_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>,
-  DELETE: <T extends keyof DELETE_Requests>(route: T, o: { body: DELETE_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<any>>,
+  DELETE: <T extends keyof DELETE_Requests>(route: T, o: { body?: DELETE_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<any>>,
   PATCH: <T extends keyof PUT_Requests>(route: T, o: { body: Partial<PUT_Requests[T]>; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>
 };
 

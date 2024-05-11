@@ -12,7 +12,7 @@ import { ApiRoutes, GET_Responses, POST_Requests, POST_Responses } from "../../@
 import { AppRoutes } from "../../@types/routes"
 import { ProjectContext } from "../../router/ProjectRoutes"
 import useApi from "../../hooks/useApi"
-import { DockerFormData } from "../../components/common/saveDockerForm"
+import saveDockerForm, { DockerFormData } from "../../components/common/saveDockerForm"
 
 const EditProject: React.FC = () => {
   const [form] = Form.useForm<ProjectFormData & DockerFormData>()
@@ -29,6 +29,7 @@ const EditProject: React.FC = () => {
   const updateDockerForm = async () => {
     if (!projectId) return
     const response = await API.GET(ApiRoutes.PROJECT_TESTS, { pathValues: { id: projectId } })
+    if(!response.success) return setInitialDockerValues(null)
 
     let formVals:POST_Requests[ApiRoutes.PROJECT_TESTS] ={
       structureTest: null,
@@ -38,6 +39,7 @@ const EditProject: React.FC = () => {
     }
     if (response.success) {
       const tests = response.response.data
+      console.log(tests);
       formVals = {
         structureTest: tests.structureTest ?? "",
         dockerTemplate: tests.dockerTemplate ?? "",
@@ -49,8 +51,9 @@ const EditProject: React.FC = () => {
     form.setFieldsValue(formVals)
 
     setInitialDockerValues(formVals)
-
   }
+
+  console.log(initialDockerValues);
 
   useEffect(() => {
     if (!project) return
@@ -73,6 +76,8 @@ const EditProject: React.FC = () => {
       },
       "alert"
     )
+
+    await saveDockerForm(form, initialDockerValues, API, projectId)
 
     if (!response.success) {
       setError(response.alert || null)
