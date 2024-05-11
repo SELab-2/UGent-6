@@ -3,6 +3,7 @@ package com.ugent.pidgeon.controllers;
 import com.ugent.pidgeon.auth.Roles;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.json.TestJson;
+import com.ugent.pidgeon.model.json.TestUpdateJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -44,9 +45,6 @@ public class TestController {
 
     /**
      * Function to update the tests of a project
-     * @param dockerImage the docker image to use for the tests
-     * @param dockerTest the docker test file
-     * @param structureTest the structure test file
      * @param projectId the id of the project to update the tests for
      * @param auth the authentication object of the requesting user
      * @HttpMethod POST
@@ -58,37 +56,34 @@ public class TestController {
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateTests(
-        @RequestParam(name = "dockerimage", required = false) String dockerImage,
-        @RequestParam(name = "dockerscript", required = false) String dockerTest,
-        @RequestParam(name = "dockertemplate", required = false) String dockerTemplate,
-        @RequestParam(name = "structuretest", required = false) String structureTest,
+        @RequestBody TestUpdateJson testJson,
+
         @PathVariable("projectid") long projectId,
         Auth auth) {
-        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest,  dockerTemplate,  structureTest, HttpMethod.POST);
+        return alterTests(projectId, auth.getUserEntity(), testJson.getDockerImage(), testJson.getDockerScript(),
+            testJson.getDockerTemplate(), testJson.getStructureTest(), HttpMethod.POST);
     }
 
     @PatchMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchTests(
-        @RequestParam(name = "dockerimage", required = false) String dockerImage,
-        @RequestParam(name = "dockerscript", required = false) String dockerTest,
-        @RequestParam(name = "dockertemplate", required = false) String dockerTemplate,
-        @RequestParam(name = "structuretest", required = false) String structureTest,
+        @RequestBody TestUpdateJson testJson,
+
         @PathVariable("projectid") long projectId,
         Auth auth) {
-        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest,  dockerTemplate, structureTest, HttpMethod.PATCH);
+        return alterTests(projectId, auth.getUserEntity(), testJson.getDockerImage(), testJson.getDockerScript(),
+            testJson.getDockerTemplate(), testJson.getStructureTest(), HttpMethod.PATCH);
     }
 
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> putTests(
-            @RequestParam(name = "dockerimage", required = false) String dockerImage,
-            @RequestParam(name = "dockerscript", required = false) String dockerTest,
-            @RequestParam(name = "dockertemplate", required = false) String dockerTemplate,
-            @RequestParam(name = "structuretest", required = false) String structureTest,
+            @RequestBody TestUpdateJson testJson,
+
             @PathVariable("projectid") long projectId,
             Auth auth) {
-        return alterTests(projectId, auth.getUserEntity(), dockerImage, dockerTest, dockerTemplate, structureTest, HttpMethod.PUT);
+        return alterTests(projectId, auth.getUserEntity(), testJson.getDockerImage(), testJson.getDockerScript(),
+            testJson.getDockerTemplate(), testJson.getStructureTest(), HttpMethod.PUT);
     }
 
 
@@ -101,7 +96,6 @@ public class TestController {
             String structureTemplate,
             HttpMethod httpMethod
     ) {
-
 
 
 
