@@ -2,6 +2,7 @@ package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
+import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -27,8 +28,9 @@ public class FileUtil {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "File not found", null);
         }
         try {
-            Filehandler.deleteLocation(Path.of(fileEntity.getPath()));
-        } catch (IOException e) {
+            Path path = Path.of(fileEntity.getPath());
+            Filehandler.deleteLocation(new File(path.toString()));
+        } catch (Exception e) {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting file", null);
         }
         fileRepository.delete(fileEntity);

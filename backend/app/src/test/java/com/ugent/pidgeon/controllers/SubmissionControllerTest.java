@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -278,7 +277,7 @@ public class SubmissionControllerTest extends ControllerTest {
         try (MockedStatic<Filehandler> mockedFileHandler = mockStatic(Filehandler.class)) {
             mockedFileHandler.when(() -> Filehandler.getSubmissionPath(submission.getProjectId(), groupEntity.getId(), submission.getId())).thenReturn(path);
             mockedFileHandler.when(() -> Filehandler.saveSubmission(path, mockMultipartFile)).thenReturn(file);
-            mockedFileHandler.when(() -> Filehandler.getSubmissionAritfactPath(anyLong(), anyLong(), anyLong())).thenReturn(artifactPath);
+            mockedFileHandler.when(() -> Filehandler.getSubmissionArtifactPath(anyLong(), anyLong(), anyLong())).thenReturn(artifactPath);
 
             when(testRunner.runStructureTest(any(), eq(testEntity))).thenReturn(null);
             when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath))).thenReturn(null);
@@ -459,7 +458,7 @@ public class SubmissionControllerTest extends ControllerTest {
 
             /* all checks succeed */
             when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
-            mockedFileHandler.when(() -> Filehandler.getSubmissionAritfactPath(submission.getProjectId(), submission.getGroupId(), submission.getId())).thenReturn(path);
+            mockedFileHandler.when(() -> Filehandler.getSubmissionArtifactPath(submission.getProjectId(), submission.getGroupId(), submission.getId())).thenReturn(path);
             mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenReturn(mockedResource);
 
             mockMvc.perform(MockMvcRequestBuilders.get(url))
@@ -477,7 +476,7 @@ public class SubmissionControllerTest extends ControllerTest {
 
             /* Unexpected error */
             mockedFileHandler.reset();
-            mockedFileHandler.when(() -> Filehandler.getSubmissionAritfactPath(submission.getProjectId(), submission.getGroupId(), submission.getId())).thenThrow(new RuntimeException());
+            mockedFileHandler.when(() -> Filehandler.getSubmissionArtifactPath(submission.getProjectId(), submission.getGroupId(), submission.getId())).thenThrow(new RuntimeException());
             mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isInternalServerError());
 

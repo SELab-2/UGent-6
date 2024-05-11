@@ -7,7 +7,6 @@ import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerOutput;
-import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
@@ -21,13 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -232,7 +229,7 @@ public class    SubmissionController {
           submission.setDockerTestState(DockerTestState.running);
           // run docker tests in background
           File finalSavedFile = savedFile;
-          Path artifactPath = Filehandler.getSubmissionAritfactPath(projectid, groupId, submission.getId());
+          Path artifactPath = Filehandler.getSubmissionArtifactPath(projectid, groupId, submission.getId());
 
           CompletableFuture.runAsync(() -> {
             try {
@@ -327,7 +324,7 @@ public class    SubmissionController {
 
         // Get the file from the server
         try {
-            Resource zipFile = Filehandler.getFileAsResource(Filehandler.getSubmissionAritfactPath(submission.getProjectId(), submission.getGroupId(), submission.getId()));
+            Resource zipFile = Filehandler.getFileAsResource(Filehandler.getSubmissionArtifactPath(submission.getProjectId(), submission.getGroupId(), submission.getId()));
             if (zipFile == null) {
               return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No artifacts found for this submission.");
             }
