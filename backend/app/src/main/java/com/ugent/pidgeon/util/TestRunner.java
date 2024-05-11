@@ -15,24 +15,22 @@ import org.springframework.stereotype.Component;
 public class TestRunner {
 
   public SubmissionTemplateModel.SubmissionResult runStructureTest(
-      ZipFile file, TestEntity testEntity) throws IOException {
+      ZipFile file, TestEntity testEntity, SubmissionTemplateModel model) throws IOException {
     // There is no structure test for this project
-    if(testEntity.getStructureTemplate() == null){
+    if(testEntity == null || testEntity.getStructureTemplate() == null){
       return null;
     }
     String structureTemplateString = testEntity.getStructureTemplate();
 
     // Parse the file
-    SubmissionTemplateModel model = new SubmissionTemplateModel();
     model.parseSubmissionTemplate(structureTemplateString);
     return model.checkSubmission(file);
   }
 
-  public DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath) throws IOException {
+  public DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath, DockerSubmissionTestModel model) throws IOException {
     // Get the test file from the server
     String testScript = testEntity.getDockerTestScript();
     String testTemplate = testEntity.getDockerTestTemplate();
-    String image = testEntity.getDockerImage();
 
     // The first script must always be null, otherwise there is nothing to run on the container
     if (testScript == null) {
@@ -40,7 +38,6 @@ public class TestRunner {
     }
 
     // Init container and add input files
-    DockerSubmissionTestModel model = new DockerSubmissionTestModel(image);
     try {
 
       model.addZipInputFiles(file);

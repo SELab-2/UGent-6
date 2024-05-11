@@ -279,8 +279,8 @@ public class SubmissionControllerTest extends ControllerTest {
             mockedFileHandler.when(() -> Filehandler.saveSubmission(path, mockMultipartFile)).thenReturn(file);
             mockedFileHandler.when(() -> Filehandler.getSubmissionArtifactPath(anyLong(), anyLong(), anyLong())).thenReturn(artifactPath);
 
-            when(testRunner.runStructureTest(any(), eq(testEntity))).thenReturn(null);
-            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath))).thenReturn(null);
+            when(testRunner.runStructureTest(any(), eq(testEntity), any())).thenReturn(null);
+            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath), any())).thenReturn(null);
 
             when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
 
@@ -314,7 +314,7 @@ public class SubmissionControllerTest extends ControllerTest {
             submission.setStructureAccepted(false);
             submission.setStructureFeedback("");
             SubmissionResult submissionResult = new SubmissionResult(true, "structureFeedback-test");
-            when(testRunner.runStructureTest(any(), eq(testEntity))).thenReturn(submissionResult);
+            when(testRunner.runStructureTest(any(), eq(testEntity), any())).thenReturn(submissionResult);
             mockMvc.perform(MockMvcRequestBuilders.multipart(url)
                     .file(mockMultipartFile))
                 .andExpect(status().isOk())
@@ -356,7 +356,7 @@ public class SubmissionControllerTest extends ControllerTest {
             testEntity.setDockerImage("dockerImage");
             testEntity.setDockerTestScript("dockerTestScript");
             DockerOutput dockerOutput = new DockerTestOutput( List.of("dockerFeedback-test"), true);
-            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath))).thenReturn(dockerOutput);
+            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath), any())).thenReturn(dockerOutput);
             submission.setDockerAccepted(false);
             submission.setDockerFeedback("dockerFeedback-test");
             mockMvc.perform(MockMvcRequestBuilders.multipart(url)
@@ -379,8 +379,8 @@ public class SubmissionControllerTest extends ControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
-            verify(testRunner, times(0)).runStructureTest(any(), eq(testEntity));
-            verify(testRunner, times(0)).runDockerTest(any(), eq(testEntity), eq(artifactPath));
+            verify(testRunner, times(0)).runStructureTest(any(), eq(testEntity), any());
+            verify(testRunner, times(0)).runDockerTest(any(), eq(testEntity), eq(artifactPath), any());
 
             /* Unexpected error */
             reset(fileRepository);

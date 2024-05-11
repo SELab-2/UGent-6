@@ -7,6 +7,7 @@ import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
 import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerOutput;
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
@@ -203,7 +204,8 @@ public class    SubmissionController {
       } else {
 
         // Check file structure
-        structureTestResult = testRunner.runStructureTest(new ZipFile(savedFile), testEntity);
+        SubmissionTemplateModel model = new SubmissionTemplateModel();
+        structureTestResult = testRunner.runStructureTest(new ZipFile(savedFile), testEntity, model);
         if (structureTestResult == null) {
           submission.setStructureFeedback(
               "No specific structure requested for this project.");
@@ -234,7 +236,8 @@ public class    SubmissionController {
           CompletableFuture.runAsync(() -> {
             try {
               // Check if docker tests succeed
-              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath);
+              DockerSubmissionTestModel dockerModel = new DockerSubmissionTestModel(testEntity.getDockerImage());
+              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel);
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
