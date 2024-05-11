@@ -17,22 +17,6 @@ public class FileUtil {
     private FileRepository fileRepository;
 
     /**
-     * Save the file entity to the database
-     * @param filePath path of the file
-     * @param projectId id of the project
-     * @param userId id of the user
-     * @return the saved file entity
-     * @throws IOException if an error occurs while saving the file
-     */
-    public FileEntity saveFileEntity(Path filePath, long projectId, long userId) throws IOException {
-        // Save the file entity to the database
-        Logger.getGlobal().info("file path: " + filePath.toString());
-        Logger.getGlobal().info("file name: " + filePath.getFileName().toString());
-        FileEntity fileEntity = new FileEntity(filePath.getFileName().toString(), filePath.toString(), userId);
-        return fileRepository.save(fileEntity);
-    }
-
-    /**
      * Delete a file by id from the database and server
      * @param fileId id of the file
      * @return CheckResult with the status of the check

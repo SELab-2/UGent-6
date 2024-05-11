@@ -118,7 +118,6 @@ public class EntityToJsonConverterTest {
         groupClusterEntity.getId()
     );
     groupEntity.setId(4L);
-    groupEntity.setClusterId(groupClusterEntity.getId());
 
     groupJson = new GroupJson(
         20,
