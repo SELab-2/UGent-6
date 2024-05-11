@@ -14,6 +14,7 @@ export enum ApiRoutes {
   COURSE_CLUSTERS = "api/courses/:id/clusters",
   COURSE_GRADES = '/api/courses/:id/grades',
   COURSE_LEAVE = "api/courses/:courseId/leave",
+  COURSE_COPY = "/api/courses/:courseId/copy",
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -74,6 +75,8 @@ export type POST_Requests = {
     groupCount: number
   },
   [ApiRoutes.PROJECT_TESTS]: Omit<GET_Responses[ApiRoutes.PROJECT_TESTS], "projectUrl">
+  [ApiRoutes.COURSE_COPY]: undefined
+
 }
 
 /**
@@ -86,7 +89,7 @@ export type POST_Responses = {
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBERS]
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER],
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
-  
+  [ApiRoutes.COURSE_COPY]: GET_Responses[ApiRoutes.COURSE]
 
 }
 

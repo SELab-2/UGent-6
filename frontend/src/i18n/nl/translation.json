@@ -31,6 +31,7 @@
     "fetching": "Bezig met ophalen...",
     "timeline": "Tijdlijn",
     "table": "Tabel",
+    "docs": "Documentatie",
     "calendar": "Kalender",
     "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",
     "courseNameMaxLength": "Vak naam mag maximaal 50 karakters bevatten",
@@ -227,7 +228,9 @@
     "leave": "Vak verlaten",
     "leaveConfirm": "Ben je zeker dat je dit vak wil verlaten?",
     "leaveSuccess": "Vak succesvol verlaten",
-    "leaveFail": "Het lukte niet om het vak te verlaten"
+    "leaveFail": "Het lukte niet om het vak te verlaten",
+    "copy": "Maak kopie van dit vak",
+    "copySuccess": "Vak succesvol gekopieerd"
   },
   "cancel": "Annuleren",
   "ok": "Ok",

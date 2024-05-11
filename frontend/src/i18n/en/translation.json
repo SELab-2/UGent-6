@@ -30,6 +30,7 @@
     "fetching": "Fetching...",
     "timeline": "Timeline",
     "table": "Table",
+    "docs": "Documentation",
     "calendar": "Calendar",
     "academicYearRequired": "Academic year is required",
     "noCourses": "You're not in any courses yet, you can join a course by opening a course join link.",
@@ -224,7 +225,9 @@
     "leave": "Leave course",
     "leaveConfirm": "Are you sure you want to leave this course?",
     "leaveSuccess": "Left course successfully",
-    "leaveFail": "Failed to leave the course"
+    "leaveFail": "Failed to leave the course",
+    "copy": "Create copy of this course",
+    "copySuccess": "Course copied successfully"
   },
   "cancel": "Cancel",
   "ok": "OK",
