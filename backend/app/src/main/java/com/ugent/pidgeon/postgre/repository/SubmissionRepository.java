@@ -27,6 +27,7 @@ public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Lo
         FROM SubmissionEntity s2
         WHERE s2.groupId = :groupId
         AND s2.projectId = :projectId
+        AND s2.dockerTestState != :#{T(com.ugent.pidgeon.postgre.models.types.DockerTestState).running.toString()}
     ) ORDER BY s.id DESC LIMIT 1
     """)
     Optional<SubmissionEntity> findLatestsSubmissionIdsByProjectAndGroupId(long projectId, long groupId);
