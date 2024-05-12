@@ -166,6 +166,12 @@ public class GroupUtilTest {
     result = groupUtil.canAddUserToGroup(group.getId(), otherUserId, mockUser);
     assertEquals(HttpStatus.OK, result.getStatus());
 
+    /* Group is already full but it's an admin adding someone else */
+    when(groupRepository.countUsersInGroup(group.getId())).thenReturn(groupCluster.getMaxSize());
+    result = groupUtil.canAddUserToGroup(group.getId(), otherUserId, mockUser);
+    assertEquals(HttpStatus.OK, result.getStatus());
+    when(groupRepository.countUsersInGroup(group.getId())).thenReturn(groupCluster.getMaxSize()-1);
+
     /* User trying to add is admin */
     doReturn(new CheckResult<>(HttpStatus.OK, "", null)).
         when(groupUtil).isAdminOfGroup(group.getId(), otherUser);
@@ -179,7 +185,7 @@ public class GroupUtilTest {
 
     /* Group is already full */
     when(groupRepository.countUsersInGroup(group.getId())).thenReturn(groupCluster.getMaxSize());
-    result = groupUtil.canAddUserToGroup(group.getId(), otherUserId, mockUser);
+    result = groupUtil.canAddUserToGroup(group.getId(), mockUser.getId(), mockUser);
     assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
 
     /* ClusterEntity is not found */
@@ -312,4 +318,6 @@ public class GroupUtilTest {
     result = groupUtil.canGetProjectGroupData(group.getId(), project.getId(), mockUser);
     assertEquals(HttpStatus.I_AM_A_TEAPOT, result.getStatus());
   }
-}
+
+
+ }

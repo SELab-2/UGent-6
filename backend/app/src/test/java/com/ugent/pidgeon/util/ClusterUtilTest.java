@@ -3,14 +3,23 @@ package com.ugent.pidgeon.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ugent.pidgeon.model.json.ClusterFillJson;
 import com.ugent.pidgeon.model.json.GroupClusterCreateJson;
 import com.ugent.pidgeon.model.json.GroupClusterUpdateJson;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import java.util.Optional;
 import org.hibernate.annotations.Check;
@@ -28,6 +37,8 @@ public class ClusterUtilTest {
 
   @Mock
   private GroupClusterRepository groupClusterRepository;
+  @Mock
+  private CourseUserRepository courseUserRepository;
   @Mock
   private CourseUtil courseUtil;
 
@@ -250,5 +261,56 @@ public class ClusterUtilTest {
     result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
   }
+
+  @Test
+  public void testCheckFillClusterJson() {
+    ClusterFillJson fillJson = new ClusterFillJson();
+    CourseUserEntity enrolledCU = new CourseUserEntity(22L, 5L, CourseRelation.enrolled);
+    fillJson.addClusterGroupMembers("Group1", new Long[]{5L, 2L});
+    fillJson.addClusterGroupMembers("Group2", new Long[]{3L, 10L});
+
+    when(courseUserRepository.findById(any())).thenReturn(Optional.of(enrolledCU));
+
+    CheckResult<Void> result = clusterUtil.checkFillClusterJson(fillJson, clusterEntity);
+    assertEquals(HttpStatus.OK, result.getStatus());
+
+    verify(courseUserRepository, times(1)).findById(argThat(
+        arg -> arg.getCourseId() == clusterEntity.getCourseId() && arg.getUserId() == 5L));
+    verify(courseUserRepository, times(1)).findById(argThat(
+        arg -> arg.getCourseId() == clusterEntity.getCourseId() && arg.getUserId() == 2L));
+    verify(courseUserRepository, times(1)).findById(argThat(
+        arg -> arg.getCourseId() == clusterEntity.getCourseId() && arg.getUserId() == 3L));
+    verify(courseUserRepository, times(1)).findById(argThat(
+        arg -> arg.getCourseId() == clusterEntity.getCourseId() && arg.getUserId() == 10L));
+
+    /* User admin in course */
+    CourseUserEntity courseAdminCU = new CourseUserEntity(22L, 5L, CourseRelation.course_admin);
+    when(courseUserRepository.findById(argThat(
+        arg -> arg.getCourseId() == clusterEntity.getCourseId() && arg.getUserId() == 5L)))
+        .thenReturn(Optional.of(courseAdminCU));
+
+    result = clusterUtil.checkFillClusterJson(fillJson, clusterEntity);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* User not found in course */
+    reset(courseUserRepository);
+    when(courseUserRepository.findById(any())).thenReturn(Optional.of(enrolledCU));
+    when(courseUserRepository.findById(argThat(
+        arg -> arg.getCourseId() == clusterEntity.getCourseId() && arg.getUserId() == 3L)))
+        .thenReturn(Optional.empty());
+
+    result = clusterUtil.checkFillClusterJson(fillJson, clusterEntity);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* trying to add user twice */
+    reset(courseUserRepository);
+    when(courseUserRepository.findById(any())).thenReturn(Optional.of(enrolledCU));
+    fillJson.addClusterGroupMembers("Group3", new Long[]{5L, 4L});
+
+    result = clusterUtil.checkFillClusterJson(fillJson, clusterEntity);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+  }
+
 
 }
