@@ -184,14 +184,10 @@ public class ClusterUtil {
     }
 
     public CheckResult<Void> checkFillClusterJson(ClusterFillJson fillJson, GroupClusterEntity cluster) {
-        int maxSize = cluster.getMaxSize();
         Collection<Long[]> members = fillJson.getClusterGroupMembers().values();
 
         Set<Long> seen = new HashSet<>();
         for (Long[] member : members) {
-            if (member.length > maxSize) {
-                return new CheckResult<>(HttpStatus.BAD_REQUEST, "Max amount of users per group for this cluster is " + maxSize, null);
-            }
             for (Long userId : member) {
                 CourseUserEntity courseUser = courseUserRepository.findById(new CourseUserId(cluster.getCourseId(), userId)).orElse(null);
                 if (courseUser == null || !courseUser.getRelation().equals(CourseRelation.enrolled)) {
