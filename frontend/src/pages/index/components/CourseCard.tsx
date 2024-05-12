@@ -1,12 +1,12 @@
 import { ContainerOutlined, TeamOutlined } from "@ant-design/icons"
-import { Card, List, Statistic, Tooltip, theme } from "antd"
+import { Card, List, Statistic, Tooltip, Typography, theme } from "antd"
 import { FC } from "react"
 import ProjectStatusTag from "./ProjectStatusTag"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
-import { CourseProjectsType } from "./HorizontalCourseScroll"
 import GroupProgress from "./GroupProgress"
+import { CourseProjectsType } from "./CourseSection"
 
 const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:boolean }> = ({ courseProjects,adminView }) => {
   const { t } = useTranslation()
@@ -34,17 +34,17 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
       title={courseProjects.course.name}
       style={{ width: 300,height:"100%" }}
       actions={[
-        <Tooltip title={t("home.projects.userCourseCount", { count: 2 })}>
+        <Tooltip title={t(courseProjects.course.memberCount > 1? "home.projects.userCourseCount_plural": "home.projects.userCourseCount", { count: courseProjects.course.memberCount })}>
           <span>
             <Statistic
               valueStyle={{ fontSize: "1em", color: token.colorTextLabel }}
               prefix={<TeamOutlined />}
-              value={72}
+              value={courseProjects.course.memberCount}
             />
           </span>
         </Tooltip>,
 
-        <Tooltip title={t("home.projects.activeProjects_plural", { count:courseProjects.projects.length })}>
+        <Tooltip title={t(courseProjects.projects.length > 1 ? "home.projects.activeProjects_plural": "home.projects.activeProjects", { count:courseProjects.projects.length })}>
           <span>
             <Statistic
               valueStyle={{ fontSize: "1em", color: token.colorTextLabel }}
@@ -56,7 +56,7 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
       ]}
     >
       <List
-        dataSource={courseProjects.projects}
+        dataSource={courseProjects.projects.slice(0, 3)}
         locale={{ emptyText: t("home.projects.noProjects") }}
         rowKey="projectId"
         renderItem={(project) => (
@@ -74,7 +74,7 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
             />,
             ]}
           >
-            <List.Item.Meta title={project.name} />
+            <List.Item.Meta title={<Typography.Text ellipsis>{project.name}</Typography.Text>} />
           </List.Item>
         )}
       ></List>

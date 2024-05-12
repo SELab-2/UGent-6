@@ -45,9 +45,6 @@ public class TestController {
 
     /**
      * Function to update the tests of a project
-     * @param dockerImage the docker image to use for the tests
-     * @param dockerTest the docker test file
-     * @param structureTest the structure test file
      * @param projectId the id of the project to update the tests for
      * @param auth the authentication object of the requesting user
      * @HttpMethod POST
@@ -60,6 +57,7 @@ public class TestController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateTests(
         @RequestBody TestUpdateJson testJson,
+
         @PathVariable("projectid") long projectId,
         Auth auth) {
         return alterTests(projectId, auth.getUserEntity(), testJson.getDockerImage(), testJson.getDockerScript(),
@@ -70,6 +68,7 @@ public class TestController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchTests(
         @RequestBody TestUpdateJson testJson,
+
         @PathVariable("projectid") long projectId,
         Auth auth) {
         return alterTests(projectId, auth.getUserEntity(), testJson.getDockerImage(), testJson.getDockerScript(),
@@ -80,6 +79,7 @@ public class TestController {
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> putTests(
             @RequestBody TestUpdateJson testJson,
+
             @PathVariable("projectid") long projectId,
             Auth auth) {
         return alterTests(projectId, auth.getUserEntity(), testJson.getDockerImage(), testJson.getDockerScript(),
@@ -96,7 +96,6 @@ public class TestController {
             String structureTemplate,
             HttpMethod httpMethod
     ) {
-
 
 
 

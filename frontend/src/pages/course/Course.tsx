@@ -12,8 +12,9 @@ import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
-import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
-import LeaveCourseButton from "./components/LeaveCourse/LeaveCourseButton"
+import { InboxOutlined, InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
+import PeriodTag from "../../components/common/PeriodTag"
+import ExtraTabBtn from "./components/tabExtraBtn/ExtraTabBtn"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -22,7 +23,7 @@ const Course: FC = () => {
   const course = useCourse()
   const isCourseAdmin = useIsCourseAdmin()
   const navigate = useNavigate()
-  const location = useLocation();
+  const location = useLocation()
 
   const items: TabsProps["items"] = useMemo(() => {
     let tabs: TabsProps["items"] = [
@@ -43,16 +44,15 @@ const Course: FC = () => {
         label: t("course.groups"),
         icon: <TeamOutlined />,
         children: <GroupsCard courseId={course.courseId!} />,
-      }
+      },
     ]
     if (isCourseAdmin) {
-
       tabs = tabs.concat([
         {
           key: "members",
           label: t("course.members"),
           icon: <UserOutlined />,
-          children: <MembersCard />
+          children: <MembersCard />,
         },
         {
           key: "settings",
@@ -67,31 +67,52 @@ const Course: FC = () => {
           key: "grades",
           label: t("course.grades"),
           icon: <ScheduleOutlined />,
-          children: <GradesCard />
+          children: <GradesCard />,
         },
       ])
     }
 
     return tabs
-  }, [t, isCourseAdmin,course])
+  }, [t, isCourseAdmin, course])
 
   return (
     <div style={{ margin: "3rem 0" }}>
       <div style={{ padding: "0 2rem" }}>
-        <Typography.Title style={{marginBottom:"0.5rem"}} level={1}>{course.name}</Typography.Title>
-        <Space direction="horizontal" size="small" style={{marginBottom:"0.5rem"}}>
-          <Tag color="blue">2024-2025</Tag>
-           <Tag key={course.teacher.url} color="orange">{course.teacher.name} {course.teacher.surname}</Tag>
-
+        <Typography.Title
+          style={{ marginBottom: "0.5rem" }}
+          level={1}
+        >
+          {course.name}
+        </Typography.Title>
+        <Space
+          direction="horizontal"
+          size="small"
+          style={{ marginBottom: "0.5rem" }}
+        >
+          <PeriodTag
+            year={course.year}
+          />
+          <Tag
+            key={course.teacher.url}
+            color="gold"
+          >
+            {course.teacher.name} {course.teacher.surname}
+          </Tag>
+          {
+            course.archivedAt && <Tag icon={<InboxOutlined />}
+            color="orange">{t("course.archived")}</Tag>
+          }
         </Space>
-        <br/>
+        <br />
         <Tabs
           onChange={(k) => navigate(`#${k}`)}
           defaultActiveKey={location.hash.slice(1) || "1"}
           items={items}
-          tabBarExtraContent={<LeaveCourseButton courseId={course.courseId.toString()} />}
+          tabBarExtraContent={<ExtraTabBtn/>}
         />
       </div>
+      <br />
+      <br />
     </div>
   )
 }

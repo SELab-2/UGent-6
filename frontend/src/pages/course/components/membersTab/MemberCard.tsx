@@ -47,7 +47,7 @@ const MembersCard = () => {
           />
         }
       >
-        <MembersList members={filteredMembers} />
+        <MembersList members={filteredMembers} onChange={setMembers} />
       </Card>
       <br />
       <br />
