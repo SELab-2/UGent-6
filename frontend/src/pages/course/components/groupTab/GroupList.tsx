@@ -60,7 +60,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null; onChanged: () => Promise<void> }> = ({ groups, project, onChanged }) => {
+const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void> }> = ({ groups, project, onChanged }) => {
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null)
   const [groupId, setGroupId] = useState<number | null>(null)
@@ -71,6 +71,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null; 
   const { courseId } = useParams<{ courseId: string }>()
 
   useEffect(() => {
+    if (typeof project === "number") return setGroupId(project)
     if (project !== undefined) return setGroupId(project?.groupId ?? null)
     if (!courseId) return
 
@@ -101,7 +102,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null; 
     try {
       setLoading(true)
       await apiCall.delete(ApiRoutes.GROUP_MEMBER, undefined, { id: groupId, userId: userId })
-      await onChanged()
+      if(onChanged) await onChanged()
 
       setGroupId(null)
       message.success(t("course.leftGroup"))
@@ -124,7 +125,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: ProjectType | null; 
     try {
       setLoading(true)
       await apiCall.post(ApiRoutes.GROUP_MEMBERS, { id: user.id }, { id: group.groupId })
-      await onChanged()
+      if(onChanged) await onChanged()
 
       message.success(t("course.joinedGroup"))
       setGroupId(group.groupId)

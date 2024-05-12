@@ -5,7 +5,6 @@
  */
 export enum AppRoutes {
   HOME = "/",
-  COURSES = "/courses",
   PROJECT = "/courses/:courseId/projects/:projectId",
   PROJECT_CREATE = "/courses/:courseId/create",
   PROJECT_TESTS = "/courses/:courseId/projects/:projectId/tests",
@@ -17,5 +16,6 @@ export enum AppRoutes {
   ERROR = "/error",
   NOT_FOUND = "/not-found",
   EDIT_ROLE = "/edit-role",
-  COURSE_INVITE = "/invite/:inviteId"
+  COURSE_INVITE = "/invite/:inviteId",
+  COURSES = "/courses",
 }

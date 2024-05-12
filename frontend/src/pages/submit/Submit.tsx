@@ -15,7 +15,7 @@ const Submit = () => {
     <>
       <div>
         <Row
-          style={{ margin: "3rem 0" }}
+          style={{ marginTop: "3rem" }}
           gutter={[32, 32]}
         >
           <Col
@@ -46,9 +46,9 @@ const Submit = () => {
             </Card>
           </Col>
         </Row>
-      </div>
-      <Card
-        style={{ position: "fixed", bottom: 32, width: "calc(100% - 8rem)", maxWidth: "1200px", height: "4rem", margin: "1rem" }}
+        <Row>
+        <Card
+        style={{  width: "100%", maxWidth: "1200px", height: "4rem", margin: "1rem 0" }}
         styles={{ body: { padding:"10px 0",display:"flex",gap:"1rem" } }}
       >
         <Button size="large" onClick={() => navigate(-1)}>
@@ -64,6 +64,9 @@ const Submit = () => {
           {t("project.submit")}
         </Button>
       </Card>
+        </Row>
+      </div>
+      
     </>
   )
 }
