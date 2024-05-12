@@ -1,26 +1,21 @@
 package com.ugent.pidgeon.model.json;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ClusterFillJson {
-
-  private Map<Long, Long[]> clusterGroupMembers;
-
-
-  public ClusterFillJson(Map<Long, Long[]> clusterGroupMembers) {
-    this.clusterGroupMembers = clusterGroupMembers;
-  }
+  private final Map<String, Long[]> clusterGroupMembers;
 
   public ClusterFillJson() {
+    this.clusterGroupMembers = new HashMap<>();
   }
 
-
-  public Map<Long, Long[]> getClusterGroupMembers() {
-    return clusterGroupMembers;
-  }
-
-  public void setClusterGroupMembers(Map<Long, Long[]> clusterGroupMembers) {
+  public ClusterFillJson(Map<String, Long[]> clusterGroupMembers) {
     this.clusterGroupMembers = clusterGroupMembers;
+  }
+
+  public Map<String, Long[]> getClusterGroupMembers() {
+    return clusterGroupMembers;
   }
 
 }
