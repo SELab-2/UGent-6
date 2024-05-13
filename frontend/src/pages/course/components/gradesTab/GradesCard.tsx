@@ -21,7 +21,7 @@ const GradesCard = () => {
     return () => {
       ignore = true
     }
-  }, [API])
+  }, [])
   if (feedback === null) return <Card loading />
 
   return (

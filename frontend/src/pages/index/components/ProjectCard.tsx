@@ -22,7 +22,7 @@ const ProjectCard: FC<{ courseId?: number }> = ({ courseId }) => {
         setProjects(res.response.data)
       })
     }
-  }, [courseId, API])
+  }, [courseId])
 
   return (
     <>
