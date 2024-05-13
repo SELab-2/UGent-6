@@ -19,7 +19,7 @@ public class ProjectJson {
     @JsonSerialize(using = OffsetDateTimeSerializer.class)
     private OffsetDateTime deadline;
 
-    public ProjectJson(String name, String description, Long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
+    public ProjectJson(String name, String description, Long groupClusterId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
         this.name = name;
         this.description = description;
         this.groupClusterId = groupClusterId;

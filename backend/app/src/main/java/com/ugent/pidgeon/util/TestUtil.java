@@ -6,6 +6,7 @@ import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,15 +52,6 @@ public class TestUtil {
             String dockerTemplate,
             HttpMethod httpMethod
     ) {
-        /* Log arguments */
-        Logger logger = Logger.getGlobal();
-        logger.log(Level.INFO, "==========");
-        logger.log(Level.INFO, "projectId: " + projectId);
-        logger.log(Level.INFO, "user: " + user);
-        logger.log(Level.INFO, "dockerImage: " + dockerImage);
-        logger.log(Level.INFO, "dockerScript: " + dockerScript);
-        logger.log(Level.INFO, "dockerTemplate: " + dockerTemplate);
-        logger.log(Level.INFO, "httpMethod: " + httpMethod);
 
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, user);
         if (!projectCheck.getStatus().equals(HttpStatus.OK)) {
@@ -81,14 +73,17 @@ public class TestUtil {
         }
 
         if(!httpMethod.equals(HttpMethod.PATCH) && dockerImage != null && dockerScript == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script is required in a docker test.", null);
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script is required if u add a dockerimage.", null);
+        }
+        if (!httpMethod.equals(HttpMethod.PATCH) && dockerScript != null && dockerImage == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A docker image is required if u add a script", null);
         }
 
-        if(!httpMethod.equals(HttpMethod.PATCH) && dockerScript != null && dockerImage == null && DockerSubmissionTestModel.imageExists(dockerImage)) {
+        if(dockerImage != null && !DockerSubmissionTestModel.imageExists(dockerImage)) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A valid docker image is required in a docker test.", null);
         }
 
-        if (!httpMethod.equals(HttpMethod.PATCH) && dockerTemplate != null && dockerScript == null) {
+        if (!httpMethod.equals(HttpMethod.PATCH) && dockerTemplate != null && dockerImage == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script and image are required in a docker template test.", null);
         }
 
@@ -145,6 +140,8 @@ public class TestUtil {
             admin = true;
         } else if (!isProjectAdmin.getStatus().equals(HttpStatus.FORBIDDEN)){
             return new CheckResult<>(isProjectAdmin.getStatus(), isProjectAdmin.getMessage(), null);
+        } else if (user.getRole().equals(UserRole.admin)) {
+            admin = true;
         }
 
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, admin));

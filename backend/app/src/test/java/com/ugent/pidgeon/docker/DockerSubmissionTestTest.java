@@ -16,9 +16,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 public class DockerSubmissionTestTest {
+
+  @AfterEach
+  void cleanUp() {
+    File file = new File(System.getProperty("user.dir") + "/tmp/test");
+    try {
+      FileUtils.deleteDirectory(file);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   File initTestFile(String text, String fileName) {
     String localFileLocation = System.getProperty("user.dir") + "/tmp/test/" + fileName;
@@ -119,6 +130,8 @@ public class DockerSubmissionTestTest {
     // Extract subtests
     List<DockerSubtestResult> results = result.getSubtestResults();
 
+    stm.cleanUp();
+
     // Testing for the template parser capabilities
     assertEquals(results.size(), 2);
 
@@ -136,7 +149,6 @@ public class DockerSubmissionTestTest {
     assertEquals(results.get(1).getOutput(), "HelloWorld2!\n");
 
     assertTrue(result.isAllowed());
-    stm.cleanUp();
   }
 
   @Test
@@ -178,6 +190,7 @@ public class DockerSubmissionTestTest {
     DockerTestOutput output = stm.runSubmission("cat /shared/input/helloworld.txt");
     // run and check if zipfile was properly received
     assertEquals( "Hello Happy World!", output.logs.get(0));
+    stm.cleanUp();
 
   }
   @Test

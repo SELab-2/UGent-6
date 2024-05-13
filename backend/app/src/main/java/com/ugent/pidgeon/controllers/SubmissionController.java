@@ -21,13 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -60,61 +58,12 @@ public class    SubmissionController {
     private EntityToJsonConverter entityToJsonConverter;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
-  @Autowired
-  private TestUtil testUtil;
+    @Autowired
+    private TestUtil testUtil;
 
+    @Autowired
+    private TestRunner testRunner;
 
-  private SubmissionTemplateModel.SubmissionResult runStructureTest(ZipFile file, TestEntity testEntity) throws IOException {
-        // There is no structure test for this project
-        if(testEntity.getStructureTemplate() == null){
-            return null;
-        }
-        String structureTemplateString = testEntity.getStructureTemplate();
-
-        // Parse the file
-        SubmissionTemplateModel model = new SubmissionTemplateModel();
-        model.parseSubmissionTemplate(structureTemplateString);
-        return model.checkSubmission(file);
-    }
-
-    private DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath) throws IOException {
-
-    // Get the test file from the server
-    String testScript = testEntity.getDockerTestScript();
-    String testTemplate = testEntity.getDockerTestTemplate();
-    String image = testEntity.getDockerImage();
-
-    // The first script must always be null, otherwise there is nothing to run on the container
-    if (testScript == null) {
-      return null;
-    }
-
-    // Init container and add input files
-    DockerSubmissionTestModel model = new DockerSubmissionTestModel(image);
-    model.addZipInputFiles(file);
-    DockerOutput output;
-
-    if (testTemplate == null) {
-      // This docker test is configured in the simple mode (store test console logs)
-      output = model.runSubmission(testScript);
-    } else {
-      // This docker test is configured in the template mode (store json with feedback)
-      output = model.runSubmissionWithTemplate(testScript, testTemplate);
-    }
-    // Get list of artifact files generated on submission
-    List<File> artifacts = model.getArtifacts();
-
-    // Copy all files as zip into the output directory
-      if (artifacts != null && !artifacts.isEmpty()) {
-        Filehandler.copyFilesAsZip(artifacts, outputPath);
-      }
-
-    // Cleanup garbage files and container
-    model.cleanUp();
-
-    return output;
-
-  }
 
     /**
      * Function to get a submission by its ID
@@ -172,7 +121,7 @@ public class    SubmissionController {
                 if (groupFeedbackEntity == null) {
                     groupFeedbackJson = null;
                 } else {
-                    groupFeedbackJson = new GroupFeedbackJson(groupFeedbackEntity.getScore(), groupFeedbackEntity.getFeedback(), groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId());
+                    groupFeedbackJson = entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity);
                 }
                 SubmissionEntity submission = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId).orElse(null);
                 if (submission == null) {
@@ -217,7 +166,8 @@ public class    SubmissionController {
         try {
             //Save the file entry in the database to get the id
             FileEntity fileEntity = new FileEntity("", "", userId);
-            long fileid = fileRepository.save(fileEntity).getId();
+            fileEntity = fileRepository.save(fileEntity);
+            long fileid = fileEntity.getId();
 
             OffsetDateTime now = OffsetDateTime.now();
             SubmissionEntity submissionEntity = new SubmissionEntity(
@@ -228,6 +178,7 @@ public class    SubmissionController {
                     false,
                     false
             );
+            submissionEntity.setDockerTestState(DockerTestState.finished);
 
             //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
@@ -253,7 +204,8 @@ public class    SubmissionController {
       } else {
 
         // Check file structure
-        structureTestResult = runStructureTest(new ZipFile(savedFile), testEntity);
+        SubmissionTemplateModel model = new SubmissionTemplateModel();
+        structureTestResult = testRunner.runStructureTest(new ZipFile(savedFile), testEntity, model);
         if (structureTestResult == null) {
           submission.setStructureFeedback(
               "No specific structure requested for this project.");
@@ -279,11 +231,13 @@ public class    SubmissionController {
           submission.setDockerTestState(DockerTestState.running);
           // run docker tests in background
           File finalSavedFile = savedFile;
+          Path artifactPath = Filehandler.getSubmissionArtifactPath(projectid, groupId, submission.getId());
+
           CompletableFuture.runAsync(() -> {
             try {
               // Check if docker tests succeed
-              DockerOutput dockerOutput = runDockerTest(new ZipFile(finalSavedFile), testEntity,
-                  Filehandler.getSubmissionAritfactPath(projectid, groupId, submission.getId()));
+              DockerSubmissionTestModel dockerModel = new DockerSubmissionTestModel(testEntity.getDockerImage());
+              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel);
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
@@ -309,8 +263,8 @@ public class    SubmissionController {
         }
       }
 
-      return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submissionEntity));
-    } catch (IOException ex) {
+      return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submission));
+    } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to save submissions on file server.");
     }
@@ -373,13 +327,13 @@ public class    SubmissionController {
 
         // Get the file from the server
         try {
-            Resource zipFile = Filehandler.getFileAsResource(Filehandler.getSubmissionAritfactPath(submission.getProjectId(), submission.getGroupId(), submission.getId()));
+            Resource zipFile = Filehandler.getFileAsResource(Filehandler.getSubmissionArtifactPath(submission.getProjectId(), submission.getGroupId(), submission.getId()));
             if (zipFile == null) {
               return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No artifacts found for this submission.");
             }
             // Set headers for the response
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipFile.getFilename());
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=artifacts.zip" );
             headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
 
             return ResponseEntity.ok()
