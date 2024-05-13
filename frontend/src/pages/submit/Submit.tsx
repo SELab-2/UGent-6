@@ -7,6 +7,7 @@ import React, {useState, useRef} from 'react';
 import apiCall from "../../util/apiFetch";
 import {ApiRoutes} from "../../@types/requests.d";
 import JSZip from 'jszip';
+import { Popconfirm, message } from 'antd';
 
 const Submit = () => {
     const {t} = useTranslation()
@@ -36,6 +37,9 @@ const Submit = () => {
         const response = await apiCall.post(ApiRoutes.PROJECT_SUBMIT, formData, {id: projectId})
         console.log(response)
 
+        if (response.status === 200) { // Check if the submission was successful
+            message.success(t("project.submitSuccess"));
+        }
         const projectUrl = new URL(response.data.projectUrl, 'http://localhost:3001');
 
         const courseUrl = new URL(projectUrl.origin + projectUrl.pathname.split('/').slice(0, 3).join('/'), 'http://localhost:3001');

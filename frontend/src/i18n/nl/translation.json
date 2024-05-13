@@ -99,6 +99,8 @@
     "testFailed": "Testen gefaald",
     "structureFailed": "Structuur testen gefaald",
     "passed": "Geslaagd",
+    "submitSuccess": "Indiening succesvol",
+
     "notSubmitted": "Niet ingediend",
     "submissionTime": "Indienings tijd",
     "noSubmissions": "Geen indieningen",
