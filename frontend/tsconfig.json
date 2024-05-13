@@ -19,6 +19,8 @@
   },
   "include": [
     "src",
-    "src/test/setupTests.ts"
+    "cypress.d.ts",
+    "src/test/setupTests.ts",
+    "node_modules/cypress/types/cypress-global-vars.d.ts"
   ]
 }
