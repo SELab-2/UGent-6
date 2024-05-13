@@ -2,9 +2,9 @@ import { Card, Input } from "antd"
 import { useTranslation } from "react-i18next"
 import MembersList from "./MembersList"
 import { useEffect, useMemo, useState } from "react"
-import apiCall from "../../../../util/apiFetch"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import useCourse from "../../../../hooks/useCourse"
+import useApi from "../../../../hooks/useApi"
 
 export type CourseMemberType = GET_Responses[ApiRoutes.COURSE_MEMBERS][number]
 
@@ -13,15 +13,17 @@ const MembersCard = () => {
   const course = useCourse()
   const [members, setMembers] = useState<CourseMemberType[] | null>(null)
   const [search, setSearch] = useState<string>("")
-  
+  const API = useApi()
+
   useEffect(() => {
     if (!course) return console.error("No courseId found")
 
     let ignore = false
-    apiCall.get(course.memberUrl).then((res) => {
-      console.log(res.data)
-      setMembers(res.data)
+
+    API.GET(ApiRoutes.COURSE_MEMBERS, { pathValues: { id: course.courseId } }, "message").then((res) => {
+      if (!ignore && res.success) setMembers(res.response.data)
     })
+
     return () => {
       ignore = true
     }

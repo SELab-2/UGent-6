@@ -14,7 +14,7 @@ import GroupTab from "./components/GroupTab"
 import { AppRoutes } from "../../@types/routes"
 import SubmissionsTab from "./components/SubmissionsTab"
 import MarkdownTextfield from "../../components/input/MarkdownTextfield"
-import apiCall from "../../util/apiFetch"
+import useApi from "../../hooks/useApi"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -30,6 +30,7 @@ const Project = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(location.hash.slice(1) || "description")
+  const API = useApi()
 
   const now = Date.now()
   const deadline = new Date(project?.deadline ?? "").getTime()
@@ -98,8 +99,8 @@ const Project = () => {
 
   const deleteProject = async () => {
     if (!project || !course) return console.error("project is undefined")
-    await apiCall.delete(ApiRoutes.PROJECT, undefined, { id: project!.projectId + "" })
-
+    const res = await API.DELETE(ApiRoutes.PROJECT, { pathValues: { id: project.projectId } }, "message")
+    if(!res.success) return
     navigate(AppRoutes.COURSE.replace(":courseId", course.courseId + ""))
   }
 

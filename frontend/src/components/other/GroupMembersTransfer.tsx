@@ -1,12 +1,12 @@
 import { FC, useEffect, useMemo, useState } from "react"
 import { GroupType } from "../../pages/project/components/GroupTab"
 
-import { Alert, Button, Select, Space, Switch, Table, Transfer } from "antd"
+import { Alert, Button, Select, Table, Transfer } from "antd"
 import type { GetProp, SelectProps, TableColumnsType, TableProps, TransferProps } from "antd"
-import apiCall from "../../util/apiFetch"
 import { ApiRoutes } from "../../@types/requests.d"
 import { CourseMemberType } from "../../pages/course/components/membersTab/MemberCard"
 import { useTranslation } from "react-i18next"
+import useApi from "../../hooks/useApi"
 
 type TransferItem = GetProp<TransferProps, "dataSource">[number]
 type TableRowSelection<T extends object> = TableProps<T>["rowSelection"]
@@ -62,6 +62,7 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
   const [courseMembers, setCourseMembers] = useState<CourseMemberType[] | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
   const { t } = useTranslation()
+  const API = useApi()
 
 
   useEffect(()=> {
@@ -75,8 +76,10 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
   }, [courseId])
 
   const fetchCourseMembers = async () => {
-    const response = await apiCall.get(ApiRoutes.COURSE_MEMBERS, { courseId })
-    setCourseMembers(response.data.filter(m => m.relation === "enrolled"))
+    const response = await API.GET(ApiRoutes.COURSE_MEMBERS, { pathValues: { courseId } },"message")
+    if(!response.success) return
+
+    setCourseMembers(response.response.data.filter(m => m.relation === "enrolled"))
   }
 
   const onChange: TableTransferProps["onChange"] = (nextTargetKeys) => {

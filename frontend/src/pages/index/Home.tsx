@@ -2,7 +2,6 @@ import { Card, Segmented, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import CreateCourseModal from "./components/CreateCourseModal"
 import { useEffect, useState } from "react"
-import apiCall from "../../util/apiFetch"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import ProjectTable from "./components/ProjectTable"
 import ProjectTimeline from "../../components/other/ProjectTimeline"
@@ -10,6 +9,7 @@ import { useLocalStorage } from "usehooks-ts"
 import { CalendarOutlined, NodeIndexOutlined, OrderedListOutlined, UnorderedListOutlined } from "@ant-design/icons"
 import ProjectCalander from "../../components/other/ProjectCalander"
 import CourseSection from "./components/CourseSection"
+import useApi from "../../hooks/useApi"
 
 export type ProjectsType = GET_Responses[ApiRoutes.COURSE_PROJECTS]
 
@@ -20,13 +20,20 @@ const Home = () => {
   const [projects, setProjects] = useLocalStorage<ProjectsType | null>("__projects_cache",null)
   const [open, setOpen] = useState(false)
   const [projectsViewMode, setProjectsViewMode] = useLocalStorage<ProjectView>("projects_view", "table")
+  const API = useApi()
 
   useEffect(() => {
-    apiCall.get(ApiRoutes.PROJECTS).then((res) => {
-      const projects: ProjectsType = [...res.data.adminProjects, ...res.data.enrolledProjects.map((p) => ({ ...p.project, status: p.status }))]
-      console.log("=>", projects)
+    let ignore=  false
+
+    API.GET(ApiRoutes.PROJECTS, {}).then((res) => {
+      if(!res.success || ignore) return
+      const projects: ProjectsType = [...res.response.data.adminProjects, ...res.response.data.enrolledProjects.map((p) => ({ ...p.project, status: p.status }))]
       setProjects(projects)
     })
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   return (

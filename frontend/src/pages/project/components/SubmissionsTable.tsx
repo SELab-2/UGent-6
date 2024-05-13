@@ -8,9 +8,9 @@ import useProject from "../../../hooks/useProject"
 import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
 import { Link, useParams } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
-import apiCall from "../../../util/apiFetch"
 import { ApiRoutes, PUT_Requests } from "../../../@types/requests.d"
 import useAppApi from "../../../hooks/useAppApi"
+import useApi from "../../../hooks/useApi"
 
 const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number]) => {
   return <List.Item>{name}</List.Item>
@@ -21,12 +21,15 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const project = useProject()
   const { courseId, projectId } = useParams()
   const { message } = useAppApi()
+  const API = useApi()
 
   const updateTable = async (groupId: number, feedback: Partial<PUT_Requests[ApiRoutes.PROJECT_SCORE]>) => {
     if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found")
 
-    const response = await apiCall.patch(ApiRoutes.PROJECT_SCORE, feedback, { id: projectId, groupId })
-    const data = response.data
+    const res = await API.PATCH(ApiRoutes.PROJECT_SCORE, { body: feedback, pathValues: { id: projectId, groupId } }, "message")
+    if (!res.success) return
+
+    const data = res.response.data
 
     const newSubmissions: ProjectSubmissionsType[] = submissions.map((s) => {
       if (s.group.groupId !== groupId) return s

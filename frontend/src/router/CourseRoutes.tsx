@@ -4,7 +4,6 @@ import { CourseType } from "../pages/course/Course"
 import { Flex, Spin } from "antd"
 import useUser from "../hooks/useUser"
 import { UserCourseType } from "../providers/UserProvider"
-import apiCall from "../util/apiFetch"
 import { ApiRoutes } from "../@types/requests.d"
 import useApi from "../hooks/useApi"
 

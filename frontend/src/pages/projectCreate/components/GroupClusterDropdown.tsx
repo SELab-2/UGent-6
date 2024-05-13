@@ -1,12 +1,12 @@
 import React, { FC, useEffect, useState } from "react"
 import { Button, Divider, Select, SelectProps, Space, Typography } from "antd"
 import { ApiRoutes } from "../../../@types/requests.d"
-import apiCall from "../../../util/apiFetch"
 import { PlusOutlined } from "@ant-design/icons"
 import { useTranslation } from "react-i18next"
 import useAppApi from "../../../hooks/useAppApi"
 import GroupClusterModalContent from "./GroupClusterModalContent"
 import { ClusterType } from "../../course/components/groupTab/GroupsCard"
+import useApi from "../../../hooks/useApi"
 
 interface GroupClusterDropdownProps {
   courseId: string | number
@@ -31,6 +31,7 @@ const GroupClusterDropdown: React.FC<GroupClusterDropdownProps & SelectProps> = 
   const [loading, setLoading] = useState(false)
   const { t } = useTranslation()
   const { modal } = useAppApi()
+  const API = useApi()
 
   useEffect(() => {
     const fetchClusters = async () => {
@@ -38,8 +39,9 @@ const GroupClusterDropdown: React.FC<GroupClusterDropdownProps & SelectProps> = 
       const groupCountText = t("project.change.amountOfGroups")
       const capacityText = t("project.change.groupSize")
       try {
-        const response = await apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId })
-        const options: SelectProps["options"] = response.data.map((cluster: ClusterType) => ({ label: <DropdownItem capacityText={capacityText} groupCountText={groupCountText} cluster={cluster} />, value: cluster.clusterId }))
+        const response =  await API.GET(ApiRoutes.COURSE_CLUSTERS, { pathValues: { id: courseId } })
+        if(!response.success) return
+        const options: SelectProps["options"] = response.response.data.map((cluster: ClusterType) => ({ label: <DropdownItem capacityText={capacityText} groupCountText={groupCountText} cluster={cluster} />, value: cluster.clusterId }))
 
         setClusters(options) // Zorg ervoor dat de nieuwe staat correct wordt doorgegeven
       } catch (error) {

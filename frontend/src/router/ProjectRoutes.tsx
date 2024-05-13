@@ -1,7 +1,6 @@
 import { createContext, useEffect, useState } from "react"
 import { ProjectType } from "../pages/project/Project"
 import { Outlet, useParams } from "react-router-dom"
-import apiCall from "../util/apiFetch"
 import { ApiRoutes } from "../@types/requests.d"
 import useApi from "../hooks/useApi"
 

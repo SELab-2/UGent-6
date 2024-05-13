@@ -5,41 +5,38 @@ import { ApiRoutes } from "../../../@types/requests"
 import { ArrowLeftOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 import "@fontsource/jetbrains-mono"
-import { useEffect, useState } from "react"
-import apiCall from "../../../util/apiFetch"
+import useApi from "../../../hooks/useApi"
 
 export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 
 const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
-  const [structureFeedback, setStructureFeedback] = useState<string | null>(null)
-  const [dockerFeedback, setDockerFeedback] = useState<string | null>(null)
+  const API = useApi()
+
   const navigate = useNavigate()
-  useEffect(() => {
-    if (!submission.dockerAccepted) apiCall.get(submission.dockerFeedbackUrl).then((res) => setDockerFeedback(res.data ? res.data : ""))
-    if (!submission.structureAccepted) apiCall.get(submission.structureFeedbackUrl).then((res) => setStructureFeedback(res.data ? res.data : ""))
-  }, [submission.dockerFeedbackUrl, submission.structureFeedbackUrl])
+
 
   const downloadSubmission = async () => {
-    //TODO: testen of dit wel echt werkt
-    try {
-      const fileContent = await apiCall.get(submission.fileUrl)
-      console.log(fileContent)
-      const blob = new Blob([fileContent.data], { type: "text/plain" })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = "indiening.zip"
-      document.body.appendChild(link)
-      link.click()
-      URL.revokeObjectURL(url)
-      document.body.removeChild(link)
-    } catch (err) {
-      // TODO: handle error
-    }
+    const response = await API.GET(submission.fileUrl, { })
+    if(!response.success) return
+    const fileContent = response.response
+    console.log(fileContent)
+    const blob = new Blob([fileContent.data], { type: "text/plain" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "indiening.zip"
+    document.body.appendChild(link)
+    link.click()
+    URL.revokeObjectURL(url)
+    document.body.removeChild(link)
+  
   }
 
+  //TODO: better way to show submission feedback
+  // const feedbacksubmission.dockerFeedback.feedback
+  const feedback = "TODO: feedback"
   return (
     <Card
       styles={{
@@ -85,12 +82,12 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
           <Typography.Text type={submission.structureAccepted ? "success" : "danger"}>{submission.structureAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
           {submission.structureAccepted ? null : (
             <div>
-              {structureFeedback === null ? (
+              {submission.structureFeedback === null ? (
                 <Spin />
               ) : (
                 <Input.TextArea
                   readOnly
-                  value={structureFeedback}
+                  value={submission.structureFeedback}
                   style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
                   rows={4}
                   autoSize={{ minRows: 4, maxRows: 8 }}
@@ -108,12 +105,12 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
           <Typography.Text type={submission.dockerAccepted ? "success" : "danger"}>{submission.dockerAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
           {submission.dockerAccepted ? null : (
             <div>
-              {dockerFeedback === null ? (
+              {submission.dockerFeedback === null ? (
                 <Spin />
               ) : (
                 <Input.TextArea
                   readOnly
-                  value={dockerFeedback}
+                  value={feedback}
                   style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
                   rows={4}
                   autoSize={{ minRows: 4, maxRows: 16 }}

@@ -1,23 +1,27 @@
-import { Card, Typography, Spin } from "antd"
+import { Spin } from "antd"
 import { useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
 import SubmissionCard from "./components/SubmissionCard"
 import { SubmissionType } from "./components/SubmissionCard"
 import { useParams } from "react-router-dom"
-import apiCall from "../../util/apiFetch"
 import { ApiRoutes } from "../../@types/requests.d"
+import useApi from "../../hooks/useApi"
 
 const Submission = () => {
   const [submission, setSubmission] = useState<SubmissionType | null>(null)
   const { submissionId } = useParams()
+  const API = useApi()
 
   useEffect(() => {
     if (!submissionId) return console.error("No submissionId found")
-    apiCall.get(ApiRoutes.SUBMISSION, { id: submissionId }).then((res) => {
-      console.log(res.data)
-      setSubmission(res.data)
+      let ignore = false
+    API.GET(ApiRoutes.SUBMISSION, { pathValues: { id: submissionId } }).then((res) => {
+      if (!res.success || ignore) return
+      setSubmission(res.response.data)
     })
-  }, [submissionId])
+    return () => {
+      ignore = true
+    }
+  }, [submissionId,API])
 
   if (submission === null) {
     return (

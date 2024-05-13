@@ -2,13 +2,12 @@ import { Alert, Form, Modal } from "antd"
 import { FC, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import CourseForm from "../../../components/forms/CourseForm"
-import apiCall from "../../../util/apiFetch"
 import { ApiRoutes } from "../../../@types/requests.d"
 import useAppApi from "../../../hooks/useAppApi"
-import axios, { AxiosError } from "axios"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
 import useUser from "../../../hooks/useUser"
+import useApi from "../../../hooks/useApi"
 
 const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ open,setOpen }) => {
   const { t } = useTranslation()
@@ -18,7 +17,7 @@ const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ op
   const {message} = useAppApi()
   const navigate = useNavigate()
   const {updateCourses} = useUser()
-
+  const API = useApi()
 
   useEffect(()=> {
     form.setFieldValue("year", new Date().getFullYear()-1)
@@ -32,21 +31,13 @@ const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ op
     console.log(values);
     values.description ??= ""
     setLoading(true)
-    try {
-      const course =  await apiCall.post(ApiRoutes.COURSES, values)
-      message.success(t("home.courseCreated"))
-      await updateCourses()
-      navigate(AppRoutes.COURSE.replace(":courseId", course.data.courseId.toString()))
-    } catch(err){
-      console.error(err);
-      if(axios.isAxiosError(err)){
-        setError(err.response?.data.message || t("woops"))
-      } else {
-        message.error(t("woops"))
-      }
-    } finally {
-      setLoading(false)
-    }
+    const res = await API.POST(ApiRoutes.COURSES, { body:values}, "message")
+    if(!res.success) return setLoading(false)
+    const course=  res.response
+    message.success(t("home.courseCreated"))
+    await updateCourses()
+    navigate(AppRoutes.COURSE.replace(":courseId", course.data.courseId.toString()))
+  
   }
 
   return (
