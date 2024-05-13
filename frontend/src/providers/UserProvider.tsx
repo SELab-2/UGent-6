@@ -4,6 +4,7 @@ import { useIsAuthenticated, useMsal } from "@azure/msal-react"
 import { Spin } from "antd"
 import { InteractionStatus } from "@azure/msal-browser"
 import useApi from "../hooks/useApi"
+import { useLocalStorage } from "usehooks-ts"
 
 type UserContextProps = {
   user: User | null
@@ -19,7 +20,7 @@ export type User = GET_Responses[ApiRoutes.USER]
 
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useLocalStorage<User | null>("__user_cache",null)
   const [courses, setCourses] = useState<UserCourseType[] | null>(null)
   const { inProgress } = useMsal()
   const API = useApi()
@@ -27,6 +28,8 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     if (isAuthenticated) {
       updateUser()
+    } else {
+      setUser(null)
     }
   }, [isAuthenticated])
 

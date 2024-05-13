@@ -25,7 +25,7 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   }, [selectedClusterId])
 
   const fetchCluster = async () => {
-    const response = await API.GET(ApiRoutes.CLUSTER, { pathValues: {id: selectedClusterId} })
+    const response = await API.GET(ApiRoutes.CLUSTER, { pathValues: { id: selectedClusterId } })
     if (!response.success) return
     setSelectedCluster(response.response.data)
   }
@@ -40,6 +40,10 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         <GroupClusterDropdown
           allowClear
           courseId={courseId!}
+          onClusterCreated={(clusterId) => {
+            console.log("Setting clusterId:", clusterId)
+            form.setFieldValue("groupClusterId", clusterId)
+          }}
         />
       </Form.Item>
 
@@ -47,11 +51,15 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         <>
           {selectedCluster ? (
             <>
-              <GroupMembersTransfer
-                groups={selectedCluster.groups}
-                onChanged={fetchCluster}
-                courseId={courseId}
-              />
+              <Form.Item
+                name="groups"
+                label=""
+              >
+                <GroupMembersTransfer
+                  groups={selectedCluster.groups}
+                  courseId={courseId}
+                />
+              </Form.Item>
             </>
           ) : (
             <Spin />

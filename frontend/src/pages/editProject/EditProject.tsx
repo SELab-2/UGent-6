@@ -29,9 +29,9 @@ const EditProject: React.FC = () => {
   const updateDockerForm = async () => {
     if (!projectId) return
     const response = await API.GET(ApiRoutes.PROJECT_TESTS, { pathValues: { id: projectId } })
-    if(!response.success) return setInitialDockerValues(null)
+    if (!response.success) return setInitialDockerValues(null)
 
-    let formVals:POST_Requests[ApiRoutes.PROJECT_TESTS] ={
+    let formVals: POST_Requests[ApiRoutes.PROJECT_TESTS] = {
       structureTest: null,
       dockerTemplate: null,
       dockerScript: null,
@@ -39,7 +39,7 @@ const EditProject: React.FC = () => {
     }
     if (response.success) {
       const tests = response.response.data
-      console.log(tests);
+      console.log(tests)
       formVals = {
         structureTest: tests.structureTest ?? "",
         dockerTemplate: tests.dockerTemplate ?? "",
@@ -53,7 +53,7 @@ const EditProject: React.FC = () => {
     setInitialDockerValues(formVals)
   }
 
-  console.log(initialDockerValues);
+  console.log(initialDockerValues)
 
   useEffect(() => {
     if (!project) return
@@ -77,7 +77,15 @@ const EditProject: React.FC = () => {
       "alert"
     )
 
-    await saveDockerForm(form, initialDockerValues, API, projectId)
+    let promisses = []
+
+    promisses.push(saveDockerForm(form, initialDockerValues, API, projectId))
+
+    if (form.isFieldTouched("groups") && values.groupClusterId && values.groups) {
+      promisses.push(API.PUT(ApiRoutes.CLUSTER_FILL, { body: values.groups, pathValues: { id: values.groupClusterId } }, "message"))
+    }
+
+    Promise.all(promisses)
 
     if (!response.success) {
       setError(response.alert || null)

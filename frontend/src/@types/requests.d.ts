@@ -34,6 +34,7 @@ export enum ApiRoutes {
 
 
   CLUSTER = "api/clusters/:id",
+  CLUSTER_FILL = "api/clusters/:id/fill",
 
   GROUP = "api/groups/:id",
   GROUP_MEMBERS = "api/groups/:id/members", 
@@ -115,6 +116,10 @@ export type PUT_Requests = {
   [ApiRoutes.COURSE_MEMBER]: { relation: CourseRelation }
   [ApiRoutes.PROJECT_SCORE]: { score: number | null , feedback: string},
   [ApiRoutes.PROJECT_TESTS]: POST_Requests[ApiRoutes.PROJECT_TESTS]
+
+  [ApiRoutes.CLUSTER_FILL]: {
+    [groupName:string]: number[] /* userId[] */
+  }
 }
 
 
@@ -125,6 +130,7 @@ export type PUT_Responses = {
   [ApiRoutes.COURSE_MEMBER]: GET_Responses[ApiRoutes.COURSE_MEMBERS]
   [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
+  [ApiRoutes.CLUSTER_FILL]: PUT_Requests[ApiRoutes.CLUSTER_FILL]
 }
 
 

@@ -127,6 +127,8 @@
       "groups": "Groups",
       "structure": "Structure",
       "tests": "Tests",
+      "noClusters": "No group clusters found",
+      "groupClusterCreated": "Group cluster created",
       "fileStructure": "File structure",
       "fileStructurePreview": "File structure preview",
       "update": "Update project",
