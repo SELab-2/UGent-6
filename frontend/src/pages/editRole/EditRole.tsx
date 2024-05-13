@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Row, Col, Form, Input, Button, Spin } from "antd";
+import { useEffect, useState, useRef } from "react";
+import { Row, Col, Form, Input, Button, Spin, Select } from "antd";
 import UserList from "./components/UserList"
 import { ApiRoutes, GET_Responses, UserRole } from "../../@types/requests.d";
 import apiCall from "../../util/apiFetch";
@@ -10,6 +10,8 @@ export type UsersType = GET_Responses[ApiRoutes.USERS]
 
 const ProfileContent = () => {
     const [users, setUsers] = useState<UsersType | null>(null);
+    const [searchField, setSearchField] = useState<string>("email");
+    const searchFieldRef = useRef<string>("email");
     const [searched, setSearched] = useState(false);
     const [form] = Form.useForm();
     const { t } = useTranslation();
@@ -54,10 +56,9 @@ return (
           form={form}
           name="search"
           onFinish={onSearch}
-          initialValues={{ remember: true }}
       >
           <Row gutter={24} justify="space-between">
-              <Col span={7}>
+              {/*<Col span={7}>
                   <Form.Item
                       name="email"
                       rules={[
@@ -88,9 +89,43 @@ return (
                   >
                       <Input placeholder={t("editRole.surname")} />
                   </Form.Item>
-              </Col>
+                    </Col>*/}
+            <Col span={20}>
+                <Form.Item
+                name = "search"
+                rules={[
+                    {
+                        validator: (_, value) => {
+                            if (searchFieldRef.current === 'email') {
+                                // Validate email
+                                const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+                                if (!emailRegex.test(value)) {
+                                    return Promise.reject(new Error(t("editRole.invalidEmail")));
+                                }
+                            } else {
+                                // Validate name and surname
+                                if (value.length < 3) {
+                                    return Promise.reject(new Error(t("editRole.shortValue")));
+                                }
+                            }
+                            return Promise.resolve();
+                        },
+                    },
+                ]}>
+                    <Input 
+                        addonBefore={
+                            <Select defaultValue="email" onChange={(value) => {console.log(value); searchFieldRef.current = value}} style={{ width: 120 }} options={[
+                                { label: t("editRole.email"), value: "email" },
+                                { label: t("editRole.name"), value: "name" },
+                                { label: t("editRole.surname"), value: "surname" },
+                            ]}/>
+                        }
+                        placeholder={t(`editRole.${searchFieldRef.current}`)} 
+                    />
+                </Form.Item>
+            </Col>
 
-              <Col span={3}>
+              <Col span={4}>
                   <Form.Item shouldUpdate>
                       {() => (
                           <Button
