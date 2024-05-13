@@ -8,11 +8,13 @@ import apiCall from "../../util/apiFetch";
 import {ApiRoutes} from "../../@types/requests.d";
 import JSZip from 'jszip';
 import { Popconfirm, message } from 'antd';
+import {AppRoutes} from "../../@types/routes";
+import submission from "../submission/Submission";
 
 const Submit = () => {
     const {t} = useTranslation()
     const [form] = Form.useForm()
-    const {projectId} = useParams<{ projectId: string }>()
+    const {projectId, courseId} = useParams<{ projectId: string, courseId: string}>()
     const [fileAdded, setFileAdded] = useState(false);
     const navigate = useNavigate()
 
@@ -36,17 +38,21 @@ const Submit = () => {
         if (!projectId) return;
         const response = await apiCall.post(ApiRoutes.PROJECT_SUBMIT, formData, {id: projectId})
         console.log(response)
-
+        const submissionId:string =  response.data.submissionId.toString();
         if (response.status === 200) { // Check if the submission was successful
             message.success(t("project.submitSuccess"));
         }
-        const projectUrl = new URL(response.data.projectUrl, 'http://localhost:3001');
-
-        const courseUrl = new URL(projectUrl.origin + projectUrl.pathname.split('/').slice(0, 3).join('/'), 'http://localhost:3001');
-        const courseId = courseUrl.pathname.split('/')[2];
-
-        const submissionId = response.data.submissionId;
-        navigate(`/courses/${courseId}/projects/${projectId}/submissions/${submissionId}`);
+        else {
+            message.error(t("project.submitError"));
+        }
+        if (courseId != null && submissionId != null) {
+            navigate(AppRoutes.SUBMISSION.replace(':courseId', courseId).replace(':projectId', projectId).replace(':submissionId', submissionId));
+        }else{
+            console.log(projectId)
+            console.log(courseId)
+            console.log(submissionId)
+            message.error(t("project.submitError"));
+        }
     }
 
     return (
