@@ -26,16 +26,5 @@ router.get('/id',
     }
 );
 
-router.get('/profile',
-    isAuthenticated, // check if user is authenticated
-    async function (req, res, next) {
-        try {
-            const response = await fetch("api/test", req.session.accessToken);
-            res.render('profile', { profile: response });
-        } catch (error) {
-            next(error);
-        }
-    }
-);
 
 module.exports = router;

@@ -142,6 +142,7 @@ class AuthProvider {
 
                 req.session.tokenCache = msalInstance.getTokenCache().serialize();
                 req.session.idToken = tokenResponse.idToken;
+                req.session.accessToken = tokenResponse.accessToken;
                 req.session.account = tokenResponse.account;
                 req.session.isAuthenticated = true;
                 

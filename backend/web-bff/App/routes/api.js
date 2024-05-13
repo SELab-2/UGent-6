@@ -17,10 +17,13 @@ function isAuthenticated(req, res, next) {
 router.all('/*',
     isAuthenticated,
     async function(req, res, next) {
+    console.log("req token: " + req.session.accessToken);
     try {
-        const response = await fetch(req.url , req.session.accessToken, req.method)
+        const response = await fetch( "api" + req.url , req.session.accessToken, req.method)
         res.send(response)
     } catch(error) {
         next(error);
     }
     })
+
+module.exports = router;

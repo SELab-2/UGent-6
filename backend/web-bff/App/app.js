@@ -12,6 +12,7 @@ const rateLimit = require('express-rate-limit')
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
+const apiRouter = require('./routes/api');
 
 /* initialize express */
 const app = express();
@@ -21,9 +22,9 @@ const app = express();
  * Using cookie-session middleware for persistent user session.
  */
 
-connection_string = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=admin`
+//connection_string = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=admin`
 
-console.log(connection_string)
+//console.log(connection_string)
 
 app.use(session({
     name: 'pigeon session',
@@ -34,16 +35,15 @@ app.use(session({
     cookie: {
         httpOnly: true,
         secure: false, // make sure this is true in production
-        maxAge: 7*24*60*60*1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     },
-    store: MongoStore.create(
-        {mongoUrl: connection_string})
+//    store: MongoStore.create(
+//        {mongoUrl: connection_string})
 }));
 
 
-
 const limiter = rateLimit({
-   windowMs: 15 * 60 * 1000,
+    windowMs: 15 * 60 * 1000,
     max: 100,
 });
 
@@ -55,12 +55,14 @@ app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use('/api', apiRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

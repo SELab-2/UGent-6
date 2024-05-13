@@ -15,13 +15,13 @@ const {BACKEND_API_ENDPOINT} = require("./authConfig");
  * @param method The http method for the call. Choice out of 'GET'
  */
 async function fetch(endpoint, accessToken, method) {
-    let methods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
-    if (!(method in methods)) {
+    let methods = ["GET", "POST", "PATCH", "PUT", "DELETE"]
+    if (!(methods.includes(method))) {
         throw new Error('Not a valid HTTP method');
     }
     const url = new URL(endpoint, BACKEND_API_ENDPOINT)
     const headers = {
-        Authorization: `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
     }
 
