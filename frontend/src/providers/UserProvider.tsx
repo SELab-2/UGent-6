@@ -21,7 +21,7 @@ export type User = GET_Responses[ApiRoutes.USER]
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
   const [user, setUser] = useLocalStorage<User | null>("__user_cache",null)
-  const [courses, setCourses] = useState<UserCourseType[] | null>(null)
+  const [courses, setCourses] = useLocalStorage<UserCourseType[] | null>("__courses_cache",null)
   const { inProgress } = useMsal()
   const API = useApi()
 
@@ -36,14 +36,14 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const updateCourses = async (userId: number | undefined = user?.id) => {
     if (!userId) return console.error("No user id provided")
     const res = await API.GET(ApiRoutes.USER_COURSES, { pathValues: { id: userId } },"page")
-    if (!res.success) return
+    if (!res.success) return setCourses(null)
     setCourses(res.response.data)
   }
 
   const updateUser = async () => {
     try {
       const res = await API.GET(ApiRoutes.USER_AUTH, {}, "page")
-      if(!res.success) return
+      if(!res.success) return setUser(null)
       setUser(res.response.data)
 
       await updateCourses(res.response.data.id)

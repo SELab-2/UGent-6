@@ -6,6 +6,7 @@ import useUser from "../hooks/useUser"
 import { UserCourseType } from "../providers/UserProvider"
 import { ApiRoutes } from "../@types/requests.d"
 import useApi from "../hooks/useApi"
+import { useSessionStorage } from "usehooks-ts"
 
 export type CourseContextType = {
   course: CourseType
@@ -17,7 +18,7 @@ export const CourseContext = createContext<CourseContextType>({} as CourseContex
 
 const CourseRoutes: FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
-  const [course, setCourse] = useState<CourseType | null>(null)
+  const [course, setCourse] = useSessionStorage<CourseType | null>("__course_cache_"+ courseId,null)
   const [member, setMember] = useState<UserCourseType | null>(null)
   const { courses } = useUser()
   const { GET } = useApi()
@@ -34,10 +35,11 @@ const CourseRoutes: FC = () => {
 
     let ignore = false
     GET(ApiRoutes.COURSE, { pathValues: { courseId: courseId! } }, "page").then((res) => {
-      if (res.success && !ignore) {
+      if(ignore) return 
+      if (res.success) {
         console.log("Course: ", res.response.data)
         setCourse(res.response.data)
-      }
+      } else setCourse(null)
     })
 
     return () => {

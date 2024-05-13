@@ -3,6 +3,7 @@ import { ProjectType } from "../pages/project/Project"
 import { Outlet, useParams } from "react-router-dom"
 import { ApiRoutes } from "../@types/requests.d"
 import useApi from "../hooks/useApi"
+import { useSessionStorage } from "usehooks-ts"
 
 type ProjectContextType = {
   project: ProjectType | null
@@ -12,8 +13,8 @@ type ProjectContextType = {
 export const ProjectContext = createContext<ProjectContextType>({} as ProjectContextType)
 
 const ProjectRoutes = () => {
-  const [project, setProject] = useState<ProjectContextType["project"]>(null)
   const { projectId } = useParams()
+  const [project, setProject] = useSessionStorage<ProjectContextType["project"]>("__project_cache_"+projectId,null)
   const { GET } = useApi()
 
   useEffect(() => {
@@ -27,7 +28,9 @@ const ProjectRoutes = () => {
     console.log("Making the request", projectId)
 
     GET(ApiRoutes.PROJECT, { pathValues: { id: projectId! } }, "page").then((res) => {
-      if (res.success && !ignore) setProject(res.response.data)
+      if(ignore) return
+      if (res.success) setProject(res.response.data)
+        else setProject(null)
     })
 
     return () => {
