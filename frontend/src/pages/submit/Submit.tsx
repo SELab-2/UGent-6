@@ -7,13 +7,14 @@ import {useState} from 'react';
 import apiCall from "../../util/apiFetch";
 import {ApiRoutes} from "../../@types/requests.d";
 import JSZip from 'jszip';
-import { message } from 'antd';
 import {AppRoutes} from "../../@types/routes";
+import useAppApi from "../../hooks/useAppApi"
 
 const Submit = () => {
     const {t} = useTranslation()
     const [form] = Form.useForm()
     const {projectId, courseId} = useParams<{ projectId: string, courseId: string}>()
+    const {message} = useAppApi()
     const [fileAdded, setFileAdded] = useState(false);
     const navigate = useNavigate()
 
