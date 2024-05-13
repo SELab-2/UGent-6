@@ -13,7 +13,6 @@ public record GroupClusterJson(
 
         String courseUrl
 ) {
-    public GroupClusterJson {
-    }
+
 }
 

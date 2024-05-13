@@ -41,10 +41,11 @@ public class SubmissionUtil {
         if (submission == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Submission not found", null);
         }
-        if (groupUtil.canGetProjectGroupData(submission.getGroupId(), submission.getProjectId(), user).getStatus().equals(HttpStatus.OK)) {
+        CheckResult<Void> groupCheck = groupUtil.canGetProjectGroupData(submission.getGroupId(), submission.getProjectId(), user);
+        if (groupCheck.getStatus().equals(HttpStatus.OK)) {
             return new CheckResult<>(HttpStatus.OK, "", submission);
         } else {
-            return new CheckResult<>(HttpStatus.FORBIDDEN, "User does not have access to this submission", null);
+            return new CheckResult<>(groupCheck.getStatus(), groupCheck.getMessage(), null);
         }
     }
 
@@ -59,10 +60,11 @@ public class SubmissionUtil {
         if (submission == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Submission not found", null);
         }
-        if (projectUtil.isProjectAdmin(submission.getProjectId(), user).getStatus().equals(HttpStatus.OK)) {
+        CheckResult<Void> projectCheck = projectUtil.isProjectAdmin(submission.getProjectId(), user);
+        if (projectCheck.getStatus().equals(HttpStatus.OK)) {
             return new CheckResult<>(HttpStatus.OK, "", submission);
         } else {
-            return new CheckResult<>(HttpStatus.FORBIDDEN, "User does not have access to delete this submission", null);
+            return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
     }
 
@@ -81,10 +83,12 @@ public class SubmissionUtil {
         if (groupId == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "User is not part of a group for this project", null);
         }
-        GroupEntity group = groupUtil.getGroupIfExists(groupId).getData();
-        if (group == null) {
-            return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not found", null);
+
+        CheckResult<GroupEntity> groupCheck = groupUtil.getGroupIfExists(groupId);
+        if (groupCheck.getStatus() != HttpStatus.OK) {
+            return new CheckResult<>(groupCheck.getStatus(), groupCheck.getMessage(), null);
         }
+        GroupEntity group = groupCheck.getData();
 
         if (groupClusterRepository.inArchivedCourse(group.getClusterId())) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot submit for a project in an archived course", null);

@@ -103,6 +103,9 @@ html {
   font-size: 28px;
 }
 
+.ant-table-row > td.ant-table-column-sort, .ant-table-thead > tr > th.ant-table-column-sort {
+  background-color: unset ;
+}
 /* *************************** Landing page *************************** */
 
 .landing-page * {

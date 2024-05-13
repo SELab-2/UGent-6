@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { AppRoutes } from "../../@types/routes"
 import { ProjectStatus } from "../../@types/requests"
-
+import i18n from "i18next"
 
 const colorByProjectStatus: Record<ProjectStatus, string> = {
   "correct": "green",
@@ -18,8 +18,18 @@ const ProjectTimeline: FC<{ projects: ProjectType[] | null }> = ({ projects }) =
 
   const items = useMemo(() => {
     if (projects === null) return null
-    return projects.map((p) => ({
-      label: new Date(p.deadline).toLocaleString(undefined, {
+
+    const now = new Date();
+    const filteredAndSortedProjects = projects
+        .filter(project => new Date(project.deadline) > now)
+        .sort((a, b) => {
+          const deadlineA = new Date(a.deadline).getTime();
+          const deadlineB = new Date(b.deadline).getTime();
+          return deadlineA - deadlineB;
+        });
+
+    return filteredAndSortedProjects.map((p) => ({
+      label: new Date(p.deadline).toLocaleString(i18n.language, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -32,14 +42,14 @@ const ProjectTimeline: FC<{ projects: ProjectType[] | null }> = ({ projects }) =
   }, [projects])
 
   return (
-    <>
-      {items !== null && items.length === 0 && <Typography.Text type="secondary">{t("home.projects.noProjects")}</Typography.Text>}
-      <Timeline
-        pending={items === null ? t("home.fetching") : null}
-        mode="left"
-        items={items ?? []}
-      />
-    </>
+      <>
+        {items !== null && items.length === 0 && <Typography.Text type="secondary">{t("home.projects.noProjects")}</Typography.Text>}
+        <Timeline
+            pending={items === null ? t("home.fetching") : null}
+            mode="left"
+            items={items ?? []}
+        />
+      </>
   )
 }
 

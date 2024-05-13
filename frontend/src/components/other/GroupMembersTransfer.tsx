@@ -1,12 +1,12 @@
 import { FC, useEffect, useMemo, useState } from "react"
 import { GroupType } from "../../pages/project/components/GroupTab"
 
-import { Alert, Button, Select, Space, Switch, Table, Transfer } from "antd"
+import { Alert, Button, Select, Table, Transfer } from "antd"
 import type { GetProp, SelectProps, TableColumnsType, TableProps, TransferProps } from "antd"
-import apiCall from "../../util/apiFetch"
 import { ApiRoutes } from "../../@types/requests.d"
 import { CourseMemberType } from "../../pages/course/components/membersTab/MemberCard"
 import { useTranslation } from "react-i18next"
+import useApi from "../../hooks/useApi"
 
 type TransferItem = GetProp<TransferProps, "dataSource">[number]
 type TableRowSelection<T extends object> = TableProps<T>["rowSelection"]
@@ -57,16 +57,28 @@ const TableTransfer = ({ leftColumns, rightColumns, emptyText, ...restProps }: T
   </Transfer>
 )
 
-const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; courseId: number | string }> = ({ groups, onChanged, courseId }) => {
-  const [targetKeys, setTargetKeys] = useState<Record<string, TransferProps["targetKeys"]>>({})
+export type GroupMembers = Record<string, number[]>
+
+const GroupMembersTransfer: FC<{ value?: GroupMembers,groups: GroupType[]; onChange?: (newTargetKeys:GroupMembers) => void; courseId: number | string }> = ({ groups, onChange, courseId, value, ...args }) => {
   const [courseMembers, setCourseMembers] = useState<CourseMemberType[] | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
   const { t } = useTranslation()
-
+  const API = useApi()
+  console.log(courseMembers, selectedGroup, groups, value);
 
   useEffect(()=> {
     if(courseMembers === null || !groups?.length) return
+
+
+    let groupsMembers:GroupMembers = {}
+    for( let group of groups) {
+      groupsMembers[group.name] = group.members.map((m) => m.userId)
+    }
+    if(onChange) onChange(groupsMembers)
+
     setSelectedGroup(groups[0])
+
+
   },[groups, courseMembers])
 
 
@@ -75,14 +87,17 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
   }, [courseId])
 
   const fetchCourseMembers = async () => {
-    const response = await apiCall.get(ApiRoutes.COURSE_MEMBERS, { courseId })
-    setCourseMembers(response.data)
+    const response = await API.GET(ApiRoutes.COURSE_MEMBERS, { pathValues: { courseId } },"message")
+    if(!response.success) return
+
+    setCourseMembers(response.response.data.filter(m => m.relation === "enrolled"))
   }
 
-  const onChange: TableTransferProps["onChange"] = (nextTargetKeys) => {
+  const onChangeHandler: TableTransferProps["onChange"] = (nextTargetKeys) => {
     if (!selectedGroup) return console.error("No group selected")
-    setTargetKeys((curr) => ({ ...curr, [selectedGroup?.groupId]: nextTargetKeys }))
-    // TODO: make api call here or when pressing save
+    const newTargetKeys = { ...value, [selectedGroup?.name]: nextTargetKeys as any as number[]}
+    // setTargetKeys(newTargetKeys)
+    if(onChange) onChange(newTargetKeys)
   }
 
   const columns: TableColumnsType<CourseMemberType> = [
@@ -99,8 +114,8 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
     },
   ]
 
-  const changeGroup: SelectProps["onChange"] = (e: number) => {
-    const group = groups.find((g) => g.groupId === e)
+  const changeGroup: SelectProps["onChange"] = (e: string) => {
+    const group = groups.find((g) => g.name === e)
     if (group == null) return console.error("Group not found: " + e)
     setSelectedGroup(group)
   }
@@ -110,7 +125,7 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
       if(!courseMembers) {
         return
       }
-      let randomGroups: Record<string, string[]> = {}
+      let randomGroups: Record<string, number[]> = {}
 
       let members = [...courseMembers]
       members = members.sort(() => Math.random() - 0.5)
@@ -118,10 +133,11 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
         const group = groups[i]
         const groupMembers = members.splice(0, group.capacity)
         // @ts-ignore //TODO: fix the types so i can remove the ts ignore
-        randomGroups[group.groupId] = groupMembers.map((m) => m.user.userId)
+        randomGroups[group.name] = groupMembers.map((m) => m.user.userId)
       }
       console.log(randomGroups);
-      setTargetKeys(randomGroups)
+      // setTargetKeys(randomGroups)
+      if(onChange) onChange(randomGroups)
   }
 
   const renderFooter: TransferProps["footer"] = (_, info) => {
@@ -134,13 +150,13 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
           info?.direction === "left" ? <Button disabled={!courseMembers} onClick={randomizeGroups}>{t("project.change.randomizeGroups")}</Button>:
           <Select
             showSearch
-            value={selectedGroup?.groupId}
+            value={selectedGroup?.name}
             placeholder={t("project.change.selectGroup")}
             optionFilterProp="children"
             onChange={changeGroup}
             filterOption={filterOption}
             style={{width:"100%"}}
-            options={groups.map((g) => ({ label: g.name, value: g.groupId }))}
+            options={groups.map((g) => ({ label: g.name, value: g.name }))}
           />
         }
       </div>
@@ -153,29 +169,30 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
     if(!selectedGroup || !courseMembers) return []
     let users = new Set<string>()
 
-    const selectedGroupId = selectedGroup.groupId.toString()
-    for(const groupId in targetKeys) {
-      if(groupId === selectedGroupId) continue
-      targetKeys[groupId]?.forEach((key) => users.add(key.toString()))
+    const selectedname = selectedGroup.name.toString()
+    for(const name in value) {
+      if(name === selectedname) continue
+      value[name]?.forEach((key) => users.add(key.toString()))
     }
 
     return courseMembers.filter((u) => !users.has(u.user.userId.toString()))
-  },[selectedGroup,courseMembers,groups,targetKeys])
-  const overCapacity = selectedGroup && (targetKeys[selectedGroup.groupId]?.length??0) >  selectedGroup.capacity
+  },[selectedGroup,courseMembers,groups,value])
+  const overCapacity = selectedGroup && value && (value[selectedGroup.name]?.length??0) >  selectedGroup.capacity
 
   return (
     <>
       <TableTransfer
+        {...args}
         locale={{
           searchPlaceholder: t("project.change.searchUser"),
         }}
         emptyText={t("project.change.noMembersinGroup")}
         dataSource={dataSource}
-        targetKeys={selectedGroup?.groupId ? targetKeys[selectedGroup?.groupId] : []}
+        targetKeys={selectedGroup?.name && value ? value[selectedGroup?.name] as any as string[]: []}
         showSearch
         rowKey={(r) => r.user.userId}
         showSelectAll={false}
-        onChange={onChange}
+        onChange={onChangeHandler}
         filterOption={(inputValue, item) => item.user.name!.indexOf(inputValue) !== -1}
         leftColumns={columns}
         rightColumns={columns}
