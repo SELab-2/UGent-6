@@ -21,7 +21,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.security:spring-security-config'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
@@ -44,6 +43,9 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-devtools"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 // tasks.named('test',Test) {
@@ -52,6 +54,7 @@ dependencies {
 
 //     testLogging {
 //         events "passed"
+
 //     }
 // }
 
@@ -59,7 +62,6 @@ task unitTests (type: Test){
 
 	exclude '**/docker'
 
-	
 	useJUnitPlatform()
        maxHeapSize = '1G'
 
@@ -67,5 +69,17 @@ task unitTests (type: Test){
          events "passed"
      }
 
+}
+
+task allTest (type: Test) {
+
+	include '**'
+	useJUnitPlatform()
+	maxHeapSize = '1G'
+
+
+	testLogging {
+		events "passed"
+	}
 }
 

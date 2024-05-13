@@ -124,9 +124,6 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "User not found", null);
         }
 
-
-
-
         if (groupClusterRepository.userInGroupForCluster(group.getClusterId(), userId)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is already in a group for this cluster", null);
         }

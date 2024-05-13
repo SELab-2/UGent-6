@@ -43,8 +43,11 @@ public class EntityToJsonConverter {
 
   public GroupJson groupEntityToJson(GroupEntity groupEntity) {
         GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
+        if (cluster == null) {
+            throw new RuntimeException("Cluster not found");
+        }
         GroupJson group = new GroupJson(cluster.getMaxSize(), groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
-        if (cluster != null && cluster.getGroupAmount() > 1){
+        if (cluster.getMaxSize() > 1){
             group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
         } else {
             group.setGroupClusterUrl(null);
@@ -144,23 +147,23 @@ public class EntityToJsonConverter {
         if (groupId == null) {
             return new ProjectResponseJsonWithStatus(
                     projectEntityToProjectResponseJson(project, course, user),
-                    "no group"
+                    ProjectStatus.no_group.toString()
             );
         }
         SubmissionEntity sub = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
-        String status;
+        ProjectStatus status;
         if (sub == null) {
-            status = "not started";
-        } else if (sub.getStructureAccepted() && sub.getStructureAccepted()) {
-            status = "correct";
+            status = ProjectStatus.not_started;
+        } else if (sub.getStructureAccepted() && sub.getDockerAccepted()) {
+            status = ProjectStatus.correct;
         } else {
-            status = "incorrect";
+            status = ProjectStatus.incorrect;
         }
 
 
         return new ProjectResponseJsonWithStatus(
                 projectEntityToProjectResponseJson(project, course, user),
-                status
+                status.toString()
         );
     }
 
@@ -182,7 +185,7 @@ public class EntityToJsonConverter {
         String submissionUrl = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/submissions";
         CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(course.getId(), user.getId())).orElse(null);
         if (courseUserEntity == null) {
-            return null;
+            throw new RuntimeException("User not found in course");
         }
 
         // GroupId is null if the user is a course_admin/creator
@@ -229,7 +232,6 @@ public class EntityToJsonConverter {
 
     public SubmissionJson getSubmissionJson(SubmissionEntity submission) {
       DockerTestFeedbackJson feedback;
-      TestEntity test = testRepository.findByProjectId(submission.getProjectId()).orElse(null);
         if (submission.getDockerTestState().equals(DockerTestState.running)) {
           feedback = null;
         } else if (submission.getDockerTestType().equals(DockerTestType.NONE)) {

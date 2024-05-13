@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +26,7 @@ public class UserUtilTest {
   @Mock
   private UserRepository userRepository;
 
+  @Spy
   @InjectMocks
   private UserUtil userUtil;
 
@@ -32,25 +35,29 @@ public class UserUtilTest {
   @BeforeEach
   public void setUp() {
     user = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
-    user.setId(1L);
+    user.setId(87L);
   }
 
   @Test
   public void testUserExists() {
-    when(userRepository.existsById(anyLong())).thenReturn(true);
-    assertTrue(userUtil.userExists(1L));
+    /* The user exists */
+    when(userRepository.existsById(user.getId())).thenReturn(true);
+    assertTrue(userUtil.userExists(user.getId()));
 
-    when(userRepository.existsById(anyLong())).thenReturn(false);
-    assertFalse(userUtil.userExists(1L));
+    /* The user does not exist */
+    when(userRepository.existsById(user.getId())).thenReturn(false);
+    assertFalse(userUtil.userExists(user.getId()));
   }
 
   @Test
   public void testGetUserIfExists() {
-    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-    assertEquals(user, userUtil.getUserIfExists(1L));
+    /* The user exists */
+    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+    assertEquals(user, userUtil.getUserIfExists(user.getId()));
 
-    when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
-    assertNull(userUtil.getUserIfExists(1L));
+    /* The user does not exist */
+    when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+    assertNull(userUtil.getUserIfExists(user.getId()));
   }
 
   @Test
@@ -61,14 +68,61 @@ public class UserUtilTest {
     json.setEmail("newEmail@example.com");
     json.setRole("student");
 
-    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-    CheckResult<UserEntity> result = userUtil.checkForUserUpdateJson(1L, json);
+    /* All checks succeed */
+    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+    CheckResult<UserEntity> result = userUtil.checkForUserUpdateJson(user.getId(), json);
     assertEquals(HttpStatus.OK, result.getStatus());
     assertEquals(user, result.getData());
 
+    /* Not a valid email */
     json.setEmail("invalidEmail");
-    result = userUtil.checkForUserUpdateJson(1L, json);
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-    assertEquals("Email is not valid", result.getMessage());
+    json.setEmail("newEmail@example.com");
+
+    /* Surname is blank */
+    json.setSurname("");
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* Name is blank */
+    json.setSurname("newSurname");
+    json.setName("");
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* Role is not valid */
+    json.setName("newName");
+    json.setRole("invalidRole");
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* Role is null */
+    json.setRole(null);
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* Email is null */
+    json.setRole("student");
+    json.setEmail(null);
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* Surname is null */
+    json.setEmail("email.email@email.email");
+    json.setSurname(null);
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* Name is null */
+    json.setSurname("newSurname");
+    json.setName(null);
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    /* User not found */
+    when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+    result = userUtil.checkForUserUpdateJson(user.getId(), json);
+    assertEquals(HttpStatus.NOT_FOUND, result.getStatus());
   }
 }

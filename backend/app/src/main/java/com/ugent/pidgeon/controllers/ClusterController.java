@@ -174,7 +174,7 @@ public class ClusterController {
         }
         clusterEntity.setMaxSize(clusterJson.getCapacity());
         clusterEntity.setName(clusterJson.getName());
-        groupClusterRepository.save(clusterEntity);
+        clusterEntity = groupClusterRepository.save(clusterEntity);
         return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity));
     }
 
@@ -183,7 +183,7 @@ public class ClusterController {
      *
      * @param clusterid  identifier of a cluster
      * @param auth authentication object of the requesting user
-     * @param clusterFillJson ClusterFillJson object containing a map of all groups and their
+     * @param clusterFillMap Map object containing a map of all groups and their
      *                        members of that cluster
      * @return ResponseEntity<?>
      * @HttpMethod PUT
@@ -226,7 +226,7 @@ public class ClusterController {
 
             groupCluster.setGroupAmount(clusterFillJson.getClusterGroupMembers().size());
             groupClusterRepository.save(groupCluster);
-            return ResponseEntity.status(HttpStatus.OK).body("Filled group cluster successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.clusterEntityToClusterJson(groupCluster));
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");

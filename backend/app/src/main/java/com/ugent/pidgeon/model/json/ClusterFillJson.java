@@ -18,4 +18,8 @@ public class ClusterFillJson {
     return clusterGroupMembers;
   }
 
+  public void addClusterGroupMembers(String clusterId, Long[] groupIds) {
+    clusterGroupMembers.put(clusterId, groupIds);
+  }
+
 }

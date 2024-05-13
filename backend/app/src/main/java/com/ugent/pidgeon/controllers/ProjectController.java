@@ -82,7 +82,7 @@ public class ProjectController {
       }
     }
 
-    return ResponseEntity.ok().body(new userProjectsJson(enrolledProjects, adminProjects));
+    return ResponseEntity.ok().body(new UserProjectsJson(enrolledProjects, adminProjects));
   }
 
 

@@ -40,8 +40,7 @@ public class CommonDatabaseActions {
     private TestRepository testRepository;
     @Autowired
     private FileUtil fileUtil;
-  @Autowired
-  private FileRepository fileRepository;
+
   @Autowired
   private CourseRepository courseRepository;
   @Autowired
@@ -55,17 +54,20 @@ public class CommonDatabaseActions {
      */
     public boolean removeGroup(long groupId) {
         try {
-            // Delete the group
-            groupRepository.deleteGroupUsersByGroupId(groupId);
-            groupRepository.deleteSubmissionsByGroupId(groupId);
-            groupRepository.deleteGroupFeedbacksByGroupId(groupId);
-            groupRepository.deleteById(groupId);
+            GroupEntity group = groupRepository.findById(groupId).orElse(null);
+            if (group != null) {
+                // Delete the group
+                groupRepository.deleteGroupUsersByGroupId(groupId);
+                groupRepository.deleteSubmissionsByGroupId(groupId);
+                groupRepository.deleteGroupFeedbacksByGroupId(groupId);
+                groupRepository.deleteById(groupId);
 
-            // update groupcount in cluster
-            groupClusterRepository.findById(groupId).ifPresent(cluster -> {
-                cluster.setGroupAmount(cluster.getGroupAmount() - 1);
-                groupClusterRepository.save(cluster);
-            });
+                // update groupcount in cluster
+                groupClusterRepository.findById(group.getClusterId()).ifPresent(cluster -> {
+                    cluster.setGroupAmount(cluster.getGroupAmount() - 1);
+                    groupClusterRepository.save(cluster);
+                });
+            }
             return true;
         } catch (Exception e) {
             return false;
@@ -109,7 +111,16 @@ public class CommonDatabaseActions {
         }
         // Find the group of the user
         Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
-        return groupEntityOptional.filter(groupEntity -> removeGroup(groupEntity.getId())).isPresent();
+        if (!groupEntityOptional.isPresent()) {
+            return false;
+        }
+        GroupEntity groupEntity = groupEntityOptional.get();
+        // Delete the group
+        removeGroup(groupEntity.getId());
+
+        groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() - 1);
+        groupClusterRepository.save(groupClusterEntity);
+        return true;
     }
 
     /**
@@ -139,7 +150,9 @@ public class CommonDatabaseActions {
                     return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
                 }
                 CheckResult<Void> delRes =  deleteTestById(projectEntity, testEntity);
-                return delRes;
+                if (!delRes.getStatus().equals(HttpStatus.OK)) {
+                    return delRes;
+                }
             }
 
             projectRepository.delete(projectEntity);
@@ -177,13 +190,18 @@ public class CommonDatabaseActions {
      * @return CheckResult with the status of the deletion
      */
     public CheckResult<Void> deleteTestById(ProjectEntity projectEntity, TestEntity testEntity) {
-        projectEntity.setTestId(null);
-        projectRepository.save(projectEntity);
-        testRepository.deleteById(testEntity.getId());
-        if(!testRepository.imageIsUsed(testEntity.getDockerImage())){
-            DockerSubmissionTestModel.removeDockerImage(testEntity.getDockerImage());
+        try {
+            projectEntity.setTestId(null);
+            projectRepository.save(projectEntity);
+            testRepository.deleteById(testEntity.getId());
+            if(!testRepository.imageIsUsed(testEntity.getDockerImage())){
+                DockerSubmissionTestModel.removeDockerImage(testEntity.getDockerImage());
+            }
+            return new CheckResult<>(HttpStatus.OK, "", null);
+        } catch (Exception e) {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting test", null);
         }
-        return new CheckResult<>(HttpStatus.OK, "", null);
+
     }
 
     /**
@@ -194,9 +212,10 @@ public class CommonDatabaseActions {
     public CheckResult<Void> deleteClusterById(long clusterId) {
         try {
             for (GroupEntity group : groupRepository.findAllByClusterId(clusterId)) {
-                // Delete all groupUsers
-                groupUserRepository.deleteAllByGroupId(group.getId());
-                groupRepository.deleteById(group.getId());
+                boolean res = removeGroup(group.getId());
+                if (!res) {
+                    return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting cluster", null);
+                }
             }
             groupClusterRepository.deleteById(clusterId);
             return new CheckResult<>(HttpStatus.OK, "", null);
@@ -271,7 +290,7 @@ public class CommonDatabaseActions {
             courseId,
             groupCluster.getMaxSize(),
             groupCluster.getName(),
-            groupCluster.getGroupAmount()
+            copyGroups ? groupCluster.getGroupAmount() : 0
         );
         newGroupCluster.setCreatedAt(OffsetDateTime.now());
 
