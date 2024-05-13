@@ -33,11 +33,50 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
   )
 }
 
+function isValidTemplate(template: string): string {
+  if(!template?.length) return "" // Template is optional
+  let atLeastOne = false; // Template should not be empty
+  const lines = template.split("\n");
+  if (lines[0].charAt(0) !== '@') {
+    return 'Error: The first character of the first line should be "@"';
+  }
+  let isConfigurationLine = false;
+  for (const line of lines) {
+    if(line.length === 0){ // skip line if empty
+      continue;
+    }
+    if (line.charAt(0) === '@') {
+      atLeastOne = true;
+      isConfigurationLine = true;
+      continue;
+    }
+    if (isConfigurationLine) {
+      if (line.charAt(0) === '>') {
+        const isDescription = line.length >= 13 && line.substring(0, 13).toLowerCase() === ">description=";
+        // option lines
+        if (line.toLowerCase() !== ">required" && line.toLowerCase() !== ">optional"
+            && !isDescription) {
+          return 'Error: Option lines should be either ">Required", ">Optional" or start with ">Description="';
+        }
+      } else {
+        isConfigurationLine = false;
+      }
+    }
+  }
+  if (!atLeastOne) {
+    return 'Error: Template should not be empty';
+  }
+  return '';
+}
+
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const dockerImage = Form.useWatch("dockerImage", form)
 
   const dockerDisabled = !dockerImage?.length
+
+
+
   return (
     <>
       <Form.Item
@@ -72,9 +111,17 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           />
 
           <Form.Item
-            label="Sjabloon"
-            name="sjabloon"
+            label="Docker template"
+            name="dockerTemplate"
             tooltip="TODO write docs for this"
+            rules={[
+              {
+                validator: (_, value) => {
+                  const errorMessage = isValidTemplate(value);
+                  return errorMessage === '' ? Promise.resolve() : Promise.reject(new Error(errorMessage));
+                },
+              },
+            ]}
           >
             <Input.TextArea
               autoSize={{ minRows: 3 }}
@@ -85,7 +132,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           <UploadBtn
             form={form}
             disabled={dockerDisabled}
-            fieldName="sjabloon"
+            fieldName="dockerTemplate"
           />
         </>
     </>

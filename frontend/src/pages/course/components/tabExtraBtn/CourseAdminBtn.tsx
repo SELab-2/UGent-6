@@ -1,4 +1,4 @@
-import { LogoutOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons"
+import { CopyOutlined, LogoutOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons"
 import { Button, Dropdown } from "antd"
 import { MenuProps } from "antd/lib";
 import { FC, useContext } from "react";
@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { AppRoutes } from "../../../../@types/routes";
 import { UserContext } from "../../../../providers/UserProvider";
 import { leaveCourse } from "./CourseMembershipService";
+import useApi from "../../../../hooks/useApi";
+import { ApiRoutes } from "../../../../@types/requests.d";
 
 
 
@@ -17,14 +19,25 @@ const CourseAdminBtn:FC<{courseId:string}> = ({courseId}) => {
   const { member } = useContext(CourseContext)
   const navigate = useNavigate()
   const  userContext  = useContext(UserContext)
+  const API = useApi()
 
 
   const leaveCourseHandler = async () => {
-    const result = await leaveCourse(courseId, t);
+    await leaveCourse(courseId, t);
     await userContext.updateCourses()
     navigate(AppRoutes.HOME);
   }
 
+  const makeCopy = async () => {
+    const course = await API.POST(ApiRoutes.COURSE_COPY, {body: undefined, pathValues: {courseId: courseId}}, {
+     mode: "message",
+     successMessage: t("course.copySuccess"), 
+    })
+    if(!course.success) return
+    await userContext.updateCourses()
+
+    navigate(AppRoutes.COURSE.replace(":courseId", course.response.data.courseId+""))
+  }
 
   const items: MenuProps['items'] = [
     {
@@ -32,6 +45,12 @@ const CourseAdminBtn:FC<{courseId:string}> = ({courseId}) => {
       label: t("project.change.create"),
       icon: <PlusOutlined/>,
       onClick: () => navigate(AppRoutes.PROJECT_CREATE.replace(":courseId", courseId))
+    },
+    {
+      key: '3',
+      label: t("course.copy"),
+      icon: <CopyOutlined/>,
+      onClick: makeCopy
     },
     {
       key: '2',

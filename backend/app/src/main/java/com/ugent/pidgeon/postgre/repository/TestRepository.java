@@ -7,6 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface TestRepository extends JpaRepository<TestEntity, Long> {
+    @Query(value = """
+      SELECT CASE WHEN EXISTS (SELECT t FROM TestEntity  t WHERE t.dockerImage = ?1)
+      THEN true
+      ELSE false
+      END
+      """)
+    boolean imageIsUsed(String image);
+
 
     @Query(value ="SELECT t FROM ProjectEntity p JOIN TestEntity t ON p.testId = t.id WHERE p.id = ?1")
     Optional<TestEntity> findByProjectId(long projectId);

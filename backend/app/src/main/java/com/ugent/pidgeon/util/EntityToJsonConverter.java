@@ -6,10 +6,10 @@ import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import com.ugent.pidgeon.postgre.models.types.DockerTestState;
+import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,9 +35,13 @@ public class EntityToJsonConverter {
     private SubmissionRepository submissionRepository;
   @Autowired
   private ClusterUtil clusterUtil;
+  @Autowired
+  private TestUtil testUtil;
+  @Autowired
+  private TestRepository testRepository;
 
 
-    public GroupJson groupEntityToJson(GroupEntity groupEntity) {
+  public GroupJson groupEntityToJson(GroupEntity groupEntity) {
         GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
         GroupJson group = new GroupJson(cluster.getMaxSize(), groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
         if (cluster != null && cluster.getGroupAmount() > 1){
@@ -224,6 +228,18 @@ public class EntityToJsonConverter {
 
 
     public SubmissionJson getSubmissionJson(SubmissionEntity submission) {
+      DockerTestFeedbackJson feedback;
+      TestEntity test = testRepository.findByProjectId(submission.getProjectId()).orElse(null);
+        if (submission.getDockerTestState().equals(DockerTestState.running)) {
+          feedback = null;
+        } else if (submission.getDockerTestType().equals(DockerTestType.NONE)) {
+          feedback =  new DockerTestFeedbackJson(DockerTestType.NONE, "", true);
+        }
+        else if (submission.getDockerTestType().equals(DockerTestType.SIMPLE)) {
+          feedback = new DockerTestFeedbackJson(DockerTestType.SIMPLE, submission.getDockerFeedback(), submission.getDockerAccepted());
+        } else {
+          feedback = new DockerTestFeedbackJson(DockerTestType.TEMPLATE, submission.getDockerFeedback(), submission.getDockerAccepted());
+        }
         return new SubmissionJson(
                 submission.getId(),
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
@@ -233,18 +249,20 @@ public class EntityToJsonConverter {
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
                 submission.getStructureAccepted(),
                 submission.getSubmissionTime(),
-                submission.getDockerAccepted(),
-                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/structurefeedback",
-                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/dockerfeedback"
+                submission.getStructureFeedback(),
+                feedback,
+                submission.getDockerTestState().toString(),
+            ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/artifacts"
         );
     }
 
     public TestJson testEntityToTestJson(TestEntity testEntity, long projectId) {
         return new TestJson(
                 ApiRoutes.PROJECT_BASE_PATH + "/" + projectId,
-                testEntity.getDockerImage(),
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/dockertest",
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/structuretest"
+            testEntity.getDockerImage(),
+            testEntity.getDockerTestScript(),
+            testEntity.getDockerTestTemplate(),
+            testEntity.getStructureTemplate()
         );
     }
 }

@@ -1,8 +1,7 @@
-import { Button, Card, Segmented, Tooltip, Typography } from "antd"
+import { Card, Segmented, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import CreateCourseModal from "./components/CreateCourseModal"
 import { useEffect, useState } from "react"
-import HorizontalCourseScroll from "./components/HorizontalCourseScroll"
 import apiCall from "../../util/apiFetch"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import ProjectTable from "./components/ProjectTable"
@@ -10,6 +9,7 @@ import ProjectTimeline from "../../components/other/ProjectTimeline"
 import { useLocalStorage } from "usehooks-ts"
 import { CalendarOutlined, NodeIndexOutlined, OrderedListOutlined, UnorderedListOutlined } from "@ant-design/icons"
 import ProjectCalander from "../../components/other/ProjectCalander"
+import CourseSection from "./components/CourseSection"
 
 export type ProjectsType = GET_Responses[ApiRoutes.COURSE_PROJECTS]
 
@@ -17,7 +17,7 @@ type ProjectView = "table" | "timeline" | "calendar"
 
 const Home = () => {
   const { t } = useTranslation()
-  const [projects, setProjects] = useState<ProjectsType | null>(null)
+  const [projects, setProjects] = useLocalStorage<ProjectsType | null>("__projects_cache",null)
   const [open, setOpen] = useState(false)
   const [projectsViewMode, setProjectsViewMode] = useLocalStorage<ProjectView>("projects_view", "table")
 
@@ -32,7 +32,7 @@ const Home = () => {
   return (
     <div>
       <div>
-        <HorizontalCourseScroll
+        <CourseSection
           projects={projects}
           onOpenNew={() => setOpen(true)}
         />

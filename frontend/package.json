@@ -9,6 +9,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@fontsource/jetbrains-mono": "^5.0.19",
     "@fontsource/roboto-mono": "^5.0.17",
+    "@mdx-js/react": "^3.0.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
@@ -39,7 +40,8 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "docs": "docusaurus"
   },
   "jest": {
     "preset": "ts-jest",

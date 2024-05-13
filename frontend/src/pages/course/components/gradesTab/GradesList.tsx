@@ -28,11 +28,11 @@ const GradesList: FC<{ feedback: CourseGradesType[]; courseId: number }> = ({ fe
         }
         renderItem={(score) => (
           <List.Item
-            actions={[
-              <Typography.Text>
+            actions={score.maxScore ? [
+              <Typography.Text key="score">
                 {score.groupFeedback!.score} / {score.maxScore}
               </Typography.Text>,
-            ]}
+            ] : []}
           >
             <List.Item.Meta
               title={

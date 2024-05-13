@@ -61,7 +61,7 @@ public class CourseUtil {
         if (courseUserEntity == null && !user.getRole().equals(UserRole.admin)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not part of the course", null);
         }
-        return new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, courseUserEntity.getRelation()));
+        return new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, courseUserEntity == null ? null : courseUserEntity.getRelation()));
     }
 
 
