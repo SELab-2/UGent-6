@@ -1,6 +1,8 @@
 package com.ugent.pidgeon.util;
 
 
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
@@ -38,8 +40,7 @@ public class CommonDatabaseActions {
     private TestRepository testRepository;
     @Autowired
     private FileUtil fileUtil;
-  @Autowired
-  private FileRepository fileRepository;
+
   @Autowired
   private CourseRepository courseRepository;
   @Autowired
@@ -53,17 +54,20 @@ public class CommonDatabaseActions {
      */
     public boolean removeGroup(long groupId) {
         try {
-            // Delete the group
-            groupRepository.deleteGroupUsersByGroupId(groupId);
-            groupRepository.deleteSubmissionsByGroupId(groupId);
-            groupRepository.deleteGroupFeedbacksByGroupId(groupId);
-            groupRepository.deleteById(groupId);
+            GroupEntity group = groupRepository.findById(groupId).orElse(null);
+            if (group != null) {
+                // Delete the group
+                groupRepository.deleteGroupUsersByGroupId(groupId);
+                groupRepository.deleteSubmissionsByGroupId(groupId);
+                groupRepository.deleteGroupFeedbacksByGroupId(groupId);
+                groupRepository.deleteById(groupId);
 
-            // update groupcount in cluster
-            groupClusterRepository.findById(groupId).ifPresent(cluster -> {
-                cluster.setGroupAmount(cluster.getGroupAmount() - 1);
-                groupClusterRepository.save(cluster);
-            });
+                // update groupcount in cluster
+                groupClusterRepository.findById(group.getClusterId()).ifPresent(cluster -> {
+                    cluster.setGroupAmount(cluster.getGroupAmount() - 1);
+                    groupClusterRepository.save(cluster);
+                });
+            }
             return true;
         } catch (Exception e) {
             return false;
@@ -107,7 +111,16 @@ public class CommonDatabaseActions {
         }
         // Find the group of the user
         Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
-        return groupEntityOptional.filter(groupEntity -> removeGroup(groupEntity.getId())).isPresent();
+        if (!groupEntityOptional.isPresent()) {
+            return false;
+        }
+        GroupEntity groupEntity = groupEntityOptional.get();
+        // Delete the group
+        removeGroup(groupEntity.getId());
+
+        groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() - 1);
+        groupClusterRepository.save(groupClusterEntity);
+        return true;
     }
 
     /**
@@ -131,18 +144,18 @@ public class CommonDatabaseActions {
                 }
             }
 
-            projectRepository.delete(projectEntity);
-
             if (projectEntity.getTestId() != null) {
                 TestEntity testEntity = testRepository.findById(projectEntity.getTestId()).orElse(null);
                 if (testEntity == null) {
                     return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
                 }
                 CheckResult<Void> delRes =  deleteTestById(projectEntity, testEntity);
-                return delRes;
+                if (!delRes.getStatus().equals(HttpStatus.OK)) {
+                    return delRes;
+                }
             }
 
-
+            projectRepository.delete(projectEntity);
 
             return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
@@ -178,15 +191,17 @@ public class CommonDatabaseActions {
      */
     public CheckResult<Void> deleteTestById(ProjectEntity projectEntity, TestEntity testEntity) {
         try {
-            testRepository.deleteById(testEntity.getId())   ;
-            CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
-            if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
-                return checkAndDeleteRes;
+            projectEntity.setTestId(null);
+            projectRepository.save(projectEntity);
+            testRepository.deleteById(testEntity.getId());
+            if(!testRepository.imageIsUsed(testEntity.getDockerImage())){
+                DockerSubmissionTestModel.removeDockerImage(testEntity.getDockerImage());
             }
-            return fileUtil.deleteFileById(testEntity.getDockerTestId());
+            return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting test", null);
         }
+
     }
 
     /**
@@ -197,9 +212,10 @@ public class CommonDatabaseActions {
     public CheckResult<Void> deleteClusterById(long clusterId) {
         try {
             for (GroupEntity group : groupRepository.findAllByClusterId(clusterId)) {
-                // Delete all groupUsers
-                groupUserRepository.deleteAllByGroupId(group.getId());
-                groupRepository.deleteById(group.getId());
+                boolean res = removeGroup(group.getId());
+                if (!res) {
+                    return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting cluster", null);
+                }
             }
             groupClusterRepository.deleteById(clusterId);
             return new CheckResult<>(HttpStatus.OK, "", null);
@@ -274,7 +290,7 @@ public class CommonDatabaseActions {
             courseId,
             groupCluster.getMaxSize(),
             groupCluster.getName(),
-            groupCluster.getGroupAmount()
+            copyGroups ? groupCluster.getGroupAmount() : 0
         );
         newGroupCluster.setCreatedAt(OffsetDateTime.now());
 
@@ -318,7 +334,7 @@ public class CommonDatabaseActions {
         if (project.getTestId() != null) {
             TestEntity test = testRepository.findById(project.getTestId()).orElse(null);
             if (test != null) {
-                CheckResult<TestEntity> checkResult = copyTest(test, newProject.getId());
+                CheckResult<TestEntity> checkResult = copyTest(test);
                 if (!checkResult.getStatus().equals(HttpStatus.OK)) {
                     return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
                 }
@@ -334,62 +350,20 @@ public class CommonDatabaseActions {
     }
 
     /**
-     * Copy a test and all its related data. Assumes that permissions are already checked
+     * Copy a test and all its related data. Assumes that permissions are already checked and that the parameters are valid.
      * @param test test that needs to be copied
-     * @param projectId id of the project the test is linked to
      * @return CheckResult with the status of the copy and the new test
      */
-    public CheckResult<TestEntity> copyTest(TestEntity test, long projectId) {
+    public CheckResult<TestEntity> copyTest(TestEntity test) {
         // Copy the test
         TestEntity newTest = new TestEntity(
             test.getDockerImage(),
-            test.getDockerTestId(),
-            test.getStructureTestId()
+            test.getDockerTestScript(),
+            test.getDockerTestTemplate(),
+            test.getStructureTemplate()
         );
-
-        // Copy the files linked to the test
-        try {
-            FileEntity dockerFile = fileRepository.findById(test.getDockerTestId()).orElse(null);
-            FileEntity structureFile = fileRepository.findById(test.getStructureTestId()).orElse(null);
-            if (dockerFile == null || structureFile == null) {
-                return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying test", null);
-            }
-
-            CheckResult<FileEntity> copyDockRes = copyTestFile(dockerFile, projectId);
-            if (!copyDockRes.getStatus().equals(HttpStatus.OK)) {
-                return new CheckResult<>(copyDockRes.getStatus(), copyDockRes.getMessage(), null);
-            }
-            newTest.setDockerTestId(copyDockRes.getData().getId());
-
-            CheckResult<FileEntity> copyStructRes = copyTestFile(structureFile, projectId);
-            if (!copyStructRes.getStatus().equals(HttpStatus.OK)) {
-                return new CheckResult<>(copyStructRes.getStatus(), copyStructRes.getMessage(), null);
-            }
-            newTest.setStructureTestId(copyStructRes.getData().getId());
-        } catch (Exception e) {
-            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying test", null);
-        }
 
         newTest = testRepository.save(newTest);
         return new CheckResult<>(HttpStatus.OK, "", newTest);
-    }
-
-
-    /**
-     * Copy a file and all its related data. Assumes that permissions are already checked
-     * @param file file to copy
-     * @param projectId id of the project the file is linked to
-     * @return CheckResult with the status of the copy and the new file
-     */
-    public CheckResult<FileEntity> copyTestFile(FileEntity file, long projectId) {
-        // Copy the file
-        try {
-            Path newPath = Filehandler.copyTest(Path.of(file.getPath()), projectId);
-            FileEntity newFile = new FileEntity(newPath.getFileName().toString(), newPath.toString(), file.getUploadedBy());
-            newFile = fileRepository.save(newFile);
-            return new CheckResult<>(HttpStatus.OK, "", newFile);
-        } catch (Exception e) {
-            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying file", null);
-        }
     }
 }

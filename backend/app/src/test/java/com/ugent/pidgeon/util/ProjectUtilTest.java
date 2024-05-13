@@ -7,17 +7,22 @@ import com.ugent.pidgeon.postgre.repository.ProjectRepository;
 import com.ugent.pidgeon.model.json.ProjectJson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class ProjectUtilTest {
 
   @Mock
@@ -26,217 +31,195 @@ public class ProjectUtilTest {
   @Mock
   private ClusterUtil clusterUtil;
 
+  @Spy
   @InjectMocks
   private ProjectUtil projectUtil;
 
+  private ProjectEntity projectEntity;
+  private UserEntity mockUser;
+
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
+    projectEntity = new ProjectEntity(
+        99L,
+        "projectName",
+        "projectDescription",
+        69L,
+        38L,
+        true,
+        34,
+        OffsetDateTime.now()
+    );
+    projectEntity.setId(64);
+
+    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    mockUser.setId(10L);
   }
 
   @Test
   public void testUserPartOfProject() {
-    long projectId = 1L;
-    long userId = 1L;
-    when(projectRepository.userPartOfProject(projectId, userId)).thenReturn(true);
-    boolean result = projectUtil.userPartOfProject(projectId, userId);
-    assertEquals(true, result);
+    /* User in project */
+    when(projectRepository.userPartOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(true);
+    assertEquals(true, projectUtil.userPartOfProject(projectEntity.getId(), mockUser.getId()));
+
+    /* User not in project */
+    when(projectRepository.userPartOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(false);
+    assertEquals(false, projectUtil.userPartOfProject(projectEntity.getId(), mockUser.getId()));
   }
+
 
   @Test
   public void testGetProjectIfExists() {
-    long projectId = 1L;
-    ProjectEntity projectEntity = new ProjectEntity();
-    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(projectEntity));
-    CheckResult<ProjectEntity> result = projectUtil.getProjectIfExists(projectId);
-    assertEquals(HttpStatus.OK, result.getStatus());
+    /* Project found */
+    when(projectRepository.findById(projectEntity.getId())).thenReturn(java.util.Optional.of(projectEntity));
+    CheckResult<ProjectEntity> checkResult = projectUtil.getProjectIfExists(projectEntity.getId());
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
+    assertEquals(projectEntity, checkResult.getData());
+
+    /* Project not found */
+    when(projectRepository.findById(projectEntity.getId())).thenReturn(java.util.Optional.empty());
+    checkResult = projectUtil.getProjectIfExists(projectEntity.getId());
+    assertEquals(HttpStatus.NOT_FOUND, checkResult.getStatus());
   }
-
-
-  @Test
-  public void testGetProjectIfExistsNotFound() {
-    long projectId = 1L;
-    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.empty());
-    CheckResult<ProjectEntity> result = projectUtil.getProjectIfExists(projectId);
-    assertEquals(HttpStatus.NOT_FOUND, result.getStatus());
-  }
-
 
   @Test
   public void testIsProjectAdmin() {
-    long projectId = 1L;
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    user.setRole(UserRole.admin);
-    when(projectRepository.adminOfProject(projectId, user.getId())).thenReturn(true);
-    CheckResult<Void> result = projectUtil.isProjectAdmin(projectId, user);
-    assertEquals(HttpStatus.OK, result.getStatus());
-  }
+    /* User is admin */
+    when(projectRepository.adminOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(true);
+    CheckResult<Void> checkResult = projectUtil.isProjectAdmin(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
 
+    /* User is not admin */
+    when(projectRepository.adminOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(false);
+    checkResult = projectUtil.isProjectAdmin(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.FORBIDDEN, checkResult.getStatus());
 
-  @Test
-  public void testIsProjectAdminForbidden() {
-    long projectId = 1L;
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    user.setRole(UserRole.student);
-    when(projectRepository.adminOfProject(projectId, user.getId())).thenReturn(false);
-    CheckResult<Void> result = projectUtil.isProjectAdmin(projectId, user);
-    assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
+    /* User is general admin */
+    mockUser.setRole(UserRole.admin);
+    checkResult = projectUtil.isProjectAdmin(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
   }
 
   @Test
   public void testGetProjectIfAdmin() {
-    long projectId = 1L;
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    user.setRole(UserRole.admin);
-    ProjectEntity projectEntity = new ProjectEntity();
-    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(projectEntity));
-    when(projectRepository.adminOfProject(projectId, user.getId())).thenReturn(true);
-    CheckResult<ProjectEntity> result = projectUtil.getProjectIfAdmin(projectId, user);
-    assertEquals(HttpStatus.OK, result.getStatus());
-  }
+    /* All checks succeed */
+    doReturn(new CheckResult<>(HttpStatus.OK, "", projectEntity)).when(projectUtil).getProjectIfExists(projectEntity.getId());
+    when(projectRepository.adminOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(true);
 
-  @Test
-  public void testGetProjectIfAdminForbidden() {
-    long projectId = 1L;
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    user.setRole(UserRole.student);
-    ProjectEntity projectEntity = new ProjectEntity();
-    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(projectEntity));
-    when(projectRepository.adminOfProject(projectId, user.getId())).thenReturn(false);
-    CheckResult<ProjectEntity> result = projectUtil.getProjectIfAdmin(projectId, user);
-    assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
+    CheckResult<ProjectEntity> checkResult = projectUtil.getProjectIfAdmin(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
+
+    /* User is not admin */
+    when(projectRepository.adminOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(false);
+    checkResult = projectUtil.getProjectIfAdmin(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.FORBIDDEN, checkResult.getStatus());
+
+    /* User is not project admin but admin role */
+    mockUser.setRole(UserRole.admin);
+    checkResult = projectUtil.getProjectIfAdmin(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
+
+    /* Project not found */
+    doReturn(new CheckResult<>(HttpStatus.NOT_FOUND, "Project not found", null)).when(projectUtil).getProjectIfExists(projectEntity.getId());
+    checkResult = projectUtil.getProjectIfAdmin(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.NOT_FOUND, checkResult.getStatus());
   }
 
   @Test
   public void testCheckProjectJson() {
-    long courseId = 1L;
-    ProjectJson projectJson = new ProjectJson();
-    projectJson.setName("Test Project");
-    projectJson.setDescription("This is a test project.");
-    projectJson.setMaxScore(100);
-    projectJson.setGroupClusterId(1L);
-    projectJson.setDeadline(OffsetDateTime.now().plusDays(1));
-    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), courseId)).thenReturn(
-        new CheckResult<>(HttpStatus.OK, "", null));
-    CheckResult<Void> result = projectUtil.checkProjectJson(projectJson, courseId);
-    assertEquals(HttpStatus.OK, result.getStatus());
-  }
+    ProjectJson projectJson = new ProjectJson(
+        "UpdateProjectName",
+        "UpdateProjectDescription",
+        69L,
+        true,
+        34,
+        OffsetDateTime.now().plusDays(1)
+    );
 
-  @Test
-  public void testCheckProjectJsonNullName() {
-    long courseId = 1L;
-    ProjectJson projectJson = new ProjectJson();
-    projectJson.setDescription("This is a test project.");
-    projectJson.setMaxScore(100);
-    projectJson.setGroupClusterId(1L);
-    projectJson.setDeadline(OffsetDateTime.now().plusDays(1));
-    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), courseId)).thenReturn(
-        new CheckResult<>(HttpStatus.OK, "", null));
-    CheckResult<Void> result = projectUtil.checkProjectJson(projectJson, courseId);
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-  }
+    /* All checks succeed */
+    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), projectEntity.getCourseId()))
+        .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
 
-  @Test
-  public void testCheckProjectJsonNullDescription() {
-    long courseId = 1L;
-    ProjectJson projectJson = new ProjectJson();
-    projectJson.setName("Test Project");
-    projectJson.setMaxScore(100);
-    projectJson.setGroupClusterId(1L);
-    projectJson.setDeadline(OffsetDateTime.now().plusDays(1));
-    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), courseId)).thenReturn(
-        new CheckResult<>(HttpStatus.OK, "", null));
-    CheckResult<Void> result = projectUtil.checkProjectJson(projectJson, courseId);
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-  }
+    CheckResult<Void> checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
 
-  @Test
-  public void testCheckProjectJsonNullMaxScore() {
-    long courseId = 1L;
-    ProjectJson projectJson = new ProjectJson();
-    projectJson.setName("Test Project");
-    projectJson.setDescription("This is a test project.");
-    projectJson.setGroupClusterId(1L);
-    projectJson.setDeadline(OffsetDateTime.now().plusDays(1));
-    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), courseId)).thenReturn(
-        new CheckResult<>(HttpStatus.OK, "", null));
-    CheckResult<Void> result = projectUtil.checkProjectJson(projectJson, courseId);
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-  }
+    /* projectJson maxScore is negative */
+    projectJson.setMaxScore(-1);
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
 
+    /* projectJson maxScore is zero */
+    projectJson.setMaxScore(0);
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
 
-  @Test
-  public void testCheckProjectJsonNullDeadline() {
-    long courseId = 1L;
-    ProjectJson projectJson = new ProjectJson();
-    projectJson.setName("Test Project");
-    projectJson.setDescription("This is a test project.");
-    projectJson.setMaxScore(100);
-    projectJson.setGroupClusterId(1L);
-    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), courseId)).thenReturn(
-        new CheckResult<>(HttpStatus.OK, "", null));
-    CheckResult<Void> result = projectUtil.checkProjectJson(projectJson, courseId);
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-  }
+    /* projectJson no max score */
+    projectJson.setMaxScore(null);
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
 
-  @Test
-  public void testCheckProjectDeadlinePast() {
-    long courseId = 1L;
-    ProjectJson projectJson = new ProjectJson();
-    projectJson.setName("Test Project");
-    projectJson.setDescription("This is a test project.");
-    projectJson.setMaxScore(100);
-    projectJson.setGroupClusterId(1L);
+    /* projectJson deadline is already passed */
     projectJson.setDeadline(OffsetDateTime.now().minusDays(1));
-    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), courseId)).thenReturn(
-        new CheckResult<>(HttpStatus.OK, "", null));
-    CheckResult<Void> result = projectUtil.checkProjectJson(projectJson, courseId);
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
+
+    /* Cluster not part of course */
+    when(clusterUtil.partOfCourse(projectJson.getGroupClusterId(), projectEntity.getCourseId()))
+        .thenReturn(new CheckResult<>(HttpStatus.NOT_FOUND, "Cluster not part of course", null));
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.NOT_FOUND, checkResult.getStatus());
+
+    /* name is blank */
+    projectJson.setName("");
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
+
+    /* deadline is null */
+    projectJson.setDeadline(null);
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
+
+    /* groupClusterId is null */
+    projectJson.setDeadline(OffsetDateTime.now().plusDays(1));
+    projectJson.setGroupClusterId(null);
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
+
+    /* description is null */
+    projectJson.setDescription(null);
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
+
+    /* name is null */
+    projectJson.setName(null);
+    checkResult = projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId());
+    assertEquals(HttpStatus.BAD_REQUEST, checkResult.getStatus());
   }
 
   @Test
   public void testCanGetProject() {
-    long projectId = 1L;
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    user.setRole(UserRole.admin);
-    ProjectEntity projectEntity = new ProjectEntity();
-    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(projectEntity));
-    when(projectRepository.userPartOfProject(projectId, user.getId())).thenReturn(true);
-    when(projectRepository.adminOfProject(projectId, user.getId())).thenReturn(true);
-    CheckResult<ProjectEntity> result = projectUtil.canGetProject(projectId, user);
-    assertEquals(HttpStatus.OK, result.getStatus());
+    /* User is student */
+    when(projectRepository.findById(projectEntity.getId())).thenReturn(java.util.Optional.of(projectEntity));
+    when(projectRepository.userPartOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(true);
+
+    CheckResult<ProjectEntity> checkResult = projectUtil.canGetProject(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
+
+    /* User is admin */
+    when(projectRepository.userPartOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(false);
+    mockUser.setRole(UserRole.admin);
+    checkResult = projectUtil.canGetProject(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.OK, checkResult.getStatus());
+
+    /* User is not part of project */
+    mockUser.setRole(UserRole.student);
+    checkResult = projectUtil.canGetProject(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.FORBIDDEN, checkResult.getStatus());
+
+    /* Project not found */
+    when(projectRepository.findById(projectEntity.getId())).thenReturn(java.util.Optional.empty());
+    checkResult = projectUtil.canGetProject(projectEntity.getId(), mockUser);
+    assertEquals(HttpStatus.NOT_FOUND, checkResult.getStatus());
   }
-
-  @Test
-  public void testCanGetProjectForbidden() {
-    long projectId = 1L;
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    user.setRole(UserRole.student);
-    ProjectEntity projectEntity = new ProjectEntity();
-    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(projectEntity));
-    when(projectRepository.userPartOfProject(projectId, user.getId())).thenReturn(false);
-    when(projectRepository.adminOfProject(projectId, user.getId())).thenReturn(false);
-    CheckResult<ProjectEntity> result = projectUtil.canGetProject(projectId, user);
-    assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
-  }
-
-  @Test
-  public void testCanGetProjectNotFound() {
-    long projectId = 1L;
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    user.setRole(UserRole.admin);
-    when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.empty());
-    CheckResult<ProjectEntity> result = projectUtil.canGetProject(projectId, user);
-    assertEquals(HttpStatus.NOT_FOUND, result.getStatus());
-  }
-
-
 
 }

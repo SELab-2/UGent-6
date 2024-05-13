@@ -48,7 +48,7 @@ const Submit = () => {
         </Row>
         <Row>
         <Card
-        style={{  width: "100%", maxWidth: "1200px", height: "4rem", margin: "1rem" }}
+        style={{  width: "100%", maxWidth: "1200px", height: "4rem", margin: "1rem 0" }}
         styles={{ body: { padding:"10px 0",display:"flex",gap:"1rem" } }}
       >
         <Button size="large" onClick={() => navigate(-1)}>

@@ -1,12 +1,20 @@
 package com.ugent.pidgeon.util;
 
+import com.ugent.pidgeon.model.json.ClusterFillJson;
 import com.ugent.pidgeon.model.json.GroupClusterCreateJson;
 import com.ugent.pidgeon.model.json.GroupClusterUpdateJson;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserId;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -17,6 +25,8 @@ public class ClusterUtil {
     private GroupClusterRepository groupClusterRepository;
     @Autowired
     private CourseUtil courseUtil;
+  @Autowired
+  private CourseUserRepository courseUserRepository;
 
     /**
      * Check if a cluster is an individual cluster. This means that it only contains one group
@@ -168,6 +178,26 @@ public class ClusterUtil {
 
         if (clusterJson.groupCount() < 0) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "Group count must be 0 or greater", null);
+        }
+
+        return new CheckResult<>(HttpStatus.OK, "", null);
+    }
+
+    public CheckResult<Void> checkFillClusterJson(ClusterFillJson fillJson, GroupClusterEntity cluster) {
+        Collection<Long[]> members = fillJson.getClusterGroupMembers().values();
+
+        Set<Long> seen = new HashSet<>();
+        for (Long[] member : members) {
+            for (Long userId : member) {
+                CourseUserEntity courseUser = courseUserRepository.findById(new CourseUserId(cluster.getCourseId(), userId)).orElse(null);
+                if (courseUser == null || !courseUser.getRelation().equals(CourseRelation.enrolled)) {
+                    return new CheckResult<>(HttpStatus.BAD_REQUEST, "User with id " + userId + " is not enrolled in the course", null);
+                }
+                if (seen.contains(userId)) {
+                    return new CheckResult<>(HttpStatus.BAD_REQUEST, "Can't add a user to 2 different groups", null);
+                }
+                seen.add(userId);
+            }
         }
 
         return new CheckResult<>(HttpStatus.OK, "", null);

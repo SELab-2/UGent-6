@@ -12,7 +12,7 @@ const VisibleTab: FC<PropsWithChildren<{ visible: boolean }>> = ({ visible, chil
   return <div style={{ display: visible ? "block" : "none" }}>{children}</div>
 }
 
-const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardProps; }>> = ({ children, cardProps, form }) => {
+const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardProps; error?: JSX.Element | null }>> = ({ children, cardProps, form,error }) => {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
@@ -57,6 +57,7 @@ const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardPr
       }}
       onTabChange={onTabChange}
     >
+      {error}
       <VisibleTab visible={activeTab === "general"}>
         <GeneralFormTab form={form} />
       </VisibleTab>

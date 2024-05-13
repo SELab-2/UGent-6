@@ -18,8 +18,6 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
   const selectedClusterId = Form.useWatch("groupClusterId", form)
 
-  console.log(selectedClusterId)
-
   useEffect(() => {
     if (selectedClusterId == null) setSelectedCluster(null)
     else {

@@ -33,12 +33,7 @@ const AuthNav = () => {
         {
           key: Themes.DARK,
           label: t("nav.dark"),
-        },
-        {
-          key: Themes.DODONA,
-          label: "Dodona",
-          
-        },
+        }
       ]
     },
     {
@@ -59,7 +54,6 @@ const AuthNav = () => {
         })
         break
       case Themes.DARK:
-      case Themes.DODONA:
       case Themes.LIGHT:
         app.setTheme(menu.key as Themes)
         break

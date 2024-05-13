@@ -6,7 +6,7 @@ import useUser from "../hooks/useUser"
 import { UserCourseType } from "../providers/UserProvider"
 import apiCall from "../util/apiFetch"
 import { ApiRoutes } from "../@types/requests.d"
-import useApi from "../pages/index/components/useApi"
+import useApi from "../hooks/useApi"
 
 export type CourseContextType = {
   course: CourseType

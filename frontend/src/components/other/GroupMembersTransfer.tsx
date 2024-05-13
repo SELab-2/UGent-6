@@ -76,7 +76,7 @@ const GroupMembersTransfer: FC<{ groups: GroupType[]; onChanged: () => void; cou
 
   const fetchCourseMembers = async () => {
     const response = await apiCall.get(ApiRoutes.COURSE_MEMBERS, { courseId })
-    setCourseMembers(response.data)
+    setCourseMembers(response.data.filter(m => m.relation === "enrolled"))
   }
 
   const onChange: TableTransferProps["onChange"] = (nextTargetKeys) => {

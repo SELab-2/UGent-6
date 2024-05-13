@@ -14,7 +14,9 @@
     "member": "Lid",
     "members": "Leden",
     "archived": "Gearchiveerd",
-    "noCourses": "Geen vakken gevonden"
+    "noCourses": "Geen vakken gevonden",
+    "sortAscending": "A tot Z",
+    "sortDescending": "Z tot A"
   },
   "home": {
     "allCourses": "Alle vakken",
@@ -29,6 +31,7 @@
     "fetching": "Bezig met ophalen...",
     "timeline": "Tijdlijn",
     "table": "Tabel",
+    "docs": "Documentatie",
     "calendar": "Kalender",
     "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",
     "courseNameMaxLength": "Vak naam mag maximaal 50 karakters bevatten",
@@ -42,6 +45,7 @@
       "description": "Beschrijving",
       "course": "Vak",
       "deadline": "Deadline",
+      "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
       "projectStatus": "Status",
       "status": {
@@ -116,6 +120,7 @@
       "visible": "Project zichtbaar maken",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in",
+      "maxScoreHelp": "Wat is de maximale score die je kunt behalen voor dit project? Als je het leeg laat, wordt het project niet beoordeeld",
       "deadline": "Deadline",
       "create": "Project aanmaken",
       "success": "Project succesvol aangemaakt",
@@ -136,7 +141,7 @@
       "groupSizeMessage": "Groep grootte moet groter dan 0 zijn",
       "amountOfGroupsMessage": "Aantal groepen moet groter dan 0 zijn",
       "selectGroup": "Selecteer een groep",
-      "noMembersinGroup": "Geen leden in deze groep",
+      "noMembersinGroup": "Geen leden gevonden",
       "searchUser": "Zoek gebruiker",
       "groupFull": "De groep bevat meer leden dan toegestaan volgens de capacitiet",
       "randomizeGroups": "Maak willekeurige groepen"
@@ -223,7 +228,9 @@
     "leave": "Vak verlaten",
     "leaveConfirm": "Ben je zeker dat je dit vak wil verlaten?",
     "leaveSuccess": "Vak succesvol verlaten",
-    "leaveFail": "Het lukte niet om het vak te verlaten"
+    "leaveFail": "Het lukte niet om het vak te verlaten",
+    "copy": "Maak kopie van dit vak",
+    "copySuccess": "Vak succesvol gekopieerd"
   },
   "cancel": "Annuleren",
   "ok": "Ok",
