@@ -9,6 +9,7 @@ import ThemeProvider from "./theme/ThemeProvider"
 import { AppProvider } from "./providers/AppProvider"
 import { UserProvider } from "./providers/UserProvider"
 import AppApiProvider from "./providers/AppApiProvider"
+import ErrorProvider from "./providers/ErrorProvider"
 
 type AppProps = {
   pca: IPublicClientApplication
@@ -27,7 +28,9 @@ function App({ pca }: AppProps) {
             <MsalProvider instance={pca}>
               <UserProvider>
                 <Layout>
-                  <AppRouter />
+                  <ErrorProvider>
+                    <AppRouter />
+                  </ErrorProvider>
                 </Layout>
               </UserProvider>
             </MsalProvider>

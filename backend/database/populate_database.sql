@@ -10,12 +10,12 @@ INSERT INTO users (name, surname, email, azure_id, role) VALUES
                                                              ('Charlie', 'Davis', 'charlie.davis@example.com', 'token_5', 'teacher');
 
 -- Inserting into `courses`
-INSERT INTO courses (course_id,course_name, description) VALUES
-                                                             (1,'Math 101', 'Introduction to Mathematics'),
-                                                             (2,'Science 101', 'Basics of Scientific Method'),
-                                                             (3,'History 101', 'World History Overview'),
-                                                             (4,'Computer Science 101', 'Introduction to Computing'),
-                                                             (5,'English 101', 'English Literature');
+INSERT INTO courses (course_id,course_name, description, course_year) VALUES
+                                                                          (1,'Math 101', 'Introduction to Mathematics',2023),
+                                                                          (2,'Science 101', 'Basics of Scientific Method',2023),
+                                                                          (3,'History 101', 'World History Overview',2023),
+                                                                          (4,'Computer Science 101', 'Introduction to Computing',2023),
+                                                                          (5,'English 101', 'English Literature',2023);
 
 -- Inserting into `course_users`
 -- Assume course_id and user_id start from 1 and match accordingly
@@ -53,15 +53,6 @@ INSERT INTO files (file_path, file_name, uploaded_by) VALUES
                                                           ('/path/to/file22', 'file22.txt', 3);
 
 
--- Assume tests are created before projects for foreign key constraints
--- Inserting into `tests`
-INSERT INTO tests (docker_image, docker_test, structure_test_id) VALUES
-                                                                     ('docker/image1', 16, 17),
-                                                                     ('docker/image2', 5, 6),
-                                                                     ('docker/image3', 8, 9),
-                                                                     ('docker/image4', 12, 13),
-                                                                     ('docker/image5', 14, 15);
-
 -- Inserting into `group_clusters`
 INSERT INTO group_clusters (course_id, cluster_name, max_size, group_amount) VALUES
                                                                                  (1, 'Project: priemgetallen', 4, 20),
@@ -93,8 +84,8 @@ INSERT INTO group_users (group_id, user_id) VALUES
 -- Linking solutions to projects and groups
 INSERT INTO projects (course_id, test_id, project_name, description, group_cluster_id, max_score, deadline)
 VALUES
-    (1, 1, 'Math project 1', 'Solve equations', 1, 20, '2024-03-20 09:00:00+02'),
-    (2, 2, 'Science Lab 1', 'Aparte reeks met enkel de opdracht-oefening zodat de interface van Dodona de deadline duidelijk maakt. Deze opdracht komt uit de hoofdstuk 5 en de eerdere oefeningen uit die reeks zullen je helpen tot een juiste oplossing te komen.
+    (1, null, 'Math project 1', 'Solve equations', 1, 20, '2024-03-20 09:00:00+02'),
+    (2, null, 'Science Lab 1', 'Aparte reeks met enkel de opdracht-oefening zodat de interface van Dodona de deadline duidelijk maakt. Deze opdracht komt uit de hoofdstuk 5 en de eerdere oefeningen uit die reeks zullen je helpen tot een juiste oplossing te komen.
 
 Jullie oplossing wordt geëvalueerd op basis van uitvoeringstijd (**50%**), geheugengebruik (25%) en codestijl (25%).
 
@@ -140,9 +131,9 @@ def global_multiple_alignment(infile: str | Path, output: str | Path | None = No
 212 156 65 -16 52 23 67 155 96 0
 <BLANKLINE>
 ```', 2, 6, '2024-06-22 12:00:00+02'),
-    (3, 3, 'History Essay 1', 'Discuss historical event', 3, NULL, '2024-03-22 12:00:00+02'),
-    (4, 4, 'Programming Assignment 1', 'Write code', 4, 4, '2024-03-23 14:45:00+02'),
-    (5, 5, 'Literature Analysis', 'Analyze text', 5, 10, '2024-03-24 10:00:00+02');
+    (3, null, 'History Essay 1', 'Discuss historical event', 3, NULL, '2024-03-22 12:00:00+02'),
+    (4, null, 'Programming Assignment 1', 'Write code', 4, 4, '2024-03-23 14:45:00+02'),
+    (5, null, 'Literature Analysis', 'Analyze text', 5, 10, '2024-03-24 10:00:00+02');
 
 
 -- Inserting into `group_grades`
@@ -162,12 +153,14 @@ INSERT INTO submissions (
     structure_accepted,
     docker_accepted,
     structure_feedback,
-    docker_feedback
+    docker_feedback,
+    docker_test_state,
+    docker_type
 ) VALUES
-      (1, 1, 1, true, true, NULL, NULL),
-      (2, 2, 2, false, true, 'ERROR: .....', NULL),
-      (3, 3, 3, true, false, NULL, 'Docker configuration needs improvement'),
-      (4, 4, 4, false, false, 'Structure needs improvement', 'Docker configuration needs improvement');
+      (1, 1, 1, true, true, NULL, NULL, 'finished', 'simple'),
+      (2, 2, 2, false, true, 'ERROR: .....', NULL, 'finished', 'simple'),
+      (3, 3, 3, true, false, NULL, 'Docker configuration needs improvement', 'finished', 'simple'),
+      (4, 4, 4, false, false, 'Structure needs improvement', 'Docker configuration needs improvement', 'finished', 'simple');
 
 
 

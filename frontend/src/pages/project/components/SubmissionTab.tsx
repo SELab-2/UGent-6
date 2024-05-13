@@ -12,13 +12,12 @@ const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId,
   const project = useProject()
 
   useEffect(() => {
-    //TODO: fetch submissions /api/projects/1/submissions/1
 
     if(!project) return 
     console.log(project.submissionUrl);
     apiCall.get(project.submissionUrl ).then((res) => {
-      console.log(res.data)
-      setSubmissions(res.data)
+      
+      setSubmissions(res.data.sort((a, b) => b.submissionId - a.submissionId))
     })
 
 

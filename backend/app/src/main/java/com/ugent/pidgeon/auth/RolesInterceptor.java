@@ -64,7 +64,7 @@ public class RolesInterceptor implements HandlerInterceptor {
                     userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.student, auth.getOid());
                     OffsetDateTime now = OffsetDateTime.now();
                     userEntity.setCreatedAt(now);
-                    userRepository.save(userEntity);
+                    userEntity = userRepository.save(userEntity);
                     System.out.println("User created with id: " + userEntity.getId());
 
                 }

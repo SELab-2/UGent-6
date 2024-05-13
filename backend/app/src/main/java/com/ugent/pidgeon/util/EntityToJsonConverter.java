@@ -6,10 +6,10 @@ import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import com.ugent.pidgeon.postgre.models.types.DockerTestState;
+import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,12 +33,21 @@ public class EntityToJsonConverter {
     private CourseUserRepository courseUserRepository;
     @Autowired
     private SubmissionRepository submissionRepository;
+  @Autowired
+  private ClusterUtil clusterUtil;
+  @Autowired
+  private TestUtil testUtil;
+  @Autowired
+  private TestRepository testRepository;
 
 
-    public GroupJson groupEntityToJson(GroupEntity groupEntity) {
+  public GroupJson groupEntityToJson(GroupEntity groupEntity) {
         GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
+        if (cluster == null) {
+            throw new RuntimeException("Cluster not found");
+        }
         GroupJson group = new GroupJson(cluster.getMaxSize(), groupEntity.getId(), groupEntity.getName(), ApiRoutes.CLUSTER_BASE_PATH + "/" + groupEntity.getClusterId());
-        if (cluster != null && cluster.getGroupAmount() > 1){
+        if (cluster.getMaxSize() > 1){
             group.setGroupClusterUrl(ApiRoutes.CLUSTER_BASE_PATH + "/" + cluster.getId());
         } else {
             group.setGroupClusterUrl(null);
@@ -93,7 +102,9 @@ public class EntityToJsonConverter {
                 ApiRoutes.COURSE_BASE_PATH + "/" + course.getId() + "/members",
                 hideKey ? null : joinLink,
                 hideKey ? null : course.getJoinKey(),
-                course.getArchivedAt()
+                course.getArchivedAt(),
+                course.getCreatedAt(),
+                course.getCourseYear()
         );
     }
 
@@ -105,7 +116,9 @@ public class EntityToJsonConverter {
                 course.getName(),
                 course.getId(),
                 course.getArchivedAt(),
-                memberCount
+                memberCount,
+                course.getCreatedAt(),
+                course.getCourseYear()
         );
     }
 
@@ -134,23 +147,23 @@ public class EntityToJsonConverter {
         if (groupId == null) {
             return new ProjectResponseJsonWithStatus(
                     projectEntityToProjectResponseJson(project, course, user),
-                    "no group"
+                    ProjectStatus.no_group.toString()
             );
         }
         SubmissionEntity sub = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(project.getId(), groupId).orElse(null);
-        String status;
+        ProjectStatus status;
         if (sub == null) {
-            status = "not started";
-        } else if (sub.getStructureAccepted() && sub.getStructureAccepted()) {
-            status = "correct";
+            status = ProjectStatus.not_started;
+        } else if (sub.getStructureAccepted() && sub.getDockerAccepted()) {
+            status = ProjectStatus.correct;
         } else {
-            status = "incorrect";
+            status = ProjectStatus.incorrect;
         }
 
 
         return new ProjectResponseJsonWithStatus(
                 projectEntityToProjectResponseJson(project, course, user),
-                status
+                status.toString()
         );
     }
 
@@ -172,7 +185,7 @@ public class EntityToJsonConverter {
         String submissionUrl = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/submissions";
         CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(course.getId(), user.getId())).orElse(null);
         if (courseUserEntity == null) {
-            return null;
+            throw new RuntimeException("User not found in course");
         }
 
         // GroupId is null if the user is a course_admin/creator
@@ -186,7 +199,10 @@ public class EntityToJsonConverter {
             }
         }
 
-
+        Long clusterId = project.getGroupClusterId();
+        if (clusterUtil.isIndividualCluster(clusterId)) {
+            clusterId = null;
+        }
         return new ProjectResponseJson(
                 courseEntityToCourseReference(course),
                 project.getDeadline(),
@@ -198,7 +214,8 @@ public class EntityToJsonConverter {
                 project.getMaxScore(),
                 project.isVisible(),
                 new ProjectProgressJson(completed, total),
-                groupId
+                groupId,
+                clusterId
         );
     }
 
@@ -214,6 +231,17 @@ public class EntityToJsonConverter {
 
 
     public SubmissionJson getSubmissionJson(SubmissionEntity submission) {
+      DockerTestFeedbackJson feedback;
+        if (submission.getDockerTestState().equals(DockerTestState.running)) {
+          feedback = null;
+        } else if (submission.getDockerTestType().equals(DockerTestType.NONE)) {
+          feedback =  new DockerTestFeedbackJson(DockerTestType.NONE, "", true);
+        }
+        else if (submission.getDockerTestType().equals(DockerTestType.SIMPLE)) {
+          feedback = new DockerTestFeedbackJson(DockerTestType.SIMPLE, submission.getDockerFeedback(), submission.getDockerAccepted());
+        } else {
+          feedback = new DockerTestFeedbackJson(DockerTestType.TEMPLATE, submission.getDockerFeedback(), submission.getDockerAccepted());
+        }
         return new SubmissionJson(
                 submission.getId(),
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
@@ -223,18 +251,20 @@ public class EntityToJsonConverter {
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",
                 submission.getStructureAccepted(),
                 submission.getSubmissionTime(),
-                submission.getDockerAccepted(),
-                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/structurefeedback",
-                ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/dockerfeedback"
+                submission.getStructureFeedback(),
+                feedback,
+                submission.getDockerTestState().toString(),
+            ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/artifacts"
         );
     }
 
     public TestJson testEntityToTestJson(TestEntity testEntity, long projectId) {
         return new TestJson(
                 ApiRoutes.PROJECT_BASE_PATH + "/" + projectId,
-                testEntity.getDockerImage(),
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/dockertest",
-                ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/structuretest"
+            testEntity.getDockerImage(),
+            testEntity.getDockerTestScript(),
+            testEntity.getDockerTestTemplate(),
+            testEntity.getStructureTemplate()
         );
     }
 }

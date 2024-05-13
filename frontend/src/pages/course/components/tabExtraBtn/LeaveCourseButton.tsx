@@ -19,7 +19,6 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
     const { t } = useTranslation();
     const [confirmLeaveVisible, setConfirmLeaveVisible] = useState<boolean>(false);
     const { message } = useAppApi()
-    const { member } = useContext(CourseContext)
     const  userContext  = useContext(UserContext)
 
     const handleLeaveConfirm = async () => {
@@ -42,26 +41,24 @@ const LeaveCourseButton: FC<LeaveCourseButtonProps> = ({ courseId }) => {
         setConfirmLeaveVisible(true);
     };
 
-    if(member.relation !== "creator") {
-        return (
-            <>
-                <Button type="text"
-                        onClick={showConfirmLeaveModal} icon={<LogoutOutlined/>}>
-                    {t("course.leave")}
-                </Button>
-                <Modal
-                    title={t("course.leave")}
-                    open={confirmLeaveVisible}
-                    onOk={handleLeaveConfirm}
-                    onCancel={handleLeaveCancel}
-                    okType="danger"
-                >
-                    <Text> {t("course.leaveConfirm")} </Text>
-                </Modal>
-            </>
-        );
-    }
-    return null;
+    return (
+        <>
+            <Button type="text"
+                    onClick={showConfirmLeaveModal} icon={<LogoutOutlined/>}>
+                {t("course.leave")}
+            </Button>
+            <Modal
+                title={t("course.leave")}
+                open={confirmLeaveVisible}
+                onOk={handleLeaveConfirm}
+                onCancel={handleLeaveCancel}
+                okType="danger"
+            >
+                <Text> {t("course.leaveConfirm")} </Text>
+            </Modal>
+        </>
+    );
+
 };
 
 export default LeaveCourseButton;

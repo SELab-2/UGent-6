@@ -136,7 +136,9 @@ public class GroupController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        commonDatabaseActions.removeGroup(groupid);
+        if (!commonDatabaseActions.removeGroup(groupid)) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting group");
+        }
         // Return 204
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group deleted");
     }

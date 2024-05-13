@@ -101,11 +101,15 @@ public class GroupUtil {
         if (group == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not found", null);
         }
+
+        boolean isAdmin = false;
+
         if (user.getId() != userId) {
             CheckResult<Void> admin = isAdminOfGroup(groupId, user);
             if (admin.getStatus() != HttpStatus.OK) {
                 return admin;
             }
+            isAdmin = true;
         } else {
             if (!groupRepository.userAccessToGroup(userId, groupId)) {
                 return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not part of the course", null);
@@ -120,9 +124,6 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "User not found", null);
         }
 
-
-
-
         if (groupClusterRepository.userInGroupForCluster(group.getClusterId(), userId)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is already in a group for this cluster", null);
         }
@@ -134,7 +135,7 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while checking cluster", null);
         }
 
-        if (cluster.getData().getMaxSize() <= groupRepository.countUsersInGroup(groupId)) {
+        if (cluster.getData().getMaxSize() <= groupRepository.countUsersInGroup(groupId) && !isAdmin) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Group is full", null);
         }
         if (clusterUtil.isIndividualCluster(group.getClusterId())) {

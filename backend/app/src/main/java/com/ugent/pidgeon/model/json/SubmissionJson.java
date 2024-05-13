@@ -14,29 +14,26 @@ public class SubmissionJson {
     private String fileUrl;
 
     private Boolean structureAccepted;
-    private Boolean dockerAccepted;
+    private String dockerStatus;
 
     @JsonSerialize(using = OffsetDateTimeSerializer.class)
     private OffsetDateTime submissionTime;
 
-    private String structureFeedbackUrl;
+    private String structureFeedback;
 
-    public String getDockerFeedbackUrl() {
-        return dockerFeedbackUrl;
-    }
 
-    public void setDockerFeedbackUrl(String dockerFeedbackUrl) {
-        this.dockerFeedbackUrl = dockerFeedbackUrl;
-    }
+    private DockerTestFeedbackJson dockerFeedback;
+    private String artifactUrl;
 
-    private String dockerFeedbackUrl;
+
 
     public SubmissionJson() {
     }
 
     public SubmissionJson(
             long id, String projectUrl, String groupUrl, Long projectId, Long groupId, String fileUrl,
-            Boolean structureAccepted, OffsetDateTime submissionTime, Boolean dockerAccepted, String structureFeedbackUrl, String dockerFeedbackUrl) {
+            Boolean structureAccepted, OffsetDateTime submissionTime, String structureFeedback, DockerTestFeedbackJson dockerFeedback, String dockerStatus,
+        String artifactUrl) {
         this.submissionId = id;
         this.projectUrl = projectUrl;
         this.groupUrl = groupUrl;
@@ -45,9 +42,10 @@ public class SubmissionJson {
         this.fileUrl = fileUrl;
         this.structureAccepted = structureAccepted;
         this.submissionTime = submissionTime;
-        this.dockerAccepted = dockerAccepted;
-        this.structureFeedbackUrl = structureFeedbackUrl;
-        this.dockerFeedbackUrl = dockerFeedbackUrl;
+        this.dockerFeedback = dockerFeedback;
+        this.structureFeedback = structureFeedback;
+        this.dockerStatus = dockerStatus;
+      this.artifactUrl = artifactUrl;
     }
 
     public long getSubmissionId() {
@@ -98,20 +96,14 @@ public class SubmissionJson {
         this.submissionTime = submissionTime;
     }
 
-    public Boolean getDockerAccepted() {
-        return dockerAccepted;
+
+
+    public String getStructureFeedback() {
+        return structureFeedback;
     }
 
-    public void setDockerAccepted(Boolean dockerAccepted) {
-        this.dockerAccepted = dockerAccepted;
-    }
-
-    public String getStructureFeedbackUrl() {
-        return structureFeedbackUrl;
-    }
-
-    public void setStructureFeedbackUrl(String structureFeedbackUrl) {
-        this.structureFeedbackUrl = structureFeedbackUrl;
+    public void setStructureFeedback(String structureFeedback) {
+        this.structureFeedback = structureFeedback;
     }
 
     public Long getProjectId() {
@@ -128,5 +120,29 @@ public class SubmissionJson {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public String getDockerStatus() {
+        return dockerStatus;
+    }
+
+    public void setDockerStatus(String dockerStatus) {
+        this.dockerStatus = dockerStatus;
+    }
+
+    public DockerTestFeedbackJson getDockerFeedback() {
+        return dockerFeedback;
+    }
+
+    public void setDockerFeedback(DockerTestFeedbackJson dockerFeedback) {
+        this.dockerFeedback = dockerFeedback;
+    }
+
+    public String getArtifactUrl() {
+        return artifactUrl;
+    }
+
+    public void setArtifactUrl(String artifactUrl) {
+        this.artifactUrl = artifactUrl;
     }
 }

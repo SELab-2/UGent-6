@@ -6,6 +6,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -60,7 +61,8 @@ public class CourseUtil {
         if (courseUserEntity == null && !user.getRole().equals(UserRole.admin)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not part of the course", null);
         }
-        return new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, courseUserEntity.getRelation()));
+        CourseRelation relation = courseUserEntity != null ? courseUserEntity.getRelation() : CourseRelation.creator;
+        return new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, relation));
     }
 
 
@@ -112,7 +114,7 @@ public class CourseUtil {
                 return new CheckResult<>(HttpStatus.BAD_REQUEST, "User is already part of the course", null);
             }
             if (!userUtil.userExists(request.getUserId())) {
-                return new CheckResult<>(HttpStatus.BAD_REQUEST, "User does not exist", null);
+                return new CheckResult<>(HttpStatus.NOT_FOUND, "User does not exist", null);
             }
         } else {
             if (!courseMember) {
@@ -120,17 +122,20 @@ public class CourseUtil {
             }
         }
 
-        if (user.getId() == request.getUserId()) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot change your own relation with this course", null);
-        }
-        if (request.getRelationAsEnum().equals(CourseRelation.creator)) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot change the creator of the course", null);
+        boolean isAdmin = user.getRole().equals(UserRole.admin);
+
+        if (user.getId() == request.getUserId() && !isAdmin) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot change your own relation with this course", null);
         }
 
-        boolean isAdmin = user.getRole().equals(UserRole.admin);
+        if (request.getRelationAsEnum().equals(CourseRelation.creator) && !isAdmin) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot change the creator of the course", null);
+        }
+
         boolean isCreator = userRelation.equals(CourseRelation.creator);
         boolean creatingAdmin = request.getRelationAsEnum().equals(CourseRelation.course_admin);
-        if (creatingAdmin && !isAdmin && !isCreator) {
+        boolean downgradingAdmin = courseMember && courseUserEntity.getRelation().equals(CourseRelation.course_admin) && !creatingAdmin;
+        if ((creatingAdmin || downgradingAdmin) && !isAdmin && !isCreator) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Only the course creator can create course admins", null);
         }
 
@@ -151,10 +156,10 @@ public class CourseUtil {
         CourseEntity course = courseCheck.getData().getFirst();
         CourseRelation relation = courseCheck.getData().getSecond();
         if (relation.equals(CourseRelation.creator)) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot leave a course you created", null);
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot leave a course you created", null);
         }
         if (course.getArchivedAt() != null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot leave an archived course", null);
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot leave an archived course", null);
         }
         return new CheckResult<>(HttpStatus.OK, "", relation);
     }
@@ -180,15 +185,20 @@ public class CourseUtil {
 
         CourseUserEntity courseUserEntity = courseUserRepository.findById(new CourseUserId(courseId, userId)).orElse(null);
         if (courseUserEntity == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "User is not part of the course", null);
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "User is not part of the course", null);
         }
 
         if (user.getId() == userId) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot delete yourself from the course", null);
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot delete yourself from the course", null);
         }
 
         if (courseUserEntity.getRelation().equals(CourseRelation.creator)) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Cannot delete the creator of the course", null);
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot delete the creator of the course", null);
+        }
+
+        boolean isAdmin = user.getRole().equals(UserRole.admin);
+        if (courseUserEntity.getRelation().equals(CourseRelation.course_admin) && !userRelation.equals(CourseRelation.creator) && !isAdmin){
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Only the creator can delete course admins", null);
         }
 
         return new CheckResult<>(HttpStatus.OK, "", courseUserEntity.getRelation());
@@ -259,9 +269,9 @@ public class CourseUtil {
             }
         }
 
-
-        if (courseJson.getName() == null || courseJson.getDescription() == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "name and description are required", null);
+        if (courseJson.getName() == null || courseJson.getDescription() == null || courseJson.getYear() == null) {
+            Logger.getGlobal().info(""+ courseJson.getYear());
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "name, description and year are required", null);
         }
 
         if (courseJson.getName().isBlank()) {

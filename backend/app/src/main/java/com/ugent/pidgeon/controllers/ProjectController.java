@@ -82,7 +82,7 @@ public class ProjectController {
       }
     }
 
-    return ResponseEntity.ok().body(new userProjectsJson(enrolledProjects, adminProjects));
+    return ResponseEntity.ok().body(new UserProjectsJson(enrolledProjects, adminProjects));
   }
 
 
@@ -311,7 +311,7 @@ public class ProjectController {
    * @return ResponseEntity with the status, no content
    */
   @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectId}")
-  @Roles({UserRole.teacher})
+  @Roles({UserRole.teacher, UserRole.student})
   public ResponseEntity<?> deleteProjectById(@PathVariable long projectId, Auth auth) {
     CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfAdmin(projectId, auth.getUserEntity());
     if (projectCheck.getStatus() != HttpStatus.OK) {

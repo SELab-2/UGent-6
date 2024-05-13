@@ -4,6 +4,7 @@ services:
     build: backend/app/
     depends_on:
       - db
+      - dind
     ports:
       - 8080:8080
     environment:
@@ -13,6 +14,10 @@ services:
     restart: always
     volumes:
       - ./backend/app/data:/data:rw 
+    networks:
+      docker_network:
+        ipv4_address: 10.5.0.9
+
   db:
     container_name: db
     image: 'postgres:latest'
@@ -24,7 +29,21 @@ services:
       - POSTGRES_DB=postgres
     ports:
       - 5432:5432
+    networks:
+      docker_network:
+        ipv4_address: 10.5.0.8
 
+  dind:
+    container_name: dind
+    image: docker:dind
+    privileged: true
+    volumes:
+      - /var/lib/docker
+    ports:
+      - 2375:2375
+    networks:
+      docker_network:
+        ipv4_address: 10.5.0.4
   pgadmin:
     container_name: container-pgadmin
     image: dpage/pgadmin4
@@ -36,33 +55,16 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: root
     restart: unless-stopped
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    env_file: backend/web-bff/App/.env.dev
-    environment:
-      - MONGO_INTIDB_ROOT_USERNAME=$MONGODB_USER
-      - MONGO_INTIDB_ROOT_PASSWORD=$MONGODB_PASSWORD
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongo-session-data:/data/mongodb
-  express:
-    build: backend/web-bff/
-    container_name: express-container
-    env_file: backend/web-bff/App/.env.dev
-    ports:
-      - '3000:3000'
-    depends_on:
-      - mongodb
-    environment:
-      - NODE_PORT=3000
-      - DB_HOST=mongodb
-      - DB_USER=$MONGODB_USER
-      - DB_PASSWORD=$MONGODB_PASSWORD
-      - DB_NAME=$MONGODB_DATABASE
-      - DB_PORT=$MONGODB_DOCKER_PORT
+    networks:
+      docker_network:
+        ipv4_address: 10.5.0.13
 volumes:
   postgres-data:
-  mongo-session-data:
+networks:
+  docker_network:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
 
