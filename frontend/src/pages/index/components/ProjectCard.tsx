@@ -49,7 +49,7 @@ const ProjectCard: FC<{ courseId?: number }> = ({ courseId }) => {
         }}
       >
         <ProjectTable
-          ignoreColumns={courseId == undefined ? ["course"] : []}
+          ignoreColumns={["course"] }
           projects={projects}
         />
       </Card>

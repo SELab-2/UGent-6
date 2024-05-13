@@ -5,7 +5,6 @@ import {ApiRoutes} from "../../../@types/requests"
 import {ArrowLeftOutlined} from "@ant-design/icons"
 import {useNavigate} from "react-router-dom"
 import "@fontsource/jetbrains-mono"
-import {useEffect, useState} from "react"
 import apiCall from "../../../util/apiFetch"
 
 export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
@@ -13,13 +12,7 @@ export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) => {
     const {token} = theme.useToken()
     const {t} = useTranslation()
-    const [structureFeedback, setStructureFeedback] = useState<string | null>(null)
-    const [dockerFeedback, setDockerFeedback] = useState<string | null>(null)
     const navigate = useNavigate()
-    useEffect(() => {
-        if (!submission.dockerAccepted) apiCall.get(submission.dockerFeedbackUrl).then((res) => setDockerFeedback(res.data ? res.data : ""))
-        if (!submission.structureAccepted) apiCall.get(submission.structureFeedbackUrl).then((res) => setStructureFeedback(res.data ? res.data : ""))
-    }, [submission.dockerFeedbackUrl, submission.structureFeedbackUrl])
 
     const downloadSubmission = async () => {
         try {
@@ -49,6 +42,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
         }
     }
 
+    const feedback = "TODO: feedback"
     return (
         <Card
             styles={{
@@ -94,27 +88,20 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                     <Typography.Text
                         type={submission.structureAccepted ? "success" : "danger"}>{submission.structureAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
                     {submission.structureAccepted ? null : (
-                        <div>
-                            {structureFeedback === null ? (
-                                <Spin/>
-                            ) : (
-                                <Input.TextArea
-                                    readOnly
-                                    value={structureFeedback}
-                                    style={{
-                                        width: "100%",
-                                        overflowX: "auto",
-                                        overflowY: "auto",
-                                        resize: "none",
-                                        fontFamily: "Jetbrains Mono",
-                                        marginTop: 8
-                                    }}
-                                    rows={4}
-                                    autoSize={{minRows: 4, maxRows: 8}}
-                                />
-                            )}
-                        </div>
-                    )}
+            <div>
+              {submission.structureFeedback === null ? (
+                <Spin />
+              ) : (
+                <Input.TextArea
+                  readOnly
+                  value={submission.structureFeedback}
+                  style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
+                  rows={4}
+                  autoSize={{ minRows: 4, maxRows: 8 }}
+                />
+              )}
+            </div>
+          )}
                 </li>
             </ul>
 
@@ -124,28 +111,21 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                 <li>
                     <Typography.Text
                         type={submission.dockerAccepted ? "success" : "danger"}>{submission.dockerAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
-                    {submission.dockerAccepted ? null : (
-                        <div>
-                            {dockerFeedback === null ? (
-                                <Spin/>
-                            ) : (
-                                <Input.TextArea
-                                    readOnly
-                                    value={dockerFeedback}
-                                    style={{
-                                        width: "100%",
-                                        overflowX: "auto",
-                                        overflowY: "auto",
-                                        resize: "none",
-                                        fontFamily: "Jetbrains Mono",
-                                        marginTop: 8
-                                    }}
-                                    rows={4}
-                                    autoSize={{minRows: 4, maxRows: 16}}
-                                />
-                            )}
-                        </div>
-                    )}
+                     {submission.dockerAccepted ? null : (
+            <div>
+              {submission.dockerFeedback === null ? (
+                <Spin />
+              ) : (
+                <Input.TextArea
+                  readOnly
+                  value={feedback}
+                  style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
+                  rows={4}
+                  autoSize={{ minRows: 4, maxRows: 16 }}
+                />
+              )}
+            </div>
+          )}
                 </li>
             </ul>
         </Card>

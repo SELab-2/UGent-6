@@ -1,15 +1,14 @@
-import {Affix, Button, Card, Col, Form, Row, Typography} from "antd"
+import {Button, Card, Col, Form, Row} from "antd"
 import {useTranslation} from "react-i18next"
 import SubmitForm from "./components/SubmitForm"
 import SubmitStructure from "./components/SubmitStructure"
 import {useNavigate, useParams} from "react-router-dom"
-import React, {useState, useRef} from 'react';
+import {useState} from 'react';
 import apiCall from "../../util/apiFetch";
 import {ApiRoutes} from "../../@types/requests.d";
 import JSZip from 'jszip';
-import { Popconfirm, message } from 'antd';
+import { message } from 'antd';
 import {AppRoutes} from "../../@types/routes";
-import submission from "../submission/Submission";
 
 const Submit = () => {
     const {t} = useTranslation()
