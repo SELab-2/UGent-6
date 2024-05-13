@@ -105,13 +105,13 @@ class AuthProvider {
                 req.session.idToken = tokenResponse.idToken;
                 req.session.account = tokenResponse.account;
 
-                res.redirect(options.successRedirect);
+                next();
             } catch (error) {
                 if (error instanceof msal.InteractionRequiredAuthError) {
                     return this.login({
                         scopes: options.scopes || [],
                         redirectUri: options.redirectUri,
-                        successRedirect: options.successRedirect || '/',
+                        successRedirect: '/',
                     })(req, res, next);
                 }
 
@@ -142,7 +142,6 @@ class AuthProvider {
 
                 req.session.tokenCache = msalInstance.getTokenCache().serialize();
                 req.session.idToken = tokenResponse.idToken;
-                req.session.accessToken = tokenResponse.accessToken;
                 req.session.account = tokenResponse.account;
                 req.session.isAuthenticated = true;
                 

@@ -11,7 +11,7 @@ const { REDIRECT_URI, POST_LOGOUT_REDIRECT_URI, msalConfig} = require('../authCo
 const router = express.Router();
 
 router.get('/signin', authProvider.login({
-    scopes: [],
+    scopes: [msalConfig.auth.clientId + "/.default"],
     redirectUri: REDIRECT_URI,
     successRedirect: '/'
 }));

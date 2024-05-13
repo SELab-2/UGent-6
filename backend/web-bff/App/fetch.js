@@ -2,7 +2,6 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  */
-
 const axios = require('axios');
 const https = require('https');
 const {BACKEND_API_ENDPOINT} = require("./authConfig");
