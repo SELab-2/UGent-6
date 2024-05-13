@@ -58,38 +58,7 @@ return (
           onFinish={onSearch}
       >
           <Row gutter={24} justify="space-between">
-              {/*<Col span={7}>
-                  <Form.Item
-                      name="email"
-                      rules={[
-                          { type: 'email', message: t("editRole.emailError") },
-                      ]}
-                  >
-                      <Input placeholder={t("editRole.email")} />
-                  </Form.Item>
-              </Col>
-
-              <Col span={7}>
-                  <Form.Item
-                      name="name"
-                      rules={[
-                          { min: 3, message: t("editRole.nameError") },
-                      ]}
-                  >
-                      <Input placeholder={t("editRole.name")} />
-                  </Form.Item>
-              </Col>
-
-              <Col span={7}>
-                  <Form.Item
-                      name="surname"
-                      rules={[
-                          { min: 3, message: t("editRole.surnameError") },
-                      ]}
-                  >
-                      <Input placeholder={t("editRole.surname")} />
-                  </Form.Item>
-                    </Col>*/}
+           
             <Col span={20}>
                 <Form.Item
                 name = "search"
@@ -105,7 +74,8 @@ return (
                             } else {
                                 // Validate name and surname
                                 if (value.length < 3) {
-                                    return Promise.reject(new Error(t("editRole.shortValue")));
+                                    if(searchFieldRef.current === 'name') return Promise.reject(new Error(t("editRole.nameError")));
+                                    else  return Promise.reject(new Error(t("editRole.surnameError")));
                                 }
                             }
                             return Promise.resolve();
@@ -124,24 +94,6 @@ return (
                     />
                 </Form.Item>
             </Col>
-
-              <Col span={4}>
-                  <Form.Item shouldUpdate>
-                      {() => (
-                          <Button
-                              type="primary"
-                              htmlType="submit"
-                              disabled={
-                                ['name', 'surname', 'email'].every(field => !form.getFieldValue(field)) ||
-                                form.getFieldsError().filter(({ errors }) => errors.length).length > 0
-                              }
-                              style={{ width: '100%' }}
-                          >
-                              {t("editRole.search")}
-                          </Button>
-                      )}
-                  </Form.Item>
-              </Col>
           </Row>
       </Form>
       {searched ? (
