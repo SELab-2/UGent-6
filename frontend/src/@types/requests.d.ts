@@ -258,7 +258,7 @@ export type GET_Responses = {
     url: string
     email: string
     role: UserRole
-  }
+  }[]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
 
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][]
