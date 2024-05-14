@@ -25,7 +25,7 @@ const LanguageDropdown = () => {
 
 
 
-  return <Dropdown menu={{ items, onClick: languageChange }}>
+  return <Dropdown className="Dropdown" menu={{ items, onClick: languageChange }}>
     <Typography.Text style={{ cursor: "pointer", width: "5rem" }}>
       <GlobalOutlined /> {app.language}
     </Typography.Text>
