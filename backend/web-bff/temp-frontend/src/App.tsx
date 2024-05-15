@@ -3,27 +3,34 @@ import axios from 'axios'
 
 import './App.css'
 
+type Account = {
+    name: string
+}
+
 function App() {
-    const [auth, setAuth]
-        = useState<{ name: string, otherKey: number } | null>(null)
+    const [isAuth, setIsAuth]
+        = useState<boolean | null>(null)
+    const [account, setAccount] = useState<Account | null>(null)
 
     useEffect(() => {
-        axios.get('/auth/current-session').then(({data}) => {
-            setAuth(data);
+        axios.get("/users/account").then(({data}) => {
+            console.log(data)
+            setIsAuth(data.isAuthenticated)
+            setAccount(data.account)
         })
-    }, [])
+    }, [isAuth, account])
 
-    if (auth === null) {
+    if (isAuth === null) {
         return (
             <>
                 <h1>Loading...</h1>
             </>
         )
-    } else if (auth) {
+    } else if (isAuth) {
         return (
             <>
                 <h1>Logged in!</h1>
-                <p> You are logged in as {auth && auth.name ? auth.name : null}</p>
+                <p> You are logged in as {account && account.name? account.name : null}</p>
             </>
         )
     } else {
