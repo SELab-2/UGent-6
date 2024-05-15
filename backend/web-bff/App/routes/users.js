@@ -8,7 +8,8 @@ const router = express.Router();
 
 const fetch = require('../fetch');
 
-const { BACKEND_API_ENDPOINT } = require('../authConfig');
+const { BACKEND_API_ENDPOINT, msalConfig, REDIRECT_URI} = require('../authConfig');
+const authProvider = require("../auth/AuthProvider");
 
 // custom middleware to check auth state
 function isAuthenticated(req, res, next) {
@@ -26,5 +27,20 @@ router.get('/id',
     }
 );
 
+router.get('/isAuthenticated',
+    isAuthenticated,
+    authProvider.acquireToken({
+        scopes: [msalConfig.auth.clientId + "/.default"],
+        redirectUri: REDIRECT_URI
+    }),
+    async function (req, res, next) {
+        try {
+            const response = await fetch( "api/user" , req.session.accessToken, "GET")
+            res.send(response)
+        } catch(error) {
+            next(error);
+        }
+    }
+);
 
 module.exports = router;
