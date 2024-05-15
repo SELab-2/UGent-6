@@ -23,7 +23,7 @@ router.all('/*',
     redirectUri: REDIRECT_URI
     }),
     async function(req, res, next) {
-    
+
     try {
         const response = await fetch( "api" + req.url , req.session.accessToken, req.method)
         res.send(response)
