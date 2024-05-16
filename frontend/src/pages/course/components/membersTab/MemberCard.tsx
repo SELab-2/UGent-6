@@ -20,7 +20,7 @@ const MembersCard = () => {
 
     let ignore = false
 
-    API.GET(ApiRoutes.COURSE_MEMBERS, { pathValues: { id: course.courseId } }, "message").then((res) => {
+    API.GET(ApiRoutes.COURSE_MEMBERS, { pathValues: { courseId: course.courseId } }, "message").then((res) => {
       if (!ignore && res.success) setMembers(res.response.data)
     })
 
