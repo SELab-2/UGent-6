@@ -41,6 +41,7 @@ const SettingsCard: FC = () => {
     message.success(t("course.changesSaved"))
     setCourse(res.response.data)
     await updateCourses()
+    setLoading(false)
 
   }
 
