@@ -56,7 +56,7 @@ const Home = () => {
         </Typography.Title>
 
         {projectsViewMode === "table" && (
-          <Card
+          <Card className="projectTable"
             style={{
               width: "100%",
               overflow: "auto",
@@ -71,10 +71,10 @@ const Home = () => {
           </Card>
         )}
 
-        {projectsViewMode === "timeline" && <ProjectTimeline projects={projects} />}
+          {projectsViewMode === "timeline" && <div className="timeline"><ProjectTimeline  projects={projects} /> </div>}
 
         {projectsViewMode === "calendar" && (
-          <Card
+          <Card className="calendar"
             style={{
               width: "100%",
               overflow: "auto",
