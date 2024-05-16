@@ -214,7 +214,7 @@
     "score": "Score",
     "noGroups": "Geen groepen beschikbaar",
     "searchMember": "Zoek lid",
-    "inviteLink": "Inschrijvingslink",
+    "inviteLink": "Uitnodigingslink",
     "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak.",
     "deleteCourse": "Vak verwijderen",
     "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen? Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
@@ -232,7 +232,14 @@
     "leaveSuccess": "Vak succesvol verlaten",
     "leaveFail": "Het lukte niet om het vak te verlaten",
     "copy": "Maak kopie van dit vak",
-    "copySuccess": "Vak succesvol gekopieerd"
+    "copySuccess": "Vak succesvol gekopieerd",
+    "registerCourse": "Inschrijven voor dit vak",
+    "register": "Inschrijven",
+    "successfullyRegistered": "Je bent succesvol ingeschreven voor dit vak",
+    "invitePeople": "Mensen uitnodigen",
+    "invitePeopleToCourse": "Mensen uitnodigen voor dit vak",
+    "allowedInviteText": "Enkel mensen met een uitnodiging kunnen inschrijven",
+    "regenerateKey": "Nieuwe uitnodigings sleutel genereren"
   },
   "cancel": "Annuleren",
   "ok": "Ok",
@@ -243,8 +250,8 @@
     "homepage": "Naar start",
     "403_message": "Je bent niet bevoegd om deze pagina te bezoeken",
     "404_message" : "Sorry, de pagina die je bezocht bestaat niet",
-    "500_message": "Sorry, er ging iets mis"
-
+    "500_message": "Sorry, er ging iets mis",
+    "cannotJoinCourse": "Je kan je niet inschrijven voor dit vak"
   },
   "goBack": "Keer terug",
   "components": {

@@ -98,7 +98,7 @@ const useApi = ():UseApiType => {
     type Ret = HandleErrorReturn<any>
     if (typeof options === "string") options = { mode: options }
     let result: Partial<Ret> = {}
-
+    
     try {
       const response = await apiFetch(method, route, apiOptions.body, apiOptions.pathValues)
       result.response = response
@@ -136,6 +136,7 @@ const useApi = ():UseApiType => {
       } else if (options.mode === "message") {
         message.error(errMessage)
       } else if (options.mode === "page") {
+        console.log("------");
         setError({
           status,
           message: errMessage,

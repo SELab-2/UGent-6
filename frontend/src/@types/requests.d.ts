@@ -15,6 +15,9 @@ export enum ApiRoutes {
   COURSE_GRADES = '/api/courses/:id/grades',
   COURSE_LEAVE = "api/courses/:courseId/leave",
   COURSE_COPY = "/api/courses/:courseId/copy",
+  COURSE_JOIN = "/api/courses/:courseId/join/:courseKey",
+  COURSE_JOIN_WITHOUT_KEY = "/api/courses/:courseId/join",
+  COURSE_JOIN_LINK = "/api/courses/:courseId/joinKey",
 
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
@@ -77,7 +80,8 @@ export type POST_Requests = {
   },
   [ApiRoutes.PROJECT_TESTS]: Omit<GET_Responses[ApiRoutes.PROJECT_TESTS], "projectUrl">
   [ApiRoutes.COURSE_COPY]: undefined
-
+  [ApiRoutes.COURSE_JOIN]: undefined
+  [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: undefined
 }
 
 /**
@@ -91,7 +95,8 @@ export type POST_Responses = {
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER],
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
   [ApiRoutes.COURSE_COPY]: GET_Responses[ApiRoutes.COURSE]
-
+  [ApiRoutes.COURSE_JOIN]: {name:string, description: string}
+  [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: POST_Responses[ApiRoutes.COURSE_JOIN]
 }
 
 /**
@@ -104,6 +109,7 @@ export type DELETE_Requests = {
   [ApiRoutes.COURSE_LEAVE]: undefined
   [ApiRoutes.COURSE_MEMBER]: undefined
   [ApiRoutes.PROJECT_TESTS]: undefined
+  [ApiRoutes.COURSE_JOIN_LINK]: undefined
 }
 
 
@@ -120,6 +126,7 @@ export type PUT_Requests = {
   [ApiRoutes.CLUSTER_FILL]: {
     [groupName:string]: number[] /* userId[] */
   }
+  [ApiRoutes.COURSE_JOIN_LINK]: undefined
 }
 
 
@@ -131,6 +138,7 @@ export type PUT_Responses = {
   [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
   [ApiRoutes.CLUSTER_FILL]: PUT_Requests[ApiRoutes.CLUSTER_FILL]
+  [ApiRoutes.COURSE_JOIN_LINK]: ApiRoutes.COURSE_JOIN
 }
 
 
@@ -279,7 +287,8 @@ export type GET_Responses = {
     name: string
     teacher: CourseTeacher
     assistents: CourseTeacher[]
-    joinUrl: string
+    joinUrl: ApiRoutes.COURSE_JOIN
+    joinKey: string | null
     archivedAt: Timestamp | null // null if not archived
     year: number
     createdAt: Timestamp
@@ -329,4 +338,7 @@ export type GET_Responses = {
 
   
   [ApiRoutes.SUBMISSION_ARTIFACT]: Blob // returned het artifact als zip
+
+  [ApiRoutes.COURSE_JOIN]: GET_Responses[ApiRoutes.COURSE]
+  [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: GET_Responses[ApiRoutes.COURSE]
 }
