@@ -6,6 +6,7 @@ import apiCall from "../../util/apiFetch"
 import { useTranslation } from "react-i18next"
 import { UsersListItem } from "./components/UserList"
 import { useDebounceValue } from "usehooks-ts"
+import { User } from "../../providers/UserProvider"
 
 export type UsersType = GET_Responses[ApiRoutes.USERS]
 type SearchType = "name" | "surname" | "email"
@@ -25,13 +26,13 @@ const ProfileContent = () => {
   }, [debouncedSearchValue])
 
   function updateRole(user: UsersListItem, role: UserRole) {
-    //here user is of type User (not UsersListItem), but it seems to work because the needed properties are named the same
     console.log(user, role)
     apiCall.patch(ApiRoutes.USER, { role: role }, { id: user.id }).then((res) => {
       console.log(res.data)
+      //onSearch();
       //replace this user in the userlist with the updated one from res.data
       const updatedUsers = users?.map((u) => {
-        if (u.userId === user.id) {
+        if (u.id === user.id) {
           return { ...u, role: res.data.role };
         }
         return u;

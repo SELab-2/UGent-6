@@ -254,7 +254,8 @@ export type GET_Responses = {
   }
   [ApiRoutes.USERS]: {
     name: string
-    userId: number
+    surname: string
+    id: number
     url: string
     email: string
     role: UserRole
