@@ -28,7 +28,7 @@ const ScoreCard = () => {
     let ignore = false
   
 
-    API.GET(ApiRoutes.PROJECT_SCORE, { pathValues: { id: projectId, groupId: project?.groupId! } }).then((res) => {
+    API.GET(ApiRoutes.PROJECT_SCORE, { pathValues: { id: projectId, groupId: projectId } }).then((res) => {
       if (ignore) return
       if (!res.success) return setScore(null)
       setScore(res.response.data)

@@ -14,9 +14,11 @@ const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId,
   useEffect(() => {
 
     if(!project) return 
-
+    if(!project.submissionUrl) return setSubmissions([]) //TODO: fix me, project.submissionUrl can be null 
+    console.log(project);
     let ignore = false
     API.GET(project.submissionUrl, {}).then((res) => {
+      console.log(res);
       if (!res.success || ignore) return
       setSubmissions(res.response.data.sort((a, b) => b.submissionId - a.submissionId))
     })
