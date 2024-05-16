@@ -8,6 +8,13 @@ export type DockerFormData =  POST_Requests[ApiRoutes.PROJECT_TESTS]
 
 
 const saveDockerForm = async (form:FormInstance, initialDockerValues: DockerFormData | null, API: UseApiType, projectId:string) => {
+
+
+  if(form.isFieldTouched('dockerTestDir')){
+    const val = form.getFieldValue('dockerTestDir')
+    console.log(val);
+  }
+
   if(!form.isFieldsTouched(["dockerImage", 'dockerScript', 'dockerTemplate', 'structureTest'])) return null
 
   let data:DockerFormData = form.getFieldsValue(['dockerImage', 'dockerScript', 'dockerTemplate', 'structureTest'])

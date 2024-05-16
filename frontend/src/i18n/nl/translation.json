@@ -112,6 +112,9 @@
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
     "scoreTooHigh": "Score is hoger dan maximum score",
+    "successfullyDeleted": "Project succesvol verwijderd",
+    "deleteProject": "Project verwijderen",
+    "deleteProjectDescription": "Bent u zeker dat u dit project wilt verwijderen? Alle indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",

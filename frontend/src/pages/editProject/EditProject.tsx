@@ -59,7 +59,7 @@ const EditProject: React.FC = () => {
     if (!project) return
 
     updateDockerForm()
-  }, [project])
+  }, [project?.projectId])
 
   const handleCreation = async () => {
     const values: ProjectFormData & DockerFormData = form.getFieldsValue()

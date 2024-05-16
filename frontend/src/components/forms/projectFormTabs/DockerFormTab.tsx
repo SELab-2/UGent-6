@@ -1,11 +1,13 @@
-import { InboxOutlined } from "@ant-design/icons"
+import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
 import { Button, Form, Input, Upload } from "antd"
 import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
+import { ApiRoutes } from "../../../@types/requests"
+import useAppApi from "../../../hooks/useAppApi"
 
-const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProps?: TextAreaProps, disabled?:boolean }> = ({ form, fieldName, disabled }) => {
+const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProps?: TextAreaProps; disabled?: boolean }> = ({ form, fieldName, disabled }) => {
   const handleFileUpload = (file: File) => {
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -26,7 +28,12 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
           beforeUpload={handleFileUpload}
           disabled={disabled}
         >
-          <Button disabled={disabled} icon={<InboxOutlined />}>Upload</Button>
+          <Button
+            disabled={disabled}
+            icon={<InboxOutlined />}
+          >
+            Upload
+          </Button>
         </Upload>
       </div>
     </>
@@ -34,48 +41,49 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
 }
 
 function isValidTemplate(template: string): string {
-  if(!template?.length) return "" // Template is optional
-  let atLeastOne = false; // Template should not be empty
-  const lines = template.split("\n");
-  if (lines[0].charAt(0) !== '@') {
-    return 'Error: The first character of the first line should be "@"';
+  if (!template?.length) return "" // Template is optional
+  let atLeastOne = false // Template should not be empty
+  const lines = template.split("\n")
+  if (lines[0].charAt(0) !== "@") {
+    return 'Error: The first character of the first line should be "@"'
   }
-  let isConfigurationLine = false;
+  let isConfigurationLine = false
   for (const line of lines) {
-    if(line.length === 0){ // skip line if empty
-      continue;
+    if (line.length === 0) {
+      // skip line if empty
+      continue
     }
-    if (line.charAt(0) === '@') {
-      atLeastOne = true;
-      isConfigurationLine = true;
-      continue;
+    if (line.charAt(0) === "@") {
+      atLeastOne = true
+      isConfigurationLine = true
+      continue
     }
     if (isConfigurationLine) {
-      if (line.charAt(0) === '>') {
-        const isDescription = line.length >= 13 && line.substring(0, 13).toLowerCase() === ">description=";
+      if (line.charAt(0) === ">") {
+        const isDescription = line.length >= 13 && line.substring(0, 13).toLowerCase() === ">description="
         // option lines
-        if (line.toLowerCase() !== ">required" && line.toLowerCase() !== ">optional"
-            && !isDescription) {
-          return 'Error: Option lines should be either ">Required", ">Optional" or start with ">Description="';
+        if (line.toLowerCase() !== ">required" && line.toLowerCase() !== ">optional" && !isDescription) {
+          return 'Error: Option lines should be either ">Required", ">Optional" or start with ">Description="'
         }
       } else {
-        isConfigurationLine = false;
+        isConfigurationLine = false
       }
     }
   }
   if (!atLeastOne) {
-    return 'Error: Template should not be empty';
+    return "Error: Template should not be empty"
   }
-  return '';
+  return ""
 }
 
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
+  const {message} = useAppApi()
   const dockerImage = Form.useWatch("dockerImage", form)
+  const dockerDir = Form.useWatch("dockerTestDir", form)
+  console.log(dockerDir);
 
   const dockerDisabled = !dockerImage?.length
-
-
 
   return (
     <>
@@ -83,7 +91,6 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         label="Docker image"
         name="dockerImage"
         tooltip="TODO write docs for this"
-
       >
         <Input
           style={{ marginTop: "8px" }}
@@ -91,50 +98,73 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         />
       </Form.Item>
 
-        <>
-          <Form.Item
-            rules={[{ required: !dockerDisabled, message: "Docker script is required" }]}
-            label="Docker script"
-            name="dockerScript"
-            tooltip="TODO write docs for this"
-          >
-            <Input.TextArea
-              disabled={dockerDisabled}
-              autoSize={{ minRows: 3 }}
-              style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
-            />
-          </Form.Item>
-          <UploadBtn
-            form={form}
+      <>
+        <Form.Item
+          rules={[{ required: !dockerDisabled, message: "Docker script is required" }]}
+          label="Docker start script"
+          name="dockerScript"
+          tooltip="TODO write docs for this"
+        >
+          <Input.TextArea
             disabled={dockerDisabled}
-            fieldName="dockerScript"
+            autoSize={{ minRows: 3 }}
+            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
           />
+        </Form.Item>
+        <UploadBtn
+          form={form}
+          disabled={dockerDisabled}
+          fieldName="dockerScript"
+        />
 
-          <Form.Item
-            label="Docker template"
-            name="dockerTemplate"
-            tooltip="TODO write docs for this"
-            rules={[
-              {
-                validator: (_, value) => {
-                  const errorMessage = isValidTemplate(value);
-                  return errorMessage === '' ? Promise.resolve() : Promise.reject(new Error(errorMessage));
-                },
+        <Form.Item
+          label="Docker template"
+          name="dockerTemplate"
+          tooltip="TODO write docs for this"
+          rules={[
+            {
+              validator: (_, value) => {
+                const errorMessage = isValidTemplate(value)
+                return errorMessage === "" ? Promise.resolve() : Promise.reject(new Error(errorMessage))
               },
-            ]}
-          >
-            <Input.TextArea
-              autoSize={{ minRows: 3 }}
-              disabled={dockerDisabled}
-              style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
-            />
-          </Form.Item>
-          <UploadBtn
-            form={form}
+            },
+          ]}
+        >
+          <Input.TextArea
+            autoSize={{ minRows: 3 }}
             disabled={dockerDisabled}
-            fieldName="dockerTemplate"
+            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
           />
-        </>
+        </Form.Item>
+        <UploadBtn
+          form={form}
+          disabled={dockerDisabled}
+          fieldName="dockerTemplate"
+        />
+      </>
+
+      <Form.Item
+        label="Docker test directory"
+        name="dockerTestDir"
+        tooltip="TODO write docs for this"
+      >
+        <Upload
+          listType="picture"
+          maxCount={1}
+          disabled={dockerDisabled}
+          accept="application/zip, application/x-zip-compressed, application/octet-stream, application/x-zip, *.zip"
+          beforeUpload={ (file) => {
+            const isPNG = file.type === 'application/zip'
+            if (!isPNG) {
+              message.error(`${file.name} is not a zip file`);
+              return Upload.LIST_IGNORE
+            }
+            return false
+          }}
+        >
+          <Button disabled={dockerDisabled} icon={<UploadOutlined />}>Upload test directory (zip)</Button>
+        </Upload>
+      </Form.Item>
     </>
   )
 }

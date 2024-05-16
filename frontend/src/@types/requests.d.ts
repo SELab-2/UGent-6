@@ -19,16 +19,16 @@ export enum ApiRoutes {
   COURSE_JOIN_WITHOUT_KEY = "/api/courses/:courseId/join",
   COURSE_JOIN_LINK = "/api/courses/:courseId/joinKey",
 
-    PROJECTS = "api/projects",
-    PROJECT = "api/projects/:id",
-    PROJECT_CREATE = "api/courses/:courseId/projects",
-    PROJECT_TESTS = "api/projects/:id/tests",
-    PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
-    PROJECT_SUBMIT = "api/projects/:id/submit",
-    PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",
-    PROJECT_GROUP = "api/projects/:id/groups/:groupId",
-    PROJECT_GROUPS = "api/projects/:id/groups",
-    PROJECT_GROUP_SUBMISSIONS = "api/projects/:projectId/submissions/:groupId",
+  PROJECTS = "api/projects",
+  PROJECT = "api/projects/:id",
+  PROJECT_CREATE = "api/courses/:courseId/projects",
+  PROJECT_TESTS = "api/projects/:id/tests",
+  PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
+  PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",
+  PROJECT_GROUP = "api/projects/:id/groups/:groupId",
+  PROJECT_GROUPS = "api/projects/:id/groups",
+  PROJECT_GROUP_SUBMISSIONS = "api/projects/:projectId/submissions/:groupId",
+  PROJECT_TESTS_UPLOAD = "api/projects/:id/tests/extrafiles",
 
   SUBMISSION = "api/submissions/:id",
   SUBMISSION_FILE = "api/submissions/:id/file",
@@ -115,6 +115,7 @@ export type DELETE_Requests = {
   [ApiRoutes.COURSE_MEMBER]: undefined
   [ApiRoutes.PROJECT_TESTS]: undefined
   [ApiRoutes.COURSE_JOIN_LINK]: undefined
+  [ApiRoutes.PROJECT_TESTS_UPLOAD]: undefined
 }
 
 
@@ -132,6 +133,7 @@ export type PUT_Requests = {
     [groupName:string]: number[] /* userId[] */
   }
   [ApiRoutes.COURSE_JOIN_LINK]: undefined
+  [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
 }
 
 
@@ -144,6 +146,7 @@ export type PUT_Responses = {
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
   [ApiRoutes.CLUSTER_FILL]: PUT_Requests[ApiRoutes.CLUSTER_FILL]
   [ApiRoutes.COURSE_JOIN_LINK]: ApiRoutes.COURSE_JOIN
+  [ApiRoutes.PROJECT_TESTS_UPLOAD]: undefined
 }
 
 
@@ -394,4 +397,5 @@ export type GET_Responses = {
 
   [ApiRoutes.COURSE_JOIN]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: GET_Responses[ApiRoutes.COURSE]
+  [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
 }
