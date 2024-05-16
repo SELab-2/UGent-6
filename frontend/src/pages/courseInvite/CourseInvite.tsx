@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { AppRoutes } from "../../@types/routes"
 import CourseTagLine from "../course/components/tabExtraBtn/CourseTagLine"
 import useUser from "../../hooks/useUser"
+import MarkdownTextfield from "../../components/input/MarkdownTextfield"
 
 const CourseInvite = () => {
   const { token } = theme.useToken()
@@ -92,7 +93,7 @@ const CourseInvite = () => {
       >
         {course.name}
       </Typography.Title>
-      <Typography.Paragraph>{course.description}</Typography.Paragraph>
+      <MarkdownTextfield content={course.description} />
 
       <div style={{ width: "100%", textAlign: "center" }}>
         <Button
