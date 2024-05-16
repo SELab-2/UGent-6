@@ -1,5 +1,5 @@
-import { Alert, Form, Modal } from "antd"
-import { FC, useEffect, useState } from "react"
+import { Alert, Form } from "antd"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import CourseForm from "../../../components/forms/CourseForm"
 import { ApiRoutes } from "../../../@types/requests.d"
@@ -9,52 +9,63 @@ import { AppRoutes } from "../../../@types/routes"
 import useUser from "../../../hooks/useUser"
 import useApi from "../../../hooks/useApi"
 
-const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ open,setOpen }) => {
+const createCourseModal = () => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [error, setError] = useState<string | null>(null)
-  const [loading,setLoading] = useState(false)
-  const {message} = useAppApi()
+  const { message, modal } = useAppApi()
   const navigate = useNavigate()
-  const {updateCourses} = useUser()
+  const { updateCourses } = useUser()
   const API = useApi()
 
-  useEffect(()=> {
-    form.setFieldValue("year", new Date().getFullYear()-1)
-  },[])
+  useEffect(() => {
+    form.setFieldValue("year", new Date().getFullYear() - 1)
+  }, [])
 
-  const onFinish = async () => {
-    await form.validateFields()
-    setError(null)
-    
-    const values:{name:string, description:string} = form.getFieldsValue()
-    console.log(values);
-    values.description ??= ""
-    setLoading(true)
-    const res = await API.POST(ApiRoutes.COURSES, { body:values}, "message")
-    if(!res.success) return setLoading(false)
-    const course=  res.response
-    message.success(t("home.courseCreated"))
-    await updateCourses()
-    navigate(AppRoutes.COURSE.replace(":courseId", course.data.courseId.toString()))
-  
+  const onFinish = () => {
+    return new Promise<void>(async (resolve, reject) => {
+      await form.validateFields()
+      setError(null)
+
+      const values: { name: string; description: string } = form.getFieldsValue()
+      console.log(values)
+      values.description ??= ""
+      const res = await API.POST(ApiRoutes.COURSES, { body: values }, "message")
+      if (!res.success) return reject()
+      const course = res.response
+      message.success(t("home.courseCreated"))
+      await updateCourses()
+      navigate(AppRoutes.COURSE.replace(":courseId", course.data.courseId.toString()))
+      resolve()
+    })
   }
 
-  return (
-    <Modal
-      open={open}
-      title={t("home.createCourse")}
-      onCancel={() => setOpen(false)}
-      onOk={onFinish}
-      okText={t("course.createCourse")}
-      okButtonProps={{ loading }}
-      cancelText={t("cancel")}
-      
-    >
-      {error && <Alert style={{marginBottom:"1rem"}} type="error" message={error} />}
-     <CourseForm form={form} />
-    </Modal>
-  )
+  return {
+    showModal: () => {
+      modal.info({
+        title: t("home.createCourse"),
+        width: 500,
+        className: "modal-no-icon",
+        onOk: onFinish,
+        okText: t("course.createCourse"),
+        cancelText: t("cancel"),
+        okCancel: true,
+        icon: null,
+        content: (
+          <>
+            {error && (
+              <Alert
+                style={{ marginBottom: "1rem" }}
+                type="error"
+                message={error}
+              />
+            )}
+            <CourseForm form={form} />
+          </>
+        ),
+      })
+    },
+  }
 }
 
-export default CreateCourseModal
+export default createCourseModal
