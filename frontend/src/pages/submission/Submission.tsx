@@ -21,7 +21,7 @@ const Submission = () => {
     return () => {
       ignore = true
     }
-  }, [submissionId,API])
+  }, [submissionId])
 
   if (submission === null) {
     return (

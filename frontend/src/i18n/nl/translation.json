@@ -47,6 +47,7 @@
       "deadline": "Deadline",
       "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
+
       "projectStatus": "Status",
       "status": {
         "completed": "Voltooid",
@@ -90,8 +91,9 @@
     "addFiles": "Bestanden toevoegen",
     "submit": "Indienen",
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
-    "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
+    "uploadAreaSubtitle": "Maximum bestandsgrootte is 100MB",
     "deadlinePassed": "Deadline verstreken",
+    "uploadDirectory": "Folder uploaden",
     "downloadSubmissions": "Download alle indieningen",
     "group": "Groep",
     "status": "Status",
@@ -100,6 +102,8 @@
     "testFailed": "Testen gefaald",
     "structureFailed": "Structuurtesten gefaald",
     "passed": "Geslaagd",
+    "submitSuccess": "Indiening succesvol",
+
     "notSubmitted": "Niet ingediend",
     "submissionTime": "Indieningstijd",
     "noSubmissions": "Geen indieningen",

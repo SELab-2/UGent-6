@@ -18,7 +18,7 @@ const saveDockerForm = async (form:FormInstance, initialDockerValues: DockerForm
     return API.POST(ApiRoutes.PROJECT_TESTS, { body: data, pathValues: {id: projectId}})
   }
 
-  if(data.dockerImage === null || data.dockerImage.length === 0 ) {
+  if(data.dockerImage == null || data.dockerImage.length === 0 ) {
     // We do a delete
     console.log("DELETE", data);
     return API.DELETE(ApiRoutes.PROJECT_TESTS, { pathValues: {id: projectId} })

@@ -25,7 +25,7 @@ const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId,
     return () => {
       ignore = true
     }
-  }, [projectId,courseId,API])
+  }, [projectId,courseId])
 
 
 

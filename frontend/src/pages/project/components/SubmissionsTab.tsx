@@ -24,7 +24,7 @@ const SubmissionsTab = () => {
     return () => {
       ignore = true
     }
-  }, [API,projectId])
+  }, [projectId])
 
   const handleDownloadSubmissions = () => {
     // TODO: implement this!
