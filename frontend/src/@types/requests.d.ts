@@ -18,7 +18,7 @@ export enum ApiRoutes {
   COURSE_JOIN = "/api/courses/:courseId/join/:courseKey",
   COURSE_JOIN_WITHOUT_KEY = "/api/courses/:courseId/join",
   COURSE_JOIN_LINK = "/api/courses/:courseId/joinKey",
-
+  
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
   PROJECT_CREATE = "api/courses/:courseId/projects",
@@ -29,6 +29,7 @@ export enum ApiRoutes {
   PROJECT_GROUPS = "api/projects/:id/groups",
   PROJECT_GROUP_SUBMISSIONS = "api/projects/:projectId/submissions/:groupId",
   PROJECT_TESTS_UPLOAD = "api/projects/:id/tests/extrafiles",
+  PROJECT_SUBMIT = "api/projects/:id/submit",
 
   SUBMISSION = "api/submissions/:id",
   SUBMISSION_FILE = "api/submissions/:id/file",
@@ -133,7 +134,9 @@ export type PUT_Requests = {
     [groupName:string]: number[] /* userId[] */
   }
   [ApiRoutes.COURSE_JOIN_LINK]: undefined
-  [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
+  [ApiRoutes.PROJECT_TESTS_UPLOAD]: {
+    file: FormData
+}
 }
 
 

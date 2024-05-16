@@ -80,8 +80,6 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
   const dockerImage = Form.useWatch("dockerImage", form)
-  const dockerDir = Form.useWatch("dockerTestDir", form)
-  console.log(dockerDir);
 
   const dockerDisabled = !dockerImage?.length
 
