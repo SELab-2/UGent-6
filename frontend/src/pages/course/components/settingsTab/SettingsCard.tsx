@@ -41,6 +41,7 @@ const SettingsCard: FC = () => {
     message.success(t("course.changesSaved"))
     setCourse(res.response.data)
     await updateCourses()
+    setLoading(false)
 
   }
 
@@ -63,6 +64,7 @@ const SettingsCard: FC = () => {
     >
       <div style={{ maxWidth: "600px", width: "100%" }}>
         <CourseForm form={form}>
+
           <Form.Item
             name="isArchived"
             label={t("course.archived")}

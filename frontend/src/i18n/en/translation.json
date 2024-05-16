@@ -231,7 +231,14 @@
     "leaveSuccess": "Left course successfully",
     "leaveFail": "Failed to leave the course",
     "copy": "Create copy of this course",
-    "copySuccess": "Course copied successfully"
+    "copySuccess": "Course copied successfully",
+    "registerCourse": "Register for this course",
+    "register": "Register",
+    "successfullyRegistered": "You have successfully registered for this course",
+    "invitePeople": "Invite people",
+    "invitePeopleToCourse": "Invite people to this course",
+    "allowedInviteText": "Only people with the invite link can join this course",
+    "regenerateKey": "Regenerate invite key"
   },
   "cancel": "Cancel",
   "ok": "OK",
@@ -242,7 +249,8 @@
     "homepage": "Back home",
     "403_message": "you are not authorized to access this page",
     "404_message": "Sorry, the page you visited does not exist",
-    "500_message": "Sorry, something went wrong"
+    "500_message": "Sorry, something went wrong",
+    "cannotJoinCourse": "You cannot join this course"
   },
   "goBack": "Go back",
   "components": {

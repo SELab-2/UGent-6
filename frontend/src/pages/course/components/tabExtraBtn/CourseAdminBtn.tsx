@@ -1,4 +1,4 @@
-import { CopyOutlined, LogoutOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons"
+import { CopyOutlined, LogoutOutlined, MoreOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons"
 import { Button, Dropdown } from "antd"
 import { MenuProps } from "antd/lib";
 import { FC, useContext } from "react";
@@ -10,6 +10,9 @@ import { UserContext } from "../../../../providers/UserProvider";
 import { leaveCourse } from "./CourseMembershipService";
 import useApi from "../../../../hooks/useApi";
 import { ApiRoutes } from "../../../../@types/requests.d";
+import openInviteModal from "./InviteModalContent";
+import useCourse from "../../../../hooks/useCourse";
+import useAppApi from "../../../../hooks/useAppApi";
 
 
 
@@ -18,8 +21,11 @@ const CourseAdminBtn:FC<{courseId:string}> = ({courseId}) => {
   const {t} = useTranslation()
   const { member } = useContext(CourseContext)
   const navigate = useNavigate()
+  const course = useCourse()
+  const {setCourse} = useContext(CourseContext)
   const  userContext  = useContext(UserContext)
   const API = useApi()
+  const {modal} = useAppApi()
 
 
   const leaveCourseHandler = async () => {
@@ -51,6 +57,12 @@ const CourseAdminBtn:FC<{courseId:string}> = ({courseId}) => {
       label: t("course.copy"),
       icon: <CopyOutlined/>,
       onClick: makeCopy
+    },
+    {
+      key: '4',
+      label: t("course.invitePeople"),
+      icon: <TeamOutlined/>, 
+      onClick: () => openInviteModal({modal,course, title: t("course.invitePeopleToCourse"), onChange: setCourse})
     },
     {
       key: '2',

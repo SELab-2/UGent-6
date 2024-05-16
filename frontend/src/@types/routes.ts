@@ -16,6 +16,6 @@ export enum AppRoutes {
   ERROR = "/error",
   NOT_FOUND = "/not-found",
   EDIT_ROLE = "/edit-role",
-  COURSE_INVITE = "/invite/:inviteId",
+  COURSE_INVITE = "/invite/:courseId",
   COURSES = "/courses",
 }

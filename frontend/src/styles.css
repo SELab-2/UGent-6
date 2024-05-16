@@ -106,6 +106,12 @@ html {
 .ant-table-row > td.ant-table-column-sort, .ant-table-thead > tr > th.ant-table-column-sort {
   background-color: unset ;
 }
+
+.modal-no-icon .ant-modal-confirm-paragraph, .modal-no-icon .ant-modal-confirm-body {
+
+  display: initial;
+}
+
 /* *************************** Landing page *************************** */
 
 .landing-page * {

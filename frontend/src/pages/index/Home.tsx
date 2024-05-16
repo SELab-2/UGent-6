@@ -10,6 +10,7 @@ import { CalendarOutlined, NodeIndexOutlined, OrderedListOutlined, UnorderedList
 import ProjectCalander from "../../components/other/ProjectCalander"
 import CourseSection from "./components/CourseSection"
 import useApi from "../../hooks/useApi"
+import createCourseModal from "./components/CreateCourseModal"
 
 export type ProjectsType = GET_Responses[ApiRoutes.COURSE_PROJECTS]
 
@@ -18,9 +19,9 @@ type ProjectView = "table" | "timeline" | "calendar"
 const Home = () => {
   const { t } = useTranslation()
   const [projects, setProjects] = useLocalStorage<ProjectsType | null>("__projects_cache",null)
-  const [open, setOpen] = useState(false)
   const [projectsViewMode, setProjectsViewMode] = useLocalStorage<ProjectView>("projects_view", "table")
   const API = useApi()
+  const courseModal = createCourseModal()
 
   useEffect(() => {
     let ignore=  false
@@ -41,7 +42,7 @@ const Home = () => {
       <div>
         <CourseSection
           projects={projects}
-          onOpenNew={() => setOpen(true)}
+          onOpenNew={() => courseModal.showModal()}
         />
       </div>
       <br />
@@ -100,10 +101,7 @@ const Home = () => {
       <br />
       <br />
 
-      <CreateCourseModal
-        open={open}
-        setOpen={setOpen}
-      />
+     
     </div>
   )
 }
