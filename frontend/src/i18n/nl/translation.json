@@ -193,11 +193,18 @@
   "submission": {
     "submission": "Indiening",
     "submittedFiles": "Ingediende bestanden:",
+    "running": "Testen uitvoeren...",
     "structuretest": "Resultaten structuurtest:",
     "dockertest": "Resultaten dockertest:",
+    "downloadSubmission": "Download indiening",
+    "dockertestAborted": "Testen afgebroken. Probeer het later nog eens.",
+    "success": "Geslaagd",
+    "failed": "Niet geslaagd",
+    "expected": "Vewachte output:",
+    "received": "Ontvangen output:",
     "status": {
-      "accepted": "Alle testen geslaagd.",
-      "failed": "Sommige testen niet geslaagd."
+      "accepted": "Alle testen zijn geslaagd.",
+      "failed": "Sommige testen zijn niet geslaagd."
     }
   },
 

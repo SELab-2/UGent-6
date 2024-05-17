@@ -69,6 +69,7 @@ export type POST_Requests = {
     visible: boolean;
     maxScore: number;
     deadline: Date | null;
+    visibleAfter: Date | null; 
 }
 
     [ApiRoutes.GROUP_MEMBERS]: {
@@ -175,7 +176,8 @@ type SubTest = {
   correct: string,  // verwachte output
   output: string,  // gegenereerde output
   required: boolean,  //  of de test verplicht is
-  succes: boolean, // of de test verplicht is
+  //FIXME: typo, moet success zijn ipv succes
+  succes: boolean, // of de test geslaagd is
 }
 
 type DockerFeedback = {
@@ -213,7 +215,6 @@ export type GET_Responses = {
     groupId: number
     structureAccepted: boolean,
     dockerStatus: DockerStatus,
-    dockerAccepted: boolean
     submissionTime: Timestamp
     projectUrl: ApiRoutes.PROJECT
     groupUrl: ApiRoutes.GROUP
@@ -270,6 +271,7 @@ export type GET_Responses = {
     email: string
     name: string
     userId: number
+    studentNumber: string | null // Null in case of enrolled/student
   }
   [ApiRoutes.USERS]: {
     name: string
@@ -365,6 +367,7 @@ export type GET_Responses = {
         id: number
         name: string
         surname: string
+        studentNumber: string | null // Null in case of enrolled/student
     },
     [ApiRoutes.USER_AUTH]: GET_Responses[ApiRoutes.USER],
     [ApiRoutes.USER_COURSES]: {
