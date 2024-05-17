@@ -138,7 +138,8 @@ public class EntityToJsonConverterTest {
     userReferenceJson = new UserReferenceJson(
         userEntity.getName() + " " + userEntity.getSurname(),
         userEntity.getEmail(),
-        userEntity.getId()
+        userEntity.getId(),
+        ""
     );
 
     otherUser = new UserEntity(
@@ -152,7 +153,8 @@ public class EntityToJsonConverterTest {
     otherUserReferenceJson = new UserReferenceJson(
         otherUser.getName() + " " + otherUser.getSurname(),
         otherUser.getEmail(),
-        otherUser.getId()
+        otherUser.getId(),
+        ""
     );
 
 
@@ -222,6 +224,7 @@ public class EntityToJsonConverterTest {
 
   @Test
   public void testGroupEntityToJson() {
+    userEntity.setStudentNumber("studentNumber");
     when(groupClusterRepository.findById(groupEntity.getClusterId())).thenReturn(Optional.of(groupClusterEntity));
     when(groupRepository.findGroupUsersReferencesByGroupId(anyLong())).thenReturn(
         List.of(new UserReference[]{
@@ -240,11 +243,16 @@ public class EntityToJsonConverterTest {
               public String getEmail() {
                 return userEntity.getEmail();
               }
+
+              @Override
+              public String getStudentNumber() {
+                return userEntity.getStudentNumber();
+              }
             }
 
         })
     );
-    GroupJson result = entityToJsonConverter.groupEntityToJson(groupEntity);
+    GroupJson result = entityToJsonConverter.groupEntityToJson(groupEntity, false);
     assertEquals(groupClusterEntity.getMaxSize(), result.getCapacity());
     assertEquals(groupEntity.getId(), result.getGroupId());
     assertEquals(groupEntity.getName(), result.getName());
@@ -254,25 +262,32 @@ public class EntityToJsonConverterTest {
     assertEquals(userEntity.getId(), userReferenceJson.getUserId());
     assertEquals(userEntity.getName() + " " + userEntity.getSurname(), userReferenceJson.getName());
     assertEquals(userEntity.getEmail(), userReferenceJson.getEmail());
+    assertEquals(userEntity.getStudentNumber(), userReferenceJson.getStudentNumber());
 
     /* Cluster is individual */
     groupClusterEntity.setMaxSize(1);
-    result = entityToJsonConverter.groupEntityToJson(groupEntity);
+    result = entityToJsonConverter.groupEntityToJson(groupEntity, false);
     assertEquals(1, result.getCapacity());
     assertNull(result.getGroupClusterUrl());
 
+    /* StudentNumber gets hidden correctly */
+    result = entityToJsonConverter.groupEntityToJson(groupEntity, true);
+    assertNull(result.getMembers().get(0).getStudentNumber());
+
     /* Issue when groupClusterEntity is null */
     when(groupClusterRepository.findById(groupEntity.getClusterId())).thenReturn(Optional.empty());
-    assertThrows(RuntimeException.class, () -> entityToJsonConverter.groupEntityToJson(groupEntity));
+    assertThrows(RuntimeException.class, () -> entityToJsonConverter.groupEntityToJson(groupEntity, false));
 
   }
 
   @Test
   public void testClusterEntityToClusterJson() {
     when(groupRepository.findAllByClusterId(groupClusterEntity.getId())).thenReturn(List.of(groupEntity));
-    doReturn(groupJson).when(entityToJsonConverter).groupEntityToJson(groupEntity);
+    doReturn(groupJson).when(entityToJsonConverter).groupEntityToJson(groupEntity, false);
 
-    GroupClusterJson result = entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity);
+    GroupClusterJson result = entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, false);
+
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, false);
 
     assertEquals(groupClusterEntity.getId(), result.clusterId());
     assertEquals(groupClusterEntity.getName(), result.name());
@@ -282,27 +297,49 @@ public class EntityToJsonConverterTest {
     assertEquals(1, result.groups().size());
     assertEquals(groupJson, result.groups().get(0));
     assertEquals(ApiRoutes.COURSE_BASE_PATH + "/" + courseEntity.getId(), result.courseUrl());
+
+    /* Hide studentNumber */
+    doReturn(groupJson).when(entityToJsonConverter).groupEntityToJson(groupEntity, true);
+
+    result = entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, true);
+
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, true);
   }
 
   @Test
   public void testUserEntityToUserReference() {
-    UserReferenceJson result = entityToJsonConverter.userEntityToUserReference(userEntity);
+    userEntity.setStudentNumber("studentNumber");
+    UserReferenceJson result = entityToJsonConverter.userEntityToUserReference(userEntity, false);
     assertEquals(userEntity.getId(), result.getUserId());
     assertEquals(userEntity.getName() + " " + userEntity.getSurname(), result.getName());
     assertEquals(userEntity.getEmail(), result.getEmail());
+    assertEquals(userEntity.getStudentNumber(), result.getStudentNumber());
+
+    /* Hide studentnumber */
+    result = entityToJsonConverter.userEntityToUserReference(userEntity, true);
+    assertNull(result.getStudentNumber());
   }
 
   @Test
   public void testUserEntityToUserReferenceWithRelation() {
-    doReturn(userReferenceJson).when(entityToJsonConverter).userEntityToUserReference(userEntity);
-    UserReferenceWithRelation result = entityToJsonConverter.userEntityToUserReferenceWithRelation(userEntity, CourseRelation.creator);
+
+    doReturn(userReferenceJson).when(entityToJsonConverter).userEntityToUserReference(userEntity, false);
+    UserReferenceWithRelation result = entityToJsonConverter.userEntityToUserReferenceWithRelation(userEntity, CourseRelation.creator, false);
     assertEquals(userReferenceJson, result.getUser());
     assertEquals(CourseRelation.creator.toString(), result.getRelation());
 
-    result = entityToJsonConverter.userEntityToUserReferenceWithRelation(userEntity, CourseRelation.course_admin);
+    verify(entityToJsonConverter, times(1)).userEntityToUserReference(userEntity, false);
+
+    /* Hide studentnumber */
+    doReturn(userReferenceJson).when(entityToJsonConverter).userEntityToUserReference(userEntity, true);
+    result = entityToJsonConverter.userEntityToUserReferenceWithRelation(userEntity, CourseRelation.creator, true);
+    verify(entityToJsonConverter, times(1)).userEntityToUserReference(userEntity, true);
+
+    /* Different relations */
+    result = entityToJsonConverter.userEntityToUserReferenceWithRelation(userEntity, CourseRelation.course_admin, false);
     assertEquals(CourseRelation.course_admin.toString(), result.getRelation());
 
-    result = entityToJsonConverter.userEntityToUserReferenceWithRelation(userEntity, CourseRelation.enrolled);
+    result = entityToJsonConverter.userEntityToUserReferenceWithRelation(userEntity, CourseRelation.enrolled, false);
     assertEquals(CourseRelation.enrolled.toString(), result.getRelation());
   }
 
@@ -315,8 +352,8 @@ public class EntityToJsonConverterTest {
     when(courseRepository.findTeacherByCourseId(courseEntity.getId())).thenReturn(userEntity);
     when(courseRepository.findAssistantsByCourseId(courseEntity.getId())).thenReturn(List.of(otherUser));
 
-    doReturn(userReferenceJson).when(entityToJsonConverter).userEntityToUserReference(userEntity);
-    doReturn(otherUserReferenceJson).when(entityToJsonConverter).userEntityToUserReference(otherUser);
+    doReturn(userReferenceJson).when(entityToJsonConverter).userEntityToUserReference(userEntity, true);
+    doReturn(otherUserReferenceJson).when(entityToJsonConverter).userEntityToUserReference(otherUser, true);
 
     CourseWithInfoJson result = entityToJsonConverter.courseEntityToCourseWithInfo(courseEntity, joinLink, false);
     assertEquals(courseEntity.getId(), result.courseId());

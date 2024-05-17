@@ -58,8 +58,8 @@ public class GroupMembersControllerTest extends ControllerTest {
     userEntity.setId(5L);
     userEntity2 = new UserEntity("name2", "surname2", "email2", UserRole.student, "azureid2", "");
     userEntity2.setId(6L);
-    userReferenceJson = new UserReferenceJson(userEntity.getName(), userEntity.getEmail(), userEntity.getId());
-    userReferenceJson2 = new UserReferenceJson(userEntity2.getName(), userEntity2.getEmail(), userEntity2.getId());
+    userReferenceJson = new UserReferenceJson(userEntity.getName(), userEntity.getEmail(), userEntity.getId(), "");
+    userReferenceJson2 = new UserReferenceJson(userEntity2.getName(), userEntity2.getEmail(), userEntity2.getId(), "");
   }
 
   @Test
@@ -117,8 +117,8 @@ public class GroupMembersControllerTest extends ControllerTest {
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
     when(groupMemberRepository.findAllMembersByGroupId(groupId))
         .thenReturn(List.of(userEntity, userEntity2));
-    when(entityToJsonConverter.userEntityToUserReference(userEntity)).thenReturn(userReferenceJson);
-    when(entityToJsonConverter.userEntityToUserReference(userEntity2)).thenReturn(userReferenceJson2);
+    when(entityToJsonConverter.userEntityToUserReference(userEntity, false)).thenReturn(userReferenceJson);
+    when(entityToJsonConverter.userEntityToUserReference(userEntity2, false)).thenReturn(userReferenceJson2);
     mockMvc.perform(MockMvcRequestBuilders.post(url))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -141,15 +141,15 @@ public class GroupMembersControllerTest extends ControllerTest {
   @Test
   public void testAddMemberToGroupInferred() throws Exception {
     String url = ApiRoutes.GROUP_MEMBER_BASE_PATH.replace("{groupid}", ""+groupId);
-    UserReferenceJson mockUserJson = new UserReferenceJson(getMockUser().getName(), getMockUser().getEmail(), getMockUser().getId());
+    UserReferenceJson mockUserJson = new UserReferenceJson(getMockUser().getName(), getMockUser().getEmail(), getMockUser().getId(), getMockUser().getStudentNumber());
 
     /* If all checks succeed, the user is added to the group */
     when(groupUtil.canAddUserToGroup(groupId, getMockUser().getId(), getMockUser()))
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
     when(groupMemberRepository.findAllMembersByGroupId(groupId))
         .thenReturn(List.of(getMockUser(), userEntity2));
-    when(entityToJsonConverter.userEntityToUserReference(getMockUser())).thenReturn(mockUserJson);
-    when(entityToJsonConverter.userEntityToUserReference(userEntity2)).thenReturn(userReferenceJson2);
+    when(entityToJsonConverter.userEntityToUserReference(getMockUser(), true)).thenReturn(mockUserJson);
+    when(entityToJsonConverter.userEntityToUserReference(userEntity2, true)).thenReturn(userReferenceJson2);
     mockMvc.perform(MockMvcRequestBuilders.post(url))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -174,8 +174,10 @@ public class GroupMembersControllerTest extends ControllerTest {
     List<UserEntity> members = List.of(userEntity, userEntity2);
     List<UserReferenceJson> userReferenceJsons = List.of(userReferenceJson, userReferenceJson2);
     when(groupMemberRepository.findAllMembersByGroupId(groupId)).thenReturn(members);
-    when(entityToJsonConverter.userEntityToUserReference(userEntity)).thenReturn(userReferenceJson);
-    when(entityToJsonConverter.userEntityToUserReference(userEntity2)).thenReturn(userReferenceJson2);
+    /* User is admin of group so don't hide studentNumbers */
+    when(groupUtil.isAdminOfGroup(groupId, getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    when(entityToJsonConverter.userEntityToUserReference(userEntity, false)).thenReturn(userReferenceJson);
+    when(entityToJsonConverter.userEntityToUserReference(userEntity2, false)).thenReturn(userReferenceJson2);
 
     /* If user can get group return list of members */
     when(groupUtil.canGetGroup(groupId, getMockUser()))
@@ -185,6 +187,21 @@ public class GroupMembersControllerTest extends ControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(objectMapper.writeValueAsString(userReferenceJsons)));
 
+    verify(entityToJsonConverter, times(1)).userEntityToUserReference(userEntity, false);
+    verify(entityToJsonConverter, times(1)).userEntityToUserReference(userEntity2, false);
+
+    /* If user isn't admin, studentNumbers should be hidden */
+    when(groupUtil.isAdminOfGroup(groupId, getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+    when(entityToJsonConverter.userEntityToUserReference(userEntity, true)).thenReturn(userReferenceJson);
+    when(entityToJsonConverter.userEntityToUserReference(userEntity2, true)).thenReturn(userReferenceJson2);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(userReferenceJsons)));
+
+    verify(entityToJsonConverter, times(1)).userEntityToUserReference(userEntity, true);
+    verify(entityToJsonConverter, times(1)).userEntityToUserReference(userEntity2, true);
+    
     /* If use can't get group return corresponding status */
     when(groupUtil.canGetGroup(groupId, getMockUser()))
         .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));

@@ -112,7 +112,7 @@ public class CourseControllerTest extends ControllerTest {
             activeCourse.getId(),
             activeCourse.getName(),
             activeCourse.getDescription(),
-            new UserReferenceJson("", "", 0L),
+            new UserReferenceJson("", "", 0L, ""),
             new ArrayList<>(),
             "",
             "",
@@ -308,7 +308,7 @@ public class CourseControllerTest extends ControllerTest {
                 activeCourse.getId(),
                 "test",
                 "description",
-                new UserReferenceJson("", "", 0L),
+                new UserReferenceJson("", "", 0L, ""),
                 new ArrayList<>(),
                 "",
                 "",
@@ -403,7 +403,7 @@ public class CourseControllerTest extends ControllerTest {
             activeCourse.getId(),
             "test",
             "description2",
-            new UserReferenceJson("", "", 0L),
+            new UserReferenceJson("", "", 0L, ""),
             new ArrayList<>(),
             "",
             "",
@@ -1007,21 +1007,33 @@ public class CourseControllerTest extends ControllerTest {
         CourseUserEntity courseUserEntity = new CourseUserEntity(1L, 1L, CourseRelation.enrolled);
         UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id", "");
         UserReferenceWithRelation userJson = new UserReferenceWithRelation(
-            new UserReferenceJson("name", "surname", 1L),
+            new UserReferenceJson("name", "surname", 1L, ""),
             ""+CourseRelation.enrolled
         );
         List<CourseUserEntity> userList = List.of(courseUserEntity);
         String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/members";
         /* If user is in course, return members */
         when(courseUtil.getCourseIfUserInCourse(activeCourseJson.courseId(), getMockUser()))
-            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.course_admin)));
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.enrolled)));
         when(courseUserRepository.findAllMembers(activeCourseJson.courseId())).thenReturn(userList);
         when(userUtil.getUserIfExists(courseUserEntity.getUserId())).thenReturn(user);
-        when(entityToJsonConverter.userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled)).thenReturn(userJson);
+        /* User is enrolled so studentNumber should be hidden */
+        when(entityToJsonConverter.userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, true)).thenReturn(userJson);
         mockMvc.perform(MockMvcRequestBuilders.get(url))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(List.of(userJson))));
+        verify(entityToJsonConverter, times(1)).userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, true);
+
+        /* If user is admin studentNumber should be visible */
+        when(courseUtil.getCourseIfUserInCourse(activeCourseJson.courseId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.course_admin)));
+        when(entityToJsonConverter.userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, false)).thenReturn(userJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(List.of(userJson))));
+        verify(entityToJsonConverter, times(1)).userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, false);
 
         /* If user doesn't get found it gets filtered out */
         when(userUtil.getUserIfExists(anyLong())).thenReturn(null);
@@ -1107,7 +1119,7 @@ public class CourseControllerTest extends ControllerTest {
             2L,
             "name",
             "description",
-            new UserReferenceJson("", "", 0L),
+            new UserReferenceJson("", "", 0L, ""),
             new ArrayList<>(),
             "",
             "",

@@ -746,7 +746,7 @@ public class ProjectControllerTest extends ControllerTest  {
   }
 
   @Test
-  void getGroupsOfProject() throws Exception {
+  void testGetGroupsOfProject() throws Exception {
     String url = ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId() + "/groups";
     GroupEntity groupEntity = new GroupEntity("groupName",  1L);
     long groupId = 83L;
@@ -760,11 +760,25 @@ public class ProjectControllerTest extends ControllerTest  {
     when(clusterUtil.isIndividualCluster(projectEntity.getGroupClusterId())).thenReturn(false);
     when(projectRepository.findGroupIdsByProjectId(projectEntity.getId())).thenReturn(List.of(groupId));
     when(grouprRepository.findById(groupId)).thenReturn(Optional.of(groupEntity));
-    when(entityToJsonConverter.groupEntityToJson(groupEntity)).thenReturn(groupJson);
+    /* User is admin so studentNumber shouldn't be hidden */
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    when(entityToJsonConverter.groupEntityToJson(groupEntity, false)).thenReturn(groupJson);
     mockMvc.perform(MockMvcRequestBuilders.get(url))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupJson))));
+
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, false);
+
+    /* If user is not admin, studentNumber should be hidden */
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+    when(entityToJsonConverter.groupEntityToJson(groupEntity, true)).thenReturn(groupJson);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupJson))));
+
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, true);
 
     /* If inidividual cluster return no content */
     when(clusterUtil.isIndividualCluster(projectEntity.getGroupClusterId())).thenReturn(true);

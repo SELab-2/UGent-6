@@ -105,11 +105,25 @@ public class ClusterControllerTest extends ControllerTest{
         when(courseUtil.getCourseIfUserInCourse(courseId, getMockUser()))
                 .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, CourseRelation.enrolled)));
         when(groupClusterRepository.findClustersWithoutInvidualByCourseId(courseId)).thenReturn(List.of(groupClusterEntity));
-        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity)).thenReturn(groupClusterJson);
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, true)).thenReturn(groupClusterJson);
         mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupClusterJson))));
+
+        verify(entityToJsonConverter, times(1)).clusterEntityToClusterJson(groupClusterEntity, true);
+
+
+        /* If user is course_admin, studentnumber isn't hidden */
+        when(courseUtil.getCourseIfUserInCourse(courseId, getMockUser()))
+                .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, CourseRelation.course_admin)));
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, false)).thenReturn(groupClusterJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupClusterJson))));
+
+        verify(entityToJsonConverter, times(1)).clusterEntityToClusterJson(groupClusterEntity, false);
 
         /* If a certain check fails, the corresponding status code is returned */
         when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
@@ -129,7 +143,7 @@ public class ClusterControllerTest extends ControllerTest{
                 json -> json.name().equals("test") && json.capacity().equals(20) && json.groupCount().equals(5)
         ))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(groupClusterRepository.save(any())).thenReturn(groupClusterEntity);
-        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity)).thenReturn(groupClusterJson);
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, false)).thenReturn(groupClusterJson);
         mockMvc.perform(MockMvcRequestBuilders.post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -158,12 +172,26 @@ public class ClusterControllerTest extends ControllerTest{
         String url = ApiRoutes.CLUSTER_BASE_PATH + "/" + groupClusterEntity.getId();
 
         /* If the user has acces to the cluster and it isn't an individual cluster, the cluster is returned */
-        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity)).thenReturn(groupClusterJson);
+        /* User is not an admin, studentNumber should be hidden */
+        when(courseUtil.getCourseIfAdmin(courseEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", courseEntity));
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, true)).thenReturn(groupClusterJson);
         when(clusterUtil.getGroupClusterEntityIfNotIndividual(groupClusterEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", groupClusterEntity));
         mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(groupClusterJson)));
+
+        verify(entityToJsonConverter, times(1)).clusterEntityToClusterJson(groupClusterEntity, true);
+
+        /* User is an admin, studentNumber should be visible */
+        when(courseUtil.getCourseIfAdmin(courseEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", courseEntity));
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, false)).thenReturn(groupClusterJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(groupClusterJson)));
+
+        verify(entityToJsonConverter, times(1)).clusterEntityToClusterJson(groupClusterEntity, false);
 
         /* If any check fails, the corresponding status code is returned */
         when(clusterUtil.getGroupClusterEntityIfNotIndividual(anyLong(), any())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
@@ -188,7 +216,7 @@ public class ClusterControllerTest extends ControllerTest{
         copy.setName("newclustername");
         GroupClusterJson updated = new GroupClusterJson(1L, "newclustername", 20, 5, OffsetDateTime.now(), Collections.emptyList(), "");
         when(groupClusterRepository.save(groupClusterEntity)).thenReturn(copy);
-        when(entityToJsonConverter.clusterEntityToClusterJson(copy)).thenReturn(updated);
+        when(entityToJsonConverter.clusterEntityToClusterJson(copy, false)).thenReturn(updated);
         mockMvc.perform(MockMvcRequestBuilders.put(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -318,7 +346,7 @@ public class ClusterControllerTest extends ControllerTest{
                 argThat(json -> json.getName() == groupClusterEntity.getName() && json.getCapacity() == groupClusterEntity.getMaxSize())
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(groupClusterRepository.save(groupClusterEntity)).thenReturn(groupClusterEntity);
-        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity)).thenReturn(groupClusterJson);
+        when(entityToJsonConverter.clusterEntityToClusterJson(groupClusterEntity, false)).thenReturn(groupClusterJson);
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -339,7 +367,7 @@ public class ClusterControllerTest extends ControllerTest{
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         GroupClusterJson updated = new GroupClusterJson(1L, "newclustername", 22, 5, OffsetDateTime.now(), Collections.emptyList(), "");
         when(groupClusterRepository.save(groupClusterEntity)).thenReturn(copy);
-        when(entityToJsonConverter.clusterEntityToClusterJson(copy)).thenReturn(updated);
+        when(entityToJsonConverter.clusterEntityToClusterJson(copy, false)).thenReturn(updated);
         mockMvc.perform(MockMvcRequestBuilders.patch(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -397,7 +425,7 @@ public class ClusterControllerTest extends ControllerTest{
         when(groupRepository.save(argThat(
                 group -> group.getName().equals("test") && group.getClusterId() == groupClusterEntity.getId()
         ))).thenReturn(groupEntity);
-        when(entityToJsonConverter.groupEntityToJson(groupEntity)).thenReturn(groupJson);
+        when(entityToJsonConverter.groupEntityToJson(groupEntity, false)).thenReturn(groupJson);
         mockMvc.perform(MockMvcRequestBuilders.post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
