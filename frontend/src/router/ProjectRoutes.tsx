@@ -14,23 +14,20 @@ export const ProjectContext = createContext<ProjectContextType>({} as ProjectCon
 
 const ProjectRoutes = () => {
   const { projectId } = useParams()
-  const [project, setProject] = useSessionStorage<ProjectContextType["project"]>("__project_cache_"+projectId,null)
+  const [project, setProject] = useSessionStorage<ProjectContextType["project"]>("__project_cache_" + projectId, null)
   const { GET } = useApi()
 
   useEffect(() => {
     // TODO make api call `projectId`
     if (!projectId) return console.error("ProjectId is not defined")
 
-
-
-
     let ignore = false
     console.log("Making the request", projectId)
 
     GET(ApiRoutes.PROJECT, { pathValues: { id: projectId! } }, "page").then((res) => {
-      if(ignore) return
+      if (ignore) return
       if (res.success) setProject(res.response.data)
-        else setProject(null)
+      else setProject(null)
     })
 
     return () => {
@@ -43,7 +40,7 @@ const ProjectRoutes = () => {
   }
 
   return (
-    <ProjectContext.Provider value={{ project,updateProject }}>
+    <ProjectContext.Provider value={{ project, updateProject }}>
       <Outlet />
     </ProjectContext.Provider>
   )

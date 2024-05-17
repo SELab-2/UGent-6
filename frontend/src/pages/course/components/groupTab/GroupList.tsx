@@ -59,7 +59,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void> }> = ({ groups, project, onChanged }) => {
+const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void>, onGroupIdChange?: (groupId: number|null) => void }> = ({ groups, project, onChanged,onGroupIdChange }) => {
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null)
   const [groupId, setGroupId] = useState<number | null>(null)
@@ -106,6 +106,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
     if (!response.success) return setLoading(false)
       
     setGroupId(null)
+    if(onGroupIdChange) onGroupIdChange(null)
     if (onChanged) await onChanged()
 
     message.success(t("course.leftGroup"))
@@ -127,7 +128,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
 
     message.success(t("course.joinedGroup"))
     setGroupId(group.groupId)
-
+    if(onGroupIdChange) onGroupIdChange(group.groupId)
     setLoading(false)
   }
 

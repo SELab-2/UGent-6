@@ -61,23 +61,29 @@ const Project = () => {
       })
     }
 
-    items.push({
-      key: "submissions",
-      label: t("project.submissions"),
-      icon: <SendOutlined />,
-      children: courseAdmin ? (
-        <span>
-          <SubmissionsTab />
-        </span>
-      ) : (
-        <SubmissionCard
-          projectId={Number(projectId)}
-          courseId={course.courseId}
-        />
-      ),
-    })
+    // if we work without groups -> always show submissions & score
+    // if we work with groups -> only show submissions if we are in a group
+    // if we are course admin -> always show submissions but not score 
+    if((project?.groupId || !project?.clusterId) || courseAdmin) {
 
-    if (!courseAdmin) {
+      items.push({
+        key: "submissions",
+        label: t("project.submissions"),
+        icon: <SendOutlined />,
+        children: courseAdmin ? (
+          <span>
+            <SubmissionsTab />
+          </span>
+        ) : (
+          <SubmissionCard
+            projectId={Number(projectId)}
+            courseId={course.courseId}
+          />
+        ),
+      })
+    }
+    
+    if ((project?.groupId || !project?.clusterId) && !courseAdmin) {
       items.push({
         key: "score",
         label: t("course.score"),

@@ -15,9 +15,11 @@ const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId,
 
     if(!project) return 
     if(!project.submissionUrl) return setSubmissions([]) //TODO: fix me, project.submissionUrl can be null 
+    if(!project.groupId) return console.error("No groupId found");
     console.log(project);
     let ignore = false
-    API.GET(project.submissionUrl, {}).then((res) => {
+    console.log("Sending request to: ", project.submissionUrl);
+    API.GET(ApiRoutes.PROJECT_GROUP_SUBMISSIONS, {pathValues: {projectId: project.projectId, groupId: project.groupId}}).then((res) => {
       console.log(res);
       if (!res.success || ignore) return
       setSubmissions(res.response.data.sort((a, b) => b.submissionId - a.submissionId))
@@ -27,7 +29,7 @@ const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId,
     return () => {
       ignore = true
     }
-  }, [projectId,courseId])
+  }, [projectId,courseId,project?.groupId])
 
 
 

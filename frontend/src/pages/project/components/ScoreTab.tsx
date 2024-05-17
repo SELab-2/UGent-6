@@ -24,11 +24,11 @@ const ScoreCard = () => {
     // /projects/{projectid}/groups/{groupid}/score
     if (!projectId) return console.error("No project id")
     if (project?.groupId === undefined) return setScore(null) // Means you aren't in a group yet
-
+    if(!project.groupId) return console.error("No groupId found")
     let ignore = false
   
 
-    API.GET(ApiRoutes.PROJECT_SCORE, { pathValues: { id: projectId, groupId: projectId } }).then((res) => {
+    API.GET(ApiRoutes.PROJECT_SCORE, { pathValues: { id: projectId, groupId: project.groupId } }).then((res) => {
       if (ignore) return
       if (!res.success) return setScore(null)
       setScore(res.response.data)
@@ -37,7 +37,7 @@ const ScoreCard = () => {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [project?.groupId])
 
   // don't show the card if no score is available
   if (score === undefined) return null
