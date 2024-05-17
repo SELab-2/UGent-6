@@ -18,7 +18,7 @@ export function createStatusBitVector(submission: GET_Responses[ApiRoutes.SUBMIS
   if(!submission.structureAccepted){
     status |= SubmissionStatus.STRUCTURE_REJECTED
   }
-  if(!submission.dockerAccepted){
+  if(!submission.dockerFeedback.allowed){
     status |= SubmissionStatus.DOCKER_REJECTED
   }
   if(status === 0){

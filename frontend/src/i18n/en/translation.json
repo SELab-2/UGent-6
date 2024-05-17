@@ -185,10 +185,12 @@
 
   "submission": {
     "submission": "Submission",
+    "running": "Running tests",
     "submittedFiles": "Submitted files:",
     "structuretest": "Structure test results:",
-    "dockertest": "Docker test results:",
-    "dockertestAborted": "Docker test aborted. Try again later.",
+    "dockertest": "Test results:",
+    "downloadSubmission": "Download submission",
+    "dockertestAborted": "Tests aborted. Try again later.",
     "success": "succeeded",
     "failed": "failed",
     "expected": "Expected output:",
