@@ -179,6 +179,7 @@ public class    SubmissionController {
                     false
             );
             submissionEntity.setDockerTestState(DockerTestState.finished);
+            submissionEntity.setDockerType(DockerTestType.NONE);
 
             //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
