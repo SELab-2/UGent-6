@@ -195,22 +195,18 @@ public class Filehandler {
 
     public static ResponseEntity<?> getZipFileAsResponse(Path path, String filename) {
         // Get the file from the server
-        try {
-            Resource zipFile = Filehandler.getFileAsResource(path);
-            if (zipFile == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found.");
-            }
-
-            // Set headers for the response
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-            headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
-
-            return ResponseEntity.ok()
-                .headers(headers)
-                .body(zipFile);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        Resource zipFile = Filehandler.getFileAsResource(path);
+        if (zipFile == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found.");
         }
+
+        // Set headers for the response
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(zipFile);
     }
 }

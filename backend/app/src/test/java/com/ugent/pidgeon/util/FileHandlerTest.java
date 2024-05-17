@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,7 +66,7 @@ public class FileHandlerTest {
   }
 
   @Test
-  public void testSaveSubmission() throws Exception {
+  public void testSaveFile() throws Exception {
       File savedFile = Filehandler.saveFile(tempDir, file, Filehandler.SUBMISSION_FILENAME);
 
       assertTrue(savedFile.exists());
@@ -76,7 +77,7 @@ public class FileHandlerTest {
   }
 
   @Test
-  public void testSaveSubmission_dirDoesntExist() throws Exception {
+  public void testSaveFile_dirDoesntExist() throws Exception {
     File savedFile = Filehandler.saveFile(tempDir.resolve("nonexistent"), file, Filehandler.SUBMISSION_FILENAME);
 
     assertTrue(savedFile.exists());
@@ -87,12 +88,12 @@ public class FileHandlerTest {
   }
 
   @Test
-  public void testSaveSubmission_errorWhileCreatingDir() throws Exception {
+  public void testSaveFile_errorWhileCreatingDir() throws Exception {
     assertThrows(IOException.class, () -> Filehandler.saveFile(Path.of(""), file, Filehandler.SUBMISSION_FILENAME));
   }
 
   @Test
-  public void testSaveSubmission_notAZipFile() {
+  public void testSaveFile_notAZipFile() {
     MockMultipartFile notAZipFile = new MockMultipartFile(
         "notAZipFile.txt", "This is not a zip file".getBytes()
     );
@@ -100,7 +101,7 @@ public class FileHandlerTest {
   }
 
   @Test
-  public void testSaveSubmission_fileEmpty() {
+  public void testSaveFile_fileEmpty() {
     MockMultipartFile emptyFile = new MockMultipartFile(
         "emptyFile.txt", new byte[0]
     );
@@ -108,7 +109,7 @@ public class FileHandlerTest {
   }
 
   @Test
-  public void testSaveSubmission_fileNull() {
+  public void testSaveFile_fileNull() {
     assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, null, Filehandler.SUBMISSION_FILENAME));
   }
 
@@ -256,6 +257,12 @@ public class FileHandlerTest {
   }
 
   @Test
+  public void testGetTextExtraFilesPath() {
+    Path textExtraFilesPath = Filehandler.getTestExtraFilesPath(88);
+    assertEquals(Path.of(Filehandler.BASEPATH, "projects", String.valueOf(88)), textExtraFilesPath);
+  }
+
+  @Test
   public void testGetFileAsResource_FileExists() {
     try {
       File tempFile = Files.createTempFile("testFile", ".txt").toFile();
@@ -378,6 +385,41 @@ public class FileHandlerTest {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  @Test
+  public void testGetZipFileAsResponse() throws IOException {
+    List<File> files = new ArrayList<>();
+    File tempFile1 = Files.createTempFile("tempFile1", ".txt").toFile();
+    File tempFile2 = Files.createTempFile("tempFile2", ".txt").toFile();
+
+    try {
+      files.add(tempFile1);
+      files.add(tempFile2);
+
+      File zipFile = tempDir.resolve("files.zip").toFile();
+      Filehandler.copyFilesAsZip(files, zipFile.toPath());
+
+      assertTrue(zipFile.exists());
+
+      ResponseEntity response = Filehandler.getZipFileAsResponse(zipFile.toPath(), "customfilename.zip");
+
+      assertNotNull(response);
+      assertEquals(200, response.getStatusCodeValue());
+      assertEquals("attachment; filename=customfilename.zip", response.getHeaders().get("Content-Disposition").get(0));
+      assertEquals("application/zip", response.getHeaders().get("Content-Type").get(0));
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testGetZipFileAsResponse_fileDoesNotExist() {
+    ResponseEntity response = Filehandler.getZipFileAsResponse(Path.of("nonexistent"), "customfilename.zip");
+
+    assertNotNull(response);
+    assertEquals(404, response.getStatusCodeValue());
   }
 
 }

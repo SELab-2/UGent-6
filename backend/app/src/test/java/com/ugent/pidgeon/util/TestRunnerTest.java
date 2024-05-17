@@ -96,8 +96,12 @@ public class TestRunnerTest {
 
   @Test
   public void testRunDockerTest() throws IOException {
+    Path outputPath = Path.of("outputPath");
+    Path extraFilesPath = Path.of("extraFilesPath");
+    Path extraFilesPathResolved = extraFilesPath.resolve(Filehandler.EXTRA_TESTFILES_FILENAME);
+    
     try (MockedStatic<Filehandler> filehandler = org.mockito.Mockito.mockStatic(Filehandler.class)) {
-      Path outputPath = Path.of("outputPath");
+      
       AtomicInteger filehandlerCalled = new AtomicInteger();
       filehandlerCalled.set(0);
       filehandler.when(() -> Filehandler.copyFilesAsZip(artifacts, outputPath)).thenAnswer(
@@ -105,6 +109,7 @@ public class TestRunnerTest {
             filehandlerCalled.getAndIncrement();
             return null;
           });
+      filehandler.when(() -> Filehandler.getTestExtraFilesPath(projectId)).thenReturn(extraFilesPath);
       when(dockerModel.runSubmissionWithTemplate(testEntity.getDockerTestScript(), testEntity.getDockerTestTemplate()))
           .thenReturn(dockerTemplateTestOutput);
       when(dockerModel.getArtifacts()).thenReturn(artifacts);
@@ -114,6 +119,7 @@ public class TestRunnerTest {
 
       verify(dockerModel, times(1)).addZipInputFiles(file);
       verify(dockerModel, times(1)).cleanUp();
+      verify(dockerModel, times(1)).addUtilFiles(extraFilesPathResolved);
       assertEquals(1, filehandlerCalled.get());
 
       /* artifacts are empty */
@@ -122,6 +128,7 @@ public class TestRunnerTest {
       assertEquals(dockerTemplateTestOutput, result);
       verify(dockerModel, times(2)).addZipInputFiles(file);
       verify(dockerModel, times(2)).cleanUp();
+      verify(dockerModel, times(2)).addUtilFiles(extraFilesPathResolved);
       assertEquals(1, filehandlerCalled.get());
 
       /* aritifacts are null */
@@ -130,6 +137,7 @@ public class TestRunnerTest {
       assertEquals(dockerTemplateTestOutput, result);
       verify(dockerModel, times(3)).addZipInputFiles(file);
       verify(dockerModel, times(3)).cleanUp();
+      verify(dockerModel, times(3)).addUtilFiles(extraFilesPathResolved);
       assertEquals(1, filehandlerCalled.get());
 
       /* No template */
@@ -139,6 +147,7 @@ public class TestRunnerTest {
       assertEquals(dockerTestOutput, result);
       verify(dockerModel, times(4)).addZipInputFiles(file);
       verify(dockerModel, times(4)).cleanUp();
+      verify(dockerModel, times(4)).addUtilFiles(extraFilesPathResolved);
 
       /* Error gets thrown */
       when(dockerModel.runSubmission(testEntity.getDockerTestScript())).thenThrow(new RuntimeException("Error"));
