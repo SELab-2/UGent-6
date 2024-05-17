@@ -115,7 +115,7 @@ public class    SubmissionController {
                 if (group == null) {
                     throw new RuntimeException("Group not found");
                 }
-                GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group);
+                GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group, false);
                 GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectid);
                 GroupFeedbackJson groupFeedbackJson;
                 if (groupFeedbackEntity == null) {

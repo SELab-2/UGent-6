@@ -41,7 +41,7 @@ public class EntityToJsonConverter {
   private TestRepository testRepository;
 
 
-  public GroupJson groupEntityToJson(GroupEntity groupEntity) {
+  public GroupJson groupEntityToJson(GroupEntity groupEntity, boolean hideStudentNumber) {
         GroupClusterEntity cluster = groupClusterRepository.findById(groupEntity.getClusterId()).orElse(null);
         if (cluster == null) {
             throw new RuntimeException("Cluster not found");
@@ -54,7 +54,7 @@ public class EntityToJsonConverter {
         }
         // Get the members of the group
         List<UserReferenceJson> members = groupRepository.findGroupUsersReferencesByGroupId(groupEntity.getId()).stream().map(user ->
-                new UserReferenceJson(user.getName(), user.getEmail(), user.getUserId())
+                new UserReferenceJson(user.getName(), user.getEmail(), user.getUserId(), hideStudentNumber ? null : user.getStudentNumber())
         ).toList();
 
         // Return the group with its members
@@ -63,9 +63,9 @@ public class EntityToJsonConverter {
     }
 
 
-    public GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster) {
+    public GroupClusterJson clusterEntityToClusterJson(GroupClusterEntity cluster, boolean hideStudentNumber) {
         List<GroupJson> groups = groupRepository.findAllByClusterId(cluster.getId()).stream().map(
-                this::groupEntityToJson
+                g -> groupEntityToJson(g, hideStudentNumber)
         ).toList();
         return new GroupClusterJson(
                 cluster.getId(),
@@ -78,20 +78,26 @@ public class EntityToJsonConverter {
         );
     }
 
-    public UserReferenceJson userEntityToUserReference(UserEntity user) {
-        return new UserReferenceJson(user.getName() + " " + user.getSurname(), user.getEmail(), user.getId());
+    public UserReferenceJson userEntityToUserReference(UserEntity user, boolean hideStudentNumber) {
+        return new UserReferenceJson(
+            user.getName() + " " + user.getSurname(),
+            user.getEmail(), user.getId(),
+            hideStudentNumber ? null : user.getStudentNumber()
+        );
     }
 
-    public UserReferenceWithRelation userEntityToUserReferenceWithRelation(UserEntity user, CourseRelation relation) {
-        return new UserReferenceWithRelation(userEntityToUserReference(user), relation.toString());
+    public UserReferenceWithRelation userEntityToUserReferenceWithRelation(UserEntity user, CourseRelation relation, boolean hideStudentNumber) {
+        return new UserReferenceWithRelation(userEntityToUserReference(user, hideStudentNumber), relation.toString());
     }
 
     public CourseWithInfoJson courseEntityToCourseWithInfo(CourseEntity course, String joinLink, boolean hideKey) {
         UserEntity teacher = courseRepository.findTeacherByCourseId(course.getId());
-        UserReferenceJson teacherJson = userEntityToUserReference(teacher);
+        UserReferenceJson teacherJson = userEntityToUserReference(teacher, true);
 
         List<UserEntity> assistants = courseRepository.findAssistantsByCourseId(course.getId());
-        List<UserReferenceJson> assistantsJson = assistants.stream().map(this::userEntityToUserReference).toList();
+        List<UserReferenceJson> assistantsJson = assistants.stream().map(
+            u -> userEntityToUserReference(u, true)
+        ).toList();
 
         return new CourseWithInfoJson(
                 course.getId(),

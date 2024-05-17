@@ -36,9 +36,10 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
         Long getUserId();
         String getName();
         String getEmail();
+        String getStudentNumber();
     }
     @Query(value= """
-            SELECT gu.userId as userId, u.name, CONCAT(u.name, ' ', u.surname) as name, u.email as email
+            SELECT gu.userId as userId, u.name, CONCAT(u.name, ' ', u.surname) as name, u.email as email, u.studentNumber as studentNumber
             FROM GroupUserEntity gu JOIN UserEntity u ON u.id = gu.userId
             WHERE gu.groupId = ?1""")
     List<UserReference> findGroupUsersReferencesByGroupId(long id);

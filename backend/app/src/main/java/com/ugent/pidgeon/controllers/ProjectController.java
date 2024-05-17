@@ -312,11 +312,15 @@ public class ProjectController {
             "No groups for this project: use " + memberUrl + " to get the members of the course");
       }
 
+      boolean hideStudentNumber;
+      CheckResult<Void> adminCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
+      hideStudentNumber = !adminCheck.getStatus().equals(HttpStatus.OK);
+
       List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
       List<GroupJson> groupjsons = groups.stream()
-          .map((Long id) -> {
-            return groupRepository.findById(id).orElse(null);
-          }).filter(Objects::nonNull).map(entityToJsonConverter::groupEntityToJson).toList();
+          .map((Long id) -> groupRepository.findById(id).orElse(null)).filter(Objects::nonNull).map(
+              g -> entityToJsonConverter.groupEntityToJson(g, hideStudentNumber))
+          .toList();
       return ResponseEntity.ok(groupjsons);
     }
 

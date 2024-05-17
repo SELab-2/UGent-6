@@ -65,10 +65,15 @@ public class ClusterController {
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+
+        CourseRelation courseRelation = checkResult.getData().getSecond();
+        boolean hideStudentNumber = courseRelation.equals(CourseRelation.enrolled);
+
         // Get the clusters for the course
         List<GroupClusterEntity> clusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(courseid);
         List<GroupClusterJson> clusterJsons = clusters.stream().map(
-                entityToJsonConverter::clusterEntityToClusterJson).toList();
+            g -> entityToJsonConverter.clusterEntityToClusterJson(g, hideStudentNumber)
+        ).toList();
         // Return the clusters
         return ResponseEntity.ok(clusterJsons);
     }
@@ -113,7 +118,7 @@ public class ClusterController {
             groupRepository.save(new GroupEntity("Group " + (i + 1), cluster.getId()));
         }
 
-        GroupClusterJson clusterJsonResponse = entityToJsonConverter.clusterEntityToClusterJson(clusterEntity);
+        GroupClusterJson clusterJsonResponse = entityToJsonConverter.clusterEntityToClusterJson(clusterEntity, false);
 
         // Return the cluster
         return ResponseEntity.status(HttpStatus.CREATED).body(clusterJsonResponse);
@@ -138,8 +143,11 @@ public class ClusterController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         GroupClusterEntity cluster = checkResult.getData();
+
+        CheckResult<CourseEntity> courseAdmin = courseUtil.getCourseIfAdmin(cluster.getCourseId(), auth.getUserEntity());
+        boolean hideStudentNumber = !courseAdmin.getStatus().equals(HttpStatus.OK);
         // Return the cluster
-        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(cluster));
+        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(cluster, hideStudentNumber));
     }
 
 
@@ -175,7 +183,7 @@ public class ClusterController {
         clusterEntity.setMaxSize(clusterJson.getCapacity());
         clusterEntity.setName(clusterJson.getName());
         clusterEntity = groupClusterRepository.save(clusterEntity);
-        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity));
+    return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity, false));
     }
 
     /**
@@ -226,7 +234,7 @@ public class ClusterController {
 
             groupCluster.setGroupAmount(clusterFillJson.getClusterGroupMembers().size());
             groupClusterRepository.save(groupCluster);
-            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.clusterEntityToClusterJson(groupCluster));
+            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.clusterEntityToClusterJson(groupCluster, false));
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
@@ -317,6 +325,6 @@ public class ClusterController {
 
         cluster.setGroupAmount(cluster.getGroupAmount() + 1);
         groupClusterRepository.save(cluster);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupEntityToJson(group));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupEntityToJson(group, false));
     }
 }
