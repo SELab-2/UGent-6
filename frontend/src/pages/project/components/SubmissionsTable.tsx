@@ -8,9 +8,9 @@ import useProject from "../../../hooks/useProject"
 import SubmissionStatusTag, { createStatusBitVector } from "./SubmissionStatusTag"
 import { Link, useParams } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
-import apiCall from "../../../util/apiFetch"
 import { ApiRoutes, PUT_Requests } from "../../../@types/requests.d"
 import useAppApi from "../../../hooks/useAppApi"
+import useApi from "../../../hooks/useApi"
 
 const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number]) => {
   return <List.Item>{name}</List.Item>
@@ -21,14 +21,16 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const project = useProject()
   const { courseId, projectId } = useParams()
   const { message } = useAppApi()
+  const API = useApi()
 
   const updateTable = async (groupId: number, feedback: Partial<PUT_Requests[ApiRoutes.PROJECT_SCORE]>) => {
-    console.log(projectId, submissions, groupId)
     if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found")
 
-    const response = await apiCall.patch(ApiRoutes.PROJECT_SCORE, feedback, { id: projectId, groupId })
-    const data = response.data
-    console.log(data)
+    const res = await API.PATCH(ApiRoutes.PROJECT_SCORE, { body: feedback, pathValues: { id: projectId, groupId } }, "message")
+    if (!res.success) return
+
+    const data = res.response.data
+
     const newSubmissions: ProjectSubmissionsType[] = submissions.map((s) => {
       if (s.group.groupId !== groupId) return s
       return {
@@ -44,8 +46,8 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   }
 
   const updateScore = async (s: ProjectSubmissionsType, scoreStr: string) => {
-    // TODO: update score
     if (!projectId || !project) return console.error("No projectId or project found")
+    if (!project.maxScore) return console.error("Scoring not available for this project")
     scoreStr = scoreStr.trim()
     let score: number | null
     if (scoreStr === "") score = null
@@ -56,19 +58,23 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   }
 
   const updateFeedback = async (s: ProjectSubmissionsType, feedback: string) => {
-    // TODO: update feedback
-
     await updateTable(s.group.groupId, { feedback })
   }
 
+  const downloadFile = async (s: ProjectSubmissionsType) => {
+    // TODO: implement this
+  }
+
   const columns: TableProps<ProjectSubmissionsType>["columns"] = useMemo(() => {
-    return [
+    const cols: TableProps<ProjectSubmissionsType>["columns"] = [
       {
         title: project?.clusterId ? t("project.group") : t("project.userName"),
         dataIndex: "group",
         key: "group",
         render: (g) => <Typography.Text>{g.name}</Typography.Text>,
-        description: "test",
+        sorter: (a: ProjectSubmissionsType, b: ProjectSubmissionsType) => {
+          return a.group.groupId - b.group.groupId
+        },
       },
       {
         title: t("project.submission"),
@@ -98,27 +104,48 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         dataIndex: "submission",
         key: "submission",
         render: (time: ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
-      },
-      {
-        title: `Score (/${project?.maxScore ?? ""})`,
-        key: "score",
-        render: (s: ProjectSubmissionsType) => <Typography.Text type={!s.feedback || !project || s.feedback.score === null || s.feedback.score < project.maxScore/2  ? "danger" : undefined} editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}>{s.feedback?.score ?? "-"}</Typography.Text>,
-      },
-      {
-        title: "Download",
-        key: "download",
-        render: () => (
-          <Button
-            type="text"
-            icon={<DownloadOutlined />}
-          />
-        ),
-        align: "center",
+        sorter: (a: ProjectSubmissionsType, b: ProjectSubmissionsType) => {
+          // Implement sorting logic for submissionTime column
+          const timeA: any = a.submission?.submissionTime || 0;
+          const timeB: any = b.submission?.submissionTime || 0;
+          return timeA - timeB;
+        },
       },
     ]
+
+    if (!project || project.maxScore) {
+      cols.push({
+        title: `Score (/${project?.maxScore ?? ""})`,
+        key: "score",
+        render: (s: ProjectSubmissionsType) => (
+          <Typography.Text
+            type={!s.feedback || !project || s.feedback.score === null || s.feedback.score < project.maxScore! / 2 ? "danger" : undefined}
+            editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}
+          >
+            {s.feedback?.score ?? "-"}
+          </Typography.Text>
+        ),
+      })
+    }
+
+    cols.push({
+      title: "Download",
+      key: "download",
+      render: (s: ProjectSubmissionsType) => (
+        <Button
+          onClick={() => downloadFile(s)}
+          type="text"
+          icon={<DownloadOutlined />}
+        />
+      ),
+      align: "center",
+    })
+
+    return cols
   }, [t, project, submissions])
   return (
     <Table
+      showSorterTooltip={{mouseEnterDelay: 1}}
       loading={submissions === null}
       dataSource={submissions ?? []}
       locale={{ emptyText: submissions === null ? t("project.loadingSubmissions") : t("project.noSubmissions") }}

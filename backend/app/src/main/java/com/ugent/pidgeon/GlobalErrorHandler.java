@@ -31,6 +31,7 @@ public class GlobalErrorHandler {
     logger.log(Level.SEVERE, ex.getMessage(), ex);
   }
 
+  /* Gets thrown when a invalid json is sent */
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ApiErrorReponse> handleHttpMessageNotReadableException(HttpServletRequest request, Exception ex) {
     logError(ex);
@@ -40,15 +41,17 @@ public class GlobalErrorHandler {
         "Unable to process the request due to invalid or missing data. Please ensure the request body is properly formatted and all required fields are provided.", path));
   }
 
-  @ExceptionHandler(NoResourceFoundException.class)
-  public ResponseEntity<ApiErrorReponse> handleHttpMessageNotFoundException(HttpServletRequest request, Exception ex) {
+  /* Gets thrown when endpoint doesn't exist */
+  @ExceptionHandler(NoHandlerFoundException.class)
+  public ResponseEntity<ApiErrorReponse> handleNoHandlerFoundException(HttpServletRequest request, Exception ex) {
     logError(ex);
     String path = request.getRequestURI();
     HttpStatus status = HttpStatus.NOT_FOUND;
     return ResponseEntity.status(status).body(new ApiErrorReponse(OffsetDateTime.now(), status.value(), status.getReasonPhrase(),
-        "Endpoint doesn't exist", path));
+        "Resource/endpoint doesn't exist", path));
   }
 
+  /* Gets thrown when the method is not allowed */
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
   public ResponseEntity<ApiErrorReponse> handleMethodNotSupportedException(HttpServletRequest request, Exception ex) {
     logError(ex);
@@ -58,6 +61,7 @@ public class GlobalErrorHandler {
         "Method not supported", path));
   }
 
+  /* Gets thrown when u path variable is of the wrong type */
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ApiErrorReponse> handleMethodArgumentTypeMismatchException(HttpServletRequest request, Exception ex) {
     logError(ex);
@@ -67,6 +71,7 @@ public class GlobalErrorHandler {
         "Invalid url argument type", path));
   }
 
+  /* Gets thrown when an unexpected error occurs */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiErrorReponse> handleException(HttpServletRequest request, Exception ex) {
     logError(ex);

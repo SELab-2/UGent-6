@@ -5,9 +5,9 @@ import useUser from "../../../../hooks/useUser"
 import { useTranslation } from "react-i18next"
 import GroupInfoModal from "./GroupInfoModal"
 import useAppApi from "../../../../hooks/useAppApi"
-import apiCall from "../../../../util/apiFetch"
 import { ProjectType } from "../../../project/Project"
 import { useParams } from "react-router-dom"
+import useApi from "../../../../hooks/useApi"
 
 export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
@@ -69,6 +69,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   const { message } = useAppApi()
   const { user } = useUser()
   const { courseId } = useParams<{ courseId: string }>()
+  const API = useApi()
 
   useEffect(() => {
     if (typeof project === "number") return setGroupId(project)
@@ -77,17 +78,19 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
 
     let ignore = false
 
-    const fetchOwnGroup = async () => {
-      if (!user) return
-      try {
-        const res = await apiCall.get(ApiRoutes.PROJECT, { id: courseId })
-        if (!ignore) setGroupId(res.data.groupId ?? null)
+    // const fetchOwnGroup = async () => {
+    //   if (!user) return
+    //   try {
+    //     const response = await API.GET(ApiRoutes.PROJECT, { pathValues: { id: typeof project === "number"? project.toString() : project } }, "message")
+    //     if(!response.success) return
 
-      } catch (err) {
-        console.error(err)
-      }
-    }
-    fetchOwnGroup()
+    //     if (!ignore) setGroupId(response.response.data.groupId ?? null)
+
+    //   } catch (err) {
+    //     console.error(err)
+    //   }
+    // }
+    // fetchOwnGroup()
     return () => {
       ignore = true
     }
@@ -101,7 +104,9 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   const removeUserFromGroup = async (userId: number, groupId: number) => {
     try {
       setLoading(true)
-      await apiCall.delete(ApiRoutes.GROUP_MEMBER, undefined, { id: groupId, userId: userId })
+      const response = await API.DELETE(ApiRoutes.GROUP_MEMBER, { pathValues: { id: groupId, userId: userId } }, "message")
+      if (!response.success) return
+
       if(onChanged) await onChanged()
 
       setGroupId(null)
@@ -124,7 +129,8 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
     if (!user) return
     try {
       setLoading(true)
-      await apiCall.post(ApiRoutes.GROUP_MEMBERS, { id: user.id }, { id: group.groupId })
+      const response = await API.POST(ApiRoutes.GROUP_MEMBERS, { body:{id: user.id},pathValues: { id: group.groupId } }, "message")
+      if(!response.success) return
       if(onChanged) await onChanged()
 
       message.success(t("course.joinedGroup"))

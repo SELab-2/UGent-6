@@ -1,28 +1,32 @@
 import { FC, useEffect, useState } from "react"
 import SubmissionList from "./SubmissionList"
-import apiCall from "../../../util/apiFetch"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
-import { useParams } from "react-router-dom"
 import useProject from "../../../hooks/useProject"
+import useApi from "../../../hooks/useApi"
 
 export type GroupSubmissionType = GET_Responses[ApiRoutes.PROJECT_GROUP_SUBMISSIONS][number]
 
 const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId, courseId }) => {
   const [submissions, setSubmissions] = useState<GroupSubmissionType[] | null>(null)
   const project = useProject()
+  const API = useApi()
 
   useEffect(() => {
-    //TODO: fetch submissions /api/projects/1/submissions/1
 
     if(!project) return 
-    console.log(project.submissionUrl);
-    apiCall.get(project.submissionUrl ).then((res) => {
-      console.log(res.data)
-      setSubmissions(res.data)
+    if(!project.submissionUrl) return setSubmissions([]) //TODO: fix me, project.submissionUrl can be null 
+    console.log(project);
+    let ignore = false
+    API.GET(project.submissionUrl, {}).then((res) => {
+      console.log(res);
+      if (!res.success || ignore) return
+      setSubmissions(res.response.data.sort((a, b) => b.submissionId - a.submissionId))
     })
 
 
-
+    return () => {
+      ignore = true
+    }
   }, [projectId,courseId])
 
 
