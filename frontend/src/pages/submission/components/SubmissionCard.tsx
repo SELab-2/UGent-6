@@ -6,6 +6,8 @@ import {ArrowLeftOutlined} from "@ant-design/icons"
 import {useNavigate} from "react-router-dom"
 import "@fontsource/jetbrains-mono"
 import apiCall from "../../../util/apiFetch"
+import {Collapse} from "antd"
+import { SubTest } from "../../../@types/requests"
 
 export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 
@@ -14,6 +16,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
     const {t} = useTranslation()
     const navigate = useNavigate()
 
+    //TODO: correcte file download
     const downloadSubmission = async () => {
         try {
             const response = await apiCall.get(submission.fileUrl, undefined, undefined, {
@@ -41,6 +44,27 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
             console.error(err);
         }
     }
+
+    const TestResults: React.FC<SubTest[]> = ( subTests ) => (
+        <Collapse>
+            {subTests.map((test, index) => {
+            const successText = test.succes ? 'SUCCESS' : 'FAILURE';
+            const successType = test.succes ? 'success' : 'danger';
+            return (
+                <Collapse.Panel
+                    key={index}
+                    header={<Typography.Text type={successType}>{`${test.testName}: ${successText}`}</Typography.Text>}
+                >
+                    <Typography.Paragraph>{test.testDescription}</Typography.Paragraph>
+                    <Typography.Title level={5}>Expected Output:</Typography.Title>
+                    <Typography.Text>{test.correct}</Typography.Text>
+                    <Typography.Title level={5}>Actual Output:</Typography.Title>
+                    <Typography.Text>{test.output}</Typography.Text>
+                </Collapse.Panel>
+            );
+        })}
+        </Collapse>
+    );
 
     const feedback = "TODO: feedback"
     return (
@@ -105,29 +129,36 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                 </li>
             </ul>
 
+            {submission.dockerStatus === "no_test" ? null : (<>
+
             {t("submission.dockertest")}
+
+            
 
             <ul style={{listStyleType: "none"}}>
                 <li>
+                    {submission.dockerStatus === "running" ? (
+                        <Spin/>
+                    ) : (submission.dockerStatus === "aborted" ? t("submission.dockertestAborted") : <>
                     <Typography.Text
                         type={submission.dockerAccepted ? "success" : "danger"}>{submission.dockerAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
-                     {submission.dockerAccepted ? null : (
-            <div>
-              {submission.dockerFeedback === null ? (
-                <Spin />
-              ) : (
-                <Input.TextArea
-                  readOnly
-                  value={feedback}
-                  style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
-                  rows={4}
-                  autoSize={{ minRows: 4, maxRows: 16 }}
-                />
-              )}
-            </div>
-          )}
+                    {submission.dockerFeedback.type === "SIMPLE" ? (
+                    <div>
+                        <Input.TextArea
+                        readOnly
+                        value={submission.dockerFeedback.feedback}
+                        style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
+                        rows={4}
+                        autoSize={{ minRows: 4, maxRows: 16 }}
+                        />
+                    </div>
+                    ) : (submission.dockerFeedback.type === "NONE" ? (
+                        TestResults(submission.dockerFeedback.feedback.subtests)
+                    ) : (submission.dockerFeedback.type))}
+                    </>)}
                 </li>
             </ul>
+            </>)}
         </Card>
     )
 }

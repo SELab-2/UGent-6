@@ -192,6 +192,7 @@
     "submittedFiles": "Ingediende bestanden:",
     "structuretest": "Resultaten structuurtest:",
     "dockertest": "Resultaten dockertest:",
+    "dockertestAborted": "Dockertest afgebroken. Probeer het later nog eens.",
     "status": {
       "accepted": "Alle testen geslaagd.",
       "failed": "Sommige testen niet geslaagd."

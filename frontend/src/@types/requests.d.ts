@@ -169,7 +169,8 @@ type SubTest = {
   correct: string,  // verwachte output
   output: string,  // gegenereerde output
   required: boolean,  //  of de test verplicht is
-  succes: boolean, // of de test verplicht is
+  //FIXME: typo, moet success zijn ipv succes
+  succes: boolean, // of de test geslaagd is
 }
 
 type DockerFeedback = {
