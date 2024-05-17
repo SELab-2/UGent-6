@@ -66,7 +66,7 @@ public class FileHandlerTest {
 
   @Test
   public void testSaveSubmission() throws Exception {
-      File savedFile = Filehandler.saveFile(tempDir, file);
+      File savedFile = Filehandler.saveFile(tempDir, file, Filehandler.SUBMISSION_FILENAME);
 
       assertTrue(savedFile.exists());
       assertEquals(Filehandler.SUBMISSION_FILENAME, savedFile.getName());
@@ -77,7 +77,7 @@ public class FileHandlerTest {
 
   @Test
   public void testSaveSubmission_dirDoesntExist() throws Exception {
-    File savedFile = Filehandler.saveFile(tempDir.resolve("nonexistent"), file);
+    File savedFile = Filehandler.saveFile(tempDir.resolve("nonexistent"), file, Filehandler.SUBMISSION_FILENAME);
 
     assertTrue(savedFile.exists());
     assertEquals(Filehandler.SUBMISSION_FILENAME, savedFile.getName());
@@ -88,7 +88,7 @@ public class FileHandlerTest {
 
   @Test
   public void testSaveSubmission_errorWhileCreatingDir() throws Exception {
-    assertThrows(IOException.class, () -> Filehandler.saveFile(Path.of(""), file));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(Path.of(""), file, Filehandler.SUBMISSION_FILENAME));
   }
 
   @Test
@@ -96,7 +96,7 @@ public class FileHandlerTest {
     MockMultipartFile notAZipFile = new MockMultipartFile(
         "notAZipFile.txt", "This is not a zip file".getBytes()
     );
-    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, notAZipFile));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, notAZipFile, Filehandler.SUBMISSION_FILENAME));
   }
 
   @Test
@@ -104,12 +104,12 @@ public class FileHandlerTest {
     MockMultipartFile emptyFile = new MockMultipartFile(
         "emptyFile.txt", new byte[0]
     );
-    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, emptyFile));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, emptyFile, Filehandler.SUBMISSION_FILENAME));
   }
 
   @Test
   public void testSaveSubmission_fileNull() {
-    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, null));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, null, Filehandler.SUBMISSION_FILENAME));
   }
 
   @Test

@@ -106,7 +106,10 @@ public class TestControllerTest extends ControllerTest{
             test.getDockerImage(),
             test.getDockerTestScript(),
             test.getDockerTestTemplate(),
-            test.getStructureTemplate()
+            test.getStructureTemplate(),
+            "extraFilesUrl",
+            "extraFilesName"
+
         );
 
     }
@@ -132,7 +135,9 @@ public class TestControllerTest extends ControllerTest{
             dockerImage,
             dockerTestScript,
             dockerTestTemplate,
-            structureTemplate
+            structureTemplate,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         /* All checks succeed */
         when(testUtil.checkForTestUpdate(
@@ -174,7 +179,9 @@ public class TestControllerTest extends ControllerTest{
             null,
             null,
             null,
-            null
+            null,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         testUpdateJson = new TestUpdateJson(
             dockerImageBlank,
@@ -285,7 +292,9 @@ public class TestControllerTest extends ControllerTest{
             dockerImage,
             dockerTestScript,
             dockerTestTemplate,
-            structureTemplate
+            structureTemplate,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         /* All checks succeed */
         when(testUtil.checkForTestUpdate(
@@ -337,7 +346,9 @@ public class TestControllerTest extends ControllerTest{
             null,
             null,
             null,
-            null
+            null,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         reset(testUtil);
         when(testUtil.checkForTestUpdate(
