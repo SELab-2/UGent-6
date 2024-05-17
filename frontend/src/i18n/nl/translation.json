@@ -195,6 +195,8 @@
     "dockertestAborted": "Dockertest afgebroken. Probeer het later nog eens.",
     "success": "Geslaagd",
     "failed": "Niet geslaagd",
+    "expected": "Vewachte output:",
+    "received": "Ontvangen output:",
     "status": {
       "accepted": "Alle testen geslaagd.",
       "failed": "Sommige testen niet geslaagd."

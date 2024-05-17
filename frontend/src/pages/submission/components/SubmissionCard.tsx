@@ -71,11 +71,9 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
         }
     }
 
-    const tmpSubTests = [{testName: "test1", testDescription: "test1", succes: true, correct: "correct", output: "correct"}, {testName: "test2", testDescription: "test2", succes: false, correct: "correct", output: "incorrect"}]
-
     const TestResults: React.FC<SubTest[]> = ( subTests ) => (
         <Collapse style={{marginTop: 8}}>
-            {tmpSubTests.map((test, index) => {
+            {subTests.map((test, index) => {
             const successText = test.succes ? t("submission.success") : t("submission.failed");
             const successType = test.succes ? 'success' : 'danger';
             return (
@@ -84,9 +82,9 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                     header={<Typography.Text type={successType}>{`${test.testName}: ${successText}`}</Typography.Text>}
                 >
                     <Typography.Paragraph>{test.testDescription}</Typography.Paragraph>
-                    <Typography.Title level={5}>Expected Output:</Typography.Title>
+                    <Typography.Title level={5}>{t("submission.expected")}</Typography.Title>
                     <Typography.Text>{test.correct}</Typography.Text>
-                    <Typography.Title level={5}>Actual Output:</Typography.Title>
+                    <Typography.Title level={5}>{t("submission.received")}</Typography.Title>
                     <Typography.Text>{test.output}</Typography.Text>
                 </Collapse.Panel>
             );

@@ -191,6 +191,8 @@
     "dockertestAborted": "Docker test aborted. Try again later.",
     "success": "succeeded",
     "failed": "failed",
+    "expected": "Expected output:",
+    "received": "Received output:",
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."
