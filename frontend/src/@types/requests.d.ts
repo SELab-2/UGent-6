@@ -15,14 +15,10 @@ export enum ApiRoutes {
   COURSE_GRADES = '/api/courses/:id/grades',
   COURSE_LEAVE = "api/courses/:courseId/leave",
   COURSE_COPY = "/api/courses/:courseId/copy",
-<<<<<<< HEAD
-
-=======
   COURSE_JOIN = "/api/courses/:courseId/join/:courseKey",
   COURSE_JOIN_WITHOUT_KEY = "/api/courses/:courseId/join",
   COURSE_JOIN_LINK = "/api/courses/:courseId/joinKey",
   
->>>>>>> frontend
   PROJECTS = "api/projects",
   PROJECT = "api/projects/:id",
   PROJECT_CREATE = "api/courses/:courseId/projects",
@@ -73,11 +69,7 @@ export type POST_Requests = {
     visible: boolean;
     maxScore: number;
     deadline: Date | null;
-<<<<<<< HEAD
-} 
-=======
 }
->>>>>>> frontend
 
     [ApiRoutes.GROUP_MEMBERS]: {
         id: number
@@ -93,12 +85,8 @@ export type POST_Requests = {
   },
   [ApiRoutes.PROJECT_TESTS]: Omit<GET_Responses[ApiRoutes.PROJECT_TESTS], "projectUrl">
   [ApiRoutes.COURSE_COPY]: undefined
-<<<<<<< HEAD
-
-=======
   [ApiRoutes.COURSE_JOIN]: undefined
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: undefined
->>>>>>> frontend
 }
 
 /**
@@ -113,12 +101,8 @@ export type POST_Responses = {
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER],
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
   [ApiRoutes.COURSE_COPY]: GET_Responses[ApiRoutes.COURSE]
-<<<<<<< HEAD
-
-=======
   [ApiRoutes.COURSE_JOIN]: {name:string, description: string}
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: POST_Responses[ApiRoutes.COURSE_JOIN]
->>>>>>> frontend
 }
 
 /**
@@ -131,11 +115,8 @@ export type DELETE_Requests = {
   [ApiRoutes.COURSE_LEAVE]: undefined
   [ApiRoutes.COURSE_MEMBER]: undefined
   [ApiRoutes.PROJECT_TESTS]: undefined
-<<<<<<< HEAD
-=======
   [ApiRoutes.COURSE_JOIN_LINK]: undefined
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: undefined
->>>>>>> frontend
 }
 
 
@@ -148,14 +129,13 @@ export type PUT_Requests = {
   [ApiRoutes.COURSE_MEMBER]: { relation: CourseRelation }
   [ApiRoutes.PROJECT_SCORE]: { score: number | null , feedback: string},
   [ApiRoutes.PROJECT_TESTS]: POST_Requests[ApiRoutes.PROJECT_TESTS]
-<<<<<<< HEAD
   [ApiRoutes.USER]: {
     name: string
     surname: string
     email: string
     role: UserRole
   }
-=======
+
 
   [ApiRoutes.CLUSTER_FILL]: {
     [groupName:string]: number[] /* userId[] */
@@ -164,7 +144,6 @@ export type PUT_Requests = {
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: {
     file: FormData
 }
->>>>>>> frontend
 }
 
 
@@ -175,12 +154,9 @@ export type PUT_Responses = {
   [ApiRoutes.COURSE_MEMBER]: GET_Responses[ApiRoutes.COURSE_MEMBERS]
   [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
-<<<<<<< HEAD
-=======
   [ApiRoutes.CLUSTER_FILL]: PUT_Requests[ApiRoutes.CLUSTER_FILL]
   [ApiRoutes.COURSE_JOIN_LINK]: ApiRoutes.COURSE_JOIN
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: undefined
->>>>>>> frontend
 }
 
 
@@ -210,11 +186,7 @@ type SubTest = {
 }
 
 type DockerFeedback = {
-<<<<<<< HEAD
-  type: "SIMPLE", 
-=======
   type: "SIMPLE",
->>>>>>> frontend
   feedback: string,  // de logs van de dockerrun
   allowed: boolean // vat samen of de test geslaagd is of niet
 } | {
