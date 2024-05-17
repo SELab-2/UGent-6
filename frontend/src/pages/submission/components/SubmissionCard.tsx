@@ -8,6 +8,7 @@ import "@fontsource/jetbrains-mono"
 import apiCall from "../../../util/apiFetch"
 import {Collapse} from "antd"
 import { SubTest } from "../../../@types/requests"
+import { useEffect, useState } from "react"
 
 export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 
@@ -15,6 +16,32 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
     const {token} = theme.useToken()
     const {t} = useTranslation()
     const navigate = useNavigate()
+    const [filename, setFilename] = useState<String | null>(null)
+
+    useEffect(() => {
+        const getFileName = async () => {
+            //mss is er een betere manier om de filename te krijgen, dit werkt maar kan mss langzaam zijn met hele grote files/directories
+            try {
+                const response = await apiCall.get(submission.fileUrl, undefined, undefined, {
+                    responseType: 'blob',
+                    transformResponse: [(data) => data],
+                });
+                const contentDisposition = response.headers['content-disposition'];
+                if (contentDisposition) {
+                    const fileNameMatch = contentDisposition.match(/filename=([^;]+)/);
+                    console.log(fileNameMatch);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        setFilename(fileNameMatch[1]); // use the filename from the headers
+                    }
+                }
+            } catch (err) {
+                console.log(err);
+                setFilename(null);
+            }
+        };
+    
+        getFileName();
+    }, [submission]);
 
     const downloadSubmission = async () => {
         try {
@@ -49,7 +76,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
     const TestResults: React.FC<SubTest[]> = ( subTests ) => (
         <Collapse style={{marginTop: 8}}>
             {tmpSubTests.map((test, index) => {
-            const successText = test.succes ? 'SUCCESS' : 'FAILURE';
+            const successText = test.succes ? t("submission.success") : t("submission.failed");
             const successType = test.succes ? 'success' : 'danger';
             return (
                 <Collapse.Panel
@@ -100,7 +127,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                         style={{padding: 0}}
                         onClick={downloadSubmission}
                     >
-                        <u>indiening.zip</u>
+                        {filename === null ? <Spin></Spin> : <u>{filename}</u>}
                     </Button>
                 </li>
             </ul>

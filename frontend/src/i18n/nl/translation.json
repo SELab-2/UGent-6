@@ -193,6 +193,8 @@
     "structuretest": "Resultaten structuurtest:",
     "dockertest": "Resultaten dockertest:",
     "dockertestAborted": "Dockertest afgebroken. Probeer het later nog eens.",
+    "success": "Geslaagd",
+    "failed": "Niet geslaagd",
     "status": {
       "accepted": "Alle testen geslaagd.",
       "failed": "Sommige testen niet geslaagd."

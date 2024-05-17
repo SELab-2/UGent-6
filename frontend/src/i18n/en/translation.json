@@ -189,6 +189,8 @@
     "structuretest": "Structure test results:",
     "dockertest": "Docker test results:",
     "dockertestAborted": "Docker test aborted. Try again later.",
+    "success": "succeeded",
+    "failed": "failed",
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."
