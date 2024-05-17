@@ -9,6 +9,7 @@ import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -250,10 +251,10 @@ public class TestController {
 
         try {
           Path path = Filehandler.getTestExtraFilesPath(projectId);
-          Filehandler.saveFile(path, file, Filehandler.EXTRA_TESTFILES_FILENAME);
+          Filehandler.saveFile(path, file, file.getOriginalFilename());
 
           FileEntity fileEntity = new FileEntity();
-          fileEntity.setName(Filehandler.EXTRA_TESTFILES_FILENAME);
+          fileEntity.setName(file.getOriginalFilename());
           fileEntity.setPath(path.resolve(Filehandler.EXTRA_TESTFILES_FILENAME).toString());
           fileEntity.setUploadedBy(auth.getUserEntity().getId());
           fileEntity = fileRepository.save(fileEntity);
@@ -324,7 +325,7 @@ public class TestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No extra files found");
         }
 
-        return Filehandler.getZipFileAsResponse(Path.of(fileEntity.getPath()), Filehandler.EXTRA_TESTFILES_FILENAME);
+        return Filehandler.getZipFileAsResponse(Path.of(fileEntity.getPath()), fileEntity.getName());
     }
 }
 

@@ -1,24 +1,28 @@
 package com.ugent.pidgeon.model.json;
 
 public class TestJson {
+
     private String projectUrl;
     private String dockerImage;
     private String dockerScript;
     private String dockerTemplate;
     private String structureTest;
     private String extraFilesUrl;
+    private String extraFilesName;
+
 
     public TestJson() {
     }
 
     public TestJson(String projectUrl, String dockerImage, String dockerScript,
-        String dockerTemplate, String structureTest, String extraFilesUrl) {
+        String dockerTemplate, String structureTest, String extraFilesUrl, String extraFilesName) {
         this.projectUrl = projectUrl;
         this.dockerImage = dockerImage;
         this.dockerScript = dockerScript;
         this.dockerTemplate = dockerTemplate;
         this.structureTest = structureTest;
         this.extraFilesUrl = extraFilesUrl;
+        this.extraFilesName = extraFilesName;
     }
 
     public String getProjectUrl() {
@@ -67,5 +71,13 @@ public class TestJson {
 
     public void setExtraFilesUrl(String extraFilesUrl) {
         this.extraFilesUrl = extraFilesUrl;
+    }
+
+    public String getExtraFilesName() {
+        return extraFilesName;
+    }
+
+    public void setExtraFilesName(String extraFilesName) {
+        this.extraFilesName = extraFilesName;
     }
 }
