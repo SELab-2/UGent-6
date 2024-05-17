@@ -1,5 +1,5 @@
 import { Spin } from "antd"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import SubmissionCard from "./components/SubmissionCard"
 import { SubmissionType } from "./components/SubmissionCard"
 import { useParams } from "react-router-dom"
@@ -10,18 +10,32 @@ const Submission = () => {
   const [submission, setSubmission] = useState<SubmissionType | null>(null)
   const { submissionId } = useParams()
   const API = useApi()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const fetchSubmission = () => {
+    if (!submissionId) return console.error("No submissionId found");
+
+    API.GET(ApiRoutes.SUBMISSION, { pathValues: { id: submissionId } }).then((res) => {
+      if (!res.success) return;
+      setSubmission(res.response.data);
+
+      // If dockerStatus is "running", schedule the next API call after 1 second
+      if (res.response.data.dockerStatus === "running") {
+        timeoutRef.current = setTimeout(fetchSubmission, 1000);
+      }
+    });
+  };
 
   useEffect(() => {
-    if (!submissionId) return console.error("No submissionId found")
-      let ignore = false
-    API.GET(ApiRoutes.SUBMISSION, { pathValues: { id: submissionId } }).then((res) => {
-      if (!res.success || ignore) return
-      setSubmission(res.response.data)
-    })
+    fetchSubmission();
+
+    // Clear the timeout when the component is unmounted
     return () => {
-      ignore = true
-    }
-  }, [submissionId])
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [submissionId]);
 
   if (submission === null) {
     return (

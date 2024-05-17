@@ -16,7 +16,6 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
     const {t} = useTranslation()
     const navigate = useNavigate()
 
-    //TODO: correcte file download
     const downloadSubmission = async () => {
         try {
             const response = await apiCall.get(submission.fileUrl, undefined, undefined, {
@@ -45,9 +44,11 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
         }
     }
 
+    const tmpSubTests = [{testName: "test1", testDescription: "test1", succes: true, correct: "correct", output: "correct"}, {testName: "test2", testDescription: "test2", succes: false, correct: "correct", output: "incorrect"}]
+
     const TestResults: React.FC<SubTest[]> = ( subTests ) => (
-        <Collapse>
-            {subTests.map((test, index) => {
+        <Collapse style={{marginTop: 8}}>
+            {tmpSubTests.map((test, index) => {
             const successText = test.succes ? 'SUCCESS' : 'FAILURE';
             const successType = test.succes ? 'success' : 'danger';
             return (
@@ -66,7 +67,6 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
         </Collapse>
     );
 
-    const feedback = "TODO: feedback"
     return (
         <Card
             styles={{
@@ -129,11 +129,9 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                 </li>
             </ul>
 
-            {submission.dockerStatus === "no_test" ? null : (<>
+            {submission.dockerStatus !== "running" && submission.dockerFeedback.type === "NONE" ? null : (<>
 
             {t("submission.dockertest")}
-
-            
 
             <ul style={{listStyleType: "none"}}>
                 <li>
@@ -141,7 +139,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                         <Spin/>
                     ) : (submission.dockerStatus === "aborted" ? t("submission.dockertestAborted") : <>
                     <Typography.Text
-                        type={submission.dockerAccepted ? "success" : "danger"}>{submission.dockerAccepted ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
+                        type={submission.dockerFeedback.allowed ? "success" : "danger"}>{submission.dockerFeedback.allowed ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
                     {submission.dockerFeedback.type === "SIMPLE" ? (
                     <div>
                         <Input.TextArea
@@ -152,9 +150,9 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({submission}) 
                         autoSize={{ minRows: 4, maxRows: 16 }}
                         />
                     </div>
-                    ) : (submission.dockerFeedback.type === "NONE" ? (
+                    ) : (submission.dockerFeedback.type === "TEMPLATE" ? (
                         TestResults(submission.dockerFeedback.feedback.subtests)
-                    ) : (submission.dockerFeedback.type))}
+                    ) : null)}
                     </>)}
                 </li>
             </ul>

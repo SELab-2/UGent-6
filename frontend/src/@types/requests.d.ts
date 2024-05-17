@@ -208,7 +208,6 @@ export type GET_Responses = {
     groupId: number
     structureAccepted: boolean,
     dockerStatus: DockerStatus,
-    dockerAccepted: boolean
     submissionTime: Timestamp
     projectUrl: ApiRoutes.PROJECT
     groupUrl: ApiRoutes.GROUP
