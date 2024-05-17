@@ -38,6 +38,9 @@ public class ProjectEntity {
         @Column(name="max_score")
         private Integer maxScore;
 
+        @Column(name = "visible_after")
+        private OffsetDateTime visibleAfter;
+
         public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
                 this.courseId = courseId;
                 this.name = name;
@@ -123,5 +126,13 @@ public class ProjectEntity {
 
         public void setDeadline(OffsetDateTime deadline) {
                 this.deadline = deadline;
+        }
+
+        public OffsetDateTime getVisibleAfter() {
+                return visibleAfter;
+        }
+
+        public void setVisibleAfter(OffsetDateTime visibleAfter) {
+                this.visibleAfter = visibleAfter;
         }
 }

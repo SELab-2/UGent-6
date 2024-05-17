@@ -9,6 +9,7 @@ CREATE TABLE users (
                        email VARCHAR(100) UNIQUE NOT NULL,
                        azure_id VARCHAR(255) NOT NULL,
                        role VARCHAR(50) NOT NULL,
+                       studentnumber VARCHAR(50),
                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -73,7 +74,8 @@ CREATE TABLE projects (
                           deadline TIMESTAMP WITH TIME ZONE NOT NULL,
                           test_id INT REFERENCES tests(test_id),
                           visible BOOLEAN DEFAULT false NOT NULL,
-                          max_score INT
+                          max_score INT,
+                          visible_after TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
 

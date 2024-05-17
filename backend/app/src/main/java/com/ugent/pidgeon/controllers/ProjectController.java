@@ -10,6 +10,7 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.time.OffsetDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,10 @@ public class ProjectController {
       CourseRelation relation = courseCheck.getData().getSecond();
 
       if (relation.equals(CourseRelation.enrolled)) {
+        if (project.getVisibleAfter() != null && project.getVisibleAfter().isBefore(OffsetDateTime.now())) {
+          project.setVisible(true);
+          projectRepository.save(project);
+        }
         if (project.isVisible()) {
           enrolledProjects.add(entityToJsonConverter.projectEntityToProjectResponseJsonWithStatus(project, course, user));
         }
@@ -113,6 +118,11 @@ public class ProjectController {
     }
     CourseEntity course = courseCheck.getData().getFirst();
     CourseRelation relation = courseCheck.getData().getSecond();
+    Logger.getGlobal().info("project visible after: " + project.getVisibleAfter().toInstant() + " now: " + OffsetDateTime.now().toInstant());
+    if (project.getVisibleAfter() != null && project.getVisibleAfter().isBefore(OffsetDateTime.now())) {
+      project.setVisible(true);
+      projectRepository.save(project);
+    }
     if (!project.isVisible() && relation.equals(CourseRelation.enrolled)) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
     }
@@ -161,6 +171,8 @@ public class ProjectController {
           projectJson.getGroupClusterId(), null, projectJson.isVisible(),
           projectJson.getMaxScore(), projectJson.getDeadline());
 
+      project.setVisibleAfter(projectJson.getVisibleAfter());
+
       // Save the project entity
       ProjectEntity savedProject = projectRepository.save(project);
       CourseEntity courseEntity = checkAcces.getData();
@@ -180,6 +192,10 @@ public class ProjectController {
     project.setDeadline(projectJson.getDeadline());
     project.setMaxScore(projectJson.getMaxScore());
     project.setVisible(projectJson.isVisible());
+    project.setVisibleAfter(projectJson.getVisibleAfter());
+    if (project.getVisibleAfter() != null && project.getVisibleAfter().isBefore(OffsetDateTime.now())) {
+      project.setVisible(true);
+    }
     projectRepository.save(project);
     return ResponseEntity.ok(entityToJsonConverter.projectEntityToProjectResponseJson(project, courseRepository.findById(project.getCourseId()).get(), user));
   }
@@ -259,6 +275,10 @@ public class ProjectController {
     }
     if (projectJson.isVisible() == null) {
       projectJson.setVisible(project.isVisible());
+    }
+
+    if (projectJson.getVisibleAfter() == null) {
+      projectJson.setVisibleAfter(project.getVisibleAfter());
     }
 
     CheckResult<Void> checkProject = projectUtil.checkProjectJson(projectJson, project.getCourseId());

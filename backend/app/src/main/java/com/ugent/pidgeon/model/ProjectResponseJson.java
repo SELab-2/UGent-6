@@ -21,5 +21,6 @@ public record ProjectResponseJson(
         boolean visible,
         ProjectProgressJson progress,
         Long groupId,
-        Long clusterId
+        Long clusterId,
+        OffsetDateTime visibleAfter
 ) {}

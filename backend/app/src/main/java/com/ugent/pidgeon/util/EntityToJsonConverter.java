@@ -215,7 +215,8 @@ public class EntityToJsonConverter {
                 project.isVisible(),
                 new ProjectProgressJson(completed, total),
                 groupId,
-                clusterId
+                clusterId,
+                project.getVisibleAfter()
         );
     }
 
