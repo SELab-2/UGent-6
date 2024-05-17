@@ -161,7 +161,7 @@ public class    SubmissionController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        long groupId = checkResult.getData();
+        Long groupId = checkResult.getData();
 
         try {
             //Save the file entry in the database to get the id
@@ -265,6 +265,7 @@ public class    SubmissionController {
 
       return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submission));
     } catch (Exception e) {
+      Logger.getLogger("SubmissionController").log(Level.SEVERE, e.getMessage(), e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to save submissions on file server.");
     }
@@ -393,6 +394,19 @@ public class    SubmissionController {
         }
 
         List<SubmissionEntity> submissions = submissionRepository.findByProjectIdAndGroupId(projectid, groupid);
+        List<SubmissionJson> res = submissions.stream().map(entityToJsonConverter::getSubmissionJson).toList();
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/adminsubmissions")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getAdminSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
+        CheckResult<Void> checkResult = projectUtil.isProjectAdmin(projectid, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        List<SubmissionEntity> submissions = submissionRepository.findAdminSubmissionsByProjectId(projectid);
         List<SubmissionJson> res = submissions.stream().map(entityToJsonConverter::getSubmissionJson).toList();
         return ResponseEntity.ok(res);
     }

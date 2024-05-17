@@ -189,16 +189,16 @@ public class GroupUtil {
      * @param user user that wants to get the submissions
      * @return CheckResult with the status of the check
      */
-    public CheckResult<Void> canGetProjectGroupData(long groupId, long projectId, UserEntity user) {
+    public CheckResult<Void> canGetProjectGroupData(Long groupId, long projectId, UserEntity user) {
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
         if (projectCheck.getStatus() != HttpStatus.OK) {
             return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
         ProjectEntity project = projectCheck.getData();
-        if (groupRepository.findByIdAndClusterId(groupId, project.getGroupClusterId()).isEmpty()) {
+        if (groupId != null && groupRepository.findByIdAndClusterId(groupId, project.getGroupClusterId()).isEmpty()) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not part of the project", null);
         }
-        boolean inGroup = groupRepository.userInGroup(groupId, user.getId());
+        boolean inGroup = groupId != null && groupRepository.userInGroup(groupId, user.getId());
         boolean isAdmin = user.getRole().equals(UserRole.admin) || projectUtil.isProjectAdmin(projectId, user).getStatus().equals(HttpStatus.OK);
         if (inGroup || isAdmin) {
             return new CheckResult<>(HttpStatus.OK, "", null);

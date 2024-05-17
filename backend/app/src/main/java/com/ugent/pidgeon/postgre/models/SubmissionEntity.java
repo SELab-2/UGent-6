@@ -18,7 +18,7 @@ public class SubmissionEntity {
     private long projectId;
 
     @Column(name="group_id", nullable=false)
-    private long groupId;
+    private Long groupId;
 
     @Column(name="file_id", nullable=false)
     private long fileId;
@@ -47,7 +47,7 @@ public class SubmissionEntity {
     public SubmissionEntity() {
     }
 
-    public SubmissionEntity(long projectId, long groupId, Long fileId, OffsetDateTime submissionTime, Boolean structureAccepted, Boolean dockerAccepted) {
+    public SubmissionEntity(long projectId, Long groupId, Long fileId, OffsetDateTime submissionTime, Boolean structureAccepted, Boolean dockerAccepted) {
         this.projectId = projectId;
         this.groupId = groupId;
         this.fileId = fileId;
@@ -56,7 +56,7 @@ public class SubmissionEntity {
         this.dockerAccepted = dockerAccepted;
     }
 
-    public long getGroupId() {
+    public Long getGroupId() {
         return groupId;
     }
 
