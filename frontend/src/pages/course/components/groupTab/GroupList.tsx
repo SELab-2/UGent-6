@@ -38,7 +38,6 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
             size="small"
             disabled={!canJoin}
             onClick={onJoin}
-            style={{ width: "130px" }}
           >
             {t("course.joinGroup")}
           </Button>
@@ -94,7 +93,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
     return () => {
       ignore = true
     }
-  }, [groups, project, courseId])
+  }, [project, courseId])
 
   const handleModalClick = (group: GroupType) => {
     setSelectedGroup(group.groupId)
@@ -102,21 +101,16 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   }
 
   const removeUserFromGroup = async (userId: number, groupId: number) => {
-    try {
-      setLoading(true)
-      const response = await API.DELETE(ApiRoutes.GROUP_MEMBER, { pathValues: { id: groupId, userId: userId } }, "message")
-      if (!response.success) return
+    setLoading(true)
+    const response = await API.DELETE(ApiRoutes.GROUP_MEMBER, { pathValues: { id: groupId, userId: userId } }, "message")
+    if (!response.success) return setLoading(false)
+      
+    setGroupId(null)
+    if (onChanged) await onChanged()
 
-      if(onChanged) await onChanged()
+    message.success(t("course.leftGroup"))
 
-      setGroupId(null)
-      message.success(t("course.leftGroup"))
-    } catch (err) {
-      console.error(err)
-      // TODO: handle error
-    } finally {
-      setLoading(false)
-    }
+    setLoading(false)
   }
 
   const onLeave = async (group: GroupType) => {
@@ -125,22 +119,19 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   }
 
   const onJoin = async (group: GroupType) => {
-    // TODO: join group request
     if (!user) return
-    try {
-      setLoading(true)
-      const response = await API.POST(ApiRoutes.GROUP_MEMBERS, { body:{id: user.id},pathValues: { id: group.groupId } }, "message")
-      if(!response.success) return
-      if(onChanged) await onChanged()
+    setLoading(true)
+    const response = await API.POST(ApiRoutes.GROUP_MEMBERS, { body: { id: user.id }, pathValues: { id: group.groupId } }, "message")
+    if (!response.success) return setLoading(false)
+    if (onChanged) await onChanged()
 
-      message.success(t("course.joinedGroup"))
-      setGroupId(group.groupId)
-    } catch (err) {
-      console.error(err)
-    }
+    message.success(t("course.joinedGroup"))
+    setGroupId(group.groupId)
+
     setLoading(false)
   }
 
+  console.log("Group: ", groupId);
 
   return (
     <>
@@ -154,7 +145,7 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
         renderItem={(g) => (
           <Group
             onClick={() => handleModalClick(g)}
-            canJoin={g.members.length < g.capacity || groupId !== null}
+            canJoin={g.members.length < g.capacity && groupId === null}
             canLeave={groupId === g.groupId}
             group={g}
             loading={loading}
