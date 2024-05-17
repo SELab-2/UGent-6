@@ -52,7 +52,6 @@ public class SubmissionTemplateModel {
                 mostSpaces = spaceAmount;
             }
             lines[i] = "\t".repeat(tabsPerSpaces.get(spaceAmount)) + line.replaceAll(" ", "");
-            ;
         }
 
         // Create folder stack for keeping track of all the folders while exploring the insides
@@ -173,6 +172,65 @@ public class SubmissionTemplateModel {
 
     public SubmissionResult checkSubmission(String file) throws IOException {
         return checkSubmission(new ZipFile(file));
+    }
+
+    // will throw error if there are errors in the template
+    public void tryTemplate(String template) throws Exception {
+        List<String> lines = List.of(template.split("\n"));
+        // check if the template is valid, control if every line contains a file parsable string
+        // check if the file is in a valid folder location (indentation is correct)
+        // check if the first file has indentation 0
+        List<Integer> indentionAmounts = new ArrayList<>();
+        indentionAmounts.add(0);
+        if(getIndentation(lines.get(0)) != 0){
+            throw new Exception("First file should not have any spaces or tabs.");
+        }
+        boolean newFolder = false;
+        for(int line_index = 0; line_index < lines.size(); line_index++){
+            String line = lines.get(line_index);
+            int indentation = getIndentation(line);
+            if(line.isEmpty()){
+                throw new Exception("Empty file name in template, remove blank lines");
+            }
+            if(newFolder && indentation > indentionAmounts.getLast()){
+                // since the indentation is larger than the previous, we are dealing with the first file in a new folder
+                indentionAmounts.add(indentation);
+            }else{
+                // we are dealing with a file in a folder, thus the indentation should be equal to one of the previous folders
+                for(int i = indentionAmounts.size() - 1; i >= 0; i--){
+                    if(indentionAmounts.get(i) == indentation){
+                        break;
+                    }
+                    if(i == 0){
+                        throw new Exception("File at line "+ line_index + " is not in a valid folder location (indentation is incorrect)");
+                    }
+                }
+                // check if file is correct, since location is correct
+
+                // first check if file contains valid file names
+                if(line.substring(0,line.length() - 1).contains("/")){
+                    throw new Exception("File at line "+ line_index + " contains invalid characters");
+                }
+                // check if file is a folder
+                if(line.charAt(line.length() - 1) == '/') {
+                    newFolder = true;
+                }
+
+            }
+
+
+        }
+    }
+
+    private int getIndentation(String line){
+        int length = line.length();
+        // one space is equal to a tab
+        for(int i = 0; i < length; i++){
+            if(line.charAt(i) != ' ' || line.charAt(i) != '\t'){
+                return i - 1;
+            }
+        }
+        return length - 1;
     }
 
 }
