@@ -101,6 +101,7 @@
     "groupEmpty": "Geen leden in deze groep",
     "testFailed": "Testen gefaald",
     "structureFailed": "Structuurtesten gefaald",
+    "running": "Uitvoeren",
     "passed": "Geslaagd",
     "submitSuccess": "Indiening succesvol",
 

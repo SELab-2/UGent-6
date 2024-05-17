@@ -97,6 +97,7 @@
     "groupEmpty": "No members in this group",
     "testFailed": "Tests failed",
     "structureFailed": "Structure tests failed",
+    "running": "Running",
     "passed": "Passed",
     "uploadDirectory": "Upload directory",
     "notSubmitted": "Not submitted",
