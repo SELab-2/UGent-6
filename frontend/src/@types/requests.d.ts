@@ -68,6 +68,7 @@ export type POST_Requests = {
     visible: boolean;
     maxScore: number;
     deadline: Date | null;
+    visibleAfter: Date | null; 
 }
 
     [ApiRoutes.GROUP_MEMBERS]: {
@@ -264,6 +265,7 @@ export type GET_Responses = {
     email: string
     name: string
     userId: number
+    studentNumber: string | null // Null in case of enrolled/student
   }
   [ApiRoutes.USERS]: {
     name: string
@@ -359,6 +361,7 @@ export type GET_Responses = {
         id: number
         name: string
         surname: string
+        studentNumber: string | null // Null in case of enrolled/student
     },
     [ApiRoutes.USER_AUTH]: GET_Responses[ApiRoutes.USER],
     [ApiRoutes.USER_COURSES]: {
