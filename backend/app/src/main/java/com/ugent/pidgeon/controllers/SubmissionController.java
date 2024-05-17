@@ -237,7 +237,7 @@ public class    SubmissionController {
             try {
               // Check if docker tests succeed
               DockerSubmissionTestModel dockerModel = new DockerSubmissionTestModel(testEntity.getDockerImage());
-              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel);
+              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel, projectid);
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }

@@ -27,7 +27,7 @@ public class TestRunner {
     return model.checkSubmission(file);
   }
 
-  public DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath, DockerSubmissionTestModel model) throws IOException {
+  public DockerOutput runDockerTest(ZipFile file, TestEntity testEntity, Path outputPath, DockerSubmissionTestModel model, long projectId) throws IOException {
     // Get the test file from the server
     String testScript = testEntity.getDockerTestScript();
     String testTemplate = testEntity.getDockerTestTemplate();
@@ -41,6 +41,7 @@ public class TestRunner {
     try {
 
       model.addZipInputFiles(file);
+      model.addUtilFiles(Filehandler.getTestExtraFilesPath(projectId).resolve(Filehandler.EXTRA_TESTFILES_FILENAME));
       DockerOutput output;
 
       if (testTemplate == null) {

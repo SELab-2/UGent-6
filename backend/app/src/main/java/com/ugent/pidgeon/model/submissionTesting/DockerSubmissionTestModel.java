@@ -57,7 +57,7 @@ public class DockerSubmissionTestModel {
     new File(localMountFolder + "input/").mkdirs();
     new File(localMountFolder + "output/").mkdirs();
     new File(localMountFolder + "artifacts/").mkdirs();
-    new File(localMountFolder + "utils/").mkdirs();
+    new File(localMountFolder + "extra/").mkdirs();
   }
 
 
@@ -95,7 +95,7 @@ public class DockerSubmissionTestModel {
       Enumeration<? extends ZipEntry> entries = zipFile.entries();
       while (entries.hasMoreElements()) {
         ZipEntry entry = entries.nextElement();
-        File entryDestination = new File(localMountFolder + "utils/", entry.getName());
+        File entryDestination = new File(localMountFolder + "extra/", entry.getName());
         if (entry.isDirectory()) {
           entryDestination.mkdirs();
         } else {
