@@ -83,6 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String lastName;
                 String email;
                 String oid;
+                String studentnumber;
 
                 String version = jwt.getClaim("ver").asString();
 
@@ -92,21 +93,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     lastName = jwt.getClaim("family_name").asString();
                     email = jwt.getClaim("unique_name").asString();
                     oid = jwt.getClaim("oid").asString();
+                    studentnumber = jwt.getClaim("studentnumber").asString();
                 } else if (version.startsWith("2.0")) {
                     displayName = jwt.getClaim("name").asString();
                     lastName = jwt.getClaim("surname").asString();
                     firstName = displayName.replace(lastName, "").strip();
                     email = jwt.getClaim("mail").asString();
                     oid = jwt.getClaim("oid").asString();
+                    studentnumber = jwt.getClaim("studentnumber").asString();
                 } else {
                     throw new JwkException("Invalid OAuth version");
                 }
                 // print full object
-                // logger.info(jwt.getClaims());
+                logger.info(jwt.getClaims());
 
 
 
-                User user = new User(displayName, firstName,lastName, email, oid);
+                User user = new User(displayName, firstName,lastName, email, oid, studentnumber);
 
                 Auth authUser = new Auth(user, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authUser);
