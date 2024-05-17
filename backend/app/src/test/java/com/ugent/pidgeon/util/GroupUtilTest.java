@@ -317,6 +317,18 @@ public class GroupUtilTest {
     when(projectUtil.getProjectIfExists(project.getId())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
     result = groupUtil.canGetProjectGroupData(group.getId(), project.getId(), mockUser);
     assertEquals(HttpStatus.I_AM_A_TEAPOT, result.getStatus());
+
+    /* Check if groupId is null (eg: adminsubmission) */
+    /* User is admin of project */
+    when(projectUtil.getProjectIfExists(project.getId())).thenReturn(new CheckResult<>(HttpStatus.OK, "", project));
+    when(projectUtil.isProjectAdmin(project.getId(), mockUser)).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    result = groupUtil.canGetProjectGroupData(null, project.getId(), mockUser);
+    assertEquals(HttpStatus.OK, result.getStatus());
+
+    /* User is not admin of project */
+    when(projectUtil.isProjectAdmin(project.getId(), mockUser)).thenReturn(new CheckResult<>(HttpStatus.FORBIDDEN, "", null));
+    result = groupUtil.canGetProjectGroupData(null, project.getId(), mockUser);
+    assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
   }
 
 

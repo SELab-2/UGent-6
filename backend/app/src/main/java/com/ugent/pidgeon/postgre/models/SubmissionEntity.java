@@ -60,6 +60,10 @@ public class SubmissionEntity {
         return groupId;
     }
 
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
     public long getFileId() {
         return fileId;
     }
@@ -155,4 +159,6 @@ public class SubmissionEntity {
     public void setDockerType(DockerTestType dockerType) {
         this.dockerType = dockerType.toString();
     }
+
+
 }
