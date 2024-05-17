@@ -224,14 +224,14 @@ public class DockerSubmissionTestTest {
     stm.addUtilFiles(zipLocation);
     stm.addUtilFiles(zipLocation2);
     DockerTestOutput to = stm.runSubmission("find /shared/extra/");
-    List<String> logs = to.logs.stream().map(log -> log.replaceAll("\n", "")).toList();
+    List<String> logs = to.logs.stream().map(log -> log.replaceAll("\n", "")).sorted().toList();
     assertEquals("/shared/extra/", logs.get(0));
-    assertEquals("/shared/extra/helloworld.txt", logs.get(1));
-    assertEquals("/shared/extra/helloworld", logs.get(2));
-    assertEquals("/shared/extra/helloworld/helloworld2.txt", logs.get(3)); // I don't understand the order of find :sob: but it is important all files are found.
-    assertEquals("/shared/extra/helloworld/helloworld3.txt", logs.get(4));
-    assertEquals("/shared/extra/helloworld/emptyfolder", logs.get(5));
-    assertEquals("/shared/extra/helloworld/helloworld1.txt", logs.get(6));
+    assertEquals("/shared/extra/helloworld", logs.get(1));
+    assertEquals("/shared/extra/helloworld.txt", logs.get(2));
+    assertEquals("/shared/extra/helloworld/emptyfolder", logs.get(3));
+    assertEquals("/shared/extra/helloworld/helloworld1.txt", logs.get(4));
+    assertEquals("/shared/extra/helloworld/helloworld2.txt", logs.get(5)); // I don't understand the order of find :sob: but it is important all files are found.
+    assertEquals("/shared/extra/helloworld/helloworld3.txt", logs.get(6));
     stm.cleanUp();
   }
 
