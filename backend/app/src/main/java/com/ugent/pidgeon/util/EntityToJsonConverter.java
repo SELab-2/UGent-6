@@ -264,7 +264,8 @@ public class EntityToJsonConverter {
             testEntity.getDockerImage(),
             testEntity.getDockerTestScript(),
             testEntity.getDockerTestTemplate(),
-            testEntity.getStructureTemplate()
+            testEntity.getStructureTemplate(),
+            testEntity.getExtraFilesId() == null ? null : ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/extrafiles"
         );
     }
 }

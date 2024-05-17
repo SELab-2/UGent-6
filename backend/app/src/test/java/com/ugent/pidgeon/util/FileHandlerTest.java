@@ -66,7 +66,7 @@ public class FileHandlerTest {
 
   @Test
   public void testSaveSubmission() throws Exception {
-      File savedFile = Filehandler.saveSubmission(tempDir, file);
+      File savedFile = Filehandler.saveFile(tempDir, file);
 
       assertTrue(savedFile.exists());
       assertEquals(Filehandler.SUBMISSION_FILENAME, savedFile.getName());
@@ -77,7 +77,7 @@ public class FileHandlerTest {
 
   @Test
   public void testSaveSubmission_dirDoesntExist() throws Exception {
-    File savedFile = Filehandler.saveSubmission(tempDir.resolve("nonexistent"), file);
+    File savedFile = Filehandler.saveFile(tempDir.resolve("nonexistent"), file);
 
     assertTrue(savedFile.exists());
     assertEquals(Filehandler.SUBMISSION_FILENAME, savedFile.getName());
@@ -88,7 +88,7 @@ public class FileHandlerTest {
 
   @Test
   public void testSaveSubmission_errorWhileCreatingDir() throws Exception {
-    assertThrows(IOException.class, () -> Filehandler.saveSubmission(Path.of(""), file));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(Path.of(""), file));
   }
 
   @Test
@@ -96,7 +96,7 @@ public class FileHandlerTest {
     MockMultipartFile notAZipFile = new MockMultipartFile(
         "notAZipFile.txt", "This is not a zip file".getBytes()
     );
-    assertThrows(IOException.class, () -> Filehandler.saveSubmission(tempDir, notAZipFile));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, notAZipFile));
   }
 
   @Test
@@ -104,12 +104,12 @@ public class FileHandlerTest {
     MockMultipartFile emptyFile = new MockMultipartFile(
         "emptyFile.txt", new byte[0]
     );
-    assertThrows(IOException.class, () -> Filehandler.saveSubmission(tempDir, emptyFile));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, emptyFile));
   }
 
   @Test
   public void testSaveSubmission_fileNull() {
-    assertThrows(IOException.class, () -> Filehandler.saveSubmission(tempDir, null));
+    assertThrows(IOException.class, () -> Filehandler.saveFile(tempDir, null));
   }
 
   @Test

@@ -10,17 +10,12 @@ import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
-
-import java.util.Optional;
-import java.util.function.Function;
 
 @RestController
 public class TestController {
@@ -237,6 +232,99 @@ public class TestController {
             return ResponseEntity.status(deleteResult.getStatus()).body(deleteResult.getMessage());
         }
         return  ResponseEntity.ok().build();
+    }
+
+    @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> uploadExtraTestFiles(
+        @PathVariable("projectid") long projectId,
+        @RequestParam("file") MultipartFile file,
+        Auth auth
+    ) {
+        CheckResult<TestEntity> checkResult = testUtil.getTestIfAdmin(projectId, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        TestEntity testEntity = checkResult.getData();
+
+        try {
+          Path path = Filehandler.getTestExtraFilesPath(projectId);
+          Filehandler.saveFile(path, file, Filehandler.EXTRA_TESTFILES_FILENAME);
+
+          FileEntity fileEntity = new FileEntity();
+          fileEntity.setName(Filehandler.EXTRA_TESTFILES_FILENAME);
+          fileEntity.setPath(path.resolve(Filehandler.EXTRA_TESTFILES_FILENAME).toString());
+          fileEntity.setUploadedBy(auth.getUserEntity().getId());
+          fileEntity = fileRepository.save(fileEntity);
+
+          testEntity.setExtraFilesId(fileEntity.getId());
+          testEntity = testRepository.save(testEntity);
+
+          return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(testEntity, projectId));
+        } catch (Exception e) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving files");
+        }
+    }
+
+    @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> deleteExtraTestFiles(
+        @PathVariable("projectid") long projectId,
+        Auth auth
+    ) {
+        CheckResult<TestEntity> checkResult = testUtil.getTestIfAdmin(projectId, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        TestEntity testEntity = checkResult.getData();
+
+        try {
+
+          FileEntity fileEntity = fileRepository.findById(testEntity.getExtraFilesId()).orElse(null);
+          if (fileEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No extra files found");
+          }
+
+          Path path = Path.of(fileEntity.getPath());
+          Filehandler.deleteLocation(path.toFile());
+
+          testEntity.setExtraFilesId(null);
+          testEntity = testRepository.save(testEntity);
+
+          fileRepository.delete(fileEntity);
+
+
+
+          return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(testEntity, projectId));
+        } catch (Exception e) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while deleting files");
+        }
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getExtraTestFiles(
+        @PathVariable("projectid") long projectId,
+        Auth auth
+    ) {
+        CheckResult<TestEntity> checkResult = testUtil.getTestIfAdmin(projectId, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        TestEntity testEntity = checkResult.getData();
+        if (testEntity.getExtraFilesId() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No extra files found");
+        }
+
+        FileEntity fileEntity = fileRepository.findById(testEntity.getExtraFilesId()).orElse(null);
+        if (fileEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No extra files found");
+        }
+
+        return Filehandler.getZipFileAsResponse(Path.of(fileEntity.getPath()), Filehandler.EXTRA_TESTFILES_FILENAME);
     }
 }
 

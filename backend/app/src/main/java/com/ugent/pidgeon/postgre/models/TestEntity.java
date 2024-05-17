@@ -24,6 +24,9 @@ public class TestEntity {
     @Column(name = "structure_template")
     private String structureTemplate;
 
+    @Column(name = "extra_files")
+    private Long extraFilesId;
+
     public TestEntity(String dockerImage, String docker_test_script,
         String dockerTestTemplate,
         String structureTemplate) {
@@ -75,5 +78,13 @@ public class TestEntity {
 
     public void setStructureTemplate(String structureTemplate) {
         this.structureTemplate = structureTemplate;
+    }
+
+    public Long getExtraFilesId() {
+        return extraFilesId;
+    }
+
+    public void setExtraFilesId(Long extraFilesId) {
+        this.extraFilesId = extraFilesId;
     }
 }

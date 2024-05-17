@@ -5,6 +5,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.tika.Tika;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
 
@@ -18,6 +21,7 @@ public class Filehandler {
 
     static String BASEPATH = "data";
     public static String SUBMISSION_FILENAME = "files.zip";
+    public static String EXTRA_TESTFILES_FILENAME = "testfiles.zip";
 
     /**
      * Save a submission to the server
@@ -26,7 +30,7 @@ public class Filehandler {
      * @return the saved file
      * @throws IOException if an error occurs while saving the file
      */
-    public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
+    public static File saveFile(Path directory, MultipartFile file, String filename) throws IOException {
         // Check if the file is empty
         if (file == null || file.isEmpty()) {
             throw new IOException("File is empty");
@@ -50,7 +54,7 @@ public class Filehandler {
             }
 
             // Save the file to the server
-            Path filePath = directory.resolve(SUBMISSION_FILENAME);
+            Path filePath = directory.resolve(filename);
 
             try(InputStream stream = new FileInputStream(tempFile)) {
                 Files.copy(stream, filePath, StandardCopyOption.REPLACE_EXISTING);
@@ -115,6 +119,10 @@ public class Filehandler {
 
     static public Path getSubmissionArtifactPath(long projectid, long groupid, long submissionid) {
         return getSubmissionPath(projectid, groupid, submissionid).resolve("artifacts.zip");
+    }
+
+    static public Path getTestExtraFilesPath(long projectid) {
+        return Path.of(BASEPATH,"projects", String.valueOf(projectid));
     }
 
     /**
@@ -182,6 +190,27 @@ public class Filehandler {
                 fileInputStream.close();
                 zipOutputStream.closeEntry();
             }
+        }
+    }
+
+    public static ResponseEntity<?> getZipFileAsResponse(Path path, String filename) {
+        // Get the file from the server
+        try {
+            Resource zipFile = Filehandler.getFileAsResource(path);
+            if (zipFile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found.");
+            }
+
+            // Set headers for the response
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+            headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(zipFile);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }

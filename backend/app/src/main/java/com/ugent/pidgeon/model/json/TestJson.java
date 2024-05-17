@@ -6,17 +6,19 @@ public class TestJson {
     private String dockerScript;
     private String dockerTemplate;
     private String structureTest;
+    private String extraFilesUrl;
 
     public TestJson() {
     }
 
     public TestJson(String projectUrl, String dockerImage, String dockerScript,
-        String dockerTemplate, String structureTest) {
+        String dockerTemplate, String structureTest, String extraFilesUrl) {
         this.projectUrl = projectUrl;
         this.dockerImage = dockerImage;
         this.dockerScript = dockerScript;
-      this.dockerTemplate = dockerTemplate;
-      this.structureTest = structureTest;
+        this.dockerTemplate = dockerTemplate;
+        this.structureTest = structureTest;
+        this.extraFilesUrl = extraFilesUrl;
     }
 
     public String getProjectUrl() {
@@ -57,5 +59,13 @@ public class TestJson {
 
     public void setDockerTemplate(String dockerTemplate) {
         this.dockerTemplate = dockerTemplate;
+    }
+
+    public String getExtraFilesUrl() {
+        return extraFilesUrl;
+    }
+
+    public void setExtraFilesUrl(String extraFilesUrl) {
+        this.extraFilesUrl = extraFilesUrl;
     }
 }

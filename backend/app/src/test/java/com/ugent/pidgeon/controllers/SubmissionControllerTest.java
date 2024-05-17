@@ -276,7 +276,7 @@ public class SubmissionControllerTest extends ControllerTest {
         File file = createTestFile();
         try (MockedStatic<Filehandler> mockedFileHandler = mockStatic(Filehandler.class)) {
             mockedFileHandler.when(() -> Filehandler.getSubmissionPath(submission.getProjectId(), groupEntity.getId(), submission.getId())).thenReturn(path);
-            mockedFileHandler.when(() -> Filehandler.saveSubmission(path, mockMultipartFile)).thenReturn(file);
+            mockedFileHandler.when(() -> Filehandler.saveFile(path, mockMultipartFile)).thenReturn(file);
             mockedFileHandler.when(() -> Filehandler.getSubmissionArtifactPath(anyLong(), anyLong(), anyLong())).thenReturn(artifactPath);
 
             when(testRunner.runStructureTest(any(), eq(testEntity), any())).thenReturn(null);
