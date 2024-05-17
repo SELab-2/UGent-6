@@ -131,7 +131,8 @@ public class EntityToJsonConverterTest {
         "surname",
         "email",
         UserRole.student,
-        "azureId"
+        "azureId",
+        ""
     );
     userEntity.setId(44L);
     userReferenceJson = new UserReferenceJson(
@@ -145,7 +146,8 @@ public class EntityToJsonConverterTest {
         "otherSurname",
         "otherEmail",
         UserRole.student,
-        "otherAzureId"
+        "otherAzureId",
+        ""
     );
     otherUserReferenceJson = new UserReferenceJson(
         otherUser.getName() + " " + otherUser.getSurname(),
@@ -190,7 +192,8 @@ public class EntityToJsonConverterTest {
         projectEntity.isVisible(),
         new ProjectProgressJson(44, 60),
         groupEntity.getId(),
-        groupClusterEntity.getId()
+        groupClusterEntity.getId(),
+        OffsetDateTime.now()
     );
 
     groupFeedbackEntity = new GroupFeedbackEntity(
@@ -416,7 +419,7 @@ public class EntityToJsonConverterTest {
     GroupEntity secondGroup = new GroupEntity("secondGroup", groupClusterEntity.getId());
     SubmissionEntity secondSubmission = new SubmissionEntity(22, 232, 90L, OffsetDateTime.MIN, true, true);
     CourseUserEntity courseUser = new CourseUserEntity(projectEntity.getCourseId(), userEntity.getId(), CourseRelation.creator);
-
+    projectEntity.setVisibleAfter(OffsetDateTime.now());
     when(projectRepository.findGroupIdsByProjectId(projectEntity.getId())).thenReturn(List.of(groupEntity.getId(), secondGroup.getId()));
     when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectEntity.getId(), groupEntity.getId())).thenReturn(Optional.of(submissionEntity));
     when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectEntity.getId(), secondGroup.getId())).thenReturn(Optional.of(secondSubmission));
@@ -443,6 +446,8 @@ public class EntityToJsonConverterTest {
     assertEquals(2, result.progress().total());
     assertNull(result.groupId()); // User is a creator/course_admin -> no group
     assertEquals(groupClusterEntity.getId(), result.clusterId());
+    assertEquals(projectEntity.getVisibleAfter(), result.visibleAfter());
+
 
     /* TestId is null */
     projectEntity.setTestId(null);

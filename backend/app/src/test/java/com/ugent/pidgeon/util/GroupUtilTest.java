@@ -50,7 +50,7 @@ public class GroupUtilTest {
   public void setup() {
     group = new GroupEntity("Groupname", 12L);
     group.setId(54L);
-    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
     mockUser.setId(10L);
     groupCluster = new GroupClusterEntity(9L, 5, "cluster test", 20);
     groupCluster.setId(12L);
@@ -137,7 +137,7 @@ public class GroupUtilTest {
   @Test
   public void TestCanAddUserToGroup() {
     long otherUserId = 5L;
-    UserEntity otherUser = new UserEntity("othername", "othersurname", "otheremail", UserRole.student, "otherazureid");
+    UserEntity otherUser = new UserEntity("othername", "othersurname", "otheremail", UserRole.student, "otherazureid", "");
     /* All checks succeed */
     /* Trying to add yourself to the group */
     when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));

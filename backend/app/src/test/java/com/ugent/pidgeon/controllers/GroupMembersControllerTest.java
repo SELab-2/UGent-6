@@ -54,9 +54,9 @@ public class GroupMembersControllerTest extends ControllerTest {
   @BeforeEach
   public void setup() {
     setUpController(groupMemberController);
-    userEntity = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    userEntity = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
     userEntity.setId(5L);
-    userEntity2 = new UserEntity("name2", "surname2", "email2", UserRole.student, "azureid2");
+    userEntity2 = new UserEntity("name2", "surname2", "email2", UserRole.student, "azureid2", "");
     userEntity2.setId(6L);
     userReferenceJson = new UserReferenceJson(userEntity.getName(), userEntity.getEmail(), userEntity.getId());
     userReferenceJson2 = new UserReferenceJson(userEntity2.getName(), userEntity2.getEmail(), userEntity2.getId());

@@ -52,7 +52,7 @@ public class GroupFeedbackUtilTest {
         10.0f,
         "Good job!"
     );
-    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
     mockUser.setId(2L);
     projectEntity = new ProjectEntity(
         13L,

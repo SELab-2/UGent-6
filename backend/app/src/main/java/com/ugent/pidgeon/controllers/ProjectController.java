@@ -118,7 +118,7 @@ public class ProjectController {
     }
     CourseEntity course = courseCheck.getData().getFirst();
     CourseRelation relation = courseCheck.getData().getSecond();
-    Logger.getGlobal().info("project visible after: " + project.getVisibleAfter().toInstant() + " now: " + OffsetDateTime.now().toInstant());
+
     if (project.getVisibleAfter() != null && project.getVisibleAfter().isBefore(OffsetDateTime.now())) {
       project.setVisible(true);
       projectRepository.save(project);

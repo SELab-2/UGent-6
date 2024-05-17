@@ -626,7 +626,8 @@ public class CourseControllerTest extends ControllerTest {
             true,
             new ProjectProgressJson(1, 1),
             1L,
-            1L
+            1L,
+            OffsetDateTime.now()
         );
         /* If user is in course, return projects */
         when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(),getMockUser()))
@@ -831,7 +832,7 @@ public class CourseControllerTest extends ControllerTest {
         String requestStringAdmin = "{\"userId\": 1, \"relation\": \"course_admin\"}";
         String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/members";
         CourseUserEntity courseUser = new CourseUserEntity(activeCourse.getId(), 1, CourseRelation.enrolled);
-        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id");
+        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id", "");
         /* If all checks succeed, return 201 */
 
         when(courseUtil.canUpdateUserInCourse(
@@ -907,7 +908,7 @@ public class CourseControllerTest extends ControllerTest {
         String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/members/" + userId;
         String request = "{\"relation\": \"enrolled\"}";
         String adminRequest = "{\"relation\": \"course_admin\"}";
-        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id");
+        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id", "");
         CourseUserEntity enrolledUser = new CourseUserEntity(activeCourse.getId(), userId, CourseRelation.enrolled);
         CourseUserEntity adminUser = new CourseUserEntity(activeCourse.getId(), userId, CourseRelation.course_admin);
         /* If all checks succeed, 200 gets returned  */
@@ -1004,7 +1005,7 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testGetCourseMembers() throws Exception {
         CourseUserEntity courseUserEntity = new CourseUserEntity(1L, 1L, CourseRelation.enrolled);
-        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id");
+        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id", "");
         UserReferenceWithRelation userJson = new UserReferenceWithRelation(
             new UserReferenceJson("name", "surname", 1L),
             ""+CourseRelation.enrolled

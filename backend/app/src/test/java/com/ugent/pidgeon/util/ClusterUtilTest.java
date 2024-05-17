@@ -54,7 +54,7 @@ public class ClusterUtilTest {
   public void setUp() {
     clusterEntity = new GroupClusterEntity(1L, 20, "clustername", 5);
     clusterEntity.setId(4L);
-    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
   }
 
   @Test

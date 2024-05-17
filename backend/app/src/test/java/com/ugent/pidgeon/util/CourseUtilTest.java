@@ -56,7 +56,7 @@ public class CourseUtilTest {
 
   @BeforeEach
   public void setUp() {
-    user = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    user = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
     user.setId(44L);
     course = new CourseEntity("name", "description",2024);
     course.setId(9L);
