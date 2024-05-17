@@ -251,7 +251,7 @@ public class TestController {
 
         try {
           Path path = Filehandler.getTestExtraFilesPath(projectId);
-          Filehandler.saveFile(path, file, file.getOriginalFilename());
+          Filehandler.saveFile(path, file, Filehandler.EXTRA_TESTFILES_FILENAME);
 
           FileEntity fileEntity = new FileEntity();
           fileEntity.setName(file.getOriginalFilename());
@@ -283,20 +283,19 @@ public class TestController {
 
         try {
 
-          FileEntity fileEntity = fileRepository.findById(testEntity.getExtraFilesId()).orElse(null);
+          FileEntity fileEntity = testEntity.getExtraFilesId() == null ?
+              null : fileRepository.findById(testEntity.getExtraFilesId()).orElse(null);
           if (fileEntity == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No extra files found");
           }
 
-          Path path = Path.of(fileEntity.getPath());
-          Filehandler.deleteLocation(path.toFile());
-
           testEntity.setExtraFilesId(null);
           testEntity = testRepository.save(testEntity);
 
-          fileRepository.delete(fileEntity);
-
-
+          CheckResult<Void> delResult = fileUtil.deleteFileById(fileEntity.getId());
+          if (!delResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(delResult.getStatus()).body(delResult.getMessage());
+          }
 
           return ResponseEntity.ok(entityToJsonConverter.testEntityToTestJson(testEntity, projectId));
         } catch (Exception e) {
