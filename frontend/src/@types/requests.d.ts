@@ -130,6 +130,13 @@ export type PUT_Requests = {
   [ApiRoutes.COURSE_MEMBER]: { relation: CourseRelation }
   [ApiRoutes.PROJECT_SCORE]: { score: number | null , feedback: string},
   [ApiRoutes.PROJECT_TESTS]: POST_Requests[ApiRoutes.PROJECT_TESTS]
+  [ApiRoutes.USER]: {
+    name: string
+    surname: string
+    email: string
+    role: UserRole
+  }
+
 
   [ApiRoutes.CLUSTER_FILL]: {
     [groupName:string]: number[] /* userId[] */
@@ -141,10 +148,10 @@ export type PUT_Requests = {
 }
 
 
-
 export type PUT_Responses = {
   [ApiRoutes.COURSE]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT]: GET_Responses[ApiRoutes.PROJECT]
+  [ApiRoutes.USER]: GET_Responses[ApiRoutes.USER]
   [ApiRoutes.COURSE_MEMBER]: GET_Responses[ApiRoutes.COURSE_MEMBERS]
   [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
   [ApiRoutes.PROJECT_TESTS]: GET_Responses[ApiRoutes.PROJECT_TESTS]
@@ -249,11 +256,12 @@ export type GET_Responses = {
   }
   [ApiRoutes.PROJECT_TESTS]: {
     projectUrl: ApiRoutes.PROJECT,
-    dockerImage: string | null,
+    dockerImage: string | null, 
     dockerScript: string | null,
     dockerTemplate: string | null,
     structureTest: string | null
-  }
+  } 
+
   [ApiRoutes.GROUP]: {
     groupId: number,
     capacity: number,
@@ -275,11 +283,12 @@ export type GET_Responses = {
   }
   [ApiRoutes.USERS]: {
     name: string
-    userId: number
+    surname: string
+    id: number
     url: string
     email: string
     role: UserRole
-  }
+  }[]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBER][]
 
   [ApiRoutes.COURSE_CLUSTERS]: GET_Responses[ApiRoutes.CLUSTER][]
@@ -398,10 +407,10 @@ export type GET_Responses = {
   [ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK]: string | null  // Null if no feedback is given
   [ApiRoutes.SUBMISSION_DOCKER_FEEDBACK]: string | null // Null if no feedback is given
 
-
   [ApiRoutes.SUBMISSION_ARTIFACT]: Blob // returned het artifact als zip
 
   [ApiRoutes.COURSE_JOIN]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
 }
+

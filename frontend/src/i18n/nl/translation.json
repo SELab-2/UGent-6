@@ -72,6 +72,18 @@
   },
 
   "editRole": {
+    "email": "Email",
+    "name": "Naam",
+    "surname": "Achternaam",
+    "search": "Zoeken",
+    "emailError": "Vul een geldig email adres in",
+    "emailTooShort": "Email moet minstens 3 karakters lang zijn",
+    "nameError": "Naam moet minstens 3 karakters lang zijn",
+    "surnameError": "Achternaam moet minstens 3 karakters lang zijn",
+    "searchTooShort": "Zoekopdracht moet minstens 3 karakters lang zijn",
+    "searchTutorial": "Vul een email adres, naam of achternaam in om gebruikers op te zoeken.",
+    "noUsersFound": "Geen gebruikers gevonden",
+    "invalidEmail": "Ongeldig email adres",
     "student": "Student",
     "teacher": "Professor",
     "admin": "Admin",
@@ -101,6 +113,7 @@
     "groupEmpty": "Geen leden in deze groep",
     "testFailed": "Testen gefaald",
     "structureFailed": "Structuurtesten gefaald",
+    "running": "Uitvoeren",
     "passed": "Geslaagd",
     "submitSuccess": "Indiening succesvol",
 
@@ -111,6 +124,7 @@
     "options": "Aanpassen",
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
+
     "scoreTooHigh": "Score is hoger dan maximum score",
     "successfullyDeleted": "Project succesvol verwijderd",
     "deleteProject": "Project verwijderen",
