@@ -201,6 +201,8 @@ public class    SubmissionController {
         Logger.getLogger("SubmissionController").info("no tests");
         submission.setStructureFeedback("No specific structure requested for this project.");
         submission.setStructureAccepted(true);
+        submission.setDockerAccepted(true);
+        submissionRepository.save(submission);
       } else {
 
         // Check file structure

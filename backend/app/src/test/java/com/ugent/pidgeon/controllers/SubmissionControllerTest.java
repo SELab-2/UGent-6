@@ -297,7 +297,7 @@ public class SubmissionControllerTest extends ControllerTest {
 
             /* assertEquals(DockerTestState.running, submission.getDockerTestState()); */ // This executes too quickly so we can't test this
 
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             // File repository needs to save again after setting path
             verify(fileRepository, times(1)).save(argThat(
