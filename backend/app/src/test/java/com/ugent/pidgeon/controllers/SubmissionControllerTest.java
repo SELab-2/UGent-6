@@ -278,16 +278,17 @@ public class SubmissionControllerTest extends ControllerTest {
         File file = createTestFile();
         try (MockedStatic<Filehandler> mockedFileHandler = mockStatic(Filehandler.class)) {
             mockedFileHandler.when(() -> Filehandler.getSubmissionPath(submission.getProjectId(), groupEntity.getId(), submission.getId())).thenReturn(path);
-            mockedFileHandler.when(() -> Filehandler.saveSubmission(path, mockMultipartFile)).thenReturn(file);
+            mockedFileHandler.when(() -> Filehandler.saveFile(path, mockMultipartFile, Filehandler.SUBMISSION_FILENAME)).thenReturn(file);
             mockedFileHandler.when(() -> Filehandler.getSubmissionArtifactPath(anyLong(), anyLong(), anyLong())).thenReturn(artifactPath);
 
             when(testRunner.runStructureTest(any(), eq(testEntity), any())).thenReturn(null);
-            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath), any())).thenReturn(null);
+            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath), any(), eq(submission.getProjectId()))).thenReturn(null);
 
             when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
 
             when(testRepository.findByProjectId(submission.getProjectId())).thenReturn(Optional.of(testEntity));
             when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
+
 
             mockMvc.perform(MockMvcRequestBuilders.multipart(url)
                     .file(mockMultipartFile))
@@ -358,7 +359,7 @@ public class SubmissionControllerTest extends ControllerTest {
             testEntity.setDockerImage("dockerImage");
             testEntity.setDockerTestScript("dockerTestScript");
             DockerOutput dockerOutput = new DockerTestOutput( List.of("dockerFeedback-test"), true);
-            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath), any())).thenReturn(dockerOutput);
+            when(testRunner.runDockerTest(any(), eq(testEntity), eq(artifactPath), any(), eq(submission.getProjectId()))).thenReturn(dockerOutput);
             submission.setDockerAccepted(false);
             submission.setDockerFeedback("dockerFeedback-test");
             mockMvc.perform(MockMvcRequestBuilders.multipart(url)
@@ -382,7 +383,7 @@ public class SubmissionControllerTest extends ControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
             verify(testRunner, times(0)).runStructureTest(any(), eq(testEntity), any());
-            verify(testRunner, times(0)).runDockerTest(any(), eq(testEntity), eq(artifactPath), any());
+            verify(testRunner, times(0)).runDockerTest(any(), eq(testEntity), eq(artifactPath), any(), eq(submission.getProjectId()));
 
             /* Unexpected error */
             reset(fileRepository);
@@ -418,6 +419,7 @@ public class SubmissionControllerTest extends ControllerTest {
             when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", submission));
             when(fileRepository.findById(submission.getFileId())).thenReturn(Optional.of(fileEntity));
             mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenReturn(mockedResource);
+            mockedFileHandler.when(() -> Filehandler.getZipFileAsResponse(path, fileEntity.getName())).thenCallRealMethod();
 
             mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
@@ -426,22 +428,11 @@ public class SubmissionControllerTest extends ControllerTest {
                     HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileEntity.getName()))
                 .andExpect(content().bytes(mockedResource.getInputStream().readAllBytes()));
 
-            /* Resource not found */
-            mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenReturn(null);
-            mockMvc.perform(MockMvcRequestBuilders.get(url))
-                .andExpect(status().isNotFound());
 
             /* file not found */
             when(fileRepository.findById(submission.getFileId())).thenReturn(Optional.empty());
             mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isNotFound());
-
-            /* Unexpected error */
-            when(fileRepository.findById(submission.getFileId())).thenReturn(Optional.of(fileEntity));
-            mockedFileHandler.reset();
-            mockedFileHandler.when(() -> Filehandler.getFileAsResource(path)).thenThrow(new RuntimeException());
-            mockMvc.perform(MockMvcRequestBuilders.get(url))
-                .andExpect(status().isInternalServerError());
 
             /* User can't get submission */
             when(submissionUtil.canGetSubmission(submission.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));

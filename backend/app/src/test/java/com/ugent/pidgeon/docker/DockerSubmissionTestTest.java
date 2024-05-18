@@ -11,6 +11,7 @@ import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -213,6 +214,25 @@ public class DockerSubmissionTestTest {
         + "\n"
         + "@helloworld2\n"
         + "bruh\n"));
+  }
+
+  @Test
+  void testDockerReceivesUtilFiles(){
+    DockerSubmissionTestModel stm = new DockerSubmissionTestModel("alpine:latest");
+    Path zipLocation = Path.of("src/test/test-cases/DockerSubmissionTestTest/d__test.zip"); // simple zip with one file
+    Path zipLocation2 = Path.of("src/test/test-cases/DockerSubmissionTestTest/helloworld.zip"); // complicated zip with multiple files and folder structure
+    stm.addUtilFiles(zipLocation);
+    stm.addUtilFiles(zipLocation2);
+    DockerTestOutput to = stm.runSubmission("find /shared/extra/");
+    List<String> logs = to.logs.stream().map(log -> log.replaceAll("\n", "")).sorted().toList();
+    assertEquals("/shared/extra/", logs.get(0));
+    assertEquals("/shared/extra/helloworld", logs.get(1));
+    assertEquals("/shared/extra/helloworld.txt", logs.get(2));
+    assertEquals("/shared/extra/helloworld/emptyfolder", logs.get(3));
+    assertEquals("/shared/extra/helloworld/helloworld1.txt", logs.get(4));
+    assertEquals("/shared/extra/helloworld/helloworld2.txt", logs.get(5)); // I don't understand the order of find :sob: but it is important all files are found.
+    assertEquals("/shared/extra/helloworld/helloworld3.txt", logs.get(6));
+    stm.cleanUp();
   }
 
 }

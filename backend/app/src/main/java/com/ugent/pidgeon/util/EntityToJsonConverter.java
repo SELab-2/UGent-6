@@ -39,6 +39,8 @@ public class EntityToJsonConverter {
   private TestUtil testUtil;
   @Autowired
   private TestRepository testRepository;
+  @Autowired
+  private FileRepository fileRepository;
 
 
   public GroupJson groupEntityToJson(GroupEntity groupEntity, boolean hideStudentNumber) {
@@ -267,12 +269,15 @@ public class EntityToJsonConverter {
     }
 
     public TestJson testEntityToTestJson(TestEntity testEntity, long projectId) {
+        FileEntity extrafiles = testEntity.getExtraFilesId() == null ? null : fileRepository.findById(testEntity.getExtraFilesId()).orElse(null);
         return new TestJson(
                 ApiRoutes.PROJECT_BASE_PATH + "/" + projectId,
             testEntity.getDockerImage(),
             testEntity.getDockerTestScript(),
             testEntity.getDockerTestTemplate(),
-            testEntity.getStructureTemplate()
+            testEntity.getStructureTemplate(),
+            testEntity.getExtraFilesId() == null ? null : ApiRoutes.PROJECT_BASE_PATH + "/" + projectId + "/tests/extrafiles",
+            extrafiles == null ? null : extrafiles.getName()
         );
     }
 }

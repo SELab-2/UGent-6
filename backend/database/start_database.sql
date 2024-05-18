@@ -58,7 +58,8 @@ CREATE TABLE tests (
                        docker_image VARCHAR(256),
                        docker_test_script TEXT,
                        docker_test_template TEXT,
-                       structure_template TEXT
+                       structure_template TEXT,
+                       extra_files INT REFERENCES files(file_id)
 );
 
 

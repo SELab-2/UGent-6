@@ -76,6 +76,9 @@ public class EntityToJsonConverterTest {
   @Mock
   private SubmissionRepository submissionRepository;
 
+  @Mock
+  private FileRepository fileRepository;
+
   @Spy
   @InjectMocks
   private EntityToJsonConverter entityToJsonConverter;
@@ -607,12 +610,25 @@ public class EntityToJsonConverterTest {
 
   @Test
   public void testTestEntityToTestJson() {
+    testEntity.setExtraFilesId(5L);
+    when(fileRepository.findById(testEntity.getExtraFilesId()))
+        .thenReturn(Optional.of(new FileEntity("nameoffiles", "path", 5L)));
+
     TestJson result = entityToJsonConverter.testEntityToTestJson(testEntity, projectEntity.getId());
+
+
     assertEquals(ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId(), result.getProjectUrl());
     assertEquals(testEntity.getDockerImage(), result.getDockerImage());
     assertEquals(testEntity.getDockerTestScript(), result.getDockerScript());
     assertEquals(testEntity.getDockerTestTemplate(), result.getDockerTemplate());
     assertEquals(testEntity.getStructureTemplate(), result.getStructureTest());
+    assertEquals(ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId() + "/tests/extrafiles", result.getExtraFilesUrl());
+    assertEquals("nameoffiles", result.getExtraFilesName());
+
+    testEntity.setExtraFilesId(null);
+    result = entityToJsonConverter.testEntityToTestJson(testEntity, projectEntity.getId());
+    assertNull(result.getExtraFilesUrl());
+    assertNull(result.getExtraFilesName());
   }
 
 
