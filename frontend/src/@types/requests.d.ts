@@ -219,12 +219,12 @@ export type GET_Responses = {
   [ApiRoutes.SUBMISSION]: {
     submissionId: number
     projectId: number
-    groupId: number
+    groupId: number | null
     structureAccepted: boolean,
     dockerStatus: DockerStatus,
     submissionTime: Timestamp
     projectUrl: ApiRoutes.PROJECT
-    groupUrl: ApiRoutes.GROUP
+    groupUrl: ApiRoutes.GROUP | null
     fileUrl: ApiRoutes.SUBMISSION_FILE
     structureFeedback: ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK
     dockerFeedback: DockerFeedback,
