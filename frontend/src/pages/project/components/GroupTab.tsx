@@ -40,6 +40,7 @@ const GroupTab: FC<{}> = () => {
       onChanged={fetchGroups}
       project={project}
       onGroupIdChange={handleGroupIdChange}
+      locked={new Date().toLocaleDateString()}
     />
   )
 }

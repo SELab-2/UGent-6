@@ -28,6 +28,7 @@ export enum ApiRoutes {
   PROJECT_GROUP = "api/projects/:id/groups/:groupId",
   PROJECT_GROUPS = "api/projects/:id/groups",
   PROJECT_GROUP_SUBMISSIONS = "api/projects/:projectId/submissions/:groupId",
+  PROJECT_TEST_SUBMISSIONS = "/api/projects/:projectId/adminsubmissions",
   PROJECT_TESTS_UPLOAD = "api/projects/:id/tests/extrafiles",
   PROJECT_SUBMIT = "api/projects/:id/submit",
 
@@ -213,6 +214,7 @@ export type GET_Responses = {
     submission:  GET_Responses[ApiRoutes.SUBMISSION] | null // null if no submission yet
   }[],
   [ApiRoutes.PROJECT_GROUP_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION][]
+  [ApiRoutes.PROJECT_TEST_SUBMISSIONS]: GET_Responses[ApiRoutes.PROJECT_GROUP_SUBMISSIONS]
   [ApiRoutes.GROUP_SUBMISSIONS]: GET_Responses[ApiRoutes.SUBMISSION]
   [ApiRoutes.SUBMISSION]: {
     submissionId: number
@@ -300,7 +302,8 @@ export type GET_Responses = {
     groupCount: number;
     createdAt: Timestamp;
     groups: GET_Responses[ApiRoutes.GROUP][]
-    courseUrl: ApiRoutes.COURSE
+    courseUrl: ApiRoutes.COURSE,
+    lockGroupsAfter: Timestamp | null // means students can't join or leave the group
   }
   [ApiRoutes.COURSE]: {
     description: string

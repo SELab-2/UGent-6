@@ -8,6 +8,8 @@ import useAppApi from "../../../../hooks/useAppApi"
 import { ProjectType } from "../../../project/Project"
 import { useParams } from "react-router-dom"
 import useApi from "../../../../hooks/useApi"
+import useIsCourseAdmin from "../../../../hooks/useIsCourseAdmin"
+import { ClusterType } from "./GroupsCard"
 
 export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
@@ -59,7 +61,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void>, onGroupIdChange?: (groupId: number|null) => void }> = ({ groups, project, onChanged,onGroupIdChange }) => {
+const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void>, onGroupIdChange?: (groupId: number|null) => void }> = ({ groups, project, onChanged,onGroupIdChange,locked }) => {
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null)
   const [groupId, setGroupId] = useState<number | null>(null)
@@ -68,7 +70,13 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   const { message } = useAppApi()
   const { user } = useUser()
   const { courseId } = useParams<{ courseId: string }>()
+  const isCourseAdmin = useIsCourseAdmin()
   const API = useApi()
+
+  const isLocked = useMemo(()=> {
+    if(!locked) return false
+    return new Date(locked).getTime() < Date.now()
+  }, [locked])
 
   useEffect(() => {
     if (typeof project === "number") return setGroupId(project)
@@ -146,8 +154,8 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
         renderItem={(g) => (
           <Group
             onClick={() => handleModalClick(g)}
-            canJoin={g.members.length < g.capacity && groupId === null}
-            canLeave={groupId === g.groupId}
+            canJoin={g.members.length < g.capacity && groupId === null && !isCourseAdmin && !isLocked}
+            canLeave={groupId === g.groupId && !isLocked}
             group={g}
             loading={loading}
             onJoin={() => onJoin(g)}

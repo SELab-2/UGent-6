@@ -93,6 +93,8 @@
     "userName":"Name",
     "submissions": "Submissions",
     "newSubmission": "New submission",
+    "testSubmissions": "Test submissions",
+    "newSubmissionTest": "New submission test",
     "files": "Files",
     "submission": "Submission",
     "structure": "Structure",
@@ -164,7 +166,8 @@
       "searchUser": "Search user",
       "groupFull": "The group has more members than the group capacity",
       "randomizeGroups": "Create random groups",
-      "groupLock": "Lock groups at"
+      "groupLock": "Disable joining groups at",
+      "groupLockDescription": "Disabling the option to join/leave groups means that a student can no longer leave a group or join a group. However, a course admin can still add or remove students from groups."
     },
     "tests": {
       "title": "Tests for {{projectName}}",

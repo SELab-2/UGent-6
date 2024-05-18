@@ -75,6 +75,7 @@ const GroupClusterDropdown: React.FC<GroupClusterDropdownProps> = ({ courseId,on
     const context = modal.info({
       title: t("project.change.newGroupCluster"),
       icon: null,
+      width: 500,
       content: (
         <GroupClusterModalContent
           courseId={courseId}

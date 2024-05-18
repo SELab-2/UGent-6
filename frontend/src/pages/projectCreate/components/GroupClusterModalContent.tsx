@@ -34,6 +34,7 @@ const GroupClusterModalContent: FC<{ onClose: () => void; onClusterCreated: (clu
       onFinish={createCluster}
       layout="vertical"
       validateTrigger="onBlur"
+      requiredMark="optional"
     >
       <ClusterForm />
 

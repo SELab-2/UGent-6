@@ -66,7 +66,7 @@ const Project = () => {
     // if we are course admin -> always show submissions but not score 
     if((project?.groupId || !project?.clusterId) || courseAdmin) {
 
-      items.push({
+     items.push({
         key: "submissions",
         label: t("project.submissions"),
         icon: <SendOutlined />,
@@ -81,6 +81,21 @@ const Project = () => {
           />
         ),
       })
+
+      if(courseAdmin) {
+        items.push({
+          key: "testSubmissions",
+          label: t("project.testSubmissions"),
+          icon: <SendOutlined />,
+          children: 
+            <SubmissionCard
+              projectId={Number(projectId)}
+              courseId={course.courseId}
+              testSubmissions
+            />
+        })
+      }
+
     }
     
     if ((project?.groupId || !project?.clusterId) && !courseAdmin) {
@@ -138,6 +153,14 @@ const Project = () => {
         extra={
           courseAdmin ? (
             <>
+              <Button
+                  type="primary"
+                  onClick={handleNewSubmission}
+                  icon={<PlusOutlined />}
+                >
+                  {t("project.newSubmissionTest")}
+                </Button>
+
               <Link to="edit">
                 <Button
                   type="primary"

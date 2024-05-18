@@ -95,7 +95,9 @@
   "project": {
     "userName":"Naam",
     "submissions": "Indieningen",
+    "testSubmissions": "Testindieningen",
     "newSubmission": "Nieuwe indiening",
+    "newSubmissionTest": "Nieuwe test indiening",
     "files": "Bestanden",
     "back": "Annuleren",
     "submission": "Indiening",
@@ -167,7 +169,9 @@
       "noMembersinGroup": "Geen leden gevonden",
       "searchUser": "Zoek gebruiker",
       "groupFull": "De groep bevat meer leden dan toegestaan volgens de capaciteit",
-      "randomizeGroups": "Maak willekeurige groepen"
+      "randomizeGroups": "Maak willekeurige groepen",
+      "groupLock": "Groep deelnemen/uitschrijven uitschakelen om",
+      "groupLockDescription": "Het uitschakelen van het deelnemen/uitschrijven van groepen wilt zeggen dat een student niet meer een groep kan verlaten of aan een groep deelnemen. Een vak admin kan nog steeds studenten toevoegen/verwijderen van groepen."
     },
     "tests": {
       "title": "Testen voor {{projectName}}",

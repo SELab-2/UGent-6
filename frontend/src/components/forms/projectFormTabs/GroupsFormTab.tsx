@@ -51,16 +51,6 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         <>
           {selectedCluster ? (
             <>
-            <Form.Item
-                name="lockGroupsAfter"
-                label="Lock groups"
-                rules={[{required:false}]}
-
-              >
-                <DatePicker showTime format="DD-MM-YYYY HH:mm:ss" />
-              </Form.Item>
-
-
               <Form.Item
                 name="groups"
                 label=""

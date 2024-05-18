@@ -1,5 +1,5 @@
 import { Card, Collapse, CollapseProps, Spin, Typography } from "antd"
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
@@ -29,16 +29,17 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   //   <Spin tip="Loading"></Spin>
   // </div>
 
-  const items: CollapseProps["items"] = groups?.map((cluster) => ({
+  const items: CollapseProps["items"] = useMemo(()=> groups?.map((cluster) => ({
     key: cluster.clusterId.toString(),
     label: cluster.name,
     children: (
       <GroupList
         onChanged={fetchGroups}
         groups={cluster.groups}
+        locked={cluster.lockGroupsAfter}
       />
     ),
-  }))
+  })), [groups])
 
   if (Array.isArray(items) && !items.length)
     return (
