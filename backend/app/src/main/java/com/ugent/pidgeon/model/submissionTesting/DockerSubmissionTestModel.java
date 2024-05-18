@@ -14,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -312,13 +314,24 @@ public class DockerSubmissionTestModel {
   }
 
   public static boolean imageExists(String image) {
-    DockerClient dockerClient = DockerClientInstance.getInstance();
     try {
-      dockerClient.inspectImageCmd(image).exec();
-    } catch (Exception e) {
+      // Split the image into repository and tag
+      String[] parts = image.split(":");
+      String repository = parts[0];
+      String tag = parts.length > 1 ? parts[1] : "latest";
+
+      // Construct the URL for the Docker Hub API
+      String apiUrl = "https://hub.docker.com/v2/repositories/library/" + repository + "/tags/" + tag;
+      URL url = new URL(apiUrl);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("GET");
+      connection.connect();
+      int responseCode = connection.getResponseCode();
+
+      return (responseCode == 200);
+    } catch (IOException e) {
       return false;
     }
-    return true;
   }
 
   public static boolean isValidTemplate(String template) {
