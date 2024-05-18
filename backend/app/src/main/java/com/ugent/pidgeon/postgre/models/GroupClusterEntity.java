@@ -26,6 +26,9 @@ public class GroupClusterEntity {
     @Column(name="group_amount", nullable=false)
     private int groupAmount;
 
+    @Column(name = "lock_groups_after")
+    private OffsetDateTime lockGroupsAfter;
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
@@ -86,5 +89,13 @@ public class GroupClusterEntity {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getLockGroupsAfter() {
+        return lockGroupsAfter;
+    }
+
+    public void setLockGroupsAfter(OffsetDateTime lockGroupsAfter) {
+        this.lockGroupsAfter = lockGroupsAfter;
     }
 }

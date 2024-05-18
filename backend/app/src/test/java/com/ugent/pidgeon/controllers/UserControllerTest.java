@@ -49,7 +49,7 @@ public class UserControllerTest extends ControllerTest {
   @BeforeEach
   public void setup() {
     setUpController(userController);
-    userEntity = new UserEntity("Bob", "Testman", "email", UserRole.student, "azureId");
+    userEntity = new UserEntity("Bob", "Testman", "email", UserRole.student, "azureId", "");
     userEntity.setId(74L);
     mockUserJson = new UserJson(getMockUser());
     userJson = new UserJson(userEntity);
@@ -260,7 +260,7 @@ public class UserControllerTest extends ControllerTest {
     setMockUserRoles(UserRole.admin);
     String url = ApiRoutes.USERS_BASE_PATH + "/" + userEntity.getId();
     String request = "{\"name\":\"John\",\"surname\":\"Doe\",\"email\":\"john@example.com\",\"role\":\"teacher\"}";
-    UserEntity updateUserEntity = new UserEntity("John", "Doe", "john@example.com", UserRole.teacher, "azureId");
+    UserEntity updateUserEntity = new UserEntity("John", "Doe", "john@example.com", UserRole.teacher, "azureId", "");
     updateUserEntity.setId(userEntity.getId());
     UserJson updatedUserJson = new UserJson(updateUserEntity);
 
@@ -311,7 +311,7 @@ public class UserControllerTest extends ControllerTest {
     setMockUserRoles(UserRole.admin);
     String url = ApiRoutes.USERS_BASE_PATH + "/" + userEntity.getId();
     String request = "{\"name\":\"John\",\"surname\":\"Doe\",\"email\":\"john@example.com\",\"role\":\"teacher\"}";
-    UserEntity updateUserEntity = new UserEntity("John", "Doe", "john@example.com", UserRole.teacher, "azureId");
+    UserEntity updateUserEntity = new UserEntity("John", "Doe", "john@example.com", UserRole.teacher, "azureId", "");
     updateUserEntity.setId(userEntity.getId());
     UserJson updatedUserJson = new UserJson(updateUserEntity);
     String originalName = userEntity.getName();
