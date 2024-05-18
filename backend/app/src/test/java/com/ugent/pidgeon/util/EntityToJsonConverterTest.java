@@ -282,6 +282,7 @@ public class EntityToJsonConverterTest {
 
   @Test
   public void testClusterEntityToClusterJson() {
+    groupClusterEntity.setLockGroupsAfter(OffsetDateTime.now());
     when(groupRepository.findAllByClusterId(groupClusterEntity.getId())).thenReturn(List.of(groupEntity));
     doReturn(groupJson).when(entityToJsonConverter).groupEntityToJson(groupEntity, false);
 
@@ -296,6 +297,7 @@ public class EntityToJsonConverterTest {
     assertEquals(groupClusterEntity.getCreatedAt(), result.createdAt());
     assertEquals(1, result.groups().size());
     assertEquals(groupJson, result.groups().get(0));
+    assertEquals(groupClusterEntity.getLockGroupsAfter(), result.lockGroupsAfter());
     assertEquals(ApiRoutes.COURSE_BASE_PATH + "/" + courseEntity.getId(), result.courseUrl());
 
     /* Hide studentNumber */
