@@ -3,14 +3,15 @@ import { FC, useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
-import apiCall from "../../../../util/apiFetch"
 import { useTranslation } from "react-i18next"
+import useApi from "../../../../hooks/useApi"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
 const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ courseId, cardProps }) => {
   const [groups, setGroups] = useState<ClusterType[] | null>(null)
   const { t } = useTranslation()
+  const API = useApi()
   useEffect(() => {
     // TODO: do the fetch (get all clusters from the course )
       fetchGroups().catch(console.error)
@@ -19,8 +20,9 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
 
   const fetchGroups = async () => {
     if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
-      const res = await apiCall.get(ApiRoutes.COURSE_CLUSTERS, { id: courseId })
-      setGroups(res.data)
+      const res = await API.GET(ApiRoutes.COURSE_CLUSTERS, { pathValues: { id: courseId } })
+      if(!res.success) return
+      setGroups(res.response.data)
     }
 
   // if(!groups) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>

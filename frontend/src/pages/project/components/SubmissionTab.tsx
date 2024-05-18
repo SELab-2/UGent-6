@@ -1,28 +1,35 @@
 import { FC, useEffect, useState } from "react"
 import SubmissionList from "./SubmissionList"
-import apiCall from "../../../util/apiFetch"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
-import { useParams } from "react-router-dom"
 import useProject from "../../../hooks/useProject"
+import useApi from "../../../hooks/useApi"
 
 export type GroupSubmissionType = GET_Responses[ApiRoutes.PROJECT_GROUP_SUBMISSIONS][number]
 
 const SubmissionTab: FC<{ projectId: number; courseId: number }> = ({ projectId, courseId }) => {
   const [submissions, setSubmissions] = useState<GroupSubmissionType[] | null>(null)
   const project = useProject()
+  const API = useApi()
 
   useEffect(() => {
 
     if(!project) return 
-    console.log(project.submissionUrl);
-    apiCall.get(project.submissionUrl ).then((res) => {
-      
-      setSubmissions(res.data.sort((a, b) => b.submissionId - a.submissionId))
+    if(!project.submissionUrl) return setSubmissions([]) //TODO: fix me, project.submissionUrl can be null 
+    if(!project.groupId) return console.error("No groupId found");
+    console.log(project);
+    let ignore = false
+    console.log("Sending request to: ", project.submissionUrl);
+    API.GET(ApiRoutes.PROJECT_GROUP_SUBMISSIONS, {pathValues: {projectId: project.projectId, groupId: project.groupId}}).then((res) => {
+      console.log(res);
+      if (!res.success || ignore) return
+      setSubmissions(res.response.data.sort((a, b) => b.submissionId - a.submissionId))
     })
 
 
-
-  }, [projectId,courseId])
+    return () => {
+      ignore = true
+    }
+  }, [projectId,courseId,project?.groupId])
 
 
 

@@ -1,8 +1,10 @@
 import apiCall from "../../../util/apiFetch";
-import {ApiRoutes, GET_Responses, POST_Requests} from "../../../@types/requests.d";
+import {ApiRoutes, GET_Responses, POST_Requests, PUT_Requests} from "../../../@types/requests.d";
 
 
-export type ProjectFormData = POST_Requests[ApiRoutes.PROJECT_CREATE]
+export type ProjectFormData = POST_Requests[ApiRoutes.PROJECT_CREATE] & {
+    groups: PUT_Requests[ApiRoutes.CLUSTER_FILL]
+}
 
 
 

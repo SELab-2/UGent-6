@@ -1,21 +1,20 @@
-import { Form } from "antd"
+import { DatePicker, Form } from "antd"
 import GroupClusterDropdown from "../../../pages/projectCreate/components/GroupClusterDropdown"
 import { useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { FC, useEffect, useState } from "react"
 import { FormInstance } from "antd/lib"
-import apiCall from "../../../util/apiFetch"
 import { ApiRoutes } from "../../../@types/requests.d"
 import { ClusterType } from "../../../pages/course/components/groupTab/GroupsCard"
 import { Spin } from "antd"
-import GroupList from "../../../pages/course/components/groupTab/GroupList"
 import GroupMembersTransfer from "../../other/GroupMembersTransfer"
+import useApi from "../../../hooks/useApi"
 
 const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { courseId } = useParams<{ courseId: string }>()
   const { t } = useTranslation()
   const [selectedCluster, setSelectedCluster] = useState<ClusterType | null>(null)
-
+  const API = useApi()
   const selectedClusterId = Form.useWatch("groupClusterId", form)
 
   useEffect(() => {
@@ -26,8 +25,9 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   }, [selectedClusterId])
 
   const fetchCluster = async () => {
-    const response = await apiCall.get(ApiRoutes.CLUSTER, { id: selectedClusterId })
-    setSelectedCluster(response.data)
+    const response = await API.GET(ApiRoutes.CLUSTER, { pathValues: { id: selectedClusterId } })
+    if (!response.success) return
+    setSelectedCluster(response.response.data)
   }
 
   return (
@@ -40,6 +40,10 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         <GroupClusterDropdown
           allowClear
           courseId={courseId!}
+          onClusterCreated={(clusterId) => {
+            console.log("Setting clusterId:", clusterId)
+            form.setFieldValue("groupClusterId", clusterId)
+          }}
         />
       </Form.Item>
 
@@ -47,11 +51,25 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         <>
           {selectedCluster ? (
             <>
-              <GroupMembersTransfer
-                groups={selectedCluster.groups}
-                onChanged={fetchCluster}
-                courseId={courseId}
-              />
+            <Form.Item
+                name="lockGroupsAfter"
+                label="Lock groups"
+                rules={[{required:false}]}
+
+              >
+                <DatePicker showTime format="DD-MM-YYYY HH:mm:ss" />
+              </Form.Item>
+
+
+              <Form.Item
+                name="groups"
+                label=""
+              >
+                <GroupMembersTransfer
+                  groups={selectedCluster.groups}
+                  courseId={courseId}
+                />
+              </Form.Item>
             </>
           ) : (
             <Spin />

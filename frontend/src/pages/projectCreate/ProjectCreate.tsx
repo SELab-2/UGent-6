@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom"
 import { Button, Form } from "antd"
 import { useTranslation } from "react-i18next"
 import { ProjectFormData } from "./components/ProjectCreateService"
-import Error from "../error/Error"
 import ProjectForm from "../../components/forms/ProjectForm"
 import { AppRoutes } from "../../@types/routes"
 import useAppApi from "../../hooks/useAppApi"
@@ -25,7 +24,7 @@ const ProjectCreate: React.FC = () => {
 
   const handleCreation = async () => {
     const values: ProjectFormData & DockerFormData = form.getFieldsValue()
-    const project: ProjectFormData = {
+    const project: Omit<ProjectFormData, "groups"> = {
       name: values.name,
       description: values.description,
       groupClusterId: values.groupClusterId,
@@ -33,7 +32,9 @@ const ProjectCreate: React.FC = () => {
       maxScore: values.maxScore,
       testId: values.testId,
       visible: values.visible,
+      visibleAfter: values.visibleAfter,
     }
+    console.log(values)
 
     if (!courseId) return console.error("courseId is undefined")
     setLoading(true)
@@ -44,21 +45,17 @@ const ProjectCreate: React.FC = () => {
       return setLoading(false)
     }
     const result = response.response.data
+    let promisses: Promise<any>[] = []
 
-    await saveDockerForm(
-      form,
-      {
-        dockerImage: null,
-        dockerScript: null,
-        dockerTemplate: null,
-        structureTest: null,
-      },
-      API
-    )
+    promisses.push(saveDockerForm(form, null, API, result.projectId.toString()))
+    if (form.isFieldTouched("groups") && values.groupClusterId && values.groups) {
+      promisses.push(API.PUT(ApiRoutes.CLUSTER_FILL, { body: values.groups, pathValues: { id: values.groupClusterId } }, "message"))
+    }
+
+    await Promise.all(promisses)
 
     message.success(t("project.change.success")) // Toon een succesbericht
     navigate(AppRoutes.PROJECT.replace(":projectId", result.projectId.toString()).replace(":courseId", courseId)) // Navigeer naar het nieuwe project
-
   }
 
   const onInvalid: FormProps<ProjectFormData>["onFinishFailed"] = (e) => {
@@ -71,7 +68,6 @@ const ProjectCreate: React.FC = () => {
 
   return (
     <>
-
       <Form
         initialValues={{
           name: "",

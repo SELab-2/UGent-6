@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { Button, Form, Card } from "antd"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { Button, Form, Card, UploadProps } from "antd"
 import { useTranslation } from "react-i18next"
 import ProjectForm from "../../components/forms/ProjectForm"
 import { EditFilled } from "@ant-design/icons"
@@ -25,13 +25,14 @@ const EditProject: React.FC = () => {
   const project = useProject()
   const { updateProject } = useContext(ProjectContext)
   const [initialDockerValues, setInitialDockerValues] = useState<POST_Requests[ApiRoutes.PROJECT_TESTS] | null>(null)
+  const location = useLocation() 
 
   const updateDockerForm = async () => {
     if (!projectId) return
     const response = await API.GET(ApiRoutes.PROJECT_TESTS, { pathValues: { id: projectId } })
-    if(!response.success) return setInitialDockerValues(null)
+    if (!response.success) return setInitialDockerValues(null)
 
-    let formVals:POST_Requests[ApiRoutes.PROJECT_TESTS] ={
+    let formVals: POST_Requests[ApiRoutes.PROJECT_TESTS] = {
       structureTest: null,
       dockerTemplate: null,
       dockerScript: null,
@@ -39,7 +40,23 @@ const EditProject: React.FC = () => {
     }
     if (response.success) {
       const tests = response.response.data
-      console.log(tests);
+      console.log(tests)
+
+      if(tests.extraFilesName) {
+        const downloadLink = AppRoutes.DOWNLOAD_PROJECT_TESTS.replace(":projectId", projectId).replace(":courseId", courseId!)
+        
+        const uploadVal:UploadProps["defaultFileList"] = [{
+          uid: '1',
+          name: tests.extraFilesName,
+          status: 'done',
+          url: downloadLink,
+          type: "file",          
+        }]
+
+        form.setFieldValue("dockerTestDir", uploadVal)
+      }
+
+
       formVals = {
         structureTest: tests.structureTest ?? "",
         dockerTemplate: tests.dockerTemplate ?? "",
@@ -53,13 +70,13 @@ const EditProject: React.FC = () => {
     setInitialDockerValues(formVals)
   }
 
-  console.log(initialDockerValues);
+  console.log(initialDockerValues)
 
   useEffect(() => {
     if (!project) return
 
     updateDockerForm()
-  }, [project])
+  }, [project?.projectId])
 
   const handleCreation = async () => {
     const values: ProjectFormData & DockerFormData = form.getFieldsValue()
@@ -76,14 +93,22 @@ const EditProject: React.FC = () => {
       },
       "alert"
     )
-
-    await saveDockerForm(form, initialDockerValues, API, projectId)
-
     if (!response.success) {
       setError(response.alert || null)
       setLoading(false)
       return
     }
+
+    let promisses = []
+
+    promisses.push(saveDockerForm(form, initialDockerValues, API, projectId))
+
+    if (form.isFieldTouched("groups") && values.groupClusterId && values.groups) {
+      promisses.push(API.PUT(ApiRoutes.CLUSTER_FILL, { body: values.groups, pathValues: { id: values.groupClusterId } }, "message"))
+    }
+
+    await Promise.all(promisses)
+
     const result = response.response.data
     updateProject(result)
     navigate(AppRoutes.PROJECT.replace(":projectId", result.projectId.toString()).replace(":courseId", courseId)) // Navigeer naar het nieuwe project
