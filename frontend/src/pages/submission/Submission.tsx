@@ -1,6 +1,5 @@
-import { Card, Typography, Spin } from "antd"
+import { Spin } from "antd"
 import { useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
 import SubmissionCard from "./components/SubmissionCard"
 import { SubmissionType } from "./components/SubmissionCard"
 import { useParams } from "react-router-dom"
