@@ -1,31 +1,12 @@
 import { DatePicker, Form, FormInstance, Input, Switch, Typography } from "antd"
 import { useTranslation } from "react-i18next"
-import { FC, useEffect, useState } from "react"
+import { FC } from "react"
 import MarkdownEditor from "../../input/MarkdownEditor"
 
 const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
     const { t } = useTranslation()
     const description = Form.useWatch("description", form)
     const visible = Form.useWatch("visible", form)
-    const [isVisible, setIsVisible] = useState(visible)
-    const [savedVisibleAfter, setSavedVisibleAfter] = useState<string | null>(null)
-
-    useEffect(() => {
-        setIsVisible(visible)
-        if (visible && savedVisibleAfter) {
-            form.setFieldsValue({ visibleAfter: null })
-        }
-    }, [visible])
-
-    const handleVisibleChange = (checked: boolean) => {
-        setIsVisible(checked)
-        if (checked) {
-            setSavedVisibleAfter(form.getFieldValue("visibleAfter"))
-            form.setFieldsValue({ visibleAfter: null })
-        } else {
-            form.setFieldsValue({ visibleAfter: savedVisibleAfter })
-        }
-    }
 
     return (
         <>
@@ -48,10 +29,10 @@ const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                 name="visible"
                 valuePropName="checked"
             >
-                <Switch onChange={handleVisibleChange} />
+                <Switch />
             </Form.Item>
 
-            {!isVisible && (
+            {!visible && (
                 <Form.Item
                     label={t("project.change.visibleAfter")}
                     name="visibleAfter"
@@ -59,6 +40,7 @@ const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                     <DatePicker
                         showTime
                         format="YYYY-MM-DD HH:mm:ss"
+                        allowClear={true}
                     />
                 </Form.Item>
             )}
