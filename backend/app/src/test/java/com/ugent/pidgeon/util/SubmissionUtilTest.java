@@ -55,7 +55,7 @@ public class SubmissionUtilTest {
   public void setUp() {
     submissionEntity = new SubmissionEntity(
         22,
-        45,
+        45L,
         99L,
         OffsetDateTime.MIN,
         true,
@@ -78,13 +78,14 @@ public class SubmissionUtilTest {
         "surname",
         "email",
         UserRole.student,
-        "azureId"
+        "azureId",
+        ""
     );
     userEntity.setId(44L);
 
     groupEntity = new GroupEntity(
         "groupName",
-        52L
+        projectEntity.getGroupClusterId()
     );
     groupEntity.setId(4L);
 
@@ -149,15 +150,26 @@ public class SubmissionUtilTest {
     CheckResult<Long> result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.OK, result.getStatus());
 
+    /* User not part of group but admin */
+    when(groupRepository.groupIdByProjectAndUser(projectEntity.getId(), userEntity.getId())).thenReturn(null);
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), userEntity))
+        .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
+    assertEquals(HttpStatus.OK, result.getStatus());
+    assertNull(result.getData());
+
+    /* User not part of group and not admin */
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), userEntity))
+        .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "User is not part of a group for this project", null));
+    result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+
+    when(groupRepository.groupIdByProjectAndUser(projectEntity.getId(), userEntity.getId())).thenReturn(groupEntity.getId());
+
     /* Deadline passed */
     projectEntity.setDeadline(OffsetDateTime.now().minusDays(1));
     result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
-
-    /* Project not found */
-    when(projectUtil.getProjectIfExists(projectEntity.getId())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "Project not found", null));
-    result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
-    assertEquals(HttpStatus.I_AM_A_TEAPOT, result.getStatus());
 
     /* GroupCluster in archived course */
     when(groupClusterRepository.inArchivedCourse(groupEntity.getClusterId())).thenReturn(true);
@@ -169,15 +181,16 @@ public class SubmissionUtilTest {
     result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.I_AM_A_TEAPOT, result.getStatus());
 
-    /* User not part of group */
-    when(groupRepository.groupIdByProjectAndUser(projectEntity.getId(), userEntity.getId())).thenReturn(null);
-    result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
 
     /* User not part of project */
     when(projectUtil.userPartOfProject(projectEntity.getId(), userEntity.getId())).thenReturn(false);
     result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
+
+    /* Project not found */
+    when(projectUtil.getProjectIfExists(projectEntity.getId())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "Project not found", null));
+    result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
+    assertEquals(HttpStatus.I_AM_A_TEAPOT, result.getStatus());
   }
 
 

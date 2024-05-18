@@ -591,6 +591,8 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
+        boolean hideStudentNumber = checkResult.getData().getSecond().equals(CourseRelation.enrolled);
+
         List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
         List<UserReferenceWithRelation> memberJson = members.stream().
                 map(cue -> {
@@ -598,7 +600,7 @@ public class CourseController {
                     if (user == null) {
                         return null;
                     }
-                    return entityToJsonConverter.userEntityToUserReferenceWithRelation(user, cue.getRelation());
+                    return entityToJsonConverter.userEntityToUserReferenceWithRelation(user, cue.getRelation(), hideStudentNumber);
                 }).
                 filter(Objects::nonNull).toList();
 

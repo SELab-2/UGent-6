@@ -29,6 +29,7 @@ public class Auth extends AbstractAuthenticationToken {
     public String getEmail(){
         return user.email;
     }
+    public String getStudentNumber() { return user.studentnumber; }
 
     public String getOid(){
         return user.oid;

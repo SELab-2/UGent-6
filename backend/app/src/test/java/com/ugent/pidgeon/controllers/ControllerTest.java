@@ -47,7 +47,7 @@ public class ControllerTest {
     public void testSetUp() {
         MockitoAnnotations.openMocks(this);
 
-        User user = new User("displayName", "firstName", "lastName", "email", "test");
+        User user = new User("displayName", "firstName", "lastName", "email", "test", "studentnummer");
         Auth authUser = new Auth(user, new ArrayList<>());
         SecurityContextHolder.getContext().setAuthentication(authUser);
 
@@ -57,7 +57,8 @@ public class ControllerTest {
             user.lastName,
             user.email,
             UserRole.teacher,
-            user.oid
+            user.oid,
+            "studentnummer"
         );
         mockUser.setId(1L);
         authUser.setUserEntity(mockUser);

@@ -22,6 +22,7 @@ public class Filehandler {
     static String BASEPATH = "data";
     public static String SUBMISSION_FILENAME = "files.zip";
     public static String EXTRA_TESTFILES_FILENAME = "testfiles.zip";
+    public static String ADMIN_SUBMISSION_FOLDER = "adminsubmissions";
 
     /**
      * Save a submission to the server
@@ -113,11 +114,14 @@ public class Filehandler {
      * @param submissionid id of the submission
      * @return the path of the submission
      */
-    static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
+    static public Path getSubmissionPath(long projectid, Long groupid, long submissionid) {
+        if (groupid == null) {
+            return Path.of(BASEPATH,"projects", String.valueOf(projectid), ADMIN_SUBMISSION_FOLDER, String.valueOf(submissionid));
+        }
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
-    static public Path getSubmissionArtifactPath(long projectid, long groupid, long submissionid) {
+    static public Path getSubmissionArtifactPath(long projectid, Long groupid, long submissionid) {
         return getSubmissionPath(projectid, groupid, submissionid).resolve("artifacts.zip");
     }
 

@@ -246,20 +246,33 @@ public class FileHandlerTest {
 
   @Test
   public void testGetSubmissionPath() {
-    Path submissionPath = Filehandler.getSubmissionPath(1, 2, 3);
+    Path submissionPath = Filehandler.getSubmissionPath(1, 2L, 3);
     assertEquals(Path.of(Filehandler.BASEPATH, "projects", "1", "2", "3"), submissionPath);
   }
 
   @Test
+  public void testGetSubmissionPath_groupIdIsNull() {
+    Path submissionPath = Filehandler.getSubmissionPath(1, null, 3);
+    assertEquals(Path.of(Filehandler.BASEPATH, "projects", "1", Filehandler.ADMIN_SUBMISSION_FOLDER, "3"), submissionPath);
+  }
+
+  @Test
   public void testGetSubmissionArtifactPath() {
-    Path submissionArtifactPath = Filehandler.getSubmissionArtifactPath(1, 2, 3);
+    Path submissionArtifactPath = Filehandler.getSubmissionArtifactPath(1, 2L, 3);
     assertEquals(Path.of(Filehandler.BASEPATH, "projects", "1", "2", "3", "artifacts.zip"), submissionArtifactPath);
   }
 
   @Test
+
   public void testGetTextExtraFilesPath() {
     Path textExtraFilesPath = Filehandler.getTestExtraFilesPath(88);
     assertEquals(Path.of(Filehandler.BASEPATH, "projects", String.valueOf(88)), textExtraFilesPath);
+  }
+  @Test
+  public void testGetSubmissionArtifactPath_groupIdIsNull() {
+    Path submissionArtifactPath = Filehandler.getSubmissionArtifactPath(1, null, 3);
+    assertEquals(Path.of(Filehandler.BASEPATH, "projects", "1", Filehandler.ADMIN_SUBMISSION_FOLDER, "3", "artifacts.zip"), submissionArtifactPath);
+
   }
 
   @Test
