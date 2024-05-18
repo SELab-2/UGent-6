@@ -9,7 +9,9 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.ClusterUtil;
 import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.CourseUtil;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,10 @@ public class GroupController {
     private EntityToJsonConverter entityToJsonConverter;
     @Autowired
     private CommonDatabaseActions commonDatabaseActions;
+  @Autowired
+  private ClusterUtil clusterUtil;
+  @Autowired
+  private CourseUtil courseUtil;
 
 
     /**
@@ -50,8 +56,14 @@ public class GroupController {
             return ResponseEntity.status(checkResult1.getStatus()).body(checkResult1.getMessage());
         }
 
+        boolean hideStudentNumber = true;
+        CheckResult<Void> adminCheck = groupUtil.isAdminOfGroup(groupid, auth.getUserEntity());
+        if (adminCheck.getStatus().equals(HttpStatus.OK)) {
+            hideStudentNumber = false;
+        }
+
         // Return the group
-        GroupJson groupJson = entityToJsonConverter.groupEntityToJson(group);
+        GroupJson groupJson = entityToJsonConverter.groupEntityToJson(group, hideStudentNumber);
         return ResponseEntity.ok(groupJson);
     }
 
@@ -113,7 +125,7 @@ public class GroupController {
         groupRepository.save(group);
 
         // Return the updated group
-        GroupJson groupJson = entityToJsonConverter.groupEntityToJson(group);
+        GroupJson groupJson = entityToJsonConverter.groupEntityToJson(group, false);
         return ResponseEntity.ok(groupJson);
     }
 

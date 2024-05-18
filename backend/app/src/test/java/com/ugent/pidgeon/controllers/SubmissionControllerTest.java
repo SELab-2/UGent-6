@@ -209,7 +209,7 @@ public class SubmissionControllerTest extends ControllerTest {
         when(projectUtil.isProjectAdmin(submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
         when(projectRepository.findGroupIdsByProjectId(submission.getProjectId())).thenReturn(groupIds);
         when(groupRepository.findById(groupIds.get(0))).thenReturn(Optional.of(groupEntity));
-        when(entityToJsonConverter.groupEntityToJson(groupEntity)).thenReturn(groupJson);
+        when(entityToJsonConverter.groupEntityToJson(groupEntity, false)).thenReturn(groupJson);
         when(groupFeedbackRepository.getGroupFeedback(groupEntity.getId(), submission.getProjectId())).thenReturn(groupFeedbackEntity);
         when(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity)).thenReturn(groupFeedbackJson);
         when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(submission.getProjectId(), groupEntity.getId())).thenReturn(Optional.of(submission));
@@ -218,6 +218,8 @@ public class SubmissionControllerTest extends ControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(List.of(lastGroupSubmissionJson))));
+
+        verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, false);
 
         /* no submission */
         when(submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(submission.getProjectId(), groupEntity.getId())).thenReturn(Optional.empty());
@@ -295,7 +297,7 @@ public class SubmissionControllerTest extends ControllerTest {
 
             /* assertEquals(DockerTestState.running, submission.getDockerTestState()); */ // This executes too quickly so we can't test this
 
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             // File repository needs to save again after setting path
             verify(fileRepository, times(1)).save(argThat(

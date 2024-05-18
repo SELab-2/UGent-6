@@ -50,7 +50,7 @@ public class GroupUtilTest {
   public void setup() {
     group = new GroupEntity("Groupname", 12L);
     group.setId(54L);
-    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
     mockUser.setId(10L);
     groupCluster = new GroupClusterEntity(9L, 5, "cluster test", 20);
     groupCluster.setId(12L);
@@ -137,7 +137,7 @@ public class GroupUtilTest {
   @Test
   public void TestCanAddUserToGroup() {
     long otherUserId = 5L;
-    UserEntity otherUser = new UserEntity("othername", "othersurname", "otheremail", UserRole.student, "otherazureid");
+    UserEntity otherUser = new UserEntity("othername", "othersurname", "otheremail", UserRole.student, "otherazureid", "");
     /* All checks succeed */
     /* Trying to add yourself to the group */
     when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
@@ -155,6 +155,16 @@ public class GroupUtilTest {
     CheckResult<Void> result = groupUtil.canAddUserToGroup(group.getId(), mockUser.getId(), mockUser);
     assertEquals(HttpStatus.OK, result.getStatus());
 
+    /* Trying to join a group when the groups are locked */
+    groupCluster.setLockGroupsAfter(OffsetDateTime.now().minusDays(1));
+    result = groupUtil.canAddUserToGroup(group.getId(), mockUser.getId(), mockUser);
+    assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
+
+    /* Trying to join a group when a locktime is configured but it hasn't passed yet */
+    groupCluster.setLockGroupsAfter(OffsetDateTime.now().plusDays(1));
+    result = groupUtil.canAddUserToGroup(group.getId(), mockUser.getId(), mockUser);
+    assertEquals(HttpStatus.OK, result.getStatus());
+
     /* Trying to add someone else as admin */
     doReturn(new CheckResult<>(HttpStatus.OK, "", null)).
         when(groupUtil).isAdminOfGroup(group.getId(), mockUser);
@@ -165,6 +175,12 @@ public class GroupUtilTest {
         when(groupUtil).isAdminOfGroup(group.getId(), otherUser);
     result = groupUtil.canAddUserToGroup(group.getId(), otherUserId, mockUser);
     assertEquals(HttpStatus.OK, result.getStatus());
+
+    /* Adding someone to a group as admin after the locktime has passed */
+    groupCluster.setLockGroupsAfter(OffsetDateTime.now().minusDays(1));
+    result = groupUtil.canAddUserToGroup(group.getId(), otherUserId, mockUser);
+    assertEquals(HttpStatus.OK, result.getStatus());
+
 
     /* Group is already full but it's an admin adding someone else */
     when(groupRepository.countUsersInGroup(group.getId())).thenReturn(groupCluster.getMaxSize());
@@ -238,9 +254,25 @@ public class GroupUtilTest {
     when(groupClusterRepository.inArchivedCourse(group.getClusterId())).thenReturn(false);
     when(groupRepository.userInGroup(group.getId(), mockUser.getId())).thenReturn(true);
     when(clusterUtil.isIndividualCluster(group.getClusterId())).thenReturn(false);
+    when(clusterUtil.getClusterIfExists(group.getClusterId())).thenReturn(new CheckResult<>(HttpStatus.OK, "", groupCluster));
 
     CheckResult<Void> result = groupUtil.canRemoveUserFromGroup(group.getId(), mockUser.getId(), mockUser);
     assertEquals(HttpStatus.OK, result.getStatus());
+
+    /* Trying to leave group when groups are locked */
+    groupCluster.setLockGroupsAfter(OffsetDateTime.now().minusDays(1));
+    result = groupUtil.canRemoveUserFromGroup(group.getId(), mockUser.getId(), mockUser);
+    assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
+
+    /* Trying to leave group when a locktime is configured but it hasn't passed yet */
+    groupCluster.setLockGroupsAfter(OffsetDateTime.now().plusDays(1));
+    result = groupUtil.canRemoveUserFromGroup(group.getId(), mockUser.getId(), mockUser);
+    assertEquals(HttpStatus.OK, result.getStatus());
+
+    /* Getting cluster fails */
+    when(clusterUtil.getClusterIfExists(group.getClusterId())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+    result = groupUtil.canRemoveUserFromGroup(group.getId(), mockUser.getId(), mockUser);
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatus());
 
     /* Trying to remove someone else */
     long otherUserId = 5L;

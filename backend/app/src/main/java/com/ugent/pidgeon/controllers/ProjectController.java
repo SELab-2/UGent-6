@@ -10,6 +10,7 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.time.OffsetDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,10 @@ public class ProjectController {
       CourseRelation relation = courseCheck.getData().getSecond();
 
       if (relation.equals(CourseRelation.enrolled)) {
+        if (project.getVisibleAfter() != null && project.getVisibleAfter().isBefore(OffsetDateTime.now())) {
+          project.setVisible(true);
+          projectRepository.save(project);
+        }
         if (project.isVisible()) {
           enrolledProjects.add(entityToJsonConverter.projectEntityToProjectResponseJsonWithStatus(project, course, user));
         }
@@ -113,6 +118,11 @@ public class ProjectController {
     }
     CourseEntity course = courseCheck.getData().getFirst();
     CourseRelation relation = courseCheck.getData().getSecond();
+
+    if (project.getVisibleAfter() != null && project.getVisibleAfter().isBefore(OffsetDateTime.now())) {
+      project.setVisible(true);
+      projectRepository.save(project);
+    }
     if (!project.isVisible() && relation.equals(CourseRelation.enrolled)) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
     }
@@ -161,6 +171,8 @@ public class ProjectController {
           projectJson.getGroupClusterId(), null, projectJson.isVisible(),
           projectJson.getMaxScore(), projectJson.getDeadline());
 
+      project.setVisibleAfter(projectJson.getVisibleAfter());
+
       // Save the project entity
       ProjectEntity savedProject = projectRepository.save(project);
       CourseEntity courseEntity = checkAcces.getData();
@@ -180,6 +192,10 @@ public class ProjectController {
     project.setDeadline(projectJson.getDeadline());
     project.setMaxScore(projectJson.getMaxScore());
     project.setVisible(projectJson.isVisible());
+    project.setVisibleAfter(projectJson.getVisibleAfter());
+    if (project.getVisibleAfter() != null && project.getVisibleAfter().isBefore(OffsetDateTime.now())) {
+      project.setVisible(true);
+    }
     projectRepository.save(project);
     return ResponseEntity.ok(entityToJsonConverter.projectEntityToProjectResponseJson(project, courseRepository.findById(project.getCourseId()).get(), user));
   }
@@ -261,6 +277,10 @@ public class ProjectController {
       projectJson.setVisible(project.isVisible());
     }
 
+    if (projectJson.getVisibleAfter() == null) {
+      projectJson.setVisibleAfter(project.getVisibleAfter());
+    }
+
     CheckResult<Void> checkProject = projectUtil.checkProjectJson(projectJson, project.getCourseId());
     if (checkProject.getStatus() != HttpStatus.OK) {
       return ResponseEntity.status(checkProject.getStatus()).body(checkProject.getMessage());
@@ -292,11 +312,15 @@ public class ProjectController {
             "No groups for this project: use " + memberUrl + " to get the members of the course");
       }
 
+      boolean hideStudentNumber;
+      CheckResult<Void> adminCheck = projectUtil.isProjectAdmin(projectId, auth.getUserEntity());
+      hideStudentNumber = !adminCheck.getStatus().equals(HttpStatus.OK);
+
       List<Long> groups = projectRepository.findGroupIdsByProjectId(projectId);
       List<GroupJson> groupjsons = groups.stream()
-          .map((Long id) -> {
-            return groupRepository.findById(id).orElse(null);
-          }).filter(Objects::nonNull).map(entityToJsonConverter::groupEntityToJson).toList();
+          .map((Long id) -> groupRepository.findById(id).orElse(null)).filter(Objects::nonNull).map(
+              g -> entityToJsonConverter.groupEntityToJson(g, hideStudentNumber))
+          .toList();
       return ResponseEntity.ok(groupjsons);
     }
 

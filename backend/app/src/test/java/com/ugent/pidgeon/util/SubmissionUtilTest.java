@@ -78,7 +78,8 @@ public class SubmissionUtilTest {
         "surname",
         "email",
         UserRole.student,
-        "azureId"
+        "azureId",
+        ""
     );
     userEntity.setId(44L);
 

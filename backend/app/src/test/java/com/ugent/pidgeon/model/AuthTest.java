@@ -10,7 +10,7 @@ import java.util.List;
 
 public class AuthTest {
 
-    private final User testUser = new User("John Doe", "John", "Doe", "john.doe@gmail.com", "123456");
+    private final User testUser = new User("John Doe", "John", "Doe", "john.doe@gmail.com", "123456", "");
 
     private final List<SimpleGrantedAuthority> authLijst = List.of(new SimpleGrantedAuthority("READ_AUTHORITY"));
     private final Auth auth = new Auth(testUser, authLijst);
