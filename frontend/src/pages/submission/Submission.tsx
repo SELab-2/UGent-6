@@ -21,7 +21,7 @@ const Submission = () => {
 
       // If dockerStatus is "running", schedule the next API call after 1 second
       if (res.response.data.dockerStatus === "running") {
-        timeoutRef.current = setTimeout(fetchSubmission, 1000);
+        timeoutRef.current = setTimeout(fetchSubmission, 2500);
       }
     });
   };

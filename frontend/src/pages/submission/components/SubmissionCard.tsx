@@ -44,7 +44,6 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
     }
   }
 
-
   return (
     <Card
       styles={{
@@ -59,7 +58,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       title={
         <span>
           <Button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("..")}
             type="text"
             style={{ marginRight: 16 }}
           >
