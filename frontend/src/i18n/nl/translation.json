@@ -47,8 +47,14 @@
       "deadline": "Deadline",
       "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
-
       "projectStatus": "Status",
+      "visibility": "Zichtbaarheid",
+      "visibleStatus": {
+        "visible": "Zichtbaar",
+        "invisible": "Onzichtbaar",
+        "visibleFrom": "Zichtbaar vanaf ",
+        "scheduled" : "gepland"
+      },
       "status": {
         "completed": "Voltooid",
         "failed": "Verkeerd",

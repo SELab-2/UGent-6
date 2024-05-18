@@ -49,6 +49,13 @@
       "showMore": "Show more",
       "submit": "Submit",
       "projectStatus": "Status",
+      "visibility": "Visibility",
+      "visibleStatus": {
+        "visible": "Visible",
+        "invisible": "Invisible",
+        "visibleFrom": "Visible from ",
+        "scheduled": "Scheduled"
+      },
       "status": {
         "completed": "Completed",
         "failed": "Failed",
