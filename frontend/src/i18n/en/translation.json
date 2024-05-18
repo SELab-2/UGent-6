@@ -103,6 +103,7 @@
     "uploadAreaSubtitle": "Maximum file size is 100MB",
     "deadlinePassed": "Deadline passed",
     "downloadSubmissions": "Download all submissions",
+    "downloadingFile": "File is being downloaded...",
     "group": "Group",
     "status": "Status",
     "feedback": "Feedback",
@@ -162,7 +163,8 @@
       "noMembersinGroup": "No members found",
       "searchUser": "Search user",
       "groupFull": "The group has more members than the group capacity",
-      "randomizeGroups": "Create random groups"
+      "randomizeGroups": "Create random groups",
+      "groupLock": "Lock groups at"
     },
     "tests": {
       "title": "Tests for {{projectName}}",

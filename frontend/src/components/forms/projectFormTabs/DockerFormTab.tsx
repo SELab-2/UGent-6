@@ -83,6 +83,15 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
   const dockerDisabled = !dockerImage?.length
 
+
+  const normFile = (e: any) => {
+    console.log('Upload event:', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+  };
+
   return (
     <>
       <Form.Item
@@ -145,6 +154,8 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         label="Docker test directory"
         name="dockerTestDir"
         tooltip="TODO write docs for this"
+        valuePropName="fileList"
+        getValueFromEvent={normFile}
       >
         <Upload
           listType="picture"

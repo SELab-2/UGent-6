@@ -116,7 +116,7 @@
     "running": "Uitvoeren",
     "passed": "Geslaagd",
     "submitSuccess": "Indiening succesvol",
-
+    "downloadingFile": "Bestand wordt gedownload...",
     "notSubmitted": "Niet ingediend",
     "submissionTime": "Indieningstijd",
     "noSubmissions": "Geen indieningen",

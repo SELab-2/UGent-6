@@ -84,7 +84,7 @@ export type POST_Requests = {
     capacity: number
     groupCount: number
   },
-  [ApiRoutes.PROJECT_TESTS]: Omit<GET_Responses[ApiRoutes.PROJECT_TESTS], "projectUrl">
+  [ApiRoutes.PROJECT_TESTS]: Omit<GET_Responses[ApiRoutes.PROJECT_TESTS], "projectUrl" | "extraFilesUrl" | "extraFilesName">
   [ApiRoutes.COURSE_COPY]: undefined
   [ApiRoutes.COURSE_JOIN]: undefined
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: undefined
@@ -142,9 +142,7 @@ export type PUT_Requests = {
     [groupName:string]: number[] /* userId[] */
   }
   [ApiRoutes.COURSE_JOIN_LINK]: undefined
-  [ApiRoutes.PROJECT_TESTS_UPLOAD]: {
-    file: FormData
-}
+  [ApiRoutes.PROJECT_TESTS_UPLOAD]: FormData
 }
 
 
@@ -259,7 +257,9 @@ export type GET_Responses = {
     dockerImage: string | null, 
     dockerScript: string | null,
     dockerTemplate: string | null,
-    structureTest: string | null
+    structureTest: string | null,
+    extraFilesUrl: ApiRoutes.PROJECT_TESTS_UPLOAD
+    extraFilesName: string
   } 
 
   [ApiRoutes.GROUP]: {

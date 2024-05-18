@@ -1,4 +1,4 @@
-import { Form } from "antd"
+import { DatePicker, Form } from "antd"
 import GroupClusterDropdown from "../../../pages/projectCreate/components/GroupClusterDropdown"
 import { useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
@@ -51,6 +51,16 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         <>
           {selectedCluster ? (
             <>
+            <Form.Item
+                name="lockGroupsAfter"
+                label="Lock groups"
+                rules={[{required:false}]}
+
+              >
+                <DatePicker showTime format="DD-MM-YYYY HH:mm:ss" />
+              </Form.Item>
+
+
               <Form.Item
                 name="groups"
                 label=""

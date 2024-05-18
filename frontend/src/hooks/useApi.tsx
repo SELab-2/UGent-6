@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios"
+import axios, { AxiosRequestConfig, RawAxiosRequestHeaders as AxiosRequestHeaders, AxiosResponse } from "axios"
 import useAppApi from "./useAppApi"
 import { useTranslation } from "react-i18next"
 import { Alert } from "antd"
@@ -14,10 +14,14 @@ type HandleErrorOptions = {
   errorMessage?: string
 }
 
-type ApiProps = HandleErrorOptions & {
+type RequestOptions<T> = {
+  config?: Partial<AxiosRequestConfig>,
+  headers?: AxiosRequestHeaders,
   pathValues?: ApiCallPathValues
-  body?: any
+  body?: T
 }
+
+
 
 type HandleErrorReturn<T> =
   | {
@@ -32,11 +36,11 @@ type HandleErrorReturn<T> =
     }
 
 export type UseApiType = {
-  GET: <T extends keyof GET_Responses>(route: T, o: { pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<GET_Responses[T]>>,
-  POST: <T extends keyof POST_Requests>(route: T, o: { body: POST_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<POST_Responses[T]>>,
-  PUT: <T extends keyof PUT_Requests>(route: T, o: { body: PUT_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>,
-  DELETE: <T extends keyof DELETE_Requests>(route: T, o: { body?: DELETE_Requests[T]; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<any>>,
-  PATCH: <T extends keyof PUT_Requests>(route: T, o: { body: Partial<PUT_Requests[T]>; pathValues?: ApiCallPathValues }, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>
+  GET: <T extends keyof GET_Responses>(route: T, o: RequestOptions<undefined>, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<GET_Responses[T]>>,
+  POST: <T extends keyof POST_Requests>(route: T, o: RequestOptions<POST_Requests[T]>, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<POST_Responses[T]>>,
+  PUT: <T extends keyof PUT_Requests>(route: T, o: RequestOptions<PUT_Requests[T]> , options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>,
+  DELETE: <T extends keyof DELETE_Requests>(route: T, o:RequestOptions<DELETE_Requests[T]> , options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<any>>,
+  PATCH: <T extends keyof PUT_Requests>(route: T, o: RequestOptions< Partial<PUT_Requests[T]>>, options?: HandleErrorOptions | FeedbackModes) => Promise<HandleErrorReturn<PUT_Responses[T]>>
 };
 
 /**
@@ -94,13 +98,13 @@ const useApi = ():UseApiType => {
    *
    */
 
-  const doApiCall = async (method: ApiMethods, route: string, apiOptions: ApiProps, options: HandleErrorOptions | FeedbackModes = "none"): Promise<HandleErrorReturn<any>> => {
+  const doApiCall = async (method: ApiMethods, route: string, apiOptions: RequestOptions<any>, options: HandleErrorOptions | FeedbackModes = "none"): Promise<HandleErrorReturn<any>> => {
     type Ret = HandleErrorReturn<any>
     if (typeof options === "string") options = { mode: options }
     let result: Partial<Ret> = {}
     
     try {
-      const response = await apiFetch(method, route, apiOptions.body, apiOptions.pathValues)
+      const response = await apiFetch(method, route, apiOptions.body, apiOptions.pathValues, apiOptions.headers, apiOptions.config)
       result.response = response
       result.success = true
       if (options.mode === "message" && options.successMessage) {

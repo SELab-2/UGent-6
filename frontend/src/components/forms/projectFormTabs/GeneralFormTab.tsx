@@ -38,6 +38,7 @@ const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
       >
         <Input
           min={1}
+          max={1000}
           type="number"
         />
       </Form.Item>
