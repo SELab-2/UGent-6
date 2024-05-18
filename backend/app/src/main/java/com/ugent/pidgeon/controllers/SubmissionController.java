@@ -115,7 +115,7 @@ public class    SubmissionController {
                 if (group == null) {
                     throw new RuntimeException("Group not found");
                 }
-                GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group);
+                GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group, false);
                 GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectid);
                 GroupFeedbackJson groupFeedbackJson;
                 if (groupFeedbackEntity == null) {
@@ -161,7 +161,7 @@ public class    SubmissionController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        long groupId = checkResult.getData();
+        Long groupId = checkResult.getData();
 
         try {
             //Save the file entry in the database to get the id
@@ -179,6 +179,7 @@ public class    SubmissionController {
                     false
             );
             submissionEntity.setDockerTestState(DockerTestState.finished);
+            submissionEntity.setDockerType(DockerTestType.NONE);
 
             //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
@@ -186,7 +187,7 @@ public class    SubmissionController {
             //Save the file on the server
             String filename = file.getOriginalFilename();
             Path path = Filehandler.getSubmissionPath(projectid, groupId, submission.getId());
-            File savedFile = Filehandler.saveSubmission(path, file);
+            File savedFile = Filehandler.saveFile(path, file, Filehandler.SUBMISSION_FILENAME);
             String pathname = path.resolve(Filehandler.SUBMISSION_FILENAME).toString();
 
             //Update name and path for the file entry
@@ -201,6 +202,8 @@ public class    SubmissionController {
         Logger.getLogger("SubmissionController").info("no tests");
         submission.setStructureFeedback("No specific structure requested for this project.");
         submission.setStructureAccepted(true);
+        submission.setDockerAccepted(true);
+        submissionRepository.save(submission);
       } else {
 
         // Check file structure
@@ -237,7 +240,7 @@ public class    SubmissionController {
             try {
               // Check if docker tests succeed
               DockerSubmissionTestModel dockerModel = new DockerSubmissionTestModel(testEntity.getDockerImage());
-              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel);
+              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel, projectid);
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
@@ -265,6 +268,7 @@ public class    SubmissionController {
 
       return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submission));
     } catch (Exception e) {
+      Logger.getLogger("SubmissionController").log(Level.SEVERE, e.getMessage(), e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to save submissions on file server.");
     }
@@ -297,23 +301,7 @@ public class    SubmissionController {
         }
 
         // Get the file from the server
-        try {
-            Resource zipFile = Filehandler.getFileAsResource(Path.of(file.getPath()));
-            if (zipFile == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found.");
-            }
-
-            // Set headers for the response
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
-            headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(zipFile);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return Filehandler.getZipFileAsResponse(Path.of(file.getPath()), file.getName());
     }
 
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/artifacts") //Route to get a submission
@@ -393,6 +381,19 @@ public class    SubmissionController {
         }
 
         List<SubmissionEntity> submissions = submissionRepository.findByProjectIdAndGroupId(projectid, groupid);
+        List<SubmissionJson> res = submissions.stream().map(entityToJsonConverter::getSubmissionJson).toList();
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/adminsubmissions")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getAdminSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
+        CheckResult<Void> checkResult = projectUtil.isProjectAdmin(projectid, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        List<SubmissionEntity> submissions = submissionRepository.findAdminSubmissionsByProjectId(projectid);
         List<SubmissionJson> res = submissions.stream().map(entityToJsonConverter::getSubmissionJson).toList();
         return ResponseEntity.ok(res);
     }

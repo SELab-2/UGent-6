@@ -51,6 +51,15 @@ public class GlobalErrorHandler {
         "Resource/endpoint doesn't exist", path));
   }
 
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ApiErrorReponse> handleNoResourceFoundException(HttpServletRequest request, Exception ex) {
+    logError(ex);
+    String path = request.getRequestURI();
+    HttpStatus status = HttpStatus.NOT_FOUND;
+    return ResponseEntity.status(status).body(new ApiErrorReponse(OffsetDateTime.now(), status.value(), status.getReasonPhrase(),
+        "Resource/endpoint doesn't exist", path));
+  }
+
   /* Gets thrown when the method is not allowed */
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
   public ResponseEntity<ApiErrorReponse> handleMethodNotSupportedException(HttpServletRequest request, Exception ex) {

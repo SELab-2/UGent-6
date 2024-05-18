@@ -54,7 +54,7 @@ public class ClusterUtilTest {
   public void setUp() {
     clusterEntity = new GroupClusterEntity(1L, 20, "clustername", 5);
     clusterEntity.setId(4L);
-    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
   }
 
   @Test
@@ -226,38 +226,38 @@ public class ClusterUtilTest {
 
   @Test
   void testCheckGroupClusterCreateJson() {
-    GroupClusterCreateJson json = new GroupClusterCreateJson("clustername", 5, 5);
+    GroupClusterCreateJson json = new GroupClusterCreateJson("clustername", 5, 5, null);
     /* All checks succeed */
     CheckResult<Void> result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.OK, result.getStatus());
 
     /* GroupCount is negative */
-    json = new GroupClusterCreateJson("clustername", 5, -5);
+    json = new GroupClusterCreateJson("clustername", 5, -5, null);
     result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
 
     /* Capacity is smaller than 1 */
-    json = new GroupClusterCreateJson("clustername", 0, 5);
+    json = new GroupClusterCreateJson("clustername", 0, 5, null);
     result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
 
     /* Name is empty */
-    json = new GroupClusterCreateJson("", 5, 5);
+    json = new GroupClusterCreateJson("", 5, 5, null);
     result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
 
     /* Capacity is null */
-    json = new GroupClusterCreateJson("clustername", null, 5);
+    json = new GroupClusterCreateJson("clustername", null, 5, null);
     result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
 
     /* Name is null */
-    json = new GroupClusterCreateJson(null, 5, 5);
+    json = new GroupClusterCreateJson(null, 5, 5, null);
     result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
 
     /* GroupCount is null */
-    json = new GroupClusterCreateJson("clustername", 5, null);
+    json = new GroupClusterCreateJson("clustername", 5, null, null);
     result = clusterUtil.checkGroupClusterCreateJson(json);
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
   }
