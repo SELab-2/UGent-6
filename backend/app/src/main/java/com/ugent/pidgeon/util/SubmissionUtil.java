@@ -75,32 +75,34 @@ public class SubmissionUtil {
      * @return CheckResult with the status of the check and the group id
      */
     public CheckResult<Long> checkOnSubmit(long projectId, UserEntity user) {
-        if (!projectUtil.userPartOfProject(projectId, user.getId())) {
-            return new CheckResult<>(HttpStatus.FORBIDDEN, "You aren't part of this project", null);
-        }
-
-        Long groupId = groupRepository.groupIdByProjectAndUser(projectId, user.getId());
-        if (groupId == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "User is not part of a group for this project", null);
-        }
-
-        CheckResult<GroupEntity> groupCheck = groupUtil.getGroupIfExists(groupId);
-        if (groupCheck.getStatus() != HttpStatus.OK) {
-            return new CheckResult<>(groupCheck.getStatus(), groupCheck.getMessage(), null);
-        }
-        GroupEntity group = groupCheck.getData();
-
-        if (groupClusterRepository.inArchivedCourse(group.getClusterId())) {
-            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot submit for a project in an archived course", null);
-        }
-
-
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
         if (projectCheck.getStatus() != HttpStatus.OK) {
             return new CheckResult<> (projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
 
         ProjectEntity project = projectCheck.getData();
+
+        if (!projectUtil.userPartOfProject(projectId, user.getId())) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "You aren't part of this project", null);
+        }
+
+        Long groupId = groupRepository.groupIdByProjectAndUser(projectId, user.getId());
+        if (groupId == null) {
+            CheckResult<Void> projectAdminCheck = projectUtil.isProjectAdmin(projectId, user);
+            if (projectAdminCheck.getStatus() != HttpStatus.OK) {
+                return new CheckResult<>(HttpStatus.BAD_REQUEST, "User is not part of a group for this project", null);
+            }
+        } else {
+            CheckResult<GroupEntity> groupCheck = groupUtil.getGroupIfExists(groupId);
+            if (groupCheck.getStatus() != HttpStatus.OK) {
+                return new CheckResult<>(groupCheck.getStatus(), groupCheck.getMessage(), null);
+            }
+
+            if (groupClusterRepository.inArchivedCourse(project.getGroupClusterId())) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot submit for a project in an archived course", null);
+            }
+        }
+
         OffsetDateTime time = OffsetDateTime.now();
         Logger.getGlobal().info("Time: " + time + " Deadline: " + project.getDeadline());
         if (time.isAfter(project.getDeadline())) {

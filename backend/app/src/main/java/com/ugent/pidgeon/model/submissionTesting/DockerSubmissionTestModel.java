@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -56,6 +57,7 @@ public class DockerSubmissionTestModel {
     new File(localMountFolder + "input/").mkdirs();
     new File(localMountFolder + "output/").mkdirs();
     new File(localMountFolder + "artifacts/").mkdirs();
+    new File(localMountFolder + "extra/").mkdirs();
   }
 
 
@@ -83,6 +85,33 @@ public class DockerSubmissionTestModel {
       } catch (IOException e) {
         e.printStackTrace();
       }
+    }
+  }
+
+  public void addUtilFiles(Path pathToZip){
+    // first unzip files to the utils folder
+    try {
+      ZipFile zipFile = new ZipFile(pathToZip.toFile());
+      Enumeration<? extends ZipEntry> entries = zipFile.entries();
+      while (entries.hasMoreElements()) {
+        ZipEntry entry = entries.nextElement();
+        File entryDestination = new File(localMountFolder + "extra/", entry.getName());
+        if (entry.isDirectory()) {
+          entryDestination.mkdirs();
+        } else {
+          File parent = entryDestination.getParentFile();
+          if (parent != null) {
+            parent.mkdirs();
+          }
+          try {
+            FileUtils.copyInputStreamToFile(zipFile.getInputStream(entry), entryDestination);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 

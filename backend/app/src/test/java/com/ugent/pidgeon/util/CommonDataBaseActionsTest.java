@@ -144,7 +144,7 @@ public class CommonDataBaseActionsTest {
 
     submissionEntity = new SubmissionEntity(
         22,
-        45,
+        45L,
         99L,
         OffsetDateTime.MIN,
         true,

@@ -64,7 +64,8 @@ public class TestUtilTest {
         "surname",
         "email",
         UserRole.student,
-        "azureId"
+        "azureId",
+        ""
     );
     userEntity.setId(44L);
     testEntity = new TestEntity(

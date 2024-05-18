@@ -1,8 +1,11 @@
 package com.ugent.pidgeon.model.json;
 
+import java.time.OffsetDateTime;
+
 public class GroupClusterUpdateJson {
     private String name;
     private Integer capacity;
+    private OffsetDateTime lockGroupsAfter;
 
     public GroupClusterUpdateJson() {
     }
@@ -16,6 +19,10 @@ public class GroupClusterUpdateJson {
         return capacity;
     }
 
+    public OffsetDateTime getLockGroupsAfter() {
+        return lockGroupsAfter;
+    }
+
     // Setters
     public void setName(String name) {
         this.name = name;
@@ -23,5 +30,9 @@ public class GroupClusterUpdateJson {
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+    }
+
+    public void setLockGroupsAfter(OffsetDateTime lockGroupsAfter) {
+        this.lockGroupsAfter = lockGroupsAfter;
     }
 }

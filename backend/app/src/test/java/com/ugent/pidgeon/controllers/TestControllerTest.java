@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.CustomObjectMapper;
 import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.model.json.TestUpdateJson;
+import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
@@ -13,20 +14,28 @@ import com.ugent.pidgeon.postgre.repository.TestRepository;
 import com.ugent.pidgeon.util.CheckResult;
 import com.ugent.pidgeon.util.CommonDatabaseActions;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.FileUtil;
 import com.ugent.pidgeon.util.Filehandler;
 import com.ugent.pidgeon.util.Pair;
 import com.ugent.pidgeon.util.ProjectUtil;
 import com.ugent.pidgeon.util.TestUtil;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.time.OffsetDateTime;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -45,6 +54,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,11 +71,16 @@ public class TestControllerTest extends ControllerTest{
     private TestRepository testRepository;
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private FileRepository fileRepository;
 
     @Mock
     private EntityToJsonConverter entityToJsonConverter;
     @Mock
     private CommonDatabaseActions commonDatabaseActions;
+
+    @Mock
+    private FileUtil fileUtil;
 
 
     @InjectMocks
@@ -74,6 +89,8 @@ public class TestControllerTest extends ControllerTest{
 
     private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
+    private MockMultipartFile mockMultipartFile;
+    private FileEntity fileEntity;
     private ProjectEntity project;
     private TestEntity test;
     private TestJson testJson;
@@ -106,9 +123,18 @@ public class TestControllerTest extends ControllerTest{
             test.getDockerImage(),
             test.getDockerTestScript(),
             test.getDockerTestTemplate(),
-            test.getStructureTemplate()
+            test.getStructureTemplate(),
+            "extraFilesUrl",
+            "extraFilesName"
+
         );
 
+        byte[] fileContent = "Your file content".getBytes();
+        mockMultipartFile = new MockMultipartFile("file", "filename.txt",
+            MediaType.TEXT_PLAIN_VALUE, fileContent);
+
+        fileEntity = new FileEntity("name", "dir/name", 1L);
+        fileEntity.setId(77L);
     }
 
     @Test
@@ -132,7 +158,9 @@ public class TestControllerTest extends ControllerTest{
             dockerImage,
             dockerTestScript,
             dockerTestTemplate,
-            structureTemplate
+            structureTemplate,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         /* All checks succeed */
         when(testUtil.checkForTestUpdate(
@@ -174,7 +202,9 @@ public class TestControllerTest extends ControllerTest{
             null,
             null,
             null,
-            null
+            null,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         testUpdateJson = new TestUpdateJson(
             dockerImageBlank,
@@ -285,7 +315,9 @@ public class TestControllerTest extends ControllerTest{
             dockerImage,
             dockerTestScript,
             dockerTestTemplate,
-            structureTemplate
+            structureTemplate,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         /* All checks succeed */
         when(testUtil.checkForTestUpdate(
@@ -337,7 +369,9 @@ public class TestControllerTest extends ControllerTest{
             null,
             null,
             null,
-            null
+            null,
+            "extraFilesUrl",
+            "extraFilesName"
         );
         reset(testUtil);
         when(testUtil.checkForTestUpdate(
@@ -671,5 +705,195 @@ public class TestControllerTest extends ControllerTest{
 
         mockMvc.perform(MockMvcRequestBuilders.delete(url))
             .andExpect(status().isIAmATeapot());
+    }
+
+    public static File createTestFile() throws IOException {
+        // Create a temporary directory
+        File tempDir = Files.createTempDirectory("test-dir").toFile();
+
+        // Create a temporary file within the directory
+        File tempFile = File.createTempFile("test-file", ".zip", tempDir);
+
+        // Create some content to write into the zip file
+        String content = "Hello, this is a test file!";
+        byte[] bytes = content.getBytes();
+
+        // Write the content into a file inside the zip file
+        try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(tempFile))) {
+            ZipEntry entry = new ZipEntry("test.txt");
+            zipOut.putNextEntry(entry);
+            zipOut.write(bytes);
+            zipOut.closeEntry();
+        }
+
+        // Return the File object representing the zip file
+        return tempFile;
+    }
+
+    @Test
+    public void testUploadExtraTestFiles() throws IOException {
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests/extrafiles";
+        /* All checks succeed */
+        when(testUtil.getTestIfAdmin(project.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", test));
+
+        Path savePath = Path.of("savePath");
+        File file = createTestFile();
+
+        try (MockedStatic<Filehandler> mockedFilehandler = mockStatic(Filehandler.class)) {
+            mockedFilehandler.when(() -> Filehandler.getTestExtraFilesPath(project.getId())).thenReturn(savePath);
+            mockedFilehandler.when(() -> Filehandler.saveFile(savePath, mockMultipartFile, Filehandler.EXTRA_TESTFILES_FILENAME))
+                .thenReturn(file);
+
+            when(fileRepository.save(argThat(
+                fileEntity -> fileEntity.getName().equals(mockMultipartFile.getOriginalFilename()) &&
+                    fileEntity.getPath()
+                        .equals(savePath.resolve(Filehandler.EXTRA_TESTFILES_FILENAME).toString()) &&
+                    fileEntity.getUploadedBy() == getMockUser().getId()
+            ))).thenReturn(fileEntity);
+
+            when(testRepository.save(test)).thenReturn(test);
+            when(entityToJsonConverter.testEntityToTestJson(test, project.getId())).thenReturn(testJson);
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                .file(mockMultipartFile)
+                .with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                })
+            ).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
+
+            verify(testRepository, times(1)).save(test);
+            assertEquals(fileEntity.getId(), test.getExtraFilesId());
+
+            /* Unexpected error */
+            mockedFilehandler.when(() -> Filehandler.saveFile(savePath, mockMultipartFile, Filehandler.EXTRA_TESTFILES_FILENAME))
+                .thenThrow(new IOException("Unexpected error"));
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                .file(mockMultipartFile)
+                .with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                })
+            ).andExpect(status().isInternalServerError());
+
+            /* Check fails */
+            when(testUtil.getTestIfAdmin(project.getId(), getMockUser()))
+                .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart(url)
+                .file(mockMultipartFile)
+                .with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                })
+            ).andExpect(status().isIAmATeapot());
+
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testDeleteExtraFiles() throws Exception {
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests/extrafiles";
+        test.setExtraFilesId(fileEntity.getId());
+
+        /* All checks succeed */
+        when(testUtil.getTestIfAdmin(project.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", test));
+
+        when(fileRepository.findById(test.getExtraFilesId())).thenReturn(Optional.of(fileEntity));
+        when(testRepository.save(test)).thenReturn(test);
+        when(entityToJsonConverter.testEntityToTestJson(test, project.getId())).thenReturn(testJson);
+
+        when(fileUtil.deleteFileById(test.getExtraFilesId()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(testJson)));
+
+        verify(testRepository, times(1)).save(test);
+        verify(fileUtil, times(1)).deleteFileById(fileEntity.getId());
+        assertNull(test.getExtraFilesId());
+
+        /* Unexpected error when deleting file */
+        test.setExtraFilesId(fileEntity.getId());
+        when(fileUtil.deleteFileById(test.getExtraFilesId()))
+            .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "Unexpected error", null));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isIAmATeapot());
+
+        /* Error thrown */
+        test.setExtraFilesId(fileEntity.getId());
+        when(fileUtil.deleteFileById(test.getExtraFilesId()))
+            .thenThrow(new RuntimeException("Error thrown"));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isInternalServerError());
+
+        /* No extra files */
+        test.setExtraFilesId(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isNotFound());
+
+        /* Check fails */
+        when(testUtil.getTestIfAdmin(project.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(url))
+            .andExpect(status().isIAmATeapot());
+    }
+
+    @Test
+    public void getExtraTestFiles() {
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + project.getId() + "/tests/extrafiles";
+
+        ResponseEntity<?> mockResponseEntity = ResponseEntity.ok().build();
+        test.setExtraFilesId(fileEntity.getId());
+
+        /* All checks succeed */
+        when(testUtil.getTestIfAdmin(project.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", test));
+
+        when(fileRepository.findById(test.getExtraFilesId())).thenReturn(Optional.of(fileEntity));
+
+        try (MockedStatic<Filehandler> mockedFilehandler = mockStatic(Filehandler.class)) {
+            mockedFilehandler.when(() -> Filehandler.getZipFileAsResponse(argThat(
+                path -> path.toString().equals(fileEntity.getPath())
+                ), eq(fileEntity.getName())))
+                .thenReturn(mockResponseEntity);
+
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk());
+
+            /* Files not found */
+            when(fileRepository.findById(test.getExtraFilesId())).thenReturn(Optional.empty());
+
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isNotFound());
+
+            /* No extra files */
+            test.setExtraFilesId(null);
+
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isNotFound());
+
+            /* check fails */
+            when(testUtil.getTestIfAdmin(project.getId(), getMockUser()))
+                .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
+
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isIAmATeapot());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

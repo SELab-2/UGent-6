@@ -52,7 +52,7 @@ public class ProjectUtilTest {
     );
     projectEntity.setId(64);
 
-    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    mockUser = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
     mockUser.setId(10L);
   }
 
