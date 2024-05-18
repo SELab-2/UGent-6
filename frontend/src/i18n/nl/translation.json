@@ -139,6 +139,7 @@
       "groupClusterId": "Groepen",
       "groupClusterIdMessage": "Vul de Groep cluster in",
       "visible": "Project zichtbaar maken",
+      "visibleAfter": "Kies wanneer het project automatisch zichtbaar wordt voor studenten. Als je niets invult, blijft het project onzichtbaar",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in",
       "maxScoreHelp": "Wat is de maximale score die je kunt behalen voor dit project? Als je het leeg laat, wordt het project niet beoordeeld",

@@ -135,6 +135,7 @@
       "groupClusterId": "Groups",
       "groupClusterIdMessage": "Please enter the group cluster",
       "visible": "Make the project visible",
+      "visibleAfter": "Choose when the project will be made visible to students, leaving this empty will keep the project invisible",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Please enter the maximum score for the project",
       "maxScoreHelp": "What is the maximum achievable score for this project? Leaving it empty means the project won't be graded.",

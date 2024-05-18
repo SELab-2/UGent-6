@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { Button, Form, Card, UploadProps } from "antd"
+import { Button, Form, UploadProps } from "antd"
 import { useTranslation } from "react-i18next"
 import ProjectForm from "../../components/forms/ProjectForm"
 import { EditFilled } from "@ant-design/icons"
@@ -20,12 +20,12 @@ const EditProject: React.FC = () => {
   const { courseId, projectId } = useParams()
   const [loading, setLoading] = useState(false)
   const API = useApi()
-  const [error, setError] = useState<JSX.Element | null>(null) // Gebruik ProjectError type voor error state
+  const [error, setError] = useState<JSX.Element | null>(null)
   const navigate = useNavigate()
   const project = useProject()
   const { updateProject } = useContext(ProjectContext)
   const [initialDockerValues, setInitialDockerValues] = useState<POST_Requests[ApiRoutes.PROJECT_TESTS] | null>(null)
-  const location = useLocation() 
+  const location = useLocation()
 
   const updateDockerForm = async () => {
     if (!projectId) return
@@ -42,20 +42,19 @@ const EditProject: React.FC = () => {
       const tests = response.response.data
       console.log(tests)
 
-      if(tests.extraFilesName) {
+      if (tests.extraFilesName) {
         const downloadLink = AppRoutes.DOWNLOAD_PROJECT_TESTS.replace(":projectId", projectId).replace(":courseId", courseId!)
-        
-        const uploadVal:UploadProps["defaultFileList"] = [{
+
+        const uploadVal: UploadProps["defaultFileList"] = [{
           uid: '1',
           name: tests.extraFilesName,
           status: 'done',
           url: downloadLink,
-          type: "file",          
+          type: "file",
         }]
 
         form.setFieldValue("dockerTestDir", uploadVal)
       }
-
 
       formVals = {
         structureTest: tests.structureTest ?? "",
@@ -86,12 +85,12 @@ const EditProject: React.FC = () => {
     setLoading(true)
 
     const response = await API.PUT(
-      ApiRoutes.PROJECT,
-      {
-        body: values,
-        pathValues: { id: projectId },
-      },
-      "alert"
+        ApiRoutes.PROJECT,
+        {
+          body: values,
+          pathValues: { id: projectId },
+        },
+        "alert"
     )
     if (!response.success) {
       setError(response.alert || null)
@@ -99,15 +98,15 @@ const EditProject: React.FC = () => {
       return
     }
 
-    let promisses = []
+    let promises = []
 
-    promisses.push(saveDockerForm(form, initialDockerValues, API, projectId))
+    promises.push(saveDockerForm(form, initialDockerValues, API, projectId))
 
     if (form.isFieldTouched("groups") && values.groupClusterId && values.groups) {
-      promisses.push(API.PUT(ApiRoutes.CLUSTER_FILL, { body: values.groups, pathValues: { id: values.groupClusterId } }, "message"))
+      promises.push(API.PUT(ApiRoutes.CLUSTER_FILL, { body: values.groups, pathValues: { id: values.groupClusterId } }, "message"))
     }
 
-    await Promise.all(promisses)
+    await Promise.all(promises)
 
     const result = response.response.data
     updateProject(result)
@@ -124,45 +123,46 @@ const EditProject: React.FC = () => {
 
   if (!project) return <></>
   return (
-    <>
-      <Form
-        initialValues={{
-          name: project.name,
-          description: project.description,
-          groupClusterId: project.clusterId,
-          visible: project.visible,
-          maxScore: project.maxScore,
-          deadline: dayjs(project.deadline),
-        }}
-        form={form}
-        onFinishFailed={onInvalid}
-        onFinish={handleCreation}
-        layout="vertical"
-        requiredMark="optional"
-      >
-        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-          <ProjectForm
-            form={form}
-            error={error}
-            cardProps={{
-              title: t("project.change.updateTitle", { name: project.name }),
-              extra: (
-                <Form.Item style={{ textAlign: "center", margin: 0 }}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    icon={<EditFilled />}
-                    loading={loading}
-                  >
-                    {t("project.change.update")}
-                  </Button>
-                </Form.Item>
-              ),
+      <>
+        <Form
+            initialValues={{
+              name: project.name,
+              description: project.description,
+              groupClusterId: project.clusterId,
+              visible: project.visible,
+              visibleAfter: project.visible ? null : (project.visibleAfter ? dayjs(project.visibleAfter) : null),
+              maxScore: project.maxScore,
+              deadline: dayjs(project.deadline),
             }}
-          />
-        </div>
-      </Form>
-    </>
+            form={form}
+            onFinishFailed={onInvalid}
+            onFinish={handleCreation}
+            layout="vertical"
+            requiredMark="optional"
+        >
+          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <ProjectForm
+                form={form}
+                error={error}
+                cardProps={{
+                  title: t("project.change.updateTitle", { name: project.name }),
+                  extra: (
+                      <Form.Item style={{ textAlign: "center", margin: 0 }}>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            icon={<EditFilled />}
+                            loading={loading}
+                        >
+                          {t("project.change.update")}
+                        </Button>
+                      </Form.Item>
+                  ),
+                }}
+            />
+          </div>
+        </Form>
+      </>
   )
 }
 

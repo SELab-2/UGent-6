@@ -74,6 +74,7 @@ const ProjectCreate: React.FC = () => {
           description: "",
           groupClusterId: undefined,
           visible: false, // Stel de standaardwaarde in op false
+          visibleAfter: null,
           maxScore: 20,
           deadline: null,
         }}
