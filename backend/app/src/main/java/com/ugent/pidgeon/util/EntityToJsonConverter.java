@@ -253,7 +253,7 @@ public class EntityToJsonConverter {
         return new SubmissionJson(
                 submission.getId(),
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
-                ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
+                submission.getGroupId() == null ? null : ApiRoutes.GROUP_BASE_PATH + "/" + submission.getGroupId(),
                 submission.getProjectId(),
                 submission.getGroupId(),
                 ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/file",

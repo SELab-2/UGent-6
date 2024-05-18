@@ -214,7 +214,7 @@ public class EntityToJsonConverterTest {
 
     submissionEntity = new SubmissionEntity(
         22,
-        45,
+        45L,
         99L,
         OffsetDateTime.MIN,
         true,
@@ -456,7 +456,7 @@ public class EntityToJsonConverterTest {
   @Test
   public void testProjectEntityToProjectResponseJson() {
     GroupEntity secondGroup = new GroupEntity("secondGroup", groupClusterEntity.getId());
-    SubmissionEntity secondSubmission = new SubmissionEntity(22, 232, 90L, OffsetDateTime.MIN, true, true);
+    SubmissionEntity secondSubmission = new SubmissionEntity(22, 232L, 90L, OffsetDateTime.MIN, true, true);
     CourseUserEntity courseUser = new CourseUserEntity(projectEntity.getCourseId(), userEntity.getId(), CourseRelation.creator);
     projectEntity.setVisibleAfter(OffsetDateTime.now());
     when(projectRepository.findGroupIdsByProjectId(projectEntity.getId())).thenReturn(List.of(groupEntity.getId(), secondGroup.getId()));
@@ -598,6 +598,11 @@ public class EntityToJsonConverterTest {
     assertEquals(DockerTestType.TEMPLATE, result.getDockerFeedback().type());
     assertEquals(submissionEntity.getDockerFeedback(), result.getDockerFeedback().feedback());
     assertFalse(result.getDockerFeedback().allowed());
+
+    /* Group id is null */
+    submissionEntity.setGroupId(null);
+    result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+    assertNull(result.getGroupUrl());
   }
 
   @Test

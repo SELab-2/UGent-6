@@ -137,7 +137,7 @@ public class SubmissionControllerTest extends ControllerTest {
     public void setup() {
         setUpController(submissionController);
 
-        submission = new SubmissionEntity(22, 45, 99L, OffsetDateTime.MIN, true, true);
+        submission = new SubmissionEntity(22L, 45L, 99L, OffsetDateTime.MIN, true, true);
         submission.setId(56L);
         groupIds = List.of(45L);
         submissionJson = new SubmissionJson(
@@ -528,5 +528,50 @@ public class SubmissionControllerTest extends ControllerTest {
         when(groupUtil.canGetProjectGroupData(groupEntity.getId(), submission.getProjectId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
         mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isIAmATeapot());
+    }
+
+    @Test
+    public void testGetAdminSubmissions() {
+        String url = ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId() + "/adminsubmissions";
+
+        /* all checks succeed */
+        when(projectUtil.isProjectAdmin(submission.getProjectId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(submissionRepository.findAdminSubmissionsByProjectId(submission.getProjectId()))
+            .thenReturn(List.of(submission));
+        when(entityToJsonConverter.getSubmissionJson(submission)).thenReturn(submissionJson);
+
+        try {
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(submissionJson))));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        /* No submissions */
+        when(submissionRepository.findAdminSubmissionsByProjectId(submission.getProjectId()))
+            .thenReturn(List.of());
+
+        try {
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("[]"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        /* User can't get project */
+        when(projectUtil.isProjectAdmin(submission.getProjectId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+
+        try {
+            mockMvc.perform(MockMvcRequestBuilders.get(url))
+                .andExpect(status().isIAmATeapot());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
