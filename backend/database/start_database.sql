@@ -38,6 +38,7 @@ CREATE TABLE group_clusters (
                                 max_size INT NOT NULL,
                                 cluster_name VARCHAR(100) NOT NULL,
                                 group_amount INT NOT NULL,
+                                lock_groups_after TIMESTAMP WITH TIME ZONE DEFAULT NULL,
                                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

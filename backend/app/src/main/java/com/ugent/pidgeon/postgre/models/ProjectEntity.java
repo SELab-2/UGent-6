@@ -41,6 +41,7 @@ public class ProjectEntity {
         @Column(name = "visible_after")
         private OffsetDateTime visibleAfter;
 
+
         public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
                 this.courseId = courseId;
                 this.name = name;

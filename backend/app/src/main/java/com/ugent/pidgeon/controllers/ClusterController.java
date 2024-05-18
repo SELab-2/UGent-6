@@ -112,6 +112,7 @@ public class ClusterController {
                 clusterJson.groupCount()
         );
         cluster.setCreatedAt(OffsetDateTime.now());
+        cluster.setLockGroupsAfter(clusterJson.lockGroupsAfter());
         GroupClusterEntity clusterEntity = groupClusterRepository.save(cluster);
 
         for (int i = 0; i < clusterJson.groupCount(); i++) {
@@ -182,6 +183,7 @@ public class ClusterController {
         }
         clusterEntity.setMaxSize(clusterJson.getCapacity());
         clusterEntity.setName(clusterJson.getName());
+        clusterEntity.setLockGroupsAfter(clusterJson.getLockGroupsAfter());
         clusterEntity = groupClusterRepository.save(clusterEntity);
     return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity, false));
     }
@@ -259,6 +261,10 @@ public class ClusterController {
 
         if (clusterJson.getName() == null) {
             clusterJson.setName(cluster.getName());
+        }
+
+        if (clusterJson.getLockGroupsAfter() == null) {
+            clusterJson.setLockGroupsAfter(cluster.getLockGroupsAfter());
         }
 
         return doGroupClusterUpdate(cluster, clusterJson);

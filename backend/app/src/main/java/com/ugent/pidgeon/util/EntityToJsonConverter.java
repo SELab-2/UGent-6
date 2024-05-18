@@ -74,6 +74,7 @@ public class EntityToJsonConverter {
                 cluster.getGroupAmount(),
                 cluster.getCreatedAt(),
                 groups,
+                cluster.getLockGroupsAfter(),
                 ApiRoutes.COURSE_BASE_PATH + "/" + cluster.getCourseId()
         );
     }
