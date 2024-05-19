@@ -1,7 +1,7 @@
 import { FC, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
-import { Space, Tabs, Tag, Typography } from "antd"
+import { Tabs, Typography } from "antd"
 import { TabsProps } from "antd/lib"
 import ProjectCard from "../index/components/ProjectCard"
 import GroupsCard from "./components/groupTab/GroupsCard"
@@ -12,9 +12,9 @@ import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
-import { InboxOutlined, InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
-import PeriodTag from "../../components/common/PeriodTag"
+import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
 import ExtraTabBtn from "./components/tabExtraBtn/ExtraTabBtn"
+import CourseTagLine from "./components/tabExtraBtn/CourseTagLine"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -84,25 +84,7 @@ const Course: FC = () => {
         >
           {course.name}
         </Typography.Title>
-        <Space
-          direction="horizontal"
-          size="small"
-          style={{ marginBottom: "0.5rem" }}
-        >
-          <PeriodTag
-            year={course.year}
-          />
-          <Tag
-            key={course.teacher.url}
-            color="gold"
-          >
-            {course.teacher.name} {course.teacher.surname}
-          </Tag>
-          {
-            course.archivedAt && <Tag icon={<InboxOutlined />}
-            color="orange">{t("course.archived")}</Tag>
-          }
-        </Space>
+       <CourseTagLine course={course}/>
         <br />
         <Tabs
           onChange={(k) => navigate(`#${k}`)}

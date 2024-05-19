@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, CloseCircleOutlined, MinusCircleOutlined } from "@ant-design/icons"
+import { CheckCircleOutlined, CloseCircleOutlined, MinusCircleOutlined, UserOutlined } from "@ant-design/icons"
 import { Tag } from "antd"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
@@ -15,6 +15,8 @@ const ProjectStatusTag: FC<{ status: ProjectStatus,icon?:boolean }> = ({ status,
       return <Tag icon={<CloseCircleOutlined />} color="volcano">{t("home.projects.status.failed")}</Tag>
     } else if (status === "not started") {
       return <Tag icon={<MinusCircleOutlined />} color="default">{t("home.projects.status.notStarted")}</Tag>
+    }else if (status === "no group") {
+      return <Tag icon={<UserOutlined />} color="warning">{t("home.projects.status.noGroup")}</Tag>
     } else return null
   }
 
@@ -24,6 +26,8 @@ const ProjectStatusTag: FC<{ status: ProjectStatus,icon?:boolean }> = ({ status,
     return <Tag color="volcano">{t("home.projects.status.failed")}</Tag>
   } else if (status === "not started") {
     return <Tag color="default">{t("home.projects.status.notStarted")}</Tag>
+   }else if (status === "no group") {
+    return <Tag color="warning">{t("home.projects.status.noGroup")}</Tag>
   } else return null
 }
 

@@ -5,9 +5,11 @@ import useUser from "../../../../hooks/useUser"
 import { useTranslation } from "react-i18next"
 import GroupInfoModal from "./GroupInfoModal"
 import useAppApi from "../../../../hooks/useAppApi"
-import apiCall from "../../../../util/apiFetch"
 import { ProjectType } from "../../../project/Project"
 import { useParams } from "react-router-dom"
+import useApi from "../../../../hooks/useApi"
+import useIsCourseAdmin from "../../../../hooks/useIsCourseAdmin"
+import { ClusterType } from "./GroupsCard"
 
 export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
@@ -38,7 +40,6 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
             size="small"
             disabled={!canJoin}
             onClick={onJoin}
-            style={{ width: "130px" }}
           >
             {t("course.joinGroup")}
           </Button>
@@ -60,7 +61,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void> }> = ({ groups, project, onChanged }) => {
+const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void>, onGroupIdChange?: (groupId: number|null) => void }> = ({ groups, project, onChanged,onGroupIdChange,locked }) => {
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null)
   const [groupId, setGroupId] = useState<number | null>(null)
@@ -69,6 +70,13 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   const { message } = useAppApi()
   const { user } = useUser()
   const { courseId } = useParams<{ courseId: string }>()
+  const isCourseAdmin = useIsCourseAdmin()
+  const API = useApi()
+
+  const isLocked = useMemo(()=> {
+    if(!locked) return false
+    return new Date(locked).getTime() < Date.now()
+  }, [locked])
 
   useEffect(() => {
     if (typeof project === "number") return setGroupId(project)
@@ -77,21 +85,23 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
 
     let ignore = false
 
-    const fetchOwnGroup = async () => {
-      if (!user) return
-      try {
-        const res = await apiCall.get(ApiRoutes.PROJECT, { id: courseId })
-        if (!ignore) setGroupId(res.data.groupId ?? null)
+    // const fetchOwnGroup = async () => {
+    //   if (!user) return
+    //   try {
+    //     const response = await API.GET(ApiRoutes.PROJECT, { pathValues: { id: typeof project === "number"? project.toString() : project } }, "message")
+    //     if(!response.success) return
 
-      } catch (err) {
-        console.error(err)
-      }
-    }
-    fetchOwnGroup()
+    //     if (!ignore) setGroupId(response.response.data.groupId ?? null)
+
+    //   } catch (err) {
+    //     console.error(err)
+    //   }
+    // }
+    // fetchOwnGroup()
     return () => {
       ignore = true
     }
-  }, [groups, project, courseId])
+  }, [project, courseId])
 
   const handleModalClick = (group: GroupType) => {
     setSelectedGroup(group.groupId)
@@ -99,19 +109,17 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   }
 
   const removeUserFromGroup = async (userId: number, groupId: number) => {
-    try {
-      setLoading(true)
-      await apiCall.delete(ApiRoutes.GROUP_MEMBER, undefined, { id: groupId, userId: userId })
-      if(onChanged) await onChanged()
+    setLoading(true)
+    const response = await API.DELETE(ApiRoutes.GROUP_MEMBER, { pathValues: { id: groupId, userId: userId } }, "message")
+    if (!response.success) return setLoading(false)
+      
+    setGroupId(null)
+    if(onGroupIdChange) onGroupIdChange(null)
+    if (onChanged) await onChanged()
 
-      setGroupId(null)
-      message.success(t("course.leftGroup"))
-    } catch (err) {
-      console.error(err)
-      // TODO: handle error
-    } finally {
-      setLoading(false)
-    }
+    message.success(t("course.leftGroup"))
+
+    setLoading(false)
   }
 
   const onLeave = async (group: GroupType) => {
@@ -120,21 +128,19 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
   }
 
   const onJoin = async (group: GroupType) => {
-    // TODO: join group request
     if (!user) return
-    try {
-      setLoading(true)
-      await apiCall.post(ApiRoutes.GROUP_MEMBERS, { id: user.id }, { id: group.groupId })
-      if(onChanged) await onChanged()
+    setLoading(true)
+    const response = await API.POST(ApiRoutes.GROUP_MEMBERS, { body: { id: user.id }, pathValues: { id: group.groupId } }, "message")
+    if (!response.success) return setLoading(false)
+    if (onChanged) await onChanged()
 
-      message.success(t("course.joinedGroup"))
-      setGroupId(group.groupId)
-    } catch (err) {
-      console.error(err)
-    }
+    message.success(t("course.joinedGroup"))
+    setGroupId(group.groupId)
+    if(onGroupIdChange) onGroupIdChange(group.groupId)
     setLoading(false)
   }
 
+  console.log("Group: ", groupId);
 
   return (
     <>
@@ -148,8 +154,8 @@ const GroupList: FC<{ groups: GroupType[] | null; project?: number | ProjectType
         renderItem={(g) => (
           <Group
             onClick={() => handleModalClick(g)}
-            canJoin={g.members.length < g.capacity || groupId !== null}
-            canLeave={groupId === g.groupId}
+            canJoin={g.members.length < g.capacity && groupId === null && !isCourseAdmin && !isLocked}
+            canLeave={groupId === g.groupId && !isLocked}
             group={g}
             loading={loading}
             onJoin={() => onJoin(g)}

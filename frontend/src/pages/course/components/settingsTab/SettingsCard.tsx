@@ -5,12 +5,12 @@ import { useTranslation } from "react-i18next"
 import useCourse from "../../../../hooks/useCourse"
 import useAppApi from "../../../../hooks/useAppApi"
 import { DeleteOutlined, SaveOutlined } from "@ant-design/icons"
-import apiCall from "../../../../util/apiFetch"
 import { ApiRoutes } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../../@types/routes"
 import { CourseContext } from "../../../../router/CourseRoutes"
+import useApi from "../../../../hooks/useApi"
 
 const SettingsCard: FC = () => {
   const course = useCourse()
@@ -21,6 +21,7 @@ const SettingsCard: FC = () => {
   const { updateCourses } = useUser()
   const navigate = useNavigate()
   const {setCourse} = useContext(CourseContext)
+  const API = useApi()
 
   useEffect(() => {
     form.setFieldsValue(course)
@@ -35,31 +36,25 @@ const SettingsCard: FC = () => {
     console.log(values);
     values.description ??= ""
     setLoading(true)
-    try {
-      const res = await apiCall.patch(ApiRoutes.COURSE, values, { courseId: course.courseId })
-      message.success(t("course.changesSaved"))
-      setCourse(res.data)
-      await updateCourses()
-    } catch(err){
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+    const res = await API.PATCH(ApiRoutes.COURSE, { body: values, pathValues: { courseId: course.courseId } }, "message")
+    if(!res.success) return setLoading(false)
+    message.success(t("course.changesSaved"))
+    setCourse(res.response.data)
+    await updateCourses()
+    setLoading(false)
+
   }
 
   const deleteCourse = async () => {
     setLoading(true)
-    try {
-      await apiCall.delete(ApiRoutes.COURSE, undefined, { courseId: course.courseId })
+      const res = await API.DELETE(ApiRoutes.COURSE, { pathValues: { courseId: course.courseId } }, "message")
+      if(!res.success) return  setLoading(false)
+
       message.success(t("course.courseDeleted"))
       await updateCourses()
       setLoading(false)
       navigate(AppRoutes.HOME)
-    } catch (err) {
-      console.log(err)
-      //TODO: handle error
-      setLoading(false)
-    }
+
   }
 
   return (
@@ -69,6 +64,7 @@ const SettingsCard: FC = () => {
     >
       <div style={{ maxWidth: "600px", width: "100%" }}>
         <CourseForm form={form}>
+
           <Form.Item
             name="isArchived"
             label={t("course.archived")}

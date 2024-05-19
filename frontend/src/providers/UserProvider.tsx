@@ -1,9 +1,10 @@
 import { FC, PropsWithChildren, createContext, useEffect, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../@types/requests.d"
-import apiCall from "../util/apiFetch"
 import { useIsAuthenticated, useMsal } from "@azure/msal-react"
 import { Spin } from "antd"
 import { InteractionStatus } from "@azure/msal-browser"
+import useApi from "../hooks/useApi"
+import { useLocalStorage } from "usehooks-ts"
 
 type UserContextProps = {
   user: User | null
@@ -19,33 +20,33 @@ export type User = GET_Responses[ApiRoutes.USER]
 
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuthenticated = useIsAuthenticated()
-  const [user, setUser] = useState<User | null>(null)
-  const [courses, setCourses] = useState<UserCourseType[] | null>(null)
+  const [user, setUser] = useLocalStorage<User | null>("__user_cache",null)
+  const [courses, setCourses] = useLocalStorage<UserCourseType[] | null>("__courses_cache",null)
   const { inProgress } = useMsal()
+  const API = useApi()
 
   useEffect(() => {
     if (isAuthenticated) {
       updateUser()
+    } else {
+      setUser(null)
     }
   }, [isAuthenticated])
 
   const updateCourses = async (userId: number | undefined = user?.id) => {
     if (!userId) return console.error("No user id provided")
-    try {
-      const res = await apiCall.get(ApiRoutes.USER_COURSES, { id: userId })
-      setCourses(res.data)
-    } catch (err) {
-      // TODO: handle error
-    }
+    const res = await API.GET(ApiRoutes.USER_COURSES, { pathValues: { id: userId } },"page")
+    if (!res.success) return setCourses(null)
+    setCourses(res.response.data)
   }
 
   const updateUser = async () => {
     try {
-      let data = await apiCall.get(ApiRoutes.USER_AUTH)
+      const res = await API.GET(ApiRoutes.USER_AUTH, {}, "page")
+      if(!res.success) return setUser(null)
+      setUser(res.response.data)
 
-      setUser(data.data)
-
-      await updateCourses(data.data.id)
+      await updateCourses(res.response.data.id)
     } catch (err) {
       console.log(err)
     }

@@ -35,6 +35,8 @@ import java.util.List;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -118,7 +120,8 @@ public class ProjectControllerTest extends ControllerTest  {
       projectEntity.isVisible(),
       new ProjectProgressJson(0, 0),
       1L,
-      groupClusterId
+      groupClusterId,
+        OffsetDateTime.now()
     );
 
     projectEntity2 = new ProjectEntity(
@@ -144,7 +147,8 @@ public class ProjectControllerTest extends ControllerTest  {
       projectEntity2.isVisible(),
       new ProjectProgressJson(0, 0),
       1L,
-      groupClusterId
+      groupClusterId,
+        OffsetDateTime.now()
     );
 
   }
@@ -180,7 +184,7 @@ public class ProjectControllerTest extends ControllerTest  {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
 
-    /* If project is visible and role enrolled, don't return it */
+    /* If project isn't visible and role enrolled, don't return it */
     projectEntity2.setVisible(false);
     userProjectsJson = new UserProjectsJson(
         Collections.emptyList(),
@@ -190,6 +194,35 @@ public class ProjectControllerTest extends ControllerTest  {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
+
+    /* If project isn't visible but visibleAfter is passed,  update visibility */
+    projectEntity2.setVisibleAfter(OffsetDateTime.now().minusDays(1));
+    userProjectsJson = new UserProjectsJson(
+        List.of(projectJsonWithStatus),
+        List.of(projectResponseJson)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
+
+    verify(projectRepository, times(1)).save(projectEntity2);
+    assertTrue(projectEntity2.isVisible());
+
+    /* If project isn't visible and visibleAfter is in the future, don't return it */
+    projectEntity2.setVisible(false);
+    projectEntity2.setVisibleAfter(OffsetDateTime.now().plusDays(1));
+    userProjectsJson = new UserProjectsJson(
+        Collections.emptyList(),
+        List.of(projectResponseJson)
+    );
+
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
+
+    assertFalse(projectEntity2.isVisible());
 
     /* If a coursecheck fails, return corresponding status */
     when(courseUtil.getCourseIfUserInCourse(courseEntity.getId(), getMockUser())).thenReturn(
@@ -222,6 +255,22 @@ public class ProjectControllerTest extends ControllerTest  {
     mockMvc.perform(MockMvcRequestBuilders.get(url))
         .andExpect(status().isNotFound());
 
+    /* if visibleAfter is passed, update visibility */
+    projectEntity.setVisibleAfter(OffsetDateTime.now().minusDays(1));
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk());
+
+    verify(projectRepository, times(1)).save(projectEntity);
+    assertTrue(projectEntity.isVisible());
+
+    /* If visibleAfter is in the future, return 404 */
+    projectEntity.setVisible(false);
+    projectEntity.setVisibleAfter(OffsetDateTime.now().plusDays(1));
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isNotFound());
+
+    assertFalse(projectEntity.isVisible());
+
     /* If user is not enrolled and project not visible, return project */
     when(courseUtil.getCourseIfUserInCourse(projectEntity.getCourseId(), getMockUser())).thenReturn(
         new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, CourseRelation.course_admin))
@@ -249,13 +298,15 @@ public class ProjectControllerTest extends ControllerTest  {
   @Test
   public void testCreateProject() throws Exception {
     String url = ApiRoutes.COURSE_BASE_PATH + "/" + courseEntity.getId() + "/projects";
+    projectEntity.setVisibleAfter(OffsetDateTime.now().plusDays(1));
     String request = "{\n" +
         "  \"name\": \"" + projectEntity.getName() + "\",\n" +
         "  \"description\": \"" + projectEntity.getDescription() + "\",\n" +
         "  \"groupClusterId\": " + projectEntity.getGroupClusterId() + ",\n" +
         "  \"visible\": " + projectEntity.isVisible() + ",\n" +
         "  \"maxScore\": " + projectEntity.getMaxScore() + ",\n" +
-        "  \"deadline\": \"" + projectEntity.getDeadline() + "\"\n" +
+        "  \"deadline\": \"" + projectEntity.getDeadline() + "\",\n" +
+        "  \"visibleAfter\": \"" + projectEntity.getVisibleAfter() + "\"\n" +
         "}";
 
     /* If all checks succeed, create course */
@@ -287,6 +338,7 @@ public class ProjectControllerTest extends ControllerTest  {
             && project.isVisible().equals(projectEntity.isVisible())
             && project.getMaxScore().equals(projectEntity.getMaxScore())
             && project.getDeadline().toInstant().equals(projectEntity.getDeadline().toInstant())
+            && project.getVisibleAfter().toInstant().equals(projectEntity.getVisibleAfter().toInstant())
     ));
 
     /* If groupClusterId is not provided, use invalid groupClusterId */
@@ -387,7 +439,8 @@ public class ProjectControllerTest extends ControllerTest  {
         false,
         new ProjectProgressJson(0, 0),
         1L,
-        groupClusterId * 4
+        groupClusterId * 4,
+        OffsetDateTime.now()
     );
     /* If all checks pass, update and return the project */
     when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
@@ -419,6 +472,48 @@ public class ProjectControllerTest extends ControllerTest  {
     assertEquals(projectEntity.getMaxScore(), orginalMaxScore + 33);
     assertEquals(projectEntity.getDeadline().toInstant(), newDeadline.toInstant());
     verify(projectRepository, times(1)).save(projectEntity);
+    projectEntity.setName(orginalName);
+    projectEntity.setDescription(orginalDescription);
+    projectEntity.setGroupClusterId(orginalGroupClusterId);
+    projectEntity.setVisible(orginalVisible);
+    projectEntity.setMaxScore(orginalMaxScore);
+    projectEntity.setDeadline(orginalDeadline);
+
+    /* If visible after is passed, update visibility */
+    projectEntity.setVisibleAfter(OffsetDateTime.now().minusDays(1));
+    request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\",\n" +
+        "  \"groupClusterId\": " + groupClusterId * 4 + ",\n" +
+        "  \"visible\": " + false + ",\n" +
+        "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
+        "  \"deadline\": \"" + newDeadline + "\",\n" +
+        "  \"visibleAfter\": \"" + OffsetDateTime.now().minusDays(1) + "\"\n" +
+        "}";
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(request));
+
+    verify(projectRepository, times(2)).save(projectEntity);
+    assertTrue(projectEntity.isVisible());
+
+    /* If visible after isn't passed, don't update visibility */
+    projectEntity.setVisible(false);
+    request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\",\n" +
+        "  \"groupClusterId\": " + groupClusterId * 4 + ",\n" +
+        "  \"visible\": " + false + ",\n" +
+        "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
+        "  \"deadline\": \"" + newDeadline + "\",\n" +
+        "  \"visibleAfter\": \"" + OffsetDateTime.now().plusDays(1) + "\"\n" +
+        "}";
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(request));
+
+    assertFalse(projectEntity.isVisible());
+
     projectEntity.setName(orginalName);
     projectEntity.setDescription(orginalDescription);
     projectEntity.setGroupClusterId(orginalGroupClusterId);
@@ -461,8 +556,10 @@ public class ProjectControllerTest extends ControllerTest  {
     assertEquals(projectEntity.isVisible(), false);
     assertEquals(projectEntity.getMaxScore(), orginalMaxScore + 33);
     assertEquals(projectEntity.getDeadline().toInstant(), newDeadline.toInstant());
-    verify(projectRepository, times(2)).save(projectEntity);
+    verify(projectRepository, times(4)).save(projectEntity);
     projectEntity.setGroupClusterId(orginalGroupClusterId);
+
+
 
     /* If project json is invalid, return corresponding status */
     reset(projectUtil);
@@ -504,7 +601,8 @@ public class ProjectControllerTest extends ControllerTest  {
         "  \"groupClusterId\": " + groupClusterId * 4 + ",\n" +
         "  \"visible\": " + false + ",\n" +
         "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
-        "  \"deadline\": \"" + newDeadline + "\"\n" +
+        "  \"deadline\": \"" + newDeadline + "\",\n" +
+        "  \"visibleAfter\": \"" + OffsetDateTime.now().plusDays(1) + "\"\n" +
         "}";
     String orginalName = projectEntity.getName();
     String orginalDescription = projectEntity.getDescription();
@@ -524,7 +622,8 @@ public class ProjectControllerTest extends ControllerTest  {
         false,
         new ProjectProgressJson(0, 0),
         1L,
-        groupClusterId * 4
+        groupClusterId * 4,
+        OffsetDateTime.now()
     );
     /* If all checks pass, update and return the project */
     when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
@@ -647,7 +746,7 @@ public class ProjectControllerTest extends ControllerTest  {
   }
 
   @Test
-  void getGroupsOfProject() throws Exception {
+  void testGetGroupsOfProject() throws Exception {
     String url = ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId() + "/groups";
     GroupEntity groupEntity = new GroupEntity("groupName",  1L);
     long groupId = 83L;
@@ -661,11 +760,25 @@ public class ProjectControllerTest extends ControllerTest  {
     when(clusterUtil.isIndividualCluster(projectEntity.getGroupClusterId())).thenReturn(false);
     when(projectRepository.findGroupIdsByProjectId(projectEntity.getId())).thenReturn(List.of(groupId));
     when(grouprRepository.findById(groupId)).thenReturn(Optional.of(groupEntity));
-    when(entityToJsonConverter.groupEntityToJson(groupEntity)).thenReturn(groupJson);
+    /* User is admin so studentNumber shouldn't be hidden */
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    when(entityToJsonConverter.groupEntityToJson(groupEntity, false)).thenReturn(groupJson);
     mockMvc.perform(MockMvcRequestBuilders.get(url))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupJson))));
+
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, false);
+
+    /* If user is not admin, studentNumber should be hidden */
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+    when(entityToJsonConverter.groupEntityToJson(groupEntity, true)).thenReturn(groupJson);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupJson))));
+
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, true);
 
     /* If inidividual cluster return no content */
     when(clusterUtil.isIndividualCluster(projectEntity.getGroupClusterId())).thenReturn(true);

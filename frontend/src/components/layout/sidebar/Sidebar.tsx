@@ -63,19 +63,21 @@ const Sidebar: FC = () => {
             <Button
               type="text"
               style={{ width: "100%" }}
-              size="large"
-              icon={<BookOutlined/>}
-            >
-              {t("home.docs")}
-            </Button>
-            <Button
-              type="text"
-              style={{ width: "100%" }}
               icon={<UserOutlined />}
               size="large"
               onClick={openProfile}
             >
               Profile
+            </Button>
+
+            <Button
+              type="text"
+              style={{ width: "100%" }}
+              size="large"
+              icon={<BookOutlined />}
+              onClick={() => window.open("https://github.com/SELab-2/UGent-6/wiki", "_blank")}
+            >
+              {t("home.docs")}
             </Button>
           </>
         }
