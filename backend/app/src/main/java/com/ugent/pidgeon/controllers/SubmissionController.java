@@ -15,8 +15,13 @@ import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -89,6 +94,15 @@ public class    SubmissionController {
     return ResponseEntity.ok(submissionJson);
   }
 
+  private Map<Long, Optional<SubmissionEntity>> getLatestSubmissionsForProject(long projectId) {
+    List<Long> groupIds = projectRepository.findGroupIdsByProjectId(projectId);
+    return groupIds.stream()
+        .collect(Collectors.toMap(
+            groupId -> groupId,
+            groupId -> submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectId, groupId)
+        ));
+  }
+
     /**
      * Function to get all submissions
      *
@@ -109,33 +123,36 @@ public class    SubmissionController {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
 
-            List<Long> projectGroupIds = projectRepository.findGroupIdsByProjectId(projectid);
-            List<LastGroupSubmissionJson> res = projectGroupIds.stream().map(groupId -> {
-                GroupEntity group = groupRepository.findById(groupId).orElse(null);
+            Map<Long, Optional<SubmissionEntity>> submissions = getLatestSubmissionsForProject(projectid);
+            List<LastGroupSubmissionJson> res = new ArrayList<>();
+            for (Map.Entry<Long, Optional<SubmissionEntity>> entry : submissions.entrySet()) {
+                GroupEntity group = groupRepository.findById(entry.getKey()).orElse(null);
                 if (group == null) {
                     throw new RuntimeException("Group not found");
                 }
                 GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group, false);
-                GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectid);
+                GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(entry.getKey(), projectid);
                 GroupFeedbackJson groupFeedbackJson;
                 if (groupFeedbackEntity == null) {
                     groupFeedbackJson = null;
                 } else {
                     groupFeedbackJson = entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity);
                 }
-                SubmissionEntity submission = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId).orElse(null);
+                SubmissionEntity submission = entry.getValue().orElse(null);
                 if (submission == null) {
-                    return new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson);
+                    res.add(new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson));
+                    continue;
                 }
+                res.add(new LastGroupSubmissionJson(entityToJsonConverter.getSubmissionJson(submission), groupjson, groupFeedbackJson));
+            }
 
-                return new LastGroupSubmissionJson(entityToJsonConverter.getSubmissionJson(submission), groupjson, groupFeedbackJson);
-
-            }).toList();
             return ResponseEntity.ok(res);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+
+
 
 
     /**
