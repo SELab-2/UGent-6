@@ -1,42 +1,41 @@
 import {useEffect, useState} from 'react'
 import axios from 'axios'
+import {Link} from "react-router-dom"
 
 import './App.css'
 
-type Account = {
-    name: string
-}
 
 function App() {
-    const [isAuth, setIsAuth]
-        = useState<boolean | null>(null)
-    const [account, setAccount] = useState<Account | null>(null)
+
+    const [auth, setAuth]
+        = useState<{ isAuthenticated:boolean, name: string} | null>(null)
 
     useEffect(() => {
-        axios.get("/users/account").then(({data}) => {
+        axios.get('http://localhost:3000/web/users/isAuthenticated', {withCredentials: true}).then(({data}) => {
             console.log(data)
-            setIsAuth(data.isAuthenticated)
-            setAccount(data.account)
+            setAuth(data);
         })
-    }, [isAuth, account])
+    })
 
-    if (isAuth === null) {
+    if (auth === null) {
         return (
             <>
                 <h1>Loading...</h1>
             </>
         )
-    } else if (isAuth) {
+
+    } else if (auth.isAuthenticated) {
         return (
             <>
                 <h1>Logged in!</h1>
-                <p> You are logged in as {account && account.name? account.name : null}</p>
+                <p> You are logged in as {auth && auth.name? auth.name : null}</p>
             </>
         )
     } else {
         return (
             <>
-                <h1>Welcome</h1>
+                <h1>Welcome, please login</h1>
+                <Link to='http://localhost:3000/web/auth/signin'>Login</Link>
             </>
         )
     }
