@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/signin', authProvider.login({
     scopes: [msalConfig.auth.clientId + "/.default"],
     redirectUri: REDIRECT_URI,
-    successRedirect: 'http://localhost:5173'
+    successRedirect: 'http://localhost:3001'
 }));
 
 router.get('/acquireToken', authProvider.acquireToken({
