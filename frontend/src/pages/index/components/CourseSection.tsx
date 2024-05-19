@@ -1,14 +1,9 @@
-import { Button, Select, Space, Typography } from "antd"
+import { Select, Typography } from "antd"
 import useUser from "../../../hooks/useUser"
-import CourseCard from "./CourseCard"
 import { FC, useEffect, useMemo, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../@types/requests.d"
 import { useTranslation } from "react-i18next"
-import { PlusOutlined, RightOutlined } from "@ant-design/icons"
 import { ProjectsType } from "../Home"
-import TeacherView from "../../../hooks/TeacherView"
-import { useNavigate } from "react-router-dom"
-import { AppRoutes } from "../../../@types/routes"
 import HorizontalCourseScroll from "./HorizontalCourseScroll"
 
 const { Option } = Select
@@ -71,6 +66,8 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
 
     return () => (ignore = true)
   }, [courses, projects])
+
+  console.log(courseProjects);
 
   const [filteredCourseProjects, filteredAdminCourseProjects, courseProjectsList, adminCourseProjectsList, yearOptions]: [CourseProjectList, CourseProjectList, CourseProjectList, CourseProjectList, number[] | null] = useMemo(() => {
     // Filter courses based on selected year

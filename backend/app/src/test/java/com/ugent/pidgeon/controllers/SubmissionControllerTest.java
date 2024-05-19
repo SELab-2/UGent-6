@@ -378,7 +378,7 @@ public class SubmissionControllerTest extends ControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(submissionJson)));
 
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             assertTrue(submission.getDockerAccepted());
             assertEquals("dockerFeedback-test", submission.getDockerFeedback());

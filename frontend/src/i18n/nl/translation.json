@@ -48,10 +48,18 @@
       "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
       "projectStatus": "Status",
+      "visibility": "Zichtbaarheid",
+      "visibleStatus": {
+        "visible": "Zichtbaar",
+        "invisible": "Onzichtbaar",
+        "visibleFrom": "Zichtbaar vanaf ",
+        "scheduled" : "gepland"
+      },
       "status": {
         "completed": "Voltooid",
         "failed": "Verkeerd",
-        "notStarted": "Niet begonnen"
+        "notStarted": "Niet begonnen",
+        "noGroup": "Niet in groep"
       },
       "groupProgress": "Voortgang groep",
       "completeProgress": "{{count}} / {{total}} voltooid",
@@ -71,6 +79,18 @@
   },
 
   "editRole": {
+    "email": "Email",
+    "name": "Naam",
+    "surname": "Achternaam",
+    "search": "Zoeken",
+    "emailError": "Vul een geldig email adres in",
+    "emailTooShort": "Email moet minstens 3 karakters lang zijn",
+    "nameError": "Naam moet minstens 3 karakters lang zijn",
+    "surnameError": "Achternaam moet minstens 3 karakters lang zijn",
+    "searchTooShort": "Zoekopdracht moet minstens 3 karakters lang zijn",
+    "searchTutorial": "Vul een email adres, naam of achternaam in om gebruikers op te zoeken.",
+    "noUsersFound": "Geen gebruikers gevonden",
+    "invalidEmail": "Ongeldig email adres",
     "student": "Student",
     "teacher": "Professor",
     "admin": "Admin",
@@ -82,7 +102,9 @@
   "project": {
     "userName":"Naam",
     "submissions": "Indieningen",
+    "testSubmissions": "Testindieningen",
     "newSubmission": "Nieuwe indiening",
+    "newSubmissionTest": "Nieuwe test indiening",
     "files": "Bestanden",
     "back": "Annuleren",
     "submission": "Indiening",
@@ -90,16 +112,24 @@
     "addFiles": "Bestanden toevoegen",
     "submit": "Indienen",
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
-    "uploadAreaSubtitle": "Maximum bestandsgrootte is 10MB",
+    "uploadAreaSubtitle": "Maximum bestandsgrootte is 50MB",
     "deadlinePassed": "Deadline verstreken",
+    "uploadDirectory": "Folder uploaden",
     "downloadSubmissions": "Download alle indieningen",
+    "exportToCSV": "Exporteer naar CSV",
+    "exportToUfora": "Exporteer naar Ufora",
+    "withArtifacts": "Met artifacts",
+    "withoutArtifacts": "Zonder artifacts",
     "group": "Groep",
     "status": "Status",
     "feedback": "Feedback",
     "groupEmpty": "Geen leden in deze groep",
     "testFailed": "Testen gefaald",
     "structureFailed": "Structuurtesten gefaald",
+    "running": "Uitvoeren",
     "passed": "Geslaagd",
+    "submitSuccess": "Indiening succesvol",
+    "downloadingFile": "Bestand wordt gedownload...",
     "notSubmitted": "Niet ingediend",
     "submissionTime": "Indieningstijd",
     "noSubmissions": "Geen indieningen",
@@ -107,7 +137,11 @@
     "options": "Aanpassen",
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
+    "fileTooLarge": "Bestand is te groot (max 50 MB)",
     "scoreTooHigh": "Score is hoger dan maximum score",
+    "successfullyDeleted": "Project succesvol verwijderd",
+    "deleteProject": "Project verwijderen",
+    "deleteProjectDescription": "Bent u zeker dat u dit project wilt verwijderen? Alle indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",
@@ -118,6 +152,7 @@
       "groupClusterId": "Groepen",
       "groupClusterIdMessage": "Vul de Groep cluster in",
       "visible": "Project zichtbaar maken",
+      "visibleAfter": "Kies wanneer het project automatisch zichtbaar wordt voor studenten. Als je niets invult, blijft het project onzichtbaar",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in",
       "maxScoreHelp": "Wat is de maximale score die je kunt behalen voor dit project? Als je het leeg laat, wordt het project niet beoordeeld",
@@ -129,12 +164,14 @@
       "groups": "Groepen",
       "structure": "Structuur",
       "tests": "Testen",
+      "noClusters": "Geen groep clusters gevonden",
+      "groupClusterCreated": "Groep cluster aangemaakt",
       "fileStructure": "Bestandsstructuur",
       "fileStructurePreview": "Voorbeeld van bestandsstructuur",
       "update": "Project aanpassen",
       "newGroupCluster": "Voeg een nieuwe groep cluster toe",
       "makeCluster": "Groep cluster aanmaken",
-      "clusterName": "Cluster Naam",
+      "clusterName": "Cluster naam",
       "amountOfGroups": "Aantal groepen",
       "groupSize": "Groep grootte",
       "groupSizeTooltip": "Hoeveel leden kunnen in elke groep?",
@@ -143,8 +180,10 @@
       "selectGroup": "Selecteer een groep",
       "noMembersinGroup": "Geen leden gevonden",
       "searchUser": "Zoek gebruiker",
-      "groupFull": "De groep bevat meer leden dan toegestaan volgens de capacitiet",
-      "randomizeGroups": "Maak willekeurige groepen"
+      "groupFull": "De groep bevat meer leden dan toegestaan volgens de capaciteit",
+      "randomizeGroups": "Maak willekeurige groepen",
+      "groupLock": "Groep deelnemen/uitschrijven uitschakelen om",
+      "groupLockDescription": "Het uitschakelen van het deelnemen/uitschrijven van groepen wilt zeggen dat een student niet meer een groep kan verlaten of aan een groep deelnemen. Een vak admin kan nog steeds studenten toevoegen/verwijderen van groepen."
     },
     "tests": {
       "title": "Testen voor {{projectName}}",
@@ -168,7 +207,10 @@
       "fileStructurePreview": "Voorbeeld van bestandsstructuur"
     },
     "noScore": "Nog geen score beschikbaar",
-    "noFeedback": "Geen feedback gegeven"
+    "noFeedback": "Geen feedback gegeven",
+    "noScoreLabel": "Geen score",
+    "noFeedbackLabel": "Geen feedback",
+    "noSubmissionDownload": "Geen indiening gevonden"
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
@@ -178,17 +220,26 @@
     "title-2": "indien platform",
     "subtitle-1": "Eenvoudig cursussen en projecten beheren,",
     "subtitle-2": "automatisch code testen en beoordelen.",
-    "getStarted": "Aan de slag"
+    "getStarted": "Aan de slag",
+    "docs": "Documentatie"
   },
   
   "submission": {
     "submission": "Indiening",
     "submittedFiles": "Ingediende bestanden:",
+    "running": "Testen uitvoeren...",
     "structuretest": "Resultaten structuurtest:",
     "dockertest": "Resultaten dockertest:",
+    "downloadSubmission": "Download indiening",
+    "downloadArtifacts": "Download artifacts",
+    "dockertestAborted": "Testen afgebroken. Probeer het later nog eens.",
+    "success": "Geslaagd",
+    "failed": "Niet geslaagd",
+    "expected": "Vewachte output:",
+    "received": "Ontvangen output:",
     "status": {
-      "accepted": "Alle testen geslaagd.",
-      "failed": "Sommige testen niet geslaagd."
+      "accepted": "Alle testen zijn geslaagd.",
+      "failed": "Sommige testen zijn niet geslaagd."
     }
   },
 
@@ -212,7 +263,7 @@
     "score": "Score",
     "noGroups": "Geen groepen beschikbaar",
     "searchMember": "Zoek lid",
-    "inviteLink": "Inschrijvingslink",
+    "inviteLink": "Uitnodigingslink",
     "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak.",
     "deleteCourse": "Vak verwijderen",
     "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen? Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
@@ -230,7 +281,14 @@
     "leaveSuccess": "Vak succesvol verlaten",
     "leaveFail": "Het lukte niet om het vak te verlaten",
     "copy": "Maak kopie van dit vak",
-    "copySuccess": "Vak succesvol gekopieerd"
+    "copySuccess": "Vak succesvol gekopieerd",
+    "registerCourse": "Inschrijven voor dit vak",
+    "register": "Inschrijven",
+    "successfullyRegistered": "Je bent succesvol ingeschreven voor dit vak",
+    "invitePeople": "Mensen uitnodigen",
+    "invitePeopleToCourse": "Mensen uitnodigen voor dit vak",
+    "allowedInviteText": "Enkel mensen met een uitnodiging kunnen inschrijven",
+    "regenerateKey": "Nieuwe uitnodigings sleutel genereren"
   },
   "cancel": "Annuleren",
   "ok": "Ok",
@@ -241,8 +299,8 @@
     "homepage": "Naar start",
     "403_message": "Je bent niet bevoegd om deze pagina te bezoeken",
     "404_message" : "Sorry, de pagina die je bezocht bestaat niet",
-    "500_message": "Sorry, er ging iets mis"
-
+    "500_message": "Sorry, er ging iets mis",
+    "cannotJoinCourse": "Je kan je niet inschrijven voor dit vak"
   },
   "goBack": "Keer terug",
   "components": {

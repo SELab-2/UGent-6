@@ -1,15 +1,15 @@
 import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Responses, PUT_Requests, PUT_Responses } from "../@types/requests"
-import axios, { AxiosError, AxiosResponse } from "axios"
+import axios, { AxiosError, AxiosResponse, RawAxiosRequestHeaders } from "axios"
 import { msalInstance } from "../index"
 import { AxiosRequestConfig } from "axios"
 import { msalConfig } from "../auth/AuthConfig"
 
-const serverHost =  window.location.origin.includes("localhost") ? "http://localhost:8080" : window.location.origin
+const serverHost = window.location.origin.includes("localhost") ? "http://localhost:8080" : window.location.origin
 let accessToken: string | null = null
 let tokenExpiry: Date | null = null
 
-export type ApiMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" 
-export type ApiCallPathValues = {[param: string]: string | number}
+export type ApiMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
+export type ApiCallPathValues = { [param: string]: string | number }
 /**
  *
  * @param method
@@ -21,16 +21,16 @@ export type ApiCallPathValues = {[param: string]: string | number}
  * const newCourse = await apiFetch("POST", ApiRoutes.COURSES, { name: "New Course" });
  *
  */
-export async function apiFetch(method: ApiMethods, route: string, body?: any, pathValues?:ApiCallPathValues): Promise<AxiosResponse<any, any>> {
+export async function apiFetch(method: ApiMethods, route: string, body?: any, pathValues?: ApiCallPathValues, headers?: RawAxiosRequestHeaders, config?: AxiosRequestConfig): Promise<AxiosResponse<any, any>> {
   const account = msalInstance.getActiveAccount()
 
   if (!account) {
     throw Error("No active account found")
   }
 
-  if(pathValues) {
+  if (pathValues) {
     Object.entries(pathValues).forEach(([key, value]) => {
-      route = route.replace(":"+key, value.toString())
+      route = route.replace(":" + key, value.toString())
     })
   }
 
@@ -47,30 +47,31 @@ export async function apiFetch(method: ApiMethods, route: string, body?: any, pa
     tokenExpiry = response.expiresOn // convert expiry time to JavaScript Date
   }
 
-  const headers = {
+  const defaultHeaders = {
     Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
+    "Content-Type": body instanceof FormData ? undefined : "application/json",
   }
+
+  const finalHeaders = headers ? { ...defaultHeaders, ...headers } : defaultHeaders
 
   const url = new URL(route, serverHost)
 
-  const config: AxiosRequestConfig = {
+  const finalConfig: AxiosRequestConfig = {
     method: method,
     url: url.toString(),
-    headers: headers,
-    data: body,
+    headers: finalHeaders,
+    data: body instanceof FormData ? body : JSON.stringify(body),
+    ...config, // spread the config object to merge it with the existing configuration
   }
-  
-
-  return axios(config)
+  return axios(finalConfig)
 }
 
 const apiCall = {
-  get: async <T extends keyof GET_Responses>(route: T, pathValues?:ApiCallPathValues)                                  => apiFetch("GET", route,undefined,pathValues) as Promise<AxiosResponse<GET_Responses[T]>>,
-  post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T], pathValues?:ApiCallPathValues)         => apiFetch("POST", route, body,pathValues) as Promise<AxiosResponse<POST_Responses[T]>>,
-  put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T], pathValues?:ApiCallPathValues)            => apiFetch("PUT", route, body,pathValues) as Promise<AxiosResponse<PUT_Responses[T]>>,
-  delete: async <T extends keyof DELETE_Requests>(route: T, body: DELETE_Requests[T], pathValues?:ApiCallPathValues)   => apiFetch("DELETE", route, body,pathValues),
-  patch: async <T extends keyof PUT_Requests>(route: T, body: Partial<PUT_Requests[T]>, pathValues?:ApiCallPathValues) => apiFetch("PATCH", route, body,pathValues) as Promise<AxiosResponse<PUT_Responses[T]>>,
+  get: async <T extends keyof GET_Responses>(route: T, pathValues?: ApiCallPathValues, headers?: { [header: string]: string }, config?: AxiosRequestConfig) => apiFetch("GET", route, undefined, pathValues, headers, config) as Promise<AxiosResponse<GET_Responses[T]>>,
+  post: async <T extends keyof POST_Requests>(route: T, body: POST_Requests[T] | FormData, pathValues?: ApiCallPathValues, headers?: { [header: string]: string }) => apiFetch("POST", route, body, pathValues, headers) as Promise<AxiosResponse<POST_Responses[T]>>,
+  put: async <T extends keyof PUT_Requests>(route: T, body: PUT_Requests[T], pathValues?: ApiCallPathValues, headers?: { [header: string]: string }) => apiFetch("PUT", route, body, pathValues, headers) as Promise<AxiosResponse<PUT_Responses[T]>>,
+  delete: async <T extends keyof DELETE_Requests>(route: T, body: DELETE_Requests[T], pathValues?: ApiCallPathValues, headers?: { [header: string]: string }) => apiFetch("DELETE", route, body, pathValues, headers),
+  patch: async <T extends keyof PUT_Requests>(route: T, body: Partial<PUT_Requests[T]>, pathValues?: ApiCallPathValues, headers?: { [header: string]: string }) => apiFetch("PATCH", route, body, pathValues, headers) as Promise<AxiosResponse<PUT_Responses[T]>>,
 }
 
 const apiCallInit = async () => {
@@ -90,11 +91,11 @@ const apiCallInit = async () => {
     accessToken = response.accessToken
     tokenExpiry = response.expiresOn // convert expiry time to JavaScript Date
     return accessToken
-  } else{
+  } else {
     return accessToken
   }
 }
 
-export { accessToken,apiCallInit }
+export { accessToken, apiCallInit }
 
 export default apiCall

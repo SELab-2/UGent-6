@@ -1,4 +1,4 @@
-import { Button, Card, Tabs, TabsProps, Tooltip, theme } from "antd"
+import { Button, Card, Popconfirm, Tabs, TabsProps, Tooltip, theme } from "antd"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
@@ -6,15 +6,14 @@ import SubmissionCard from "./components/SubmissionTab"
 import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
-import CourseAdminView from "../../hooks/CourseAdminView"
-import { DeleteOutlined, DownloadOutlined, HeatMapOutlined, InfoCircleOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
+import { DeleteOutlined, FileDoneOutlined, InfoCircleOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
 import { AppRoutes } from "../../@types/routes"
 import SubmissionsTab from "./components/SubmissionsTab"
 import MarkdownTextfield from "../../components/input/MarkdownTextfield"
-import apiCall from "../../util/apiFetch"
+import useApi from "../../hooks/useApi"
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -30,6 +29,7 @@ const Project = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(location.hash.slice(1) || "description")
+  const API = useApi()
 
   const now = Date.now()
   const deadline = new Date(project?.deadline ?? "").getTime()
@@ -60,23 +60,44 @@ const Project = () => {
       })
     }
 
-    items.push({
-      key: "submissions",
-      label: t("project.submissions"),
-      icon: <SendOutlined />,
-      children: courseAdmin ? (
-        <span>
-          <SubmissionsTab />
-        </span>
-      ) : (
-        <SubmissionCard
-          projectId={Number(projectId)}
-          courseId={course.courseId}
-        />
-      ),
-    })
+    // if we work without groups -> always show submissions & score
+    // if we work with groups -> only show submissions if we are in a group
+    // if we are course admin -> always show submissions but not score 
+    if((project?.groupId || !project?.clusterId) || courseAdmin) {
 
-    if (!courseAdmin) {
+     items.push({
+        key: "submissions",
+        label: t("project.submissions"),
+        icon: courseAdmin ? <FileDoneOutlined />  : <SendOutlined />,
+        children: courseAdmin ? (
+          <span>
+            <SubmissionsTab />
+          </span>
+        ) : (
+          <SubmissionCard
+            projectId={Number(projectId)}
+            courseId={course.courseId}
+          />
+        ),
+      })
+
+      if(courseAdmin) {
+        items.push({
+          key: "testSubmissions",
+          label: t("project.testSubmissions"),
+          icon: <SendOutlined />,
+          children: 
+            <SubmissionCard
+              projectId={Number(projectId)}
+              courseId={course.courseId}
+              testSubmissions
+            />
+        })
+      }
+
+    }
+    
+    if ((project?.groupId || !project?.clusterId) && !courseAdmin) {
       items.push({
         key: "score",
         label: t("course.score"),
@@ -98,8 +119,15 @@ const Project = () => {
 
   const deleteProject = async () => {
     if (!project || !course) return console.error("project is undefined")
-    await apiCall.delete(ApiRoutes.PROJECT, undefined, { id: project!.projectId + "" })
-
+    const res = await API.DELETE(
+      ApiRoutes.PROJECT,
+      { pathValues: { id: project.projectId } },
+      {
+        mode: "message",
+        successMessage: t("project.successfullyDeleted"),
+      }
+    )
+    if (!res.success) return
     navigate(AppRoutes.COURSE.replace(":courseId", course.courseId + ""))
   }
 
@@ -124,7 +152,14 @@ const Project = () => {
         extra={
           courseAdmin ? (
             <>
-  
+              <Button
+                  type="primary"
+                  onClick={handleNewSubmission}
+                  icon={<PlusOutlined />}
+                >
+                  {t("project.newSubmissionTest")}
+                </Button>
+
               <Link to="edit">
                 <Button
                   type="primary"
@@ -134,13 +169,22 @@ const Project = () => {
                   {t("project.options")}
                 </Button>
               </Link>
-              <Button
-                style={{ marginLeft: "1rem" }}
-                type="primary"
-                onClick={deleteProject}
-                danger
-                icon={<DeleteOutlined />}
-              />
+              <Popconfirm
+                title={t("project.deleteProject")}
+                description={t("project.deleteProjectDescription")}
+                onConfirm={deleteProject}
+                okButtonProps={{
+                  danger: true,
+                }}
+                okText={t("course.confirmDelete")}
+              >
+                <Button
+                  style={{ marginLeft: "1rem" }}
+                  type="primary"
+                  danger
+                  icon={<DeleteOutlined />}
+                />
+              </Popconfirm>
             </>
           ) : (
             <Tooltip title={now > deadline ? t("project.deadlinePassed") : ""}>
@@ -162,13 +206,7 @@ const Project = () => {
           activeKey={activeTab}
           onChange={changeTab}
           items={items}
-          tabBarExtraContent={
-            activeTab === "submissions" ? (
-              <CourseAdminView>
-                <Button icon={<DownloadOutlined />}>{t("project.downloadSubmissions")}</Button>
-              </CourseAdminView>
-            ) : null
-          }
+         
         />
       </Card>
     </div>
