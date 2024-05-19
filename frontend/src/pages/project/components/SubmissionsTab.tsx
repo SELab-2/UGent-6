@@ -103,6 +103,7 @@ const SubmissionsTab = () => {
       <SubmissionsTable
         submissions={submissions}
         onChange={setSubmissions}
+        withArtifacts={withArtifacts}
       />
     </Space>
   )

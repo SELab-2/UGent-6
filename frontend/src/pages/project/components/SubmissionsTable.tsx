@@ -104,7 +104,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const downloadSubmission = async (submission: ProjectSubmissionsType) => {
     if (!submission.submission) return console.error("No submission found")
     downloadFile(submission.submission.fileUrl, submission.group.name+".zip")
-    if(withArtifacts && submission.submission.artifactUrl && submission.submission.dockerFeedback.type !== "NONE") {
+    if(withArtifacts && submission.submission.artifactUrl) {
       downloadFile(submission.submission.artifactUrl, submission.group.name+"-artifacts.zip")
     }
   }
