@@ -6,6 +6,7 @@ import {Button} from "antd";
 import {Tree} from 'antd';
 import {CloseOutlined} from '@ant-design/icons';
 import { DataNode } from "antd/es/tree";
+import useAppApi from "../../../hooks/useAppApi";
 
 type TreeNode = {
     type: string;
@@ -24,6 +25,7 @@ const SubmitForm: FC<{
     const {t} = useTranslation()
     const directoryInputRef = useRef<HTMLInputElement | null>(null);
     const [directoryTree, setDirectoryTree] = useState<TreeNode[]>([]);
+    const {message} = useAppApi()
 
     const normFile = (e: any) => {
         console.log("Upload event:", e)
@@ -92,6 +94,20 @@ const SubmitForm: FC<{
     const onDirectoryUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files) {
+
+            // 
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const isLt50M = file.size / 1024 / 1024 < 50;
+                if (!isLt50M) {
+                    message.error(t("project.fileTooLarge"));
+                    return;
+                }
+              }
+
+
+
             const currentFileList = form.getFieldValue('files') || [];
             const newDirectoryTree: TreeNode[] = [...directoryTree]; 
 
@@ -182,7 +198,14 @@ const SubmitForm: FC<{
             >
                 <Upload.Dragger
                     name="file"
-                    beforeUpload={() => false}
+                    beforeUpload={(file) => {
+                        const fileSize = file.size / 1024 / 1024;
+                        if (fileSize > 50) {
+                            message.error(t("project.fileTooLarge"));
+                            return Upload.LIST_IGNORE
+                        }
+                        return false
+                    }}
                     multiple={true}
                     style={{height: "100%"}}
                     showUploadList={false}

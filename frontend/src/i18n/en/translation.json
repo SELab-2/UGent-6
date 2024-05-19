@@ -132,6 +132,7 @@
     "submissionTime": "Submission time",
     "noSubmissions": "No submissions",
     "loadingSubmissions": "Loading submissions...",
+    "fileTooLarge": "File is too large (max 50MB)",
     "options": "Update",
     "groupMembers": "Group members",
     "newProject": "New project",

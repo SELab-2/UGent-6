@@ -137,7 +137,7 @@
     "options": "Aanpassen",
     "groupMembers": "Groepsleden",
     "newProject": "Nieuw project",
-
+    "fileTooLarge": "Bestand is te groot (max 50 MB)",
     "scoreTooHigh": "Score is hoger dan maximum score",
     "successfullyDeleted": "Project succesvol verwijderd",
     "deleteProject": "Project verwijderen",
