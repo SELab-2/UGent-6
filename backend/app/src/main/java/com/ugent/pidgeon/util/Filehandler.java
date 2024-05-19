@@ -213,4 +213,15 @@ public class Filehandler {
             .headers(headers)
             .body(zipFile);
     }
+
+
+    public static void addExistingZip(ZipOutputStream groupZipOut, String zipFileName, File zipFile) throws IOException {
+        ZipEntry zipEntry = new ZipEntry(zipFileName);
+        groupZipOut.putNextEntry(zipEntry);
+
+        // Read the content of the zip file and write it to the group zip output stream
+        Files.copy(zipFile.toPath(), groupZipOut);
+
+        groupZipOut.closeEntry();
+    }
 }
