@@ -39,7 +39,7 @@ public class Filehandler {
 
         try {
             // Create a temporary file and save the uploaded file to it
-            File tempFile = File.createTempFile("uploaded-zip-", ".zip");
+            File tempFile = File.createTempFile("SELAB6CANDELETEuploaded-zip-", ".zip");
             file.transferTo(tempFile);
 
             // Check if the file is a ZIP file
@@ -212,5 +212,16 @@ public class Filehandler {
         return ResponseEntity.ok()
             .headers(headers)
             .body(zipFile);
+    }
+
+
+    public static void addExistingZip(ZipOutputStream groupZipOut, String zipFileName, File zipFile) throws IOException {
+        ZipEntry zipEntry = new ZipEntry(zipFileName);
+        groupZipOut.putNextEntry(zipEntry);
+
+        // Read the content of the zip file and write it to the group zip output stream
+        Files.copy(zipFile.toPath(), groupZipOut);
+
+        groupZipOut.closeEntry();
     }
 }
