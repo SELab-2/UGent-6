@@ -12,7 +12,7 @@ export enum ApiRoutes {
   COURSE_MEMBER = "/web/api/courses/:courseId/members/:userId",
   COURSE_PROJECTS = "/web/api/courses/:id/projects",
   COURSE_CLUSTERS = "/web/api/courses/:id/clusters",
-  COURSE_GRADES = '/web/api/courses/:id/grades',
+  COURSE_GRADES = "/web/api/courses/:id/grades",
   COURSE_LEAVE = "/web/api/courses/:courseId/leave",
   COURSE_COPY = "/web/api/courses/:courseId/copy",
 

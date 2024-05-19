@@ -76,7 +76,7 @@ const ApiTest = () => {
             ref={routeRef}
             size="large"
             addonBefore={selectBefore}
-            defaultValue="/api/test"
+            defaultValue="/web/api/test"
           />
           <Button
             size="large"

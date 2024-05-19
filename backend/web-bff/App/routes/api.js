@@ -10,7 +10,7 @@ const { BACKEND_API_ENDPOINT, msalConfig, REDIRECT_URI} = require('../authConfig
 // custom middleware to check auth state
 function isAuthenticated(req, res, next) {
     if (!req.session.isAuthenticated) {
-        return res.redirect('/auth/signin'); // redirect to sign-in route
+        return res.redirect('/web/auth/signin'); // redirect to sign-in route
     }
 
     next();
