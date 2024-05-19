@@ -247,6 +247,7 @@ export type GET_Responses = {
     testsUrl: string
     maxScore: number | null
     visible: boolean
+    visibleAfter?: Timestamp
     status?: ProjectStatus
     progress: {
       completed: number

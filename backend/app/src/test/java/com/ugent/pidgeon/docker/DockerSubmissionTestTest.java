@@ -196,7 +196,8 @@ public class DockerSubmissionTestTest {
   }
   @Test
   void dockerImageDoesNotExist(){
-    assertFalse(DockerSubmissionTestModel.imageExists("BADUBADUBADUBADUBADUBADUB"));
+    assertFalse(DockerSubmissionTestModel.imageExists("BADUBADUBADUBADUBADUBADUB - miauw :3"));
+    assertFalse(DockerSubmissionTestModel.imageExists("alpine:v69696969"));
     assertTrue(DockerSubmissionTestModel.imageExists("alpine:latest"));
   }
 
