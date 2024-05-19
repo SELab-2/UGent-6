@@ -6,8 +6,7 @@ import SubmissionCard from "./components/SubmissionTab"
 import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
-import CourseAdminView from "../../hooks/CourseAdminView"
-import { DeleteOutlined, DownloadOutlined, FileDoneOutlined, HeatMapOutlined, InfoCircleOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
+import { DeleteOutlined, FileDoneOutlined, InfoCircleOutlined, PlusOutlined, SendOutlined, SettingFilled, TeamOutlined } from "@ant-design/icons"
 import { useMemo, useState } from "react"
 import useIsCourseAdmin from "../../hooks/useIsCourseAdmin"
 import GroupTab from "./components/GroupTab"
@@ -174,6 +173,10 @@ const Project = () => {
                 title={t("project.deleteProject")}
                 description={t("project.deleteProjectDescription")}
                 onConfirm={deleteProject}
+                okButtonProps={{
+                  danger: true,
+                }}
+                okText={t("course.confirmDelete")}
               >
                 <Button
                   style={{ marginLeft: "1rem" }}

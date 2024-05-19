@@ -231,7 +231,7 @@ export type GET_Responses = {
     fileUrl: ApiRoutes.SUBMISSION_FILE
     structureFeedback: ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK
     dockerFeedback: DockerFeedback,
-    artifactUrl: ApiRoutes.SUBMISSION_ARTIFACT
+    artifactUrl: ApiRoutes.SUBMISSION_ARTIFACT | null
   }
   [ApiRoutes.SUBMISSION_FILE]: BlobPart
   [ApiRoutes.COURSE_PROJECTS]: GET_Responses[ApiRoutes.PROJECT][]

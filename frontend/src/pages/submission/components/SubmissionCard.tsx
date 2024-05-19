@@ -1,11 +1,10 @@
-import { Card, Spin, theme, Input, Button, Typography, Space } from "antd"
+import { Card, theme, Button, Space } from "antd"
 import { useTranslation } from "react-i18next"
 import { GET_Responses } from "../../../@types/requests"
 import { ApiRoutes } from "../../../@types/requests"
 import { ArrowLeftOutlined, DownloadOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 import "@fontsource/jetbrains-mono"
-import apiCall from "../../../util/apiFetch"
 import SubmissionContent from "./SubmissionCardContent"
 import useApi from "../../../hooks/useApi"
 
@@ -48,7 +47,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
   }
 
   const downloadSubmissionArtifacts = async () => {
-    downloadFile(submission.artifactUrl, t("project.submissionArtifacts"))
+    downloadFile(submission.artifactUrl!, t("project.submissionArtifacts"))
   }
 
   return (
@@ -77,7 +76,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       extra={<Space>
 
         {submission.fileUrl && <Button key="file" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>}
-        {submission.artifactUrl && submission.dockerFeedback.type !== "NONE"  && <Button key="artifacts" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmissionArtifacts}>{t("submission.downloadArtifacts")}</Button>}
+        {submission.artifactUrl && <Button key="artifacts" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmissionArtifacts}>{t("submission.downloadArtifacts")}</Button>}
       </Space>
       }
     >

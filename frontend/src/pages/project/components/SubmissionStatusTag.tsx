@@ -14,7 +14,7 @@ export enum SubmissionStatus {
 }
 
 export function createStatusBitVector(submission: GET_Responses[ApiRoutes.SUBMISSION] | null) {
-
+  console.log(submission);
   if(submission === null) return SubmissionStatus.NOT_SUBMITTED
   let status = 0
   if(submission.dockerStatus === "running") {
@@ -49,7 +49,7 @@ const SubmissionStatusTag:FC<{status:number}> = ({ status }) => {
     )
   } else if (status & SubmissionStatus.RUNNING) {
     return (
-      <Tag color="blue" icon={<LoadingOutlined />} >{t("project.running")}</Tag>
+      <Tag color="processing" icon={<LoadingOutlined />} >{t("project.running")}</Tag>
     )
   }
 

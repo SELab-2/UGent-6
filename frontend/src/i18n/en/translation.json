@@ -218,7 +218,8 @@
     "title-2": "submission platform",
     "subtitle-1": "Effortlessly manage courses and projects,",
     "subtitle-2": "automatically test and assess code.",
-    "getStarted": "Get started"
+    "getStarted": "Get started",
+    "docs": "Documentation"
   },
 
   "submission": {
