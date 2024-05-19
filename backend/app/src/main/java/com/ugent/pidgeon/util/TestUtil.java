@@ -79,6 +79,7 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A docker image is required if u add a script", null);
         }
 
+        // This returns false if the image isn't pullt yet! FIX PLS
         if(dockerImage != null && !DockerSubmissionTestModel.imageExists(dockerImage)) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A valid docker image is required in a docker test.", null);
         }

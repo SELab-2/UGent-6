@@ -50,3 +50,4 @@ docker.env
 ./startBackend.sh
 startBackend.sh
 
+/.env

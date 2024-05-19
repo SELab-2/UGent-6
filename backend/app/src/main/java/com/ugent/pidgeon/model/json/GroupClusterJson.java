@@ -10,6 +10,7 @@ public record GroupClusterJson(
         int groupCount,
         OffsetDateTime createdAt,
         List<GroupJson>  groups,
+        OffsetDateTime lockGroupsAfter,
 
         String courseUrl
 ) {

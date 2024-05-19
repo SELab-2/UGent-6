@@ -19,6 +19,7 @@ import CourseAdminView from "../hooks/CourseAdminView"
 // import ProjectTestsPage from "../pages/projectTest_old/ProjectTestPage";
 import Courses from "../pages/courses/Courses"
 import EditProject from "../pages/editProject/EditProject"
+import ExtraFilesDownload from "../pages/editProject/extrafilesDownload/ExtaFilesDownload"
 
 const AppRouter = () => {
   return (
@@ -85,6 +86,11 @@ const AppRouter = () => {
               path={AppRoutes.PROJECT}
               element={<Project />}
             />
+            <Route 
+              path={AppRoutes.DOWNLOAD_PROJECT_TESTS}
+              element={<ExtraFilesDownload/>}
+            />
+          
 
             {/* <Route
             path={AppRoutes.SUBMISSION_FEEDBACK}

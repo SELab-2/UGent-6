@@ -21,6 +21,11 @@ const Navbar: FC<{ onLogin: () => void }> = ({ onLogin }) => {
       </div>
 
       <div style={{ display: "flex", gap: "2rem", alignItems: "start" }}>
+      <div style={{ transform: "translateY(8px)" }} className="white-color">
+        <Typography.Text onClick={() => window.open("https://github.com/SELab-2/UGent-6/wiki", "_blank")} style={{ cursor: "pointer" }} >{t("landingPage.docs")}</Typography.Text>
+        
+      </div>
+
         <div style={{ transform: "translateY(8px)" }} className="white-color">
           <LanguageDropdown />
         </div>

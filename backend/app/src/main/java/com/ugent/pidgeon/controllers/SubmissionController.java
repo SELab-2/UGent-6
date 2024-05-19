@@ -15,13 +15,25 @@ import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,6 +101,15 @@ public class    SubmissionController {
     return ResponseEntity.ok(submissionJson);
   }
 
+  private Map<Long, Optional<SubmissionEntity>> getLatestSubmissionsForProject(long projectId) {
+    List<Long> groupIds = projectRepository.findGroupIdsByProjectId(projectId);
+    return groupIds.stream()
+        .collect(Collectors.toMap(
+            groupId -> groupId,
+            groupId -> submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectId, groupId)
+        ));
+  }
+
     /**
      * Function to get all submissions
      *
@@ -109,34 +130,34 @@ public class    SubmissionController {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
             }
 
-            List<Long> projectGroupIds = projectRepository.findGroupIdsByProjectId(projectid);
-            List<LastGroupSubmissionJson> res = projectGroupIds.stream().map(groupId -> {
-                GroupEntity group = groupRepository.findById(groupId).orElse(null);
+            Map<Long, Optional<SubmissionEntity>> submissions = getLatestSubmissionsForProject(projectid);
+            List<LastGroupSubmissionJson> res = new ArrayList<>();
+            for (Map.Entry<Long, Optional<SubmissionEntity>> entry : submissions.entrySet()) {
+                GroupEntity group = groupRepository.findById(entry.getKey()).orElse(null);
                 if (group == null) {
                     throw new RuntimeException("Group not found");
                 }
-                GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group);
-                GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(groupId, projectid);
+                GroupJson groupjson = entityToJsonConverter.groupEntityToJson(group, false);
+                GroupFeedbackEntity groupFeedbackEntity = groupFeedbackRepository.getGroupFeedback(entry.getKey(), projectid);
                 GroupFeedbackJson groupFeedbackJson;
                 if (groupFeedbackEntity == null) {
                     groupFeedbackJson = null;
                 } else {
                     groupFeedbackJson = entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity);
                 }
-                SubmissionEntity submission = submissionRepository.findLatestsSubmissionIdsByProjectAndGroupId(projectid, groupId).orElse(null);
+                SubmissionEntity submission = entry.getValue().orElse(null);
                 if (submission == null) {
-                    return new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson);
+                    res.add(new LastGroupSubmissionJson(null, groupjson, groupFeedbackJson));
+                    continue;
                 }
+                res.add(new LastGroupSubmissionJson(entityToJsonConverter.getSubmissionJson(submission), groupjson, groupFeedbackJson));
+            }
 
-                return new LastGroupSubmissionJson(entityToJsonConverter.getSubmissionJson(submission), groupjson, groupFeedbackJson);
-
-            }).toList();
             return ResponseEntity.ok(res);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
-
 
     /**
      * Function to submit a file
@@ -152,6 +173,7 @@ public class    SubmissionController {
      */
     @PostMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submit")
     //Route to submit a file, it accepts a multiform with the file and submissionTime
+    @Transactional
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> submitFile(@RequestParam("file") MultipartFile file, @PathVariable("projectid") long projectid, Auth auth) {
         long userId = auth.getUserEntity().getId();
@@ -161,7 +183,7 @@ public class    SubmissionController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
-        long groupId = checkResult.getData();
+        Long groupId = checkResult.getData();
 
         try {
             //Save the file entry in the database to get the id
@@ -179,6 +201,7 @@ public class    SubmissionController {
                     false
             );
             submissionEntity.setDockerTestState(DockerTestState.finished);
+            submissionEntity.setDockerType(DockerTestType.NONE);
 
             //Save the submission in the database
             SubmissionEntity submission = submissionRepository.save(submissionEntity);
@@ -186,7 +209,7 @@ public class    SubmissionController {
             //Save the file on the server
             String filename = file.getOriginalFilename();
             Path path = Filehandler.getSubmissionPath(projectid, groupId, submission.getId());
-            File savedFile = Filehandler.saveSubmission(path, file);
+            File savedFile = Filehandler.saveFile(path, file, Filehandler.SUBMISSION_FILENAME);
             String pathname = path.resolve(Filehandler.SUBMISSION_FILENAME).toString();
 
             //Update name and path for the file entry
@@ -201,6 +224,8 @@ public class    SubmissionController {
         Logger.getLogger("SubmissionController").info("no tests");
         submission.setStructureFeedback("No specific structure requested for this project.");
         submission.setStructureAccepted(true);
+        submission.setDockerAccepted(true);
+        submissionRepository.save(submission);
       } else {
 
         // Check file structure
@@ -237,7 +262,7 @@ public class    SubmissionController {
             try {
               // Check if docker tests succeed
               DockerSubmissionTestModel dockerModel = new DockerSubmissionTestModel(testEntity.getDockerImage());
-              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel);
+              DockerOutput dockerOutput = testRunner.runDockerTest(new ZipFile(finalSavedFile), testEntity, artifactPath, dockerModel, projectid);
               if (dockerOutput == null) {
                 throw new RuntimeException("Error while running docker tests.");
               }
@@ -265,6 +290,7 @@ public class    SubmissionController {
 
       return ResponseEntity.ok(entityToJsonConverter.getSubmissionJson(submission));
     } catch (Exception e) {
+      Logger.getLogger("SubmissionController").log(Level.SEVERE, e.getMessage(), e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to save submissions on file server.");
     }
@@ -297,24 +323,57 @@ public class    SubmissionController {
         }
 
         // Get the file from the server
-        try {
-            Resource zipFile = Filehandler.getFileAsResource(Path.of(file.getPath()));
-            if (zipFile == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found.");
+        return Filehandler.getZipFileAsResponse(Path.of(file.getPath()), file.getName());
+    }
+
+  @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions/files")
+  @Roles({UserRole.teacher, UserRole.student})
+  public ResponseEntity<?> getSubmissionsFiles(@PathVariable("projectid") long projectid, @RequestParam(value = "artifacts", required = false) Boolean artifacts, Auth auth) {
+    try {
+      CheckResult<Void> checkResult = projectUtil.isProjectAdmin(projectid, auth.getUserEntity());
+      if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+        return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+      }
+
+      Path tempDir = Files.createTempDirectory("SELAB6CANDELETEallsubmissions");
+      Path mainZipPath = tempDir.resolve("main.zip");
+      try (ZipOutputStream mainZipOut = new ZipOutputStream(Files.newOutputStream(mainZipPath))) {
+        Map<Long, Optional<SubmissionEntity>> submissions = getLatestSubmissionsForProject(projectid);
+        for (Map.Entry<Long, Optional<SubmissionEntity>> entry : submissions.entrySet()) {
+          SubmissionEntity submission = entry.getValue().orElse(null);
+          if (submission == null) {
+            continue;
+          }
+          FileEntity file = fileRepository.findById(submission.getFileId()).orElse(null);
+          if (file == null) {
+            continue;
+          }
+
+          // Create the group-specific zip file in a temporary location
+          Path groupZipPath = tempDir.resolve("group-" + submission.getGroupId() + ".zip");
+          try (ZipOutputStream groupZipOut = new ZipOutputStream(Files.newOutputStream(groupZipPath))) {
+            File submissionZip = Path.of(file.getPath()).toFile();
+            Filehandler.addExistingZip(groupZipOut, "files.zip", submissionZip);
+
+            if (artifacts != null && artifacts) {
+              Path artifactPath = Filehandler.getSubmissionArtifactPath(projectid, submission.getGroupId(), submission.getId());
+              File artifactZip = artifactPath.toFile();
+              if (artifactZip.exists()) {
+                Filehandler.addExistingZip(groupZipOut, "artifacts.zip", artifactZip);
+              }
             }
 
-            // Set headers for the response
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
-            headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
+          }
 
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(zipFile);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+          Filehandler.addExistingZip(mainZipOut, "group-" + submission.getGroupId() + ".zip", groupZipPath.toFile());
         }
+      }
+
+      return Filehandler.getZipFileAsResponse(mainZipPath, "allsubmissions.zip");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
+  }
 
     @GetMapping(ApiRoutes.SUBMISSION_BASE_PATH + "/{submissionid}/artifacts") //Route to get a submission
     @Roles({UserRole.teacher, UserRole.student})
@@ -393,6 +452,19 @@ public class    SubmissionController {
         }
 
         List<SubmissionEntity> submissions = submissionRepository.findByProjectIdAndGroupId(projectid, groupid);
+        List<SubmissionJson> res = submissions.stream().map(entityToJsonConverter::getSubmissionJson).toList();
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/adminsubmissions")
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> getAdminSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
+        CheckResult<Void> checkResult = projectUtil.isProjectAdmin(projectid, auth.getUserEntity());
+        if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+        }
+
+        List<SubmissionEntity> submissions = submissionRepository.findAdminSubmissionsByProjectId(projectid);
         List<SubmissionJson> res = submissions.stream().map(entityToJsonConverter::getSubmissionJson).toList();
         return ResponseEntity.ok(res);
     }

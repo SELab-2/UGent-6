@@ -4,11 +4,13 @@ public class UserReferenceJson {
     private String name;
     private String email;
     private Long userId;
+    private String studentNumber;
 
-    public UserReferenceJson(String name, String email, Long userId) {
+    public UserReferenceJson(String name, String email, Long userId, String studentNumber) {
         this.name = name;
         this.email = email;
         this.userId = userId;
+        this.studentNumber = studentNumber;
     }
 
     public String getEmail() {
@@ -39,4 +41,11 @@ public class UserReferenceJson {
     }
 
 
+    public String getStudentNumber() {
+        return studentNumber;
+    }
+
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
+    }
 }

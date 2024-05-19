@@ -76,6 +76,7 @@ public class RolesInterceptorTest  extends ControllerTest {
             user.getName().equals(getMockUser().getName()) &&
             user.getSurname().equals(getMockUser().getSurname()) &&
             user.getEmail().equals(getMockUser().getEmail()) &&
+            user.getStudentNumber().equals(getMockUser().getStudentNumber()) &&
             duration.getSeconds() < 5;
       }
     ))).thenReturn(getMockUser());

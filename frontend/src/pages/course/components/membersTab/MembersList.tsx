@@ -8,15 +8,15 @@ import { MenuProps } from "antd/lib"
 import { ApiRoutes, CourseRelation } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
 import { CourseContext } from "../../../../router/CourseRoutes"
-import apiCall from "../../../../util/apiFetch"
 import { useParams } from "react-router-dom"
+import useApi from "../../../../hooks/useApi"
 
 const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: CourseMemberType[]) => void }> = ({ members, onChange }) => {
   const { t } = useTranslation()
   const isCourseAdmin = useIsCourseAdmin()
   const relation = useContext(CourseContext).member.relation
   const { courseId } = useParams()
-
+  const API = useApi()
   const { user } = useUser()
 
   const items: MenuProps["items"] = [
@@ -44,20 +44,18 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
 
   const removeUserFromCourse = async (userId: number) => {
     if (!courseId) return
-    //TODO: test this
-    const req = await apiCall.delete(ApiRoutes.COURSE_MEMBER, undefined, { userId, courseId })
-    console.log(req.data)
+    const req = await API.DELETE(ApiRoutes.COURSE_MEMBER, { pathValues: { userId, courseId } }, "message")
+    if(!req.success) return
+
     const newMembers = members?.filter((m) => m.user.userId !== userId)
     onChange(newMembers ?? [])
   }
 
   const onRoleChange = async (userId: number, role: CourseRelation) => {
-    // TODO: test this 
     if(!courseId) return
-    const response = await apiCall.patch(ApiRoutes.COURSE_MEMBER, {relation: role}, { userId, courseId })
-    console.log(response.data);
-    onChange(response.data)
-    
+    const response = await API.PATCH(ApiRoutes.COURSE_MEMBER, { body: { relation: role },pathValues: { userId, courseId } }, "message")
+    if(!response.success) return
+    onChange(response.response.data)
   }
 
   return (

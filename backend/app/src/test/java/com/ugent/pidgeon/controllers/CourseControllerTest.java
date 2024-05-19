@@ -112,7 +112,7 @@ public class CourseControllerTest extends ControllerTest {
             activeCourse.getId(),
             activeCourse.getName(),
             activeCourse.getDescription(),
-            new UserReferenceJson("", "", 0L),
+            new UserReferenceJson("", "", 0L, ""),
             new ArrayList<>(),
             "",
             "",
@@ -308,7 +308,7 @@ public class CourseControllerTest extends ControllerTest {
                 activeCourse.getId(),
                 "test",
                 "description",
-                new UserReferenceJson("", "", 0L),
+                new UserReferenceJson("", "", 0L, ""),
                 new ArrayList<>(),
                 "",
                 "",
@@ -403,7 +403,7 @@ public class CourseControllerTest extends ControllerTest {
             activeCourse.getId(),
             "test",
             "description2",
-            new UserReferenceJson("", "", 0L),
+            new UserReferenceJson("", "", 0L, ""),
             new ArrayList<>(),
             "",
             "",
@@ -626,7 +626,8 @@ public class CourseControllerTest extends ControllerTest {
             true,
             new ProjectProgressJson(1, 1),
             1L,
-            1L
+            1L,
+            OffsetDateTime.now()
         );
         /* If user is in course, return projects */
         when(courseUtil.getCourseIfUserInCourse(activeCourse.getId(),getMockUser()))
@@ -831,7 +832,7 @@ public class CourseControllerTest extends ControllerTest {
         String requestStringAdmin = "{\"userId\": 1, \"relation\": \"course_admin\"}";
         String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/members";
         CourseUserEntity courseUser = new CourseUserEntity(activeCourse.getId(), 1, CourseRelation.enrolled);
-        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id");
+        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id", "");
         /* If all checks succeed, return 201 */
 
         when(courseUtil.canUpdateUserInCourse(
@@ -907,7 +908,7 @@ public class CourseControllerTest extends ControllerTest {
         String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/members/" + userId;
         String request = "{\"relation\": \"enrolled\"}";
         String adminRequest = "{\"relation\": \"course_admin\"}";
-        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id");
+        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id", "");
         CourseUserEntity enrolledUser = new CourseUserEntity(activeCourse.getId(), userId, CourseRelation.enrolled);
         CourseUserEntity adminUser = new CourseUserEntity(activeCourse.getId(), userId, CourseRelation.course_admin);
         /* If all checks succeed, 200 gets returned  */
@@ -1004,23 +1005,35 @@ public class CourseControllerTest extends ControllerTest {
     @Test
     public void testGetCourseMembers() throws Exception {
         CourseUserEntity courseUserEntity = new CourseUserEntity(1L, 1L, CourseRelation.enrolled);
-        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id");
+        UserEntity user = new UserEntity("name", "surname", "email", UserRole.teacher, "id", "");
         UserReferenceWithRelation userJson = new UserReferenceWithRelation(
-            new UserReferenceJson("name", "surname", 1L),
+            new UserReferenceJson("name", "surname", 1L, ""),
             ""+CourseRelation.enrolled
         );
         List<CourseUserEntity> userList = List.of(courseUserEntity);
         String url = ApiRoutes.COURSE_BASE_PATH + "/" + activeCourse.getId() + "/members";
         /* If user is in course, return members */
         when(courseUtil.getCourseIfUserInCourse(activeCourseJson.courseId(), getMockUser()))
-            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.course_admin)));
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.enrolled)));
         when(courseUserRepository.findAllMembers(activeCourseJson.courseId())).thenReturn(userList);
         when(userUtil.getUserIfExists(courseUserEntity.getUserId())).thenReturn(user);
-        when(entityToJsonConverter.userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled)).thenReturn(userJson);
+        /* User is enrolled so studentNumber should be hidden */
+        when(entityToJsonConverter.userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, true)).thenReturn(userJson);
         mockMvc.perform(MockMvcRequestBuilders.get(url))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(objectMapper.writeValueAsString(List.of(userJson))));
+        verify(entityToJsonConverter, times(1)).userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, true);
+
+        /* If user is admin studentNumber should be visible */
+        when(courseUtil.getCourseIfUserInCourse(activeCourseJson.courseId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(activeCourse, CourseRelation.course_admin)));
+        when(entityToJsonConverter.userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, false)).thenReturn(userJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(List.of(userJson))));
+        verify(entityToJsonConverter, times(1)).userEntityToUserReferenceWithRelation(user, CourseRelation.enrolled, false);
 
         /* If user doesn't get found it gets filtered out */
         when(userUtil.getUserIfExists(anyLong())).thenReturn(null);
@@ -1106,7 +1119,7 @@ public class CourseControllerTest extends ControllerTest {
             2L,
             "name",
             "description",
-            new UserReferenceJson("", "", 0L),
+            new UserReferenceJson("", "", 0L, ""),
             new ArrayList<>(),
             "",
             "",
