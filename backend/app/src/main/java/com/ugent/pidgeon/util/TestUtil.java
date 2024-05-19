@@ -80,9 +80,9 @@ public class TestUtil {
         }
 
         // This returns false if the image isn't pullt yet! FIX PLS
-//        if(dockerImage != null && !DockerSubmissionTestModel.imageExists(dockerImage)) {
-//            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A valid docker image is required in a docker test.", null);
-//        }
+        if(dockerImage != null && !DockerSubmissionTestModel.imageExists(dockerImage)) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "A valid docker image is required in a docker test.", null);
+        }
 
         if (!httpMethod.equals(HttpMethod.PATCH) && dockerTemplate != null && dockerImage == null) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A test script and image are required in a docker template test.", null);
