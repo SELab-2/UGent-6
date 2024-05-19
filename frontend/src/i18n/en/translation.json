@@ -59,7 +59,8 @@
       "status": {
         "completed": "Completed",
         "failed": "Failed",
-        "notStarted": "Not started"
+        "notStarted": "Not started",
+        "noGroup": "Not in group"
       },
       "groupProgress": "Group progress",
       "completeProgress": "{{count}} / {{total}} completed",
@@ -109,9 +110,13 @@
     "submit": "Submit",
     "back": "Cancel",
     "uploadAreaTitle": "Click or drag file to this area to upload",
-    "uploadAreaSubtitle": "Maximum file size is 100MB",
+    "uploadAreaSubtitle": "Maximum file size is 50MB",
     "deadlinePassed": "Deadline passed",
     "downloadSubmissions": "Download all submissions",
+    "exportToCSV": "Export to CSV",
+    "exportToUfora": "Export to Ufora",
+    "withArtifacts": "with artifacts",
+    "withoutArtifacts": "without artifacts",
     "downloadingFile": "File is being downloaded...",
     "group": "Group",
     "status": "Status",
@@ -199,7 +204,10 @@
       "fileStructurePreview": "File structure preview"
     },
     "noScore": "No score available",
-    "noFeedback": "No feedback provided"
+    "noFeedback": "No feedback provided",
+    "noScoreLabel": "No score",
+    "noFeedbackLabel": "No feedback",
+    "noSubmissionDownload": "No submission found"
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"
@@ -219,6 +227,7 @@
     "structuretest": "Structure test results:",
     "dockertest": "Test results:",
     "downloadSubmission": "Download submission",
+    "downloadArtifacts": "Download artifacts",
     "dockertestAborted": "Tests aborted. Try again later.",
     "success": "succeeded",
     "failed": "failed",

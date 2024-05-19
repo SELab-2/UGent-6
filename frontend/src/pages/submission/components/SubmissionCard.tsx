@@ -1,4 +1,4 @@
-import { Card, Spin, theme, Input, Button, Typography } from "antd"
+import { Card, Spin, theme, Input, Button, Typography, Space } from "antd"
 import { useTranslation } from "react-i18next"
 import { GET_Responses } from "../../../@types/requests"
 import { ApiRoutes } from "../../../@types/requests"
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 import "@fontsource/jetbrains-mono"
 import apiCall from "../../../util/apiFetch"
 import SubmissionContent from "./SubmissionCardContent"
+import useApi from "../../../hooks/useApi"
 
 export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 
@@ -14,34 +15,40 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
   const { token } = theme.useToken()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const API = useApi()
 
+
+
+  const downloadFile = async (route: ApiRoutes.SUBMISSION_FILE | ApiRoutes.SUBMISSION_ARTIFACT, filename: string) => {
+    const response = await API.GET(
+      route,
+      {
+        config: {
+          responseType: "blob",
+          transformResponse: [(data) => data],
+        },
+      },
+      "message"
+    )
+    if (!response.success) return
+    console.log(response)
+    const url = window.URL.createObjectURL(new Blob([response.response.data]))
+    const link = document.createElement("a")
+    link.href = url
+    let fileName = filename+".zip" // default filename
+    link.setAttribute("download", fileName)
+    document.body.appendChild(link)
+    link.click()
+    link.parentNode!.removeChild(link)
+
+}
   
   const downloadSubmission = async () => {
-    try {
-      const response = await apiCall.get(submission.fileUrl, undefined, undefined, {
-        responseType: "blob",
-        transformResponse: [(data) => data],
-      })
-      console.log(response)
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement("a")
-      link.href = url
-      const contentDisposition = response.headers["content-disposition"]
-      console.log(contentDisposition)
-      let fileName = "file.zip" // default filename
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename=([^;]+)/)
-        console.log(fileNameMatch)
-        if (fileNameMatch && fileNameMatch[1]) {
-          fileName = fileNameMatch[1] // use the filename from the headers
-        }
-      }
-      link.setAttribute("download", fileName)
-      document.body.appendChild(link)
-      link.click()
-    } catch (err) {
-      console.error(err)
-    }
+    downloadFile(submission.fileUrl, t("project.submission"))
+  }
+
+  const downloadSubmissionArtifacts = async () => {
+    downloadFile(submission.artifactUrl, t("project.submissionArtifacts"))
   }
 
   return (
@@ -67,8 +74,11 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
           {t("submission.submission")}
         </span>
       }
-      extra={
-        <Button type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>
+      extra={<Space>
+
+        {submission.fileUrl && <Button key="file" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>}
+        {submission.artifactUrl && submission.dockerFeedback.type !== "NONE"  && <Button key="artifacts" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmissionArtifacts}>{t("submission.downloadArtifacts")}</Button>}
+      </Space>
       }
     >
       <SubmissionContent submission={submission} />

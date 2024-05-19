@@ -178,7 +178,7 @@ const SubmitForm: FC<{
                 name="files"
                 valuePropName="fileList"
                 getValueFromEvent={normFile}
-                style={{height: "100%"}}
+           
             >
                 <Upload.Dragger
                     name="file"
@@ -219,6 +219,7 @@ const SubmitForm: FC<{
                     <p className="ant-upload-text">{t("project.uploadAreaTitle")}</p>
                     <p className="ant-upload-hint">{t("project.uploadAreaSubtitle")}</p>
                 </Upload.Dragger>
+                </Form.Item>
 
                 <input
                     type="file"
@@ -243,7 +244,6 @@ const SubmitForm: FC<{
                 >
                     {t("project.uploadDirectory")}
                 </Button>
-            </Form.Item>
         </Form>
     )
 }

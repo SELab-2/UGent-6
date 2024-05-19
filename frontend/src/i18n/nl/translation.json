@@ -58,7 +58,8 @@
       "status": {
         "completed": "Voltooid",
         "failed": "Verkeerd",
-        "notStarted": "Niet begonnen"
+        "notStarted": "Niet begonnen",
+        "noGroup": "Niet in groep"
       },
       "groupProgress": "Voortgang groep",
       "completeProgress": "{{count}} / {{total}} voltooid",
@@ -111,10 +112,14 @@
     "addFiles": "Bestanden toevoegen",
     "submit": "Indienen",
     "uploadAreaTitle": "Bestanden slepen of klikken om bestanden toe te voegen",
-    "uploadAreaSubtitle": "Maximum bestandsgrootte is 100MB",
+    "uploadAreaSubtitle": "Maximum bestandsgrootte is 50MB",
     "deadlinePassed": "Deadline verstreken",
     "uploadDirectory": "Folder uploaden",
     "downloadSubmissions": "Download alle indieningen",
+    "exportToCSV": "Exporteer naar CSV",
+    "exportToUfora": "Exporteer naar Ufora",
+    "withArtifacts": "Met artifacts",
+    "withoutArtifacts": "Zonder artifacts",
     "group": "Groep",
     "status": "Status",
     "feedback": "Feedback",
@@ -202,7 +207,10 @@
       "fileStructurePreview": "Voorbeeld van bestandsstructuur"
     },
     "noScore": "Nog geen score beschikbaar",
-    "noFeedback": "Geen feedback gegeven"
+    "noFeedback": "Geen feedback gegeven",
+    "noScoreLabel": "Geen score",
+    "noFeedbackLabel": "Geen feedback",
+    "noSubmissionDownload": "Geen indiening gevonden"
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
@@ -222,6 +230,7 @@
     "structuretest": "Resultaten structuurtest:",
     "dockertest": "Resultaten dockertest:",
     "downloadSubmission": "Download indiening",
+    "downloadArtifacts": "Download artifacts",
     "dockertestAborted": "Testen afgebroken. Probeer het later nog eens.",
     "success": "Geslaagd",
     "failed": "Niet geslaagd",

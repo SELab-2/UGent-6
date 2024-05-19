@@ -11,6 +11,7 @@ const colorByProjectStatus: Record<ProjectStatus, string> = {
   "correct": "green",
   "incorrect": "red",
   "not started": "gray",
+  "no group": "warning"
 }
 
 const ProjectTimeline: FC<{ projects: ProjectType[] | null }> = ({ projects }) => {

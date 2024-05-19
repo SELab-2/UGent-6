@@ -203,13 +203,7 @@ const Project = () => {
           activeKey={activeTab}
           onChange={changeTab}
           items={items}
-          tabBarExtraContent={
-            activeTab === "submissions" ? (
-              <CourseAdminView>
-                <Button icon={<DownloadOutlined />}>{t("project.downloadSubmissions")}</Button>
-              </CourseAdminView>
-            ) : null
-          }
+         
         />
       </Card>
     </div>

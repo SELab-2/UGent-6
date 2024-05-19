@@ -13,6 +13,7 @@ const projectStatusToBadge:Record<ProjectStatus, BadgeProps['status']> = {
   "not started": "default",
   correct: "success",
   incorrect: "error",
+  "no group": "warning",
 }
 
 type ProjectWithDeadlineDay = ProjectType & { deadlineDay: Dayjs };

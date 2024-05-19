@@ -31,6 +31,7 @@ export enum ApiRoutes {
   PROJECT_TEST_SUBMISSIONS = "/api/projects/:projectId/adminsubmissions",
   PROJECT_TESTS_UPLOAD = "api/projects/:id/tests/extrafiles",
   PROJECT_SUBMIT = "api/projects/:id/submit",
+  PROJECT_DOWNLOAD_ALL_SUBMISSIONS = "api/projects/:id/submissions/files",
 
   SUBMISSION = "api/submissions/:id",
   SUBMISSION_FILE = "api/submissions/:id/file",
@@ -89,6 +90,7 @@ export type POST_Requests = {
   [ApiRoutes.COURSE_COPY]: undefined
   [ApiRoutes.COURSE_JOIN]: undefined
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: undefined
+  [ApiRoutes.PROJECT_SCORE]: Omit<GET_Responses[ApiRoutes.PROJECT_SCORE], "groupId" | "projectId">
 }
 
 /**
@@ -96,7 +98,7 @@ export type POST_Requests = {
  */
 export type POST_Responses = {
 
-    [ApiRoutes.PROJECT_SUBMIT]: GET_Responses[ApiRoutes.SUBMISSION]
+  [ApiRoutes.PROJECT_SUBMIT]: GET_Responses[ApiRoutes.SUBMISSION]
   [ApiRoutes.COURSES]: GET_Responses[ApiRoutes.COURSE],
   [ApiRoutes.PROJECT_CREATE]: GET_Responses[ApiRoutes.PROJECT]
   [ApiRoutes.GROUP_MEMBERS]: GET_Responses[ApiRoutes.GROUP_MEMBERS]
@@ -105,6 +107,7 @@ export type POST_Responses = {
   [ApiRoutes.COURSE_COPY]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.COURSE_JOIN]: {name:string, description: string}
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: POST_Responses[ApiRoutes.COURSE_JOIN]
+  [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
 }
 
 /**
@@ -172,7 +175,7 @@ type Course = {
 }
 
 export type DockerStatus = "no_test" | "running" | "finished" | "aborted"
-export type ProjectStatus = "correct" | "incorrect" | "not started"
+export type ProjectStatus = "correct" | "incorrect" | "not started" | "no group"
 export type CourseRelation = "enrolled" | "course_admin" | "creator"
 export type UserRole = "student" | "teacher" | "admin"
 
@@ -416,5 +419,6 @@ export type GET_Responses = {
   [ApiRoutes.COURSE_JOIN]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
+  [ApiRoutes.PROJECT_DOWNLOAD_ALL_SUBMISSIONS]: Blob
 }
 

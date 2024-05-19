@@ -67,6 +67,8 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
     return () => (ignore = true)
   }, [courses, projects])
 
+  console.log(courseProjects);
+
   const [filteredCourseProjects, filteredAdminCourseProjects, courseProjectsList, adminCourseProjectsList, yearOptions]: [CourseProjectList, CourseProjectList, CourseProjectList, CourseProjectList, number[] | null] = useMemo(() => {
     // Filter courses based on selected year
     if (courseProjects === null || adminCourseProjects === null) return [null, null, [], [], null]

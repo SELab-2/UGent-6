@@ -43,7 +43,9 @@ const Submission = () => {
         <Spin
           tip="Loading..."
           size="large"
-        />
+        >
+          <span> </span>
+        </Spin>
       </div>
     )
   }
