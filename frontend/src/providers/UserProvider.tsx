@@ -1,9 +1,10 @@
-import { FC, PropsWithChildren, createContext, useEffect, useState } from "react"
-import { ApiRoutes, GET_Responses } from "../@types/requests.d"
+import {createContext, FC, PropsWithChildren, useEffect, useState} from "react"
+import {ApiRoutes, GET_Responses} from "../@types/requests.d"
 import apiCall from "../util/apiFetch"
-import { useIsAuthenticated, useMsal } from "@azure/msal-react"
-import { Spin } from "antd"
-import { InteractionStatus } from "@azure/msal-browser"
+import {Spin} from "antd"
+import useAuth from "../hooks/useAuth";
+import {LoginStatus} from "../@types/appTypes";
+
 
 type UserContextProps = {
   user: User | null
@@ -18,16 +19,16 @@ const UserContext = createContext<UserContextProps>({} as UserContextProps)
 export type User = GET_Responses[ApiRoutes.USER]
 
 const UserProvider: FC<PropsWithChildren> = ({ children }) => {
-  const isAuthenticated = useIsAuthenticated()
+  const auth = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const [courses, setCourses] = useState<UserCourseType[] | null>(null)
-  const { inProgress } = useMsal()
+
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (auth.isAuthenticated) {
       updateUser()
     }
-  }, [isAuthenticated])
+  }, [auth])
 
   const updateCourses = async (userId: number | undefined = user?.id) => {
     if (!userId) return console.error("No user id provided")
@@ -51,7 +52,7 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }
 
-  if (!user && (!(inProgress === InteractionStatus.Startup || inProgress === InteractionStatus.None || inProgress === InteractionStatus.Logout) || isAuthenticated))
+  if (!user && (auth.loginStatus === LoginStatus.LOGIN_IN_PROGRESS || auth.loginStatus === LoginStatus.LOGOUT_IN_PROGRESS  || auth.isAuthenticated))
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
         <Spin size="large" />

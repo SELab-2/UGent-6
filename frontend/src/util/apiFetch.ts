@@ -1,10 +1,9 @@
 import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Responses, PUT_Requests, PUT_Responses } from "../@types/requests"
 import axios, { AxiosError, AxiosResponse } from "axios"
-import { msalInstance } from "../index"
 import { AxiosRequestConfig } from "axios"
-import { msalConfig } from "../auth/AuthConfig"
 
-const serverHost =  window.location.origin.includes("localhost") ? "http://localhost:8080" : window.location.origin
+
+const serverHost =  window.location.origin.includes("localhost") ? "http://localhost:3000" : window.location.origin
 let accessToken: string | null = null
 let tokenExpiry: Date | null = null
 
@@ -22,11 +21,6 @@ export type ApiCallPathValues = {[param: string]: string | number}
  *
  */
 export async function apiFetch(method: ApiMethods, route: string, body?: any, pathValues?:ApiCallPathValues): Promise<AxiosResponse<any, any>> {
-  const account = msalInstance.getActiveAccount()
-
-  if (!account) {
-    throw Error("No active account found")
-  }
 
   if(pathValues) {
     Object.entries(pathValues).forEach(([key, value]) => {
@@ -34,21 +28,8 @@ export async function apiFetch(method: ApiMethods, route: string, body?: any, pa
     })
   }
 
-  // check if we have access token
-  const now = new Date()
-
-  if (!accessToken || !tokenExpiry || now >= tokenExpiry) {
-    const response = await msalInstance.acquireTokenSilent({
-      scopes: [msalConfig.auth.clientId + "/.default"],
-      account: account,
-    })
-
-    accessToken = response.accessToken
-    tokenExpiry = response.expiresOn // convert expiry time to JavaScript Date
-  }
 
   const headers = {
-    Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
   }
 
@@ -58,6 +39,7 @@ export async function apiFetch(method: ApiMethods, route: string, body?: any, pa
     method: method,
     url: url.toString(),
     headers: headers,
+    withCredentials:true,
     data: body,
   }
   
@@ -73,28 +55,6 @@ const apiCall = {
   patch: async <T extends keyof PUT_Requests>(route: T, body: Partial<PUT_Requests[T]>, pathValues?:ApiCallPathValues) => apiFetch("PATCH", route, body,pathValues) as Promise<AxiosResponse<PUT_Responses[T]>>,
 }
 
-const apiCallInit = async () => {
-  const account = msalInstance.getActiveAccount()
 
-  if (!account) {
-    throw Error("No active account found")
-  }
-
-  const now = new Date()
-  if (!accessToken || !tokenExpiry || now >= tokenExpiry) {
-    const response = await msalInstance.acquireTokenSilent({
-      scopes: [msalConfig.auth.clientId + "/.default"],
-      account: account,
-    })
-
-    accessToken = response.accessToken
-    tokenExpiry = response.expiresOn // convert expiry time to JavaScript Date
-    return accessToken
-  } else{
-    return accessToken
-  }
-}
-
-export { accessToken,apiCallInit }
 
 export default apiCall

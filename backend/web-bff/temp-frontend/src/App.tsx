@@ -8,7 +8,7 @@ import './App.css'
 function App() {
 
     const [auth, setAuth]
-        = useState<{ isAuthenticated:boolean, name: string} | null>(null)
+        = useState<{ isAuthenticated:boolean, account: { name:string } | null} | null>(null)
 
     useEffect(() => {
         axios.get('http://localhost:3000/web/users/isAuthenticated', {withCredentials: true}).then(({data}) => {
@@ -28,7 +28,7 @@ function App() {
         return (
             <>
                 <h1>Logged in!</h1>
-                <p> You are logged in as {auth && auth.name? auth.name : null}</p>
+                <p> You are logged in as {auth && auth.account?.name ? auth.account.name : null}</p>
             </>
         )
     } else {

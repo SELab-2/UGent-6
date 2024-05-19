@@ -1,18 +1,18 @@
-import { useAccount } from "@azure/msal-react"
+
 import { Dropdown, MenuProps, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import { UserOutlined, BgColorsOutlined, DownOutlined, LogoutOutlined } from "@ant-design/icons"
-import { msalInstance } from "../../../index"
 import { useNavigate } from "react-router-dom"
 import { Themes } from "../../../@types/appTypes"
 import { AppRoutes } from "../../../@types/routes"
 import useApp from "../../../hooks/useApp"
+import useAuth from "../../../hooks/useAuth"
 
 
 const AuthNav = () => {
   const { t } = useTranslation()
   const app = useApp()
-  const auth = useAccount()
+  const auth = useAuth()
   const navigate = useNavigate()
 
   const items: MenuProps["items"] = [
@@ -49,9 +49,8 @@ const AuthNav = () => {
         navigate(AppRoutes.PROFILE)
         break
       case "logout":
-        msalInstance.logoutPopup({
-          account: auth,
-        })
+        auth.logout()
+        navigate('http://localhost:3000/web/auth/signout')
         break
       case Themes.DARK:
       case Themes.LIGHT:
@@ -69,7 +68,7 @@ const AuthNav = () => {
       }}
     >
       <Dropdown menu={{ items, onClick: handleDropdownClick }}>
-        <Typography.Text style={{cursor:"pointer"}}>{auth!.name} <DownOutlined /></Typography.Text>
+        <Typography.Text style={{cursor:"pointer"}}>{auth!.account?.name} <DownOutlined /></Typography.Text>
       </Dropdown>
     </div>
     

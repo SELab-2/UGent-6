@@ -28,12 +28,14 @@ router.get('/isAuthenticated',
             if (req.session.isAuthenticated) {
                 res.send({
                     isAuthenticated: true,
-                    name: req.session.account.name
+                    account: {
+                        name: req.session.account?.name
+                    }
                 });
             } else {
                 res.send({
                     isAuthenticated: false,
-                    name: ""
+                    account: null
                 })
             }
         } catch(error) {
