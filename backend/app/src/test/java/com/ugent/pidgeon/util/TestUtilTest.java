@@ -1,6 +1,7 @@
 package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
@@ -93,6 +94,7 @@ public class TestUtilTest {
     String dockerImage = "dockerImage";
     String dockerScript = "dockerScript";
     String dockerTemplate = "@dockerTemplate\nExpectedOutput";
+    String structureTemplate = "src/\n\tindex.js\n";
     HttpMethod httpMethod = HttpMethod.POST;
 
     when(projectUtil.getProjectIfAdmin(projectEntity.getId(), userEntity))
@@ -103,6 +105,7 @@ public class TestUtilTest {
     try (MockedStatic<DockerSubmissionTestModel> mockedTestModel = mockStatic(DockerSubmissionTestModel.class)) {
       mockedTestModel.when(() -> DockerSubmissionTestModel.imageExists(dockerImage)).thenReturn(true);
       mockedTestModel.when(() -> DockerSubmissionTestModel.isValidTemplate(any())).thenReturn(true);
+
       projectEntity.setTestId(null);
       CheckResult<Pair<TestEntity, ProjectEntity>> result = testUtil.checkForTestUpdate(
           projectEntity.getId(),
@@ -110,6 +113,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -124,6 +128,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           HttpMethod.POST
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -138,6 +143,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
@@ -153,6 +159,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           null,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -165,6 +172,7 @@ public class TestUtilTest {
           dockerImage,
           null,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
@@ -177,6 +185,7 @@ public class TestUtilTest {
           dockerImage,
           null,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -189,6 +198,7 @@ public class TestUtilTest {
           null,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
@@ -201,6 +211,7 @@ public class TestUtilTest {
           null,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -214,6 +225,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -228,6 +240,7 @@ public class TestUtilTest {
           null,
           null,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
@@ -239,6 +252,7 @@ public class TestUtilTest {
           null,
           null,
           null,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -251,6 +265,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
@@ -263,6 +278,7 @@ public class TestUtilTest {
           dockerImage,
           null,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
@@ -274,6 +290,7 @@ public class TestUtilTest {
           null,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
@@ -286,6 +303,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           HttpMethod.POST
       );
       assertEquals(HttpStatus.CONFLICT, result.getStatus());
@@ -298,6 +316,7 @@ public class TestUtilTest {
           null,
           null,
           null,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.OK, result.getStatus());
@@ -310,6 +329,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           HttpMethod.PATCH
       );
       assertEquals(HttpStatus.NOT_FOUND, result.getStatus());
@@ -324,6 +344,7 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
+          structureTemplate,
           httpMethod
       );
       assertEquals(HttpStatus.I_AM_A_TEAPOT, result.getStatus());

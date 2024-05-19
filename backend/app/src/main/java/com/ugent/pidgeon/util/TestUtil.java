@@ -50,6 +50,7 @@ public class TestUtil {
             String dockerImage,
             String dockerScript,
             String dockerTemplate,
+            String structureTemplate,
             HttpMethod httpMethod
     ) {
 
@@ -96,8 +97,22 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "No docker test script is configured for this test", null);
         }
 
-        if(dockerTemplate != null && !DockerSubmissionTestModel.isValidTemplate(dockerTemplate)) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Invalid docker template", null);
+        try{
+            // throws error if there are issues in the template
+            if(dockerTemplate != null) DockerSubmissionTestModel.tryTemplate(dockerTemplate);
+            if(structureTemplate != null) DockerSubmissionTestModel.tryTemplate(structureTemplate);
+
+        }catch(IllegalArgumentException e){
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, e.getMessage(), null);
+        }
+
+        if(dockerTemplate != null){
+            try{
+                DockerSubmissionTestModel.tryTemplate(dockerTemplate);
+            }catch (IllegalArgumentException e){
+                return new CheckResult<>(HttpStatus.BAD_REQUEST, e.getMessage(), null);
+            }
+
         }
 
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, projectEntity));

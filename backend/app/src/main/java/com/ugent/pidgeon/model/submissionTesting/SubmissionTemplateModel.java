@@ -13,10 +13,39 @@ public class SubmissionTemplateModel {
     private static class FileEntry {
         public String name;
         Pattern pattern;
+        private String invert(String name){
+            // invert . with \. for simpler filenames
+            List<Integer> dotLocations = new ArrayList<>();
+            List<Integer> escapedDotLocations = new ArrayList<>();
+            for (int i = 0; i < name.length(); i++) {
+                if(i > 0 && name.charAt(i - 1) == '\\' && name.charAt(i) == '.'){
+                    escapedDotLocations.add(i);
+                }else if (name.charAt(i) == '.') {
+                    dotLocations.add(i);
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < name.length(); i++) {
+                if(escapedDotLocations.contains(i + 1)){
+                    // skip the break
+                    continue;
+                }else if(escapedDotLocations.contains(i)){
+                    sb.append(".");
+                }else if(dotLocations.contains(i)){
+                    sb.append("\\.");
+                }else{
+                    sb.append(name.charAt(i));
+                }
+            }
+            return sb.toString();
+
+        }
 
         public FileEntry(String name) {
-            this.name = name;
-            pattern = Pattern.compile("^" + name + "$"); // hat for defining start of the string, $ defines the end
+
+            this.name = invert(name);
+
+            pattern = Pattern.compile("^" + this.name + "$"); // hat for defining start of the string, $ defines the end
         }
 
         public boolean matches(String fileName) {
@@ -175,7 +204,7 @@ public class SubmissionTemplateModel {
     }
 
     // will throw error if there are errors in the template
-    public void tryTemplate(String template) throws Exception {
+    public static void tryTemplate(String template) throws IllegalArgumentException {
         List<String> lines = List.of(template.split("\n"));
         // check if the template is valid, control if every line contains a file parsable string
         // check if the file is in a valid folder location (indentation is correct)
@@ -183,18 +212,19 @@ public class SubmissionTemplateModel {
         List<Integer> indentionAmounts = new ArrayList<>();
         indentionAmounts.add(0);
         if(getIndentation(lines.get(0)) != 0){
-            throw new Exception("First file should not have any spaces or tabs.");
+            throw new IllegalArgumentException("First file should not have any spaces or tabs.");
         }
         boolean newFolder = false;
         for(int line_index = 0; line_index < lines.size(); line_index++){
             String line = lines.get(line_index);
             int indentation = getIndentation(line);
             if(line.isEmpty()){
-                throw new Exception("Empty file name in template, remove blank lines");
+                throw new IllegalArgumentException("Empty file name in template, remove blank lines");
             }
             if(newFolder && indentation > indentionAmounts.getLast()){
                 // since the indentation is larger than the previous, we are dealing with the first file in a new folder
                 indentionAmounts.add(indentation);
+                newFolder = false;
             }else{
                 // we are dealing with a file in a folder, thus the indentation should be equal to one of the previous folders
                 for(int i = indentionAmounts.size() - 1; i >= 0; i--){
@@ -202,32 +232,34 @@ public class SubmissionTemplateModel {
                         break;
                     }
                     if(i == 0){
-                        throw new Exception("File at line "+ line_index + " is not in a valid folder location (indentation is incorrect)");
+                        throw new IllegalArgumentException("File at line "+ line_index + " is not in a valid folder location (indentation is incorrect)");
                     }
                 }
                 // check if file is correct, since location is correct
 
                 // first check if file contains valid file names
                 if(line.substring(0,line.length() - 1).contains("/")){
-                    throw new Exception("File at line "+ line_index + " contains invalid characters");
+                    throw new IllegalArgumentException("File at line "+ line_index + " contains invalid characters");
                 }
                 // check if file is a folder
                 if(line.charAt(line.length() - 1) == '/') {
                     newFolder = true;
                 }
-
             }
-
-
+            if(line.charAt(line.length() - 1) == '/'){
+                // new folder start!
+                newFolder = true;
+            }
         }
     }
 
-    private int getIndentation(String line){
+
+    private static int getIndentation(String line){
         int length = line.length();
         // one space is equal to a tab
         for(int i = 0; i < length; i++){
-            if(line.charAt(i) != ' ' || line.charAt(i) != '\t'){
-                return i - 1;
+            if(line.charAt(i) != ' ' && line.charAt(i) != '\t'){
+                return i;
             }
         }
         return length - 1;

@@ -1,7 +1,9 @@
 package com.ugent.pidgeon.docker;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
@@ -202,13 +204,15 @@ public class DockerSubmissionTestTest {
   }
 
   @Test
-  void isValidTemplate(){
-    assertFalse(DockerSubmissionTestModel.isValidTemplate("This is not a valid template"));
-    assertTrue(DockerSubmissionTestModel.isValidTemplate("@HelloWorld\n" +
+  void tryTemplate(){
+    assertThrows(IllegalArgumentException.class,() -> DockerSubmissionTestModel.tryTemplate("This is not a valid template"));
+
+
+    assertDoesNotThrow(() -> DockerSubmissionTestModel.tryTemplate("@HelloWorld\n" +
         ">Description=\"Test for hello world!\"\n" +
         ">Required\n" +
         "HelloWorld!"));
-    assertTrue(DockerSubmissionTestModel.isValidTemplate("@helloworld\n"
+    assertDoesNotThrow(() -> DockerSubmissionTestModel.tryTemplate("@helloworld\n"
         + ">required\n"
         + ">description=\"Helloworldtest\"\n"
         + "Hello World\n"

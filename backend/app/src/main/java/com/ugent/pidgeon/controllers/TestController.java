@@ -108,7 +108,7 @@ public class TestController {
             structureTemplate = null;
         }
 
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, httpMethod);
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, structureTemplate, httpMethod);
 
 
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
@@ -220,7 +220,7 @@ public class TestController {
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteTestById(@PathVariable("projectid") long projectId, Auth auth) {
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null,  HttpMethod.DELETE);
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null, null, HttpMethod.DELETE);
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(updateCheckResult.getStatus()).body(updateCheckResult.getMessage());
         }
