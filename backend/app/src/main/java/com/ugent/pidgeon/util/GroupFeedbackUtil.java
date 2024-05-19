@@ -100,8 +100,8 @@ public class GroupFeedbackUtil {
             return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
         Integer maxScore = projectCheck.getData().getMaxScore();
-        if ((request.getScore() == null && maxScore != null) || request.getFeedback() == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Score and feedback need to be provided", null);
+        if (request.getFeedback() == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Feedbacks need to be provided", null);
         }
 
         if (request.getScore() != null && request.getScore() < 0) {
