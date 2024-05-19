@@ -9,6 +9,8 @@ import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
 import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.repository.*;
+import java.io.File;
+import java.nio.file.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -252,6 +254,14 @@ public class EntityToJsonConverter {
         } else {
           feedback = new DockerTestFeedbackJson(DockerTestType.TEMPLATE, submission.getDockerFeedback(), submission.getDockerAccepted());
         }
+
+        boolean artifactsExist;
+        if (submission.getGroupId() != null) {
+          Path artifactPath = Filehandler.getSubmissionArtifactPath(submission.getProjectId(), submission.getGroupId(), submission.getId());
+            artifactsExist = new File(artifactPath.toString()).exists();
+        } else {
+            artifactsExist = false;
+        }
         return new SubmissionJson(
                 submission.getId(),
                 ApiRoutes.PROJECT_BASE_PATH + "/" + submission.getProjectId(),
@@ -264,7 +274,7 @@ public class EntityToJsonConverter {
                 submission.getStructureFeedback(),
                 feedback,
                 submission.getDockerTestState().toString(),
-            ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/artifacts"
+                artifactsExist ? ApiRoutes.SUBMISSION_BASE_PATH + "/" + submission.getId() + "/artifacts" : null
         );
     }
 

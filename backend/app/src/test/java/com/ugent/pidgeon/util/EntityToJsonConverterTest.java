@@ -24,6 +24,8 @@ import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.postgre.repository.GroupRepository.UserReference;
+import java.io.File;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -47,6 +50,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -550,62 +554,79 @@ public class EntityToJsonConverterTest {
 
   @Test
   public void testGetSubmissionJson() {
-    submissionEntity.setDockerTestState(DockerTestState.running);
-    submissionEntity.setSubmissionTime(OffsetDateTime.now());
-    submissionEntity.setStructureAccepted(true);
-    submissionEntity.setStructureFeedback("feedback");
-    SubmissionJson result = entityToJsonConverter.getSubmissionJson(submissionEntity);
-    assertEquals(submissionEntity.getId(), result.getSubmissionId());
-    assertEquals(ApiRoutes.PROJECT_BASE_PATH + "/" + submissionEntity.getProjectId(), result.getProjectUrl());
-    assertEquals(ApiRoutes.GROUP_BASE_PATH + "/" + submissionEntity.getGroupId(), result.getGroupUrl());
-    assertEquals(submissionEntity.getProjectId(), result.getProjectId());
-    assertEquals(submissionEntity.getGroupId(), result.getGroupId());
-    assertEquals(ApiRoutes.SUBMISSION_BASE_PATH + "/" + submissionEntity.getId() + "/file", result.getFileUrl());
-    assertTrue(result.getStructureAccepted());
-    assertEquals(submissionEntity.getSubmissionTime(), result.getSubmissionTime());
-    assertEquals(submissionEntity.getStructureFeedback(), result.getStructureFeedback());
-    assertNull(result.getDockerFeedback());
-    assertEquals(DockerTestState.running.toString(), result.getDockerStatus());
-    assertEquals(ApiRoutes.SUBMISSION_BASE_PATH + "/" + submissionEntity.getId() + "/artifacts", result.getArtifactUrl());
+    try (MockedStatic<Filehandler> mockedFileHandler = mockStatic(Filehandler.class)) {
+      /* Create temp file for artifacts */
+      File file = File.createTempFile("SELAB2CANDELETEtest", "zip");
+      mockedFileHandler.when(() -> Filehandler.getSubmissionArtifactPath(submissionEntity.getProjectId(), submissionEntity.getGroupId(), submissionEntity.getId()))
+          .thenReturn(file.toPath());
+      submissionEntity.setDockerTestState(DockerTestState.running);
+      submissionEntity.setSubmissionTime(OffsetDateTime.now());
+      submissionEntity.setStructureAccepted(true);
+      submissionEntity.setStructureFeedback("feedback");
+      SubmissionJson result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+      assertEquals(submissionEntity.getId(), result.getSubmissionId());
+      assertEquals(ApiRoutes.PROJECT_BASE_PATH + "/" + submissionEntity.getProjectId(),
+          result.getProjectUrl());
+      assertEquals(ApiRoutes.GROUP_BASE_PATH + "/" + submissionEntity.getGroupId(),
+          result.getGroupUrl());
+      assertEquals(submissionEntity.getProjectId(), result.getProjectId());
+      assertEquals(submissionEntity.getGroupId(), result.getGroupId());
+      assertEquals(ApiRoutes.SUBMISSION_BASE_PATH + "/" + submissionEntity.getId() + "/file",
+          result.getFileUrl());
+      assertTrue(result.getStructureAccepted());
+      assertEquals(submissionEntity.getSubmissionTime(), result.getSubmissionTime());
+      assertEquals(submissionEntity.getStructureFeedback(), result.getStructureFeedback());
+      assertNull(result.getDockerFeedback());
+      assertEquals(DockerTestState.running.toString(), result.getDockerStatus());
+      assertEquals(ApiRoutes.SUBMISSION_BASE_PATH + "/" + submissionEntity.getId() + "/artifacts",
+          result.getArtifactUrl());
 
-    /* Docker finished running */
-    submissionEntity.setDockerTestState(DockerTestState.finished);
-    /* No docker test */
-    submissionEntity.setDockerType(DockerTestType.NONE);
-    result = entityToJsonConverter.getSubmissionJson(submissionEntity);
-    assertEquals(DockerTestState.finished.toString(), result.getDockerStatus());
-    assertEquals(DockerTestType.NONE, result.getDockerFeedback().type());
+      /* No artifacts */
+      file.delete();
+      result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+      assertNull(result.getArtifactUrl());
 
-    /* Simple docker test */
-    submissionEntity.setDockerFeedback("dockerFeedback - simple");
-    submissionEntity.setDockerAccepted(true);
-    submissionEntity.setDockerType(DockerTestType.SIMPLE);
-    result = entityToJsonConverter.getSubmissionJson(submissionEntity);
-    assertEquals(DockerTestType.SIMPLE, result.getDockerFeedback().type());
-    assertEquals(submissionEntity.getDockerFeedback(), result.getDockerFeedback().feedback());
-    assertTrue(result.getDockerFeedback().allowed());
+      /* Docker finished running */
+      submissionEntity.setDockerTestState(DockerTestState.finished);
+      /* No docker test */
+      submissionEntity.setDockerType(DockerTestType.NONE);
+      result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+      assertEquals(DockerTestState.finished.toString(), result.getDockerStatus());
+      assertEquals(DockerTestType.NONE, result.getDockerFeedback().type());
 
-    /* Template docker test */
-    submissionEntity.setDockerFeedback("dockerFeedback - template");
-    submissionEntity.setDockerAccepted(false);
-    submissionEntity.setDockerType(DockerTestType.TEMPLATE);
-    result = entityToJsonConverter.getSubmissionJson(submissionEntity);
-    assertEquals(DockerTestType.TEMPLATE, result.getDockerFeedback().type());
-    assertEquals(submissionEntity.getDockerFeedback(), result.getDockerFeedback().feedback());
-    assertFalse(result.getDockerFeedback().allowed());
+      /* Simple docker test */
+      submissionEntity.setDockerFeedback("dockerFeedback - simple");
+      submissionEntity.setDockerAccepted(true);
+      submissionEntity.setDockerType(DockerTestType.SIMPLE);
+      result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+      assertEquals(DockerTestType.SIMPLE, result.getDockerFeedback().type());
+      assertEquals(submissionEntity.getDockerFeedback(), result.getDockerFeedback().feedback());
+      assertTrue(result.getDockerFeedback().allowed());
 
-    /* Docker aborted */
-    submissionEntity.setDockerTestState(DockerTestState.aborted);
-    result = entityToJsonConverter.getSubmissionJson(submissionEntity);
-    assertEquals(DockerTestState.aborted.toString(), result.getDockerStatus());
-    assertEquals(DockerTestType.TEMPLATE, result.getDockerFeedback().type());
-    assertEquals(submissionEntity.getDockerFeedback(), result.getDockerFeedback().feedback());
-    assertFalse(result.getDockerFeedback().allowed());
+      /* Template docker test */
+      submissionEntity.setDockerFeedback("dockerFeedback - template");
+      submissionEntity.setDockerAccepted(false);
+      submissionEntity.setDockerType(DockerTestType.TEMPLATE);
+      result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+      assertEquals(DockerTestType.TEMPLATE, result.getDockerFeedback().type());
+      assertEquals(submissionEntity.getDockerFeedback(), result.getDockerFeedback().feedback());
+      assertFalse(result.getDockerFeedback().allowed());
 
-    /* Group id is null */
-    submissionEntity.setGroupId(null);
-    result = entityToJsonConverter.getSubmissionJson(submissionEntity);
-    assertNull(result.getGroupUrl());
+      /* Docker aborted */
+      submissionEntity.setDockerTestState(DockerTestState.aborted);
+      result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+      assertEquals(DockerTestState.aborted.toString(), result.getDockerStatus());
+      assertEquals(DockerTestType.TEMPLATE, result.getDockerFeedback().type());
+      assertEquals(submissionEntity.getDockerFeedback(), result.getDockerFeedback().feedback());
+      assertFalse(result.getDockerFeedback().allowed());
+
+      /* Group id is null */
+      submissionEntity.setGroupId(null);
+      result = entityToJsonConverter.getSubmissionJson(submissionEntity);
+      assertNull(result.getGroupUrl());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Test
