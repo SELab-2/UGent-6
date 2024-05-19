@@ -12,16 +12,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -434,5 +440,45 @@ public class FileHandlerTest {
     assertNotNull(response);
     assertEquals(404, response.getStatusCodeValue());
   }
+
+  @Test
+  public void testAddExistingZip() throws IOException {
+    // Create zip file
+    String zipFileName = "existingZipFile.zip";
+    File tempZipFile = Files.createTempFile("existingZip", ".zip").toFile();
+
+    // Populate the zip file with some content
+    try (ZipOutputStream tempZipOutputStream = new ZipOutputStream(new FileOutputStream(tempZipFile))) {
+      ZipEntry entry = new ZipEntry("testFile.txt");
+      tempZipOutputStream.putNextEntry(entry);
+      tempZipOutputStream.write("Test content".getBytes());
+      tempZipOutputStream.closeEntry();
+      Filehandler.addExistingZip(tempZipOutputStream, zipFileName, tempZipFile);
+    }
+
+
+
+
+
+    // Check if the zip file contains the entry
+    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(tempZipFile))) {
+      ZipEntry entry;
+      boolean found = false;
+      boolean originalFound = false;
+      while ((entry = zis.getNextEntry()) != null) {
+        Logger.getGlobal().info("Entry: " + entry.getName());
+        if (entry.getName().equals(zipFileName)) {
+          found = true;
+        } else if (entry.getName().equals("testFile.txt")) {
+          originalFound = true;
+        }
+      }
+      assertTrue(found);
+      assertTrue(originalFound);
+    }
+  }
+
+
+
 
 }
