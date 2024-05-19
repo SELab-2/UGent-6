@@ -122,10 +122,10 @@ public class SubmissionControllerTest extends ControllerTest {
 
     public static File createTestFile() throws IOException {
         // Create a temporary directory
-        File tempDir = Files.createTempDirectory("test-dir").toFile();
+        File tempDir = Files.createTempDirectory("SELAB6CANDELETEtest-dir").toFile();
 
         // Create a temporary file within the directory
-        File tempFile = File.createTempFile("test-file", ".zip", tempDir);
+        File tempFile = File.createTempFile("SELAB6CANDELETEtest-file", ".zip", tempDir);
 
         // Create some content to write into the zip file
         String content = "Hello, this is a test file!";

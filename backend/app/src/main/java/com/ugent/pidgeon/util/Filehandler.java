@@ -39,7 +39,7 @@ public class Filehandler {
 
         try {
             // Create a temporary file and save the uploaded file to it
-            File tempFile = File.createTempFile("uploaded-zip-", ".zip");
+            File tempFile = File.createTempFile("SELAB6CANDELETEuploaded-zip-", ".zip");
             file.transferTo(tempFile);
 
             // Check if the file is a ZIP file

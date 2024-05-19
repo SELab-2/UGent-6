@@ -333,7 +333,7 @@ public class    SubmissionController {
         return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
       }
 
-      Path tempDir = Files.createTempDirectory("allsubmissions");
+      Path tempDir = Files.createTempDirectory("SELAB6CANDELETEallsubmissions");
       Path mainZipPath = tempDir.resolve("main.zip");
       try (ZipOutputStream mainZipOut = new ZipOutputStream(Files.newOutputStream(mainZipPath))) {
         Map<Long, Optional<SubmissionEntity>> submissions = getLatestSubmissionsForProject(projectid);

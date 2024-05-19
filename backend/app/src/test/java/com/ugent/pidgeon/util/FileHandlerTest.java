@@ -64,7 +64,7 @@ public class FileHandlerTest {
 
   @BeforeEach
   public void setUp() throws IOException {
-      tempDir = Files.createTempDirectory("test");
+      tempDir = Files.createTempDirectory("SELAB6CANDELETEtest");
       fileContent = Files.readAllBytes(testFilePath.resolve(basicZipFileName));
       file = new MockMultipartFile(
           basicZipFileName, fileContent
@@ -121,17 +121,17 @@ public class FileHandlerTest {
 
   @Test
   public void testDeleteLocation() throws Exception {
-    Path testDir = Files.createTempDirectory("test");
-    Path tempFile = Files.createTempFile(testDir, "test", ".txt");
+    Path testDir = Files.createTempDirectory("SELAB6CANDELETEtest");
+    Path tempFile = Files.createTempFile(testDir, "SELAB6CANDELETEtest", ".txt");
     Filehandler.deleteLocation(new File(tempFile.toString()));
     assertFalse(Files.exists(testDir));
   }
 
   @Test
   public void testDeleteLocation_parentDirNotEmpty() throws Exception {
-    Path testDir = Files.createTempDirectory("test");
-    Path tempFile = Files.createTempFile(testDir, "test", ".txt");
-    Files.createTempFile(testDir, "test2", ".txt");
+    Path testDir = Files.createTempDirectory("SELAB6CANDELETEtest");
+    Path tempFile = Files.createTempFile(testDir, "SELAB6CANDELETEtest", ".txt");
+    Files.createTempFile(testDir, "SELAB6CANDELETEtest2", ".txt");
     Filehandler.deleteLocation(new File(tempFile.toString()));
     assertTrue(Files.exists(testDir));
   }
@@ -284,7 +284,7 @@ public class FileHandlerTest {
   @Test
   public void testGetFileAsResource_FileExists() {
     try {
-      File tempFile = Files.createTempFile("testFile", ".txt").toFile();
+      File tempFile = Files.createTempFile("SELAB6CANDELETEtestFile", ".txt").toFile();
 
       Resource resource = Filehandler.getFileAsResource(tempFile.toPath());
 
@@ -308,8 +308,8 @@ public class FileHandlerTest {
   @Test
   public void testCopyFilesAsZip() throws IOException {
     List<File> files = new ArrayList<>();
-    File tempFile1 = Files.createTempFile("tempFile1", ".txt").toFile();
-    File tempFile2 = Files.createTempFile("tempFile2", ".txt").toFile();
+    File tempFile1 = Files.createTempFile("SELAB6CANDELETEtempFile1", ".txt").toFile();
+    File tempFile2 = Files.createTempFile("SELAB6CANDELETEtempFile2", ".txt").toFile();
 
     try {
       files.add(tempFile1);
@@ -337,9 +337,9 @@ public class FileHandlerTest {
   @Test
   public void testCopyFilesAsZip_zipFileAlreadyExist() throws IOException {
     List<File> files = new ArrayList<>();
-    File tempFile1 = Files.createTempFile("tempFile1", ".txt").toFile();
-    File tempFile2 = Files.createTempFile("tempFile2", ".txt").toFile();
-    File zipFile = Files.createTempFile(tempDir, "files", ".zip").toFile();
+    File tempFile1 = Files.createTempFile("SELAB6CANDELETEtempFile1", ".txt").toFile();
+    File tempFile2 = Files.createTempFile("SELAB6CANDELETEtempFile2", ".txt").toFile();
+    File zipFile = Files.createTempFile(tempDir, "SELAB6CANDELETEfiles", ".zip").toFile();
 
     try {
       files.add(tempFile1);
@@ -379,9 +379,9 @@ public class FileHandlerTest {
   @Test
   public void testCopyFilesAsZip_zipFileAlreadyExistNonWriteable() throws IOException {
     List<File> files = new ArrayList<>();
-    File tempFile1 = createTempFileWithContent("tempFile1", ".txt", 4095);
-    File tempFile2 = Files.createTempFile("tempFile2", ".txt").toFile();
-    File zipFile = Files.createTempFile(tempDir, "files", ".zip").toFile();
+    File tempFile1 = createTempFileWithContent("SELAB6CANDELETEtempFile1", ".txt", 4095);
+    File tempFile2 = Files.createTempFile("SELAB6CANDELETEtempFile2", ".txt").toFile();
+    File zipFile = Files.createTempFile(tempDir, "SELAB6CANDELETEfiles", ".zip").toFile();
     zipFile.setWritable(false);
 
     try {
@@ -409,8 +409,8 @@ public class FileHandlerTest {
   @Test
   public void testGetZipFileAsResponse() throws IOException {
     List<File> files = new ArrayList<>();
-    File tempFile1 = Files.createTempFile("tempFile1", ".txt").toFile();
-    File tempFile2 = Files.createTempFile("tempFile2", ".txt").toFile();
+    File tempFile1 = Files.createTempFile("SELAB6CANDELETEtempFile1", ".txt").toFile();
+    File tempFile2 = Files.createTempFile("SELAB6CANDELETEtempFile2", ".txt").toFile();
 
     try {
       files.add(tempFile1);
@@ -445,7 +445,7 @@ public class FileHandlerTest {
   public void testAddExistingZip() throws IOException {
     // Create zip file
     String zipFileName = "existingZipFile.zip";
-    File tempZipFile = Files.createTempFile("existingZip", ".zip").toFile();
+    File tempZipFile = Files.createTempFile("SELAB6CANDELETEexistingZip", ".zip").toFile();
 
     // Populate the zip file with some content
     try (ZipOutputStream tempZipOutputStream = new ZipOutputStream(new FileOutputStream(tempZipFile))) {
