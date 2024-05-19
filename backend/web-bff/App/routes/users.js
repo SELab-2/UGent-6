@@ -14,7 +14,7 @@ const authProvider = require("../auth/AuthProvider");
 // custom middleware to check auth state
 function isAuthenticated(req, res, next) {
     if (!req.session.isAuthenticated) {
-        return res.redirect('/auth/signin'); // redirect to sign-in route
+        return res.redirect('/web/auth/signin'); // redirect to sign-in route
     }
 
     next();
@@ -28,15 +28,20 @@ router.get('/id',
 );
 
 router.get('/isAuthenticated',
-    isAuthenticated,
-    authProvider.acquireToken({
-        scopes: [msalConfig.auth.clientId + "/.default"],
-        redirectUri: REDIRECT_URI
-    }),
+
     async function (req, res, next) {
         try {
-            const response = await fetch( "api/user" , req.session.accessToken, "GET")
-            res.send(response)
+            if (req.session.isAuthenticated) {
+                res.send({
+                    isAuthenticated: true,
+                    name: req.session.account.name
+                });
+            } else {
+                res.send({
+                    isAuthenticated: false,
+                    name: ""
+                })
+            }
         } catch(error) {
             next(error);
         }

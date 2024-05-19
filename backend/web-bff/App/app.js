@@ -9,6 +9,8 @@ const logger = require('morgan');
 
 const rateLimit = require('express-rate-limit')
 
+const cors = require('cors')
+
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
@@ -49,6 +51,14 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+const corsOptions = {
+    origin: /localhost/,
+    optionsSuccessStatus: 200,
+    credentials: true,
+}
+
+app.use('*', cors(corsOptions));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -60,9 +70,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/auth', authRouter);
-app.use('/api', apiRouter)
+app.use('/web/users', usersRouter);
+app.use('/web/auth', authRouter);
+app.use('/web/api', apiRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

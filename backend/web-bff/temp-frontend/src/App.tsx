@@ -1,14 +1,16 @@
 import {useEffect, useState} from 'react'
 import axios from 'axios'
+import {Link} from "react-router-dom"
 
 import './App.css'
 
 function App() {
     const [auth, setAuth]
-        = useState<{ name: string, otherKey: number } | null>(null)
+        = useState<{ isAuthenticated:boolean, name: string} | null>(null)
 
     useEffect(() => {
-        axios.get('/auth/current-session').then(({data}) => {
+        axios.get('http://localhost:3000/web/users/isAuthenticated', {withCredentials: true}).then(({data}) => {
+            console.log(data)
             setAuth(data);
         })
     }, [])
@@ -19,7 +21,7 @@ function App() {
                 <h1>Loading...</h1>
             </>
         )
-    } else if (auth) {
+    } else if (auth.isAuthenticated) {
         return (
             <>
                 <h1>Logged in!</h1>
@@ -29,7 +31,8 @@ function App() {
     } else {
         return (
             <>
-                <h1>Welcome</h1>
+                <h1>Welcome, please login</h1>
+                <Link to='http://localhost:3000/web/auth/signin'>Login</Link>
             </>
         )
     }
