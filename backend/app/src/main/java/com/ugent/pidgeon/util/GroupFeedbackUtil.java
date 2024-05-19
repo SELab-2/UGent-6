@@ -108,7 +108,7 @@ public class GroupFeedbackUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "Score can't be lower than 0", null);
         }
 
-        if (maxScore != null && request.getScore() > maxScore) {
+        if (maxScore != null && request.getScore() != null && request.getScore() > maxScore) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "Score can't be higher than the defined max score (" + maxScore + ")", null);
         }
 

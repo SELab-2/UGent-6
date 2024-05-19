@@ -200,13 +200,7 @@ public class GroupFeedbackUtilTest {
     /* Score is null */
     updateGroupScoreRequest.setScore(null);
     result = groupFeedbackUtil.checkGroupFeedbackUpdateJson(updateGroupScoreRequest, groupFeedbackEntity.getProjectId());
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-
-    /* Score is null but so is maxScore */
-    projectEntity.setMaxScore(null);
-    result = groupFeedbackUtil.checkGroupFeedbackUpdateJson(updateGroupScoreRequest, groupFeedbackEntity.getProjectId());
     assertEquals(HttpStatus.OK, result.getStatus());
-    projectEntity.setMaxScore(34);
 
     /* Feedback is null */
     updateGroupScoreRequest.setScore(Float.valueOf(projectEntity.getMaxScore()));
