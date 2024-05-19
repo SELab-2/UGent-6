@@ -48,13 +48,13 @@ jest.mock('react-router-dom', () => ({
 jest.mock("../../../hooks/useUser", () => ({
   __esModule: true, // this property makes it work
   default: () => {
-    const user: GET_Responses[ApiRoutes.USER] = { courseUrl: "/api/courses", projects_url: "/api/projects/1", url: "/api/users/12", role: "teacher", email: "test@gmail.com", id: 12, name: "Bob", surname: "test" }
-    const courses: UserCourseType[] = [{courseId:1,name:"Course 1", relation: "enrolled", url:"/api/courses/1"}]
-    return {
-      user,
-      setUser: () => {},
-      courses
-    }
+    // const user: GET_Responses[ApiRoutes.USER] = { courseUrl: "/api/courses", projects_url: "/api/projects/1", url: "/api/users/12", role: "teacher", email: "test@gmail.com", id: 12, name: "Bob", surname: "test" }
+    // const courses: UserCourseType[] = [{courseId:1,name:"Course 1", relation: "enrolled", url:"/api/courses/1"}]
+    // return {
+    //   user,
+    //   setUser: () => {},
+    //   courses
+    // }
   },
 }))
 
