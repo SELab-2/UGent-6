@@ -1,9 +1,13 @@
 import type {ProjectFormData} from "../pages/projectCreate/components/ProjectCreateService";
+import {Account} from "../providers/AuthProvider";
 
 /**
  * Routes used to make API calls
  */
 export enum ApiRoutes {
+
+  AUTH_INFO = "/web/users/isAuthenticated",
+
   USER_COURSES = "/web/api/courses",
   COURSES = "/web/api/courses",
   
@@ -423,5 +427,6 @@ export type GET_Responses = {
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
   [ApiRoutes.PROJECT_DOWNLOAD_ALL_SUBMISSIONS]: Blob
+  [ApiRoutes.AUTH_INFO]: {isAuthenticated:boolean, account: Account}
 }
 

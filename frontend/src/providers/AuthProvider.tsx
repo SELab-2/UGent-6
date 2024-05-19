@@ -1,10 +1,9 @@
-import {createContext, Dispatch, FC, PropsWithChildren, useEffect, useState} from "react"
+import {createContext, FC, PropsWithChildren, useEffect, useState} from "react"
 import {LoginStatus} from "../@types/appTypes";
-import {useNavigate} from "react-router-dom";
-import axios from "axios";
-import { AxiosRequestConfig } from "axios"
+import apiCall from "../util/apiFetch";
+import {ApiRoutes} from "../@types/requests";
 
-type Account = {
+export type Account = {
     name: string
 }
 
@@ -30,10 +29,7 @@ const AuthProvider : FC<PropsWithChildren> = ({children}) => {
 
     const updateAccount = async () => {
         try {
-            const res = await axios.get(
-                'http://localhost:3000/web/users/isAuthenticated',
-                {withCredentials:true } as AxiosRequestConfig
-            )
+            const res = await apiCall.get(ApiRoutes.AUTH_INFO)
             if (res.data.isAuthenticated) {
                 setIsAuthenticated(true)
                 setLoginStatus(LoginStatus.LOGGED_IN)
