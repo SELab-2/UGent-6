@@ -50,7 +50,7 @@ const AuthNav = () => {
         break
       case "logout":
         auth.logout()
-        navigate('http://localhost:3000/web/auth/signout')
+        window.location.replace("http://localhost:3000/web/auth/signout")
         break
       case Themes.DARK:
       case Themes.LIGHT:

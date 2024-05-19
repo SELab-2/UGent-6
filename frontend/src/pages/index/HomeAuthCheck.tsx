@@ -4,7 +4,6 @@ import useAuth from "../../hooks/useAuth";
 
 const HomeAuthCheck = () => {
   const auth = useAuth()
-  auth.updateAccount()
   if (auth.isAuthenticated) {
     return <Home/>
   }

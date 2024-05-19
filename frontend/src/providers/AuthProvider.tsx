@@ -21,7 +21,7 @@ const AuthContext = createContext({} as AuthContextProps)
 
 const AuthProvider : FC<PropsWithChildren> = ({children}) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [loginStatus, setLoginStatus] = useState<LoginStatus>(LoginStatus.LOGGED_OUT)
+    const [loginStatus, setLoginStatus] = useState<LoginStatus>(LoginStatus.LOGIN_IN_PROGRESS)
     const [account, setAccount] = useState<Account | null>(null)
 
     useEffect(() => {
