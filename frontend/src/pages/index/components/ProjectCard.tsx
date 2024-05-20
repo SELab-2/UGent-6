@@ -1,55 +1,72 @@
 import { FC, useEffect, useState } from "react"
-import ProjectTable, { ProjectType } from "./ProjectTable"
+import ProjectTableCourse, { ProjectType } from "./ProjectTableCourse"
+import ProjectTable, { ProjectType as NormalProjectType } from "./ProjectTable"
 import { Button, Card } from "antd"
-import apiCall from "../../../util/apiFetch"
 import { ApiRoutes } from "../../../@types/requests.d"
-import useIsTeacher from "../../../hooks/useIsTeacher"
 import { useTranslation } from "react-i18next"
 import { AppRoutes } from "../../../@types/routes"
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import CourseAdminView from "../../../hooks/CourseAdminView"
 import { PlusOutlined } from "@ant-design/icons"
+import useApi from "../../../hooks/useApi"
+import useIsCourseAdmin from "../../../hooks/useIsCourseAdmin";
 
 const ProjectCard: FC<{ courseId?: number }> = ({ courseId }) => {
-  const [projects, setProjects] = useState<ProjectType[] | null>(null)
-  const { t } = useTranslation()
+    const [projects, setProjects] = useState<ProjectType[] | null>(null)
+    const { t } = useTranslation()
+    const navigate = useNavigate()
+    const API = useApi()
+    const isCourseAdmin = useIsCourseAdmin()
 
-  useEffect(() => {
-    if (courseId) {
-      apiCall.get(ApiRoutes.COURSE_PROJECTS, { id: courseId }).then((res) => {
-        setProjects(res.data)
-      })
-    }
-  }, [courseId])
+    useEffect(() => {
+        if (courseId) {
+            API.GET(ApiRoutes.COURSE_PROJECTS, { pathValues: { id: courseId } }).then((res) => {
+                if (!res.success) return
+                setProjects(res.response.data)
+            })
+        }
+    }, [courseId])
 
-  return (
-    <>
-        <CourseAdminView>
-          <div style={{  textAlign: "right", paddingRight: "20px", paddingBottom: "10px" }}>
-            <Button icon={<PlusOutlined/>} type="primary">
-              <Link to={AppRoutes.PROJECT_CREATE.replace(":courseId", String(courseId))}>{t("project.newProject")}</Link>
-            </Button>
-          </div>
-        </CourseAdminView>
-      <Card
-        style={{
-          width: "100%",
-          overflow: "auto",
-        }}
-        styles={{
-          body: {
-            padding: "0",
-          },
-        }}
-      >
-        <ProjectTable
-          ignoreColumns={courseId == undefined ? ["course"] : []}
-          projects={projects}
-        />
-    
-      </Card>
-    </>
-  )
+    return (
+        <>
+            {isCourseAdmin && (
+                <CourseAdminView>
+                    <div style={{ textAlign: "right", paddingBottom: "10px" }}>
+                        <Button
+                            onClick={() => navigate(AppRoutes.PROJECT_CREATE.replace(":courseId", String(courseId)))}
+                            icon={<PlusOutlined />}
+                            type="primary"
+                        >
+                            {t("project.newProject")}
+                        </Button>
+                    </div>
+                </CourseAdminView>
+            )}
+            <Card
+                style={{
+                    width: "100%",
+                    overflow: "auto",
+                }}
+                styles={{
+                    body: {
+                        padding: "0",
+                    },
+                }}
+            >
+                {isCourseAdmin ? (
+                    <ProjectTableCourse
+                        ignoreColumns={["course"] }
+                        projects={projects}
+                    />
+                ) : (
+                    <ProjectTable
+                        ignoreColumns={["course"] }
+                        projects={projects as NormalProjectType[]}
+                    />
+                )}
+            </Card>
+        </>
+    )
 }
 
 export default ProjectCard

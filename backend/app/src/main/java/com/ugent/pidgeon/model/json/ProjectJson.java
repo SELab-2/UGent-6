@@ -15,11 +15,12 @@ public class ProjectJson {
     private Long groupClusterId;
     private Boolean visible;
     private Integer maxScore;
+    private OffsetDateTime visibleAfter;
 
     @JsonSerialize(using = OffsetDateTimeSerializer.class)
     private OffsetDateTime deadline;
 
-    public ProjectJson(String name, String description, Long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
+    public ProjectJson(String name, String description, Long groupClusterId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
         this.name = name;
         this.description = description;
         this.groupClusterId = groupClusterId;
@@ -78,5 +79,13 @@ public class ProjectJson {
 
     public void setMaxScore(Integer maxScore) {
         this.maxScore = maxScore;
+    }
+
+    public OffsetDateTime getVisibleAfter() {
+        return visibleAfter;
+    }
+
+    public void setVisibleAfter(OffsetDateTime visibleAfter) {
+        this.visibleAfter = visibleAfter;
     }
 }

@@ -36,12 +36,12 @@ public class GroupFeedbackController {
     private GroupUtil groupUtil;
     @Autowired
     private EntityToJsonConverter entityToJsonConverter;
-  @Autowired
-  private ProjectRepository projectRepository;
-  @Autowired
-  private GroupRepository groupRepository;
-  @Autowired
-  private CourseUtil courseUtil;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private GroupRepository groupRepository;
+    @Autowired
+    private CourseUtil courseUtil;
 
     /**
      * Function to update the score of a group
@@ -222,19 +222,19 @@ public class GroupFeedbackController {
 
         List<GroupFeedbackJsonWithProject> grades = new ArrayList<>();
         for (ProjectEntity project : projects) {
-            Long GroupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
-            if (GroupId == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not part of this course");
-            }
-            CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.getGroupFeedbackIfExists(GroupId, project.getId());
-            if (checkResult.getStatus() != HttpStatus.OK) {
-                grades.add(entityToJsonConverter.groupFeedbackEntityToJsonWithProject(null, project));
+            Long groupId = groupRepository.groupIdByProjectAndUser(project.getId(), user.getId());
+            if (groupId == null) { // Student not yet in a group for this project
+              grades.add(entityToJsonConverter.groupFeedbackEntityToJsonWithProject(null, project));
             } else {
+              CheckResult<GroupFeedbackEntity> checkResult = groupFeedbackUtil.getGroupFeedbackIfExists(groupId, project.getId());
+              if (checkResult.getStatus() != HttpStatus.OK) {
+                grades.add(entityToJsonConverter.groupFeedbackEntityToJsonWithProject(null, project));
+              } else {
                 GroupFeedbackEntity groupFeedbackEntity = checkResult.getData();
                 grades.add(entityToJsonConverter.groupFeedbackEntityToJsonWithProject(groupFeedbackEntity, project));
+              }
             }
         }
-
         return ResponseEntity.ok(grades);
     }
 

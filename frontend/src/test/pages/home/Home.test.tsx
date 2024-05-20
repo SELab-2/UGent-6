@@ -6,12 +6,7 @@ import { UserCourseType } from "../../../providers/UserProvider"
 
 //TODO: Find better way to write all the mocks
 
-jest.mock("@azure/msal-react",()=> ({
-  useAccount: jest.fn(() => ({})),
-  MsalAuthenticationTemplate: () => null,
-  useMsal: jest.fn(() => ({})),
-  MsalAuthenticationResult: () => ({}),
-}))
+
 
 jest.mock("react-syntax-highlighter/dist/esm/styles/prism",()=> ({
   oneDark: {},
@@ -22,9 +17,6 @@ jest.mock('react-markdown', () => ({
   Markdown: () => null,
 }));
 
-jest.mock("@azure/msal-react", () => ({
-  useIsAuthenticated: () => true,
-}))
 
 
 window.matchMedia = window.matchMedia || function() {
@@ -48,13 +40,13 @@ jest.mock('react-router-dom', () => ({
 jest.mock("../../../hooks/useUser", () => ({
   __esModule: true, // this property makes it work
   default: () => {
-    const user: GET_Responses[ApiRoutes.USER] = { courseUrl: "/api/courses", projects_url: "/api/projects/1", url: "/api/users/12", role: "teacher", email: "test@gmail.com", id: 12, name: "Bob", surname: "test" }
-    const courses: UserCourseType[] = [{courseId:1,name:"Course 1", relation: "enrolled", url:"/api/courses/1"}]
-    return {
-      user,
-      setUser: () => {},
-      courses
-    }
+    // const user: GET_Responses[ApiRoutes.USER] = { courseUrl: "/api/courses", projects_url: "/api/projects/1", url: "/api/users/12", role: "teacher", email: "test@gmail.com", id: 12, name: "Bob", surname: "test" }
+    // const courses: UserCourseType[] = [{courseId:1,name:"Course 1", relation: "enrolled", url:"/api/courses/1"}]
+    // return {
+    //   user,
+    //   setUser: () => {},
+    //   courses
+    // }
   },
 }))
 

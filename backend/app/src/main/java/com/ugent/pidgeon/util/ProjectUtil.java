@@ -1,17 +1,9 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.ApiRoutes;
-import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.CourseReferenceJson;
 import com.ugent.pidgeon.model.json.ProjectJson;
-import com.ugent.pidgeon.model.json.ProjectProgressJson;
 import com.ugent.pidgeon.postgre.models.*;
-import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -96,11 +88,10 @@ public class ProjectUtil {
   public CheckResult<Void> checkProjectJson(ProjectJson projectJson, long courseId) {
     if (projectJson.getName() == null ||
         projectJson.getDescription() == null ||
-        projectJson.getMaxScore() == null ||
         projectJson.getGroupClusterId() == null ||
         projectJson.getDeadline() == null) {
       return new CheckResult<>(HttpStatus.BAD_REQUEST,
-          "name, description, maxScore and deadline are required fields", null);
+          "name, description and deadline are required fields", null);
     }
 
     if (projectJson.getName().isBlank()) {
@@ -117,8 +108,8 @@ public class ProjectUtil {
       return new CheckResult<>(HttpStatus.BAD_REQUEST, "Deadline is in the past", null);
     }
 
-    if (projectJson.getMaxScore() < 0) {
-      return new CheckResult<>(HttpStatus.BAD_REQUEST, "Max score cannot be negative", null);
+    if (projectJson.getMaxScore() != null && projectJson.getMaxScore() <= 0) {
+      return new CheckResult<>(HttpStatus.BAD_REQUEST, "Max score cannot be negative or zero", null);
     }
 
     return new CheckResult<>(HttpStatus.OK, "", null);
@@ -140,8 +131,7 @@ public class ProjectUtil {
 
     boolean studentof = projectRepository.userPartOfProject(projectId, user.getId());
     boolean isAdmin =
-        (user.getRole() == UserRole.admin) || (projectRepository.adminOfProject(projectId,
-            user.getId()));
+        (user.getRole() == UserRole.admin);
 
     if (studentof || isAdmin) {
       return new CheckResult<>(HttpStatus.OK, "", project);

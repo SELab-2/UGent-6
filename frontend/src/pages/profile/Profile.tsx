@@ -11,7 +11,7 @@ const ProfileContent = () => {
             <Spin
               tip="Loading..."
               size="large"
-            />
+            ><span> </span></Spin>
           </div>
         )
     }

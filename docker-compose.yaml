@@ -1,22 +1,10 @@
 services:
-  frontend:
-    container_name : nginx_container
-    image: nginx:latest
-    ports:
-      - 80:80
-      - 443:443
-    restart: always
-    volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - ./certbot/conf/:/etc/nginx/ssl/:ro
-      - ./frontend/build/:/usr/share/nginx/html/build/:rw
-    networks:
-      - docker_network
   backend:
     container_name: spring_container
     build: backend/app/
     depends_on:
       - db
+      - dind
     ports:
       - 8080:8080
     environment:
@@ -27,7 +15,9 @@ services:
     volumes:
       - ./backend/app/data:/data:rw 
     networks:
-      - docker_network
+      docker_network:
+        ipv4_address: 10.5.0.9
+
   db:
     container_name: db
     image: 'postgres:latest'
@@ -40,9 +30,20 @@ services:
     ports:
       - 5432:5432
     networks:
-      - docker_network
- 
+      docker_network:
+        ipv4_address: 10.5.0.8
 
+  dind:
+    container_name: dind
+    image: docker:dind
+    privileged: true
+    volumes:
+      - /var/lib/docker
+    ports:
+      - 2375:2375
+    networks:
+      docker_network:
+        ipv4_address: 10.5.0.4
   pgadmin:
     container_name: container-pgadmin
     image: dpage/pgadmin4
@@ -55,22 +56,15 @@ services:
       PGADMIN_DEFAULT_PASSWORD: root
     restart: unless-stopped
     networks:
-      - docker_network
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
-    networks:
-      - docker_network
+      docker_network:
+        ipv4_address: 10.5.0.13
 volumes:
   postgres-data:
-secrets:
-  db-password:
-    file: backend/db/password.txt
 networks:
   docker_network:
     driver: bridge
     ipam:
-      config:
-        - subnet: 172.16.0.0/24
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
+

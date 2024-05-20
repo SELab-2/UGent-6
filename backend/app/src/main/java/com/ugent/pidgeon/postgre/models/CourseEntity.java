@@ -18,8 +18,15 @@ public class CourseEntity {
     @Column(name = "description", nullable=false)
     private String description;
 
+    @Column(name = "course_year", nullable = true)
+    private Integer courseYear;
+
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
+
+    @Column(name = "archived_at")
+    private OffsetDateTime archivedAt;
 
     public String getJoinKey() {
         return joinKey;
@@ -32,9 +39,10 @@ public class CourseEntity {
     @Column(name = "join_key", nullable=true)
     private String joinKey;
 
-    public CourseEntity(String name, String description) {
+    public CourseEntity(String name, String description,Integer courseYear) {
         this.name = name;
         this.description = description;
+        this.courseYear = courseYear;
     }
 
     public CourseEntity() {
@@ -68,6 +76,7 @@ public class CourseEntity {
     }
 
 
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
@@ -75,4 +84,22 @@ public class CourseEntity {
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
+    public void setArchivedAt(OffsetDateTime archivedAt) {
+        this.archivedAt = archivedAt;
+    }
+
+    public int getCourseYear() {
+        return courseYear;
+    }
+    public void setCourseYear(int courseYear){
+        this.courseYear = courseYear;
+    }
+
+
+
 }

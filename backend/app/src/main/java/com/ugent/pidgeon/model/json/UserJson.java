@@ -14,6 +14,7 @@ public class UserJson {
     private String surname;
     private String email;
     private UserRole role;
+    private String studentNumber;
 
     private OffsetDateTime createdAt;
 
@@ -29,6 +30,7 @@ public class UserJson {
         this.email = entity.getEmail();
         this.role = entity.getRole();
         this.createdAt = entity.getCreatedAt();
+        this.studentNumber = entity.getStudentNumber();
 //        this.courses = new ArrayList<>();
     }
 
@@ -81,13 +83,13 @@ public class UserJson {
     }
 
     public String getUrl() {
-        return ApiRoutes.USER_BASE_PATH + "/" + id;
+        return ApiRoutes.USERS_BASE_PATH + "/" + id;
     }
 
     public void setUrl(String s){}
 
     public String getCourseUrl() {
-        return ApiRoutes.USER_BASE_PATH + "/" + id+"/courses";
+        return ApiRoutes.COURSE_BASE_PATH;
     }
     public void setCourseUrl(String s){}
 
@@ -96,4 +98,11 @@ public class UserJson {
     }
     public void setProjectUrl(String s){}
 
+    public String getStudentNumber() {
+        return studentNumber;
+    }
+
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
+    }
 }
