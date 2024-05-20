@@ -118,11 +118,11 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
             style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
           />
         </Form.Item>
-        <UploadBtn
+        {/* <UploadBtn
           form={form}
           disabled={dockerDisabled}
           fieldName="dockerScript"
-        />
+        /> */}
 
         <Form.Item
           label="Docker template"
@@ -143,11 +143,11 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
             style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
           />
         </Form.Item>
-        <UploadBtn
+        {/* <UploadBtn
           form={form}
           disabled={dockerDisabled}
           fieldName="dockerTemplate"
-        />
+        /> */}
       </>
 
       <Form.Item
@@ -163,8 +163,8 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           disabled={dockerDisabled}
           accept="application/zip, application/x-zip-compressed, application/octet-stream, application/x-zip, *.zip"
           beforeUpload={ (file) => {
-            const isPNG = file.type === 'application/zip'
-            if (!isPNG) {
+            const isZIP = file.type.includes('zip') || file.name.includes('.zip')
+            if (!isZIP) {
               message.error(`${file.name} is not a zip file`);
               return Upload.LIST_IGNORE
             }

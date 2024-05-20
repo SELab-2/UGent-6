@@ -45,17 +45,23 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
   const removeUserFromCourse = async (userId: number) => {
     if (!courseId) return
     const req = await API.DELETE(ApiRoutes.COURSE_MEMBER, { pathValues: { userId, courseId } }, "message")
-    if(!req.success) return
+    if (!req.success) return
 
     const newMembers = members?.filter((m) => m.user.userId !== userId)
     onChange(newMembers ?? [])
   }
 
   const onRoleChange = async (userId: number, role: CourseRelation) => {
-    if(!courseId) return
-    const response = await API.PATCH(ApiRoutes.COURSE_MEMBER, { body: { relation: role },pathValues: { userId, courseId } }, "message")
-    if(!response.success) return
-    onChange(response.response.data)
+    if (!courseId) return
+    const response = await API.PATCH(ApiRoutes.COURSE_MEMBER, { body: { relation: role }, pathValues: { userId, courseId } }, "message")
+    if (!response.success) return
+
+    const newMembers = members?.map((m) => {
+      if (m.user.userId === userId) return { user: m.user, relation: role }
+      return m
+    })
+
+    onChange(newMembers ?? [])
   }
 
   return (

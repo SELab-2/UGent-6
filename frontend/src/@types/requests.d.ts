@@ -32,21 +32,21 @@ export enum ApiRoutes {
   PROJECT_TESTS_UPLOAD = "api/projects/:id/tests/extrafiles",
   PROJECT_SUBMIT = "api/projects/:id/submit",
   PROJECT_DOWNLOAD_ALL_SUBMISSIONS = "api/projects/:id/submissions/files",
-
+  
   SUBMISSION = "api/submissions/:id",
   SUBMISSION_FILE = "api/submissions/:id/file",
   SUBMISSION_STRUCTURE_FEEDBACK= "/api/submissions/:id/structurefeedback",
   SUBMISSION_DOCKER_FEEDBACK= "/api/submissions/:id/dockerfeedback",
   SUBMISSION_ARTIFACT="/api/submissions/:id/artifacts",
-
+  
 
   CLUSTER = "api/clusters/:id",
   CLUSTER_FILL = "api/clusters/:id/fill",
 
-    GROUP = "api/groups/:id",
-    GROUP_MEMBERS = "api/groups/:id/members",
-    GROUP_MEMBER = "api/groups/:id/members/:userId",
-    GROUP_SUBMISSIONS = "api/projects/:id/groups/:id/submissions",
+  GROUP = "api/groups/:id",
+  GROUP_MEMBERS = "api/groups/:id/members",
+  GROUP_MEMBER = "api/groups/:id/members/:userId",
+  GROUP_SUBMISSIONS = "api/projects/:id/groups/:id/submissions",
 
   USER = "api/users/:id",
   USERS = "api/users",

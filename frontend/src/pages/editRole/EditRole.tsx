@@ -25,7 +25,7 @@ const ProfileContent = () => {
     onSearch()
   }, [debouncedSearchValue])
 
-  function updateRole(user: UsersListItem, role: UserRole) {
+  const updateRole = (user: UsersListItem, role: UserRole) => {
     console.log(user, role)
     apiCall.patch(ApiRoutes.USER, { role: role }, { id: user.id }).then((res) => {
       console.log(res.data)
