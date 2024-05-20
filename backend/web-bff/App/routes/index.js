@@ -3,10 +3,15 @@
  * Licensed under the MIT License.
  */
 
-var express = require('express');
+const express = require('express');
 const authProvider = require("../auth/AuthProvider");
-var router = express.Router();
+const router = express.Router();
 
+/**
+ * Index route for debugging purposes.
+ *
+ *  @route GET /
+ */
 router.get('/', function (req, res, next) {
     res.render('index', {
         title: 'MSAL Node & Express Web App',
@@ -15,6 +20,12 @@ router.get('/', function (req, res, next) {
     });
 });
 
+/**
+ * Index route that handles a correct login in the msal library.
+ * This route must be /, this is configured in the application request.
+ *
+ *  @route POST /
+ */
 router.post('/', authProvider.handleRedirect());
 
 module.exports = router;

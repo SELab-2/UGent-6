@@ -6,12 +6,7 @@ import { UserCourseType } from "../../../providers/UserProvider"
 
 //TODO: Find better way to write all the mocks
 
-jest.mock("@azure/msal-react",()=> ({
-  useAccount: jest.fn(() => ({})),
-  MsalAuthenticationTemplate: () => null,
-  useMsal: jest.fn(() => ({})),
-  MsalAuthenticationResult: () => ({}),
-}))
+
 
 jest.mock("react-syntax-highlighter/dist/esm/styles/prism",()=> ({
   oneDark: {},
@@ -22,9 +17,6 @@ jest.mock('react-markdown', () => ({
   Markdown: () => null,
 }));
 
-jest.mock("@azure/msal-react", () => ({
-  useIsAuthenticated: () => true,
-}))
 
 
 window.matchMedia = window.matchMedia || function() {

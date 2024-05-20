@@ -1,3 +1,5 @@
+backend/web-bff/App/.env.dev
+
 HELP.md
 .gradle
 build/

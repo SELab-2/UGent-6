@@ -10,8 +10,9 @@ import jsLogo from "../../../assets/landingPageLogos/jsLogo.png"
 import dockerLogo from "../../../assets/landingPageLogos/dockerLogo.png"
 import codeLogo from "../../../assets/landingPageLogos/codeLogo.png"
 import { useTranslation } from "react-i18next"
-import { msalInstance } from "../../.."
 import { motion } from "framer-motion"
+import useAuth from "../../../hooks/useAuth";
+import {useNavigate} from "react-router-dom";
 
 const defaultTransition = { duration: 0.5, ease: [0.44, 0, 0.56, 1], type: "tween" }
 
@@ -21,12 +22,12 @@ const defaultInitial = { opacity: 0.001, y: 64 }
 
 const LandingPage: FC = () => {
   const { t } = useTranslation()
-
+  const auth = useAuth()
+  const navigate = useNavigate()
   const handleLogin = async () => {
     try {
-      await msalInstance.loginPopup({
-        scopes: ["openid", "profile", "User.Read"],
-      })
+      await auth.login()
+      window.location.replace("http://localhost:3000/web/auth/signin")
     } catch (error) {
       console.error(error)
     }

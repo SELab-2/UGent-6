@@ -1,56 +1,63 @@
 import type {ProjectFormData} from "../pages/projectCreate/components/ProjectCreateService";
+import {Account} from "../providers/AuthProvider";
 
 /**
  * Routes used to make API calls
  */
 export enum ApiRoutes {
-  USER_COURSES = "api/courses", 
-  COURSES = "api/courses",
+
+  AUTH_INFO = "/web/users/isAuthenticated",
+
+  USER_COURSES = "/web/api/courses",
+  COURSES = "/web/api/courses",
   
-  COURSE = "api/courses/:courseId",
-  COURSE_MEMBERS = "api/courses/:courseId/members",
-  COURSE_MEMBER = "api/courses/:courseId/members/:userId",
-  COURSE_PROJECTS = "api/courses/:id/projects",
-  COURSE_CLUSTERS = "api/courses/:id/clusters",
-  COURSE_GRADES = '/api/courses/:id/grades',
-  COURSE_LEAVE = "api/courses/:courseId/leave",
-  COURSE_COPY = "/api/courses/:courseId/copy",
-  COURSE_JOIN = "/api/courses/:courseId/join/:courseKey",
-  COURSE_JOIN_WITHOUT_KEY = "/api/courses/:courseId/join",
-  COURSE_JOIN_LINK = "/api/courses/:courseId/joinKey",
+
+  COURSE = "/web/api/courses/:courseId",
+  COURSE_MEMBERS = "/web/api/courses/:courseId/members",
+  COURSE_MEMBER = "/web/api/courses/:courseId/members/:userId",
+  COURSE_PROJECTS = "/web/api/courses/:id/projects",
+  COURSE_CLUSTERS = "/web/api/courses/:id/clusters",
+  COURSE_GRADES = "/web/api/courses/:id/grades",
+  COURSE_LEAVE = "/web/api/courses/:courseId/leave",
+  COURSE_COPY = "/web/api/courses/:courseId/copy", 
+  COURSE_JOIN = "/web/api/courses/:courseId/join/:courseKey",
+  COURSE_JOIN_WITHOUT_KEY = "/web/api/courses/:courseId/join",
+  COURSE_JOIN_LINK = "/web/api/courses/:courseId/joinKey",
+    
+  PROJECTS = "/web/api/projects",
+  PROJECT = "/web/api/projects/:id",
+  PROJECT_CREATE = "/web/api/courses/:courseId/projects",
+  PROJECT_TESTS = "/web/api/projects/:id/tests",
+  PROJECT_SUBMISSIONS = "/web/api/projects/:id/submissions",
+  PROJECT_SCORE = "/web/api/projects/:id/groups/:groupId/score",
+  PROJECT_GROUP = "/web/api/projects/:id/groups/:groupId",
+  PROJECT_GROUPS = "/web/api/projects/:id/groups",
+  PROJECT_GROUP_SUBMISSIONS = "/web/api/projects/:projectId/submissions/:groupId",
+  PROJECT_TEST_SUBMISSIONS = "/web/api/projects/:projectId/adminsubmissions",
+  PROJECT_TESTS_UPLOAD = "/web/api/projects/:id/tests/extrafiles",
+  PROJECT_SUBMIT = "/web/api/projects/:id/submit",
+  PROJECT_DOWNLOAD_ALL_SUBMISSIONS = "/web/api/projects/:id/submissions/files",  
   
-  PROJECTS = "api/projects",
-  PROJECT = "api/projects/:id",
-  PROJECT_CREATE = "api/courses/:courseId/projects",
-  PROJECT_TESTS = "api/projects/:id/tests",
-  PROJECT_SUBMISSIONS = "api/projects/:id/submissions",
-  PROJECT_SCORE = "api/projects/:id/groups/:groupId/score",
-  PROJECT_GROUP = "api/projects/:id/groups/:groupId",
-  PROJECT_GROUPS = "api/projects/:id/groups",
-  PROJECT_GROUP_SUBMISSIONS = "api/projects/:projectId/submissions/:groupId",
-  PROJECT_TEST_SUBMISSIONS = "/api/projects/:projectId/adminsubmissions",
-  PROJECT_TESTS_UPLOAD = "api/projects/:id/tests/extrafiles",
-  PROJECT_SUBMIT = "api/projects/:id/submit",
-  PROJECT_DOWNLOAD_ALL_SUBMISSIONS = "api/projects/:id/submissions/files",
 
-  SUBMISSION = "api/submissions/:id",
-  SUBMISSION_FILE = "api/submissions/:id/file",
-  SUBMISSION_STRUCTURE_FEEDBACK= "/api/submissions/:id/structurefeedback",
-  SUBMISSION_DOCKER_FEEDBACK= "/api/submissions/:id/dockerfeedback",
-  SUBMISSION_ARTIFACT="/api/submissions/:id/artifacts",
+  SUBMISSION = "/web/api/submissions/:id",
+  SUBMISSION_FILE = "/web/api/submissions/:id/file",
+  SUBMISSION_STRUCTURE_FEEDBACK= "/web/api/submissions/:id/structurefeedback",
+  SUBMISSION_DOCKER_FEEDBACK= "/web/api/submissions/:id/dockerfeedback",
+  SUBMISSION_ARTIFACT="/web/api/submissions/:id/artifacts",
 
 
-  CLUSTER = "api/clusters/:id",
-  CLUSTER_FILL = "api/clusters/:id/fill",
 
-    GROUP = "api/groups/:id",
-    GROUP_MEMBERS = "api/groups/:id/members",
-    GROUP_MEMBER = "api/groups/:id/members/:userId",
-    GROUP_SUBMISSIONS = "api/projects/:id/groups/:id/submissions",
+  CLUSTER = "/web/api/clusters/:id",
+  CLUSTER_FILL = "/web/api/clusters/:id/fill",
+  
+  GROUP = "/web/api/groups/:id",
+  GROUP_MEMBERS = "/web/api/groups/:id/members",
+  GROUP_MEMBER = "/web/api/groups/:id/members/:userId",
+  GROUP_SUBMISSIONS = "/web/api/projects/:id/groups/:id/submissions",
 
-  USER = "api/users/:id",
-  USERS = "api/users",
-  USER_AUTH = "api/user",
+  USER = "/web/api/users/:id",
+  USERS = "/web/api/users",
+  USER_AUTH = "/web/api/user",
 }
 
 export type Timestamp = string
@@ -420,5 +427,6 @@ export type GET_Responses = {
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
   [ApiRoutes.PROJECT_DOWNLOAD_ALL_SUBMISSIONS]: Blob
+  [ApiRoutes.AUTH_INFO]: {isAuthenticated:boolean, account: Account}
 }
 

@@ -105,13 +105,13 @@ class AuthProvider {
                 req.session.idToken = tokenResponse.idToken;
                 req.session.account = tokenResponse.account;
 
-                res.redirect(options.successRedirect);
+                next();
             } catch (error) {
                 if (error instanceof msal.InteractionRequiredAuthError) {
                     return this.login({
                         scopes: options.scopes || [],
                         redirectUri: options.redirectUri,
-                        successRedirect: options.successRedirect || '/',
+                        successRedirect: '/',
                     })(req, res, next);
                 }
 
@@ -125,7 +125,6 @@ class AuthProvider {
             if (!req.body || !req.body.state) {
                 return next(new Error('Error: response not found'));
             }
-
             const authCodeRequest = {
                 ...req.session.authCodeRequest,
                 code: req.body.code,
@@ -145,7 +144,7 @@ class AuthProvider {
                 req.session.idToken = tokenResponse.idToken;
                 req.session.account = tokenResponse.account;
                 req.session.isAuthenticated = true;
-
+                
                 const state = JSON.parse(this.cryptoProvider.base64Decode(req.body.state));
                 res.redirect(state.successRedirect);
             } catch (error) {
