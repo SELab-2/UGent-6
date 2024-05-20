@@ -28,7 +28,7 @@ async function fetch(endpoint, accessToken, method, body, headers) {
     const config= {
         method: method,
         url: url.toString(),
-        body: body,
+        data: body,
         headers: finalHeaders,
     }
 

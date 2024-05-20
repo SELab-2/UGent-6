@@ -4,6 +4,7 @@ import { ApiRoutes, DELETE_Requests, GET_Responses, POST_Requests, POST_Response
 import axios, { AxiosError, AxiosResponse, RawAxiosRequestHeaders } from "axios"
 
 import { AxiosRequestConfig } from "axios"
+import {file} from "jszip";
 
 
 
@@ -51,6 +52,7 @@ export async function apiFetch(method: ApiMethods, route: string, body?: any, pa
     ...config, // spread the config object to merge it with the existing configuration
 
   }
+
   return axios(finalConfig)
 }
 
