@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
 import useAuth from "../../../hooks/useAuth";
 import {useNavigate} from "react-router-dom";
+import {BACKEND_SERVER} from "../../../util/backendServer";
 
 const defaultTransition = { duration: 0.5, ease: [0.44, 0, 0.56, 1], type: "tween" }
 
@@ -27,7 +28,7 @@ const LandingPage: FC = () => {
   const handleLogin = async () => {
     try {
       await auth.login()
-      window.location.replace("http://localhost:3000/web/auth/signin")
+      window.location.replace(BACKEND_SERVER + "/web/auth/signin")
     } catch (error) {
       console.error(error)
     }

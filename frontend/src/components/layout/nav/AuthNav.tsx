@@ -11,6 +11,7 @@ import useAuth from "../../../hooks/useAuth"
 
 import createCourseModal from "../../../pages/index/components/CreateCourseModal"
 import useIsTeacher from "../../../hooks/useIsTeacher"
+import {BACKEND_SERVER} from "../../../util/backendServer";
 
 
 const AuthNav = () => {
@@ -66,7 +67,7 @@ const AuthNav = () => {
         break
       case "logout":
         auth.logout()
-        window.location.replace("http://localhost:3000/web/auth/signout")
+        window.location.replace(BACKEND_SERVER + "/web/auth/signout")
         break
       case Themes.DARK:
       case Themes.LIGHT:
