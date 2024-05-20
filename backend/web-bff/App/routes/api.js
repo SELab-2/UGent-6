@@ -6,18 +6,17 @@ const router = express.Router();
 const fetch = require('../fetch');
 
 const { BACKEND_API_ENDPOINT, msalConfig, REDIRECT_URI} = require('../authConfig');
+const isAuthenticated = require('../util/isAuthenticated');
 
-// custom middleware to check auth state
-function isAuthenticated(req, res, next) {
-    if (!req.session.isAuthenticated) {
-        return res.redirect('/web/auth/signin'); // redirect to sign-in route
-    }
-
-    next();
-}
-
+/**
+ *  Route that captures every method and route starting with /web/api.
+ *  An access token is acquired and provided in the authorization header to the backend.
+ *  The response is sent back to the frontend.
+ *
+ *  @route /web/api/*
+ */
 router.all('/*',
-    isAuthenticated,
+    isAuthenticated("/web/auth/signin"),
     authProvider.acquireToken({
     scopes: [msalConfig.auth.clientId + "/.default"],
     redirectUri: REDIRECT_URI
@@ -25,7 +24,7 @@ router.all('/*',
     async function(req, res, next) {
 
     try {
-        const response = await fetch( "api" + req.url , req.session.accessToken, req.method)
+        const response = await fetch( "api" + req.url , req.session.accessToken, req.method, req.body, req.headers)
         res.send(response)
     } catch(error) {
         next(error);

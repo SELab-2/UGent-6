@@ -1,7 +1,13 @@
 import {createContext, FC, PropsWithChildren, useEffect, useState} from "react"
 import {LoginStatus} from "../@types/appTypes";
 import apiCall from "../util/apiFetch";
-import {ApiRoutes} from "../@types/requests";
+import {ApiRoutes} from "../@types/requests.d";
+
+/**
+ * Context provider that contains the authentication state and account name for in the nav bar.
+ */
+
+
 
 export type Account = {
     name: string
@@ -27,6 +33,10 @@ const AuthProvider : FC<PropsWithChildren> = ({children}) => {
         updateAccount()
     }, []);
 
+    /**
+     * Function that contacts the backend for information on the current authentication state.
+     * Stores the result in the state.
+     */
     const updateAccount = async () => {
         try {
             const res = await apiCall.get(ApiRoutes.AUTH_INFO)
@@ -44,10 +54,18 @@ const AuthProvider : FC<PropsWithChildren> = ({children}) => {
         }
     }
 
+    /**
+     * Function that updates the login state.
+     * Should be used when logging in.
+     */
     const login = async () => {
         setLoginStatus(LoginStatus.LOGIN_IN_PROGRESS)
     }
 
+    /**
+     * Function that updates the login state.
+     * Should be used when logging out.
+     */
     const logout = async () => {
         setIsAuthenticated(false)
         setLoginStatus(LoginStatus.LOGOUT_IN_PROGRESS)
