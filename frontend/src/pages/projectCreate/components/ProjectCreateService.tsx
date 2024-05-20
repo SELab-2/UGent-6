@@ -18,9 +18,7 @@ class ProjectCreateService {
     static async createProject(courseId: string, formData: ProjectFormData): Promise<ProjectError> {
         try {
             const response = await apiCall.post(ApiRoutes.PROJECT_CREATE, formData, {courseId: courseId!});
-            console.log(response.data)
             if (!response.data || response.status !== 200) {
-                console.log(response.data)
                 // Handle error response
                 return {
                     code: response.status,

@@ -30,7 +30,6 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       "message"
     )
     if (!response.success) return
-    console.log(response)
     const url = window.URL.createObjectURL(new Blob([response.response.data]))
     const link = document.createElement("a")
     link.href = url

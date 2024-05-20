@@ -49,7 +49,6 @@ function exportToUfora(submissions: ProjectSubmissionsType[],maxScore:number): v
       "End-of-Line Indicator": "#"
     }))
   );
-  console.log(submissions, csvData);
 
   const csvString = unparse(csvData, {
     quotes: true,

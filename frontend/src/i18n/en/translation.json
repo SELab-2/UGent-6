@@ -168,7 +168,7 @@
       "groupClusterCreated": "Group cluster created",
       "fileStructure": "File structure",
       "fileStructurePreview": "File structure preview",
-      "update": "Update project",
+      "update": "Save",
       "newGroupCluster": "Add a new group cluster",
       "makeCluster": "Create group cluster",
       "clusterName": "Cluster name",
@@ -210,7 +210,12 @@
     "noFeedback": "No feedback provided",
     "noScoreLabel": "No score",
     "noFeedbackLabel": "No feedback",
-    "noSubmissionDownload": "No submission found"
+    "noSubmissionDownload": "No submission found",
+    "breadcrumbs": {
+      "editPage": "Edit project",
+      "submit": "Submit",
+      "submission": "Submission"
+    }
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"

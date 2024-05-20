@@ -64,7 +64,6 @@ const GroupMembersTransfer: FC<{ value?: GroupMembers,groups: GroupType[]; onCha
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
   const { t } = useTranslation()
   const API = useApi()
-  console.log(courseMembers, selectedGroup, groups, value);
 
   useEffect(()=> {
     if(courseMembers === null || !groups?.length) return
@@ -135,7 +134,6 @@ const GroupMembersTransfer: FC<{ value?: GroupMembers,groups: GroupType[]; onCha
         // @ts-ignore //TODO: fix the types so i can remove the ts ignore
         randomGroups[group.name] = groupMembers.map((m) => m.user.userId)
       }
-      console.log(randomGroups);
       // setTargetKeys(randomGroups)
       if(onChange) onChange(randomGroups)
   }

@@ -37,7 +37,6 @@ const CourseRoutes: FC = () => {
     GET(ApiRoutes.COURSE, { pathValues: { courseId: courseId! } }, "page").then((res) => {
       if(ignore) return 
       if (res.success) {
-        console.log("Course: ", res.response.data)
         setCourse(res.response.data)
       } else setCourse(null)
     })

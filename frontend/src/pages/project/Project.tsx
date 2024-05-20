@@ -1,4 +1,4 @@
-import { Button, Card, Popconfirm, Tabs, TabsProps, Tooltip, theme } from "antd"
+import { Breadcrumb, Button, Card, Popconfirm, Tabs, TabsProps, Tooltip, theme } from "antd"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
@@ -132,7 +132,8 @@ const Project = () => {
   }
 
   return (
-    <div style={{ margin: "3rem 0", width: "100%", paddingBottom: "3rem" }}>
+    <div style={{ margin: "3rem 0",marginTop:"1rem", width: "100%", paddingBottom: "3rem" }}>
+     
       <Card
         styles={{
           header: {

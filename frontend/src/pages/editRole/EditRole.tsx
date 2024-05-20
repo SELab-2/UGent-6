@@ -26,9 +26,7 @@ const ProfileContent = () => {
   }, [debouncedSearchValue])
 
   const updateRole = (user: UsersListItem, role: UserRole) => {
-    console.log(user, role)
     apiCall.patch(ApiRoutes.USER, { role: role }, { id: user.id }).then((res) => {
-      console.log(res.data)
       //onSearch();
       //replace this user in the userlist with the updated one from res.data
       const updatedUsers = users?.map((u) => {
@@ -47,10 +45,8 @@ const ProfileContent = () => {
     setLoading(true)
     const params = new URLSearchParams()
     params.append(searchType, form.getFieldValue("search"))
-    console.log(ApiRoutes.USERS + "?" + params.toString())
     apiCall.get((ApiRoutes.USERS + "?" + params.toString()) as ApiRoutes.USERS).then((res) => {
-        //FIXME: It's possible that request doesn't come in the same order as they're sent in. So it's possible that it would show the request of an old query
-      console.log(res.data)
+
       setUsers(res.data)
       setLoading(false)
     })

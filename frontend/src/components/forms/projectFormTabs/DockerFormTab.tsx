@@ -12,7 +12,6 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
     const reader = new FileReader()
     reader.onload = (e) => {
       const contents = e.target?.result as string
-      console.log(contents)
       form.setFieldValue(fieldName, contents)
     }
     reader.readAsText(file)

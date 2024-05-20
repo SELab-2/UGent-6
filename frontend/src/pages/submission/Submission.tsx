@@ -51,7 +51,7 @@ const Submission = () => {
   }
 
   return (
-    <div style={{ margin: "3rem 0" }}>
+    <div style={{ margin: "3rem 0",marginTop:"1rem" }}>
       <SubmissionCard submission={submission} />
     </div>
   )

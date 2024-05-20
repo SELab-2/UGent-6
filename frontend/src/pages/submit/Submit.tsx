@@ -25,21 +25,18 @@ const Submit = () => {
         if(!projectId) return;
         API.GET(ApiRoutes.PROJECT_TESTS, {pathValues: {id: projectId}}).then((e)=> {
             if(!e.success) return setStructure("") // if 404, it means there are no tests. 
-            console.log(e.response.data);
-            setStructure(e.response.data.structureTest)
+            setStructure(e.response.data.structureTest??"")
         })
         // API.GET(ApiRoutes.STRC)
 
     },[projectId])
 
     const onSubmit = async (values: any) => {
-        console.log("Received values of form: ", values)
         const files = values.files.map((file: any) => file.originFileObj);
         if (files.length === 0) {
             console.error("No files selected")
             return
         }
-        console.log(files);
         const formData = new FormData()
 
         const zip = new JSZip();
@@ -51,7 +48,6 @@ const Submit = () => {
 
         if (!projectId) return;
         const response = await apiCall.post(ApiRoutes.PROJECT_SUBMIT, formData, {id: projectId})
-        console.log(response)
         const submissionId:string =  response.data.submissionId.toString();
         if (response.status === 200) { // Check if the submission was successful
             message.success(t("project.submitSuccess"));
@@ -62,9 +58,6 @@ const Submit = () => {
         if (courseId != null && submissionId != null) {
             navigate(AppRoutes.SUBMISSION.replace(':courseId', courseId).replace(':projectId', projectId).replace(':submissionId', submissionId));
         }else{
-            console.log(projectId)
-            console.log(courseId)
-            console.log(submissionId)
             message.error(t("project.submitError"));
         }
     }
@@ -73,7 +66,7 @@ const Submit = () => {
         <>
             <div>
                 <Row
-                    style={{marginTop: "3rem"}}
+                    style={{marginTop: "1rem"}}
                     gutter={[32, 32]}
                 >
                     <Col

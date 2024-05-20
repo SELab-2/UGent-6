@@ -142,7 +142,7 @@
     "successfullyDeleted": "Project succesvol verwijderd",
     "deleteProject": "Project verwijderen",
     "deleteProjectDescription": "Bent u zeker dat u dit project wilt verwijderen? Alle indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
-    "noStructure": "Er specifiek geen bestanden structuur nodig",
+    "noStructure": "Er is specifiek geen bestanden structuur nodig",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",
@@ -170,7 +170,7 @@
       "groupClusterCreated": "Groep cluster aangemaakt",
       "fileStructure": "Bestandsstructuur",
       "fileStructurePreview": "Voorbeeld van bestandsstructuur",
-      "update": "Project aanpassen",
+      "update": "Bewaren",
       "newGroupCluster": "Voeg een nieuwe groep cluster toe",
       "makeCluster": "Groep cluster aanmaken",
       "clusterName": "Cluster naam",
@@ -212,7 +212,12 @@
     "noFeedback": "Geen feedback gegeven",
     "noScoreLabel": "Geen score",
     "noFeedbackLabel": "Geen feedback",
-    "noSubmissionDownload": "Geen indiening gevonden"
+    "noSubmissionDownload": "Geen indiening gevonden",
+    "breadcrumbs": {
+      "editPage": "project aanpassen",
+      "submit": "indienen",
+      "submission": "indiening"
+    }
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"

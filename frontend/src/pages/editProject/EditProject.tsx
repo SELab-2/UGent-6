@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { Button, Form, UploadProps } from "antd"
 import { useTranslation } from "react-i18next"
 import ProjectForm from "../../components/forms/ProjectForm"
-import { EditFilled } from "@ant-design/icons"
+import { EditFilled, SaveFilled } from "@ant-design/icons"
 import { FormProps } from "antd/lib"
 import { ProjectFormData } from "../projectCreate/components/ProjectCreateService"
 import useProject from "../../hooks/useProject"
@@ -25,7 +25,6 @@ const EditProject: React.FC = () => {
     const project = useProject()
     const { updateProject } = useContext(ProjectContext)
     const [initialDockerValues, setInitialDockerValues] = useState<POST_Requests[ApiRoutes.PROJECT_TESTS] | null>(null)
-    const location = useLocation()
 
     const updateDockerForm = async () => {
         if (!projectId) return
@@ -155,7 +154,7 @@ const EditProject: React.FC = () => {
                                     <Button
                                         type="primary"
                                         htmlType="submit"
-                                        icon={<EditFilled />}
+                                        icon={<SaveFilled />}
                                         loading={loading}
                                     >
                                         {t("project.change.update")}
