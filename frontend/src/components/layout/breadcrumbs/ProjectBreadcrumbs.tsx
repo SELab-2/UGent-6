@@ -52,11 +52,6 @@ const ProjectBreadcrumbs: FC<{ project: ProjectType | null }> = ({ project }) =>
       breadcrumbs.push({
         title: <Link to={AppRoutes.PROJECT.replace(":courseId", course.courseId + "").replace(":projectId", project?.projectId + "")}>{project?.name || ""}</Link>,
       })
-      if (editProjectMatch) {
-        breadcrumbs.push({
-          title: t("project.breadcrumbs.editPage"),
-        })
-      }
 
       if (submitMatch) {
         breadcrumbs.push({
@@ -69,6 +64,24 @@ const ProjectBreadcrumbs: FC<{ project: ProjectType | null }> = ({ project }) =>
           title: t("project.breadcrumbs.submission"),
         })
       }
+    }
+
+    if (editProjectMatch) {
+      breadcrumbs.push({
+        title: t("project.breadcrumbs.editPage"),
+      })
+
+      return (
+        <div style={{display:"flex",justifyContent:"center", width:"100%"}}>
+<div style={{ maxWidth: "700px", width: "100%"}}>
+  
+        <Breadcrumb
+          style={{ marginTop: "1rem" }}
+          items={breadcrumbs}
+          />
+</div>
+          </div>
+      )
     }
   }
 
