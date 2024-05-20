@@ -1,26 +1,28 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.postgre.models.FileEntity;
-import com.ugent.pidgeon.postgre.repository.FileRepository;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.tika.Tika;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 import java.util.logging.Logger;
-import java.util.zip.ZipFile;
 
 public class Filehandler {
 
     static String BASEPATH = "data";
     public static String SUBMISSION_FILENAME = "files.zip";
+    public static String EXTRA_TESTFILES_FILENAME = "testfiles.zip";
+    public static String ADMIN_SUBMISSION_FOLDER = "adminsubmissions";
 
     /**
      * Save a submission to the server
@@ -29,15 +31,15 @@ public class Filehandler {
      * @return the saved file
      * @throws IOException if an error occurs while saving the file
      */
-    public static File saveSubmission(Path directory, MultipartFile file) throws IOException {
+    public static File saveFile(Path directory, MultipartFile file, String filename) throws IOException {
         // Check if the file is empty
-        if (file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             throw new IOException("File is empty");
         }
 
         try {
             // Create a temporary file and save the uploaded file to it
-            File tempFile = File.createTempFile("uploaded-zip-", ".zip");
+            File tempFile = File.createTempFile("SELAB6CANDELETEuploaded-zip-", ".zip");
             file.transferTo(tempFile);
 
             // Check if the file is a ZIP file
@@ -53,36 +55,27 @@ public class Filehandler {
             }
 
             // Save the file to the server
-            Path filePath = directory.resolve(SUBMISSION_FILENAME);
+            Path filePath = directory.resolve(filename);
 
             try(InputStream stream = new FileInputStream(tempFile)) {
                 Files.copy(stream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            return tempFile;
+            return filePath.toFile();
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
     }
 
 
-    /**
-     * Delete a submission from the server
-     * @param directory directory of the submission to delete
-     * @throws IOException if an error occurs while deleting the submission
-     */
-    public static void deleteSubmission(Path directory) throws IOException {
-        deleteLocation(directory);
-    }
 
     /**
-     * Delete a directory and all its contents
-     * @param directory directory to delete
+     * Delete a directory and all its contents, eg: deleteLocation(new File(path.toString())
+     * @param uploadDirectory File representing directory to delete
      * @throws IOException if an error occurs while deleting the directory
      */
-    public static void deleteLocation(Path directory) throws IOException {
+    public static void deleteLocation(File uploadDirectory) throws IOException {
         try {
-            File uploadDirectory = new File(directory.toString());
             if (uploadDirectory.exists()) {
                 if(!uploadDirectory.delete()) {
                     throw new IOException("Error while deleting directory");
@@ -94,16 +87,18 @@ public class Filehandler {
         }
     }
 
+
+
     /**
      * Delete empty parent directories of a directory
      * @param directory directory to delete
      */
-    private static void deleteEmptyParentDirectories(File directory) {
+    private static void deleteEmptyParentDirectories(File directory) throws IOException {
         if (directory != null && directory.isDirectory()) {
             File[] files = directory.listFiles();
             if (files != null && files.length == 0) {
                 if (!directory.delete()) {
-                    System.err.println("Error while deleting empty directory: " + directory.getAbsolutePath());
+                    throw new IOException("Error while deleting empty directory: " + directory.getAbsolutePath());
                 } else {
                     deleteEmptyParentDirectories(directory.getParentFile());
                 }
@@ -119,17 +114,19 @@ public class Filehandler {
      * @param submissionid id of the submission
      * @return the path of the submission
      */
-    static public Path getSubmissionPath(long projectid, long groupid, long submissionid) {
+    static public Path getSubmissionPath(long projectid, Long groupid, long submissionid) {
+        if (groupid == null) {
+            return Path.of(BASEPATH,"projects", String.valueOf(projectid), ADMIN_SUBMISSION_FOLDER, String.valueOf(submissionid));
+        }
         return Path.of(BASEPATH,"projects", String.valueOf(projectid), String.valueOf(groupid), String.valueOf(submissionid));
     }
 
-    /**
-     * Get the path were a test is stored
-     * @param projectid id of the project
-     * @return the path of the test
-     */
-    static public Path getTestPath(long projectid) {
-        return Path.of(BASEPATH,"projects", String.valueOf(projectid), "tests");
+    static public Path getSubmissionArtifactPath(long projectid, Long groupid, long submissionid) {
+        return getSubmissionPath(projectid, groupid, submissionid).resolve("artifacts.zip");
+    }
+
+    static public Path getTestExtraFilesPath(long projectid) {
+        return Path.of(BASEPATH,"projects", String.valueOf(projectid));
     }
 
     /**
@@ -138,6 +135,9 @@ public class Filehandler {
      * @return the file as a resource
      */
     public static Resource getFileAsResource(Path path) {
+        if (!Files.exists(path)) {
+            return null;
+        }
         File file =  path.toFile();
         return new FileSystemResource(file);
     }
@@ -161,53 +161,67 @@ public class Filehandler {
 
     }
 
+
     /**
-     * Get a submission as a resource
-     * @param path path of the submission
-     * @return the submission as a resource
-     * @throws IOException if an error occurs while getting the submission
+     * A function for copying internally made lists of files, to a required path.
+     * @param files list of files to copy
+     * @param path path to copy the files to
+     * @throws IOException if an error occurs while copying the files
      */
-    public static Resource getSubmissionAsResource(Path path) throws IOException {
-        return new InputStreamResource(new FileInputStream(path.toFile()));
+    public static void copyFilesAsZip(List<File> files, Path path) throws IOException {
+        // Write directly to a zip file in the path variable
+        File zipFile = new File(path.toString());
+        System.out.println(zipFile.getAbsolutePath());
+        Logger.getGlobal().info("Filexists: " + zipFile.exists());
+        if (zipFile.exists() && !zipFile.canWrite()) {
+            Logger.getGlobal().info("Setting writable");
+            boolean res = zipFile.setWritable(true);
+            if (!res) {
+                throw new IOException("Cannot write to zip file");
+            }
+        }
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
+            for (File file : files) {
+                // add file to zip
+                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                FileInputStream fileInputStream = new FileInputStream(file);
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = fileInputStream.read(buffer)) > 0) {
+                    zipOutputStream.write(buffer, 0, len);
+                }
+                fileInputStream.close();
+                zipOutputStream.closeEntry();
+            }
+        }
     }
 
-    /**
-     * Save a file to the server
-     * @param file file to save
-     * @param projectId id of the project
-     * @return the path of the saved file
-     * @throws IOException if an error occurs while saving the file
-     */
-    public static Path saveTest(MultipartFile file, long projectId) throws IOException {
-        // Check if the file is empty
-        if (file.isEmpty()) {
-            throw new IOException("File is empty");
+    public static ResponseEntity<?> getZipFileAsResponse(Path path, String filename) {
+        // Get the file from the server
+        Resource zipFile = Filehandler.getFileAsResource(path);
+        if (zipFile == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found.");
         }
 
-        // Create directory if it doesn't exist
-        Path projectDirectory = getTestPath(projectId);
-        if (!Files.exists(projectDirectory)) {
-            Files.createDirectories(projectDirectory);
-        }
+        // Set headers for the response
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/zip");
 
-        // Save the file to the server
-        Path filePath = projectDirectory.resolve(Objects.requireNonNull(file.getOriginalFilename()));
-        Files.write(filePath, file.getBytes());
-
-        return filePath;
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(zipFile);
     }
 
-    /**
-     * Get the structure test file contents as string
-     * @param path path of the structure test file
-     * @return the structure test file contents as string
-     * @throws IOException if an error occurs while reading the file
-     */
-    public static String getStructureTestString(Path path) throws IOException {
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            throw new IOException("Error while reading testfile: " + e.getMessage());
-        }
+
+    public static void addExistingZip(ZipOutputStream groupZipOut, String zipFileName, File zipFile) throws IOException {
+        ZipEntry zipEntry = new ZipEntry(zipFileName);
+        groupZipOut.putNextEntry(zipEntry);
+
+        // Read the content of the zip file and write it to the group zip output stream
+        Files.copy(zipFile.toPath(), groupZipOut);
+
+        groupZipOut.closeEntry();
     }
 }

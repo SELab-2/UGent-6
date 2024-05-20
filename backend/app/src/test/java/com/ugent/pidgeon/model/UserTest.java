@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 public class UserTest {
 
-    private final User testUser = new User("John Doe", "John", "Doe", "john.doe@gmail.com", "123456");
+    private final User testUser = new User("John Doe", "John", "Doe", "john.doe@gmail.com", "123456", "");
 
     @Test
     public void isNotNull() {

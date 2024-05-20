@@ -15,6 +15,7 @@ import com.ugent.pidgeon.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class GroupMemberController {
      */
     @DeleteMapping(ApiRoutes.GROUP_MEMBER_BASE_PATH + "/{memberid}")
     @Roles({UserRole.teacher, UserRole.student})
+    @Transactional
     public ResponseEntity<String> removeMemberFromGroup(@PathVariable("groupid") long groupId, @PathVariable("memberid") long memberid, Auth auth) {
         UserEntity user = auth.getUserEntity();
         CheckResult<Void> check = groupUtil.canRemoveUserFromGroup(groupId, memberid, user);
@@ -109,7 +111,9 @@ public class GroupMemberController {
         try {
             groupMemberRepository.addMemberToGroup(groupId, memberid);
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserReferenceJson> response = members.stream().map(entityToJsonConverter::userEntityToUserReference).toList();
+            List<UserReferenceJson> response = members.stream().map(
+                u -> entityToJsonConverter.userEntityToUserReference(u, false)
+            ).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -141,7 +145,9 @@ public class GroupMemberController {
         try {
             groupMemberRepository.addMemberToGroup(groupId,user.getId());
             List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-            List<UserReferenceJson> response = members.stream().map(entityToJsonConverter::userEntityToUserReference).toList();
+            List<UserReferenceJson> response = members.stream().map(
+                u -> entityToJsonConverter.userEntityToUserReference(u, true)
+            ).toList();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
@@ -169,8 +175,12 @@ public class GroupMemberController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
+        boolean hideStudentnumber = !groupUtil.isAdminOfGroup(groupId, user).getStatus().equals(HttpStatus.OK);
+
         List<UserEntity> members = groupMemberRepository.findAllMembersByGroupId(groupId);
-        List<UserReferenceJson> response = members.stream().map((UserEntity e) -> entityToJsonConverter.userEntityToUserReference(e)).toList();
+        List<UserReferenceJson> response = members.stream().map(
+            (UserEntity e) -> entityToJsonConverter.userEntityToUserReference(e, hideStudentnumber))
+        .toList();
         return ResponseEntity.ok(response);
     }
 }

@@ -1,7 +1,7 @@
 import { FC, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes, GET_Responses } from "../../@types/requests.d"
-import { Space, Tabs, Tag, Typography } from "antd"
+import { Tabs, Typography } from "antd"
 import { TabsProps } from "antd/lib"
 import ProjectCard from "../index/components/ProjectCard"
 import GroupsCard from "./components/groupTab/GroupsCard"
@@ -12,7 +12,9 @@ import SettingsCard from "./components/settingsTab/SettingsCard"
 import GradesCard from "./components/gradesTab/GradesCard"
 import { useLocation, useNavigate } from "react-router-dom"
 import InformationTab from "./components/informationTab/InformationTab"
-import { InfoOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined, UsergroupAddOutlined } from "@ant-design/icons"
+import { InfoCircleOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons"
+import ExtraTabBtn from "./components/tabExtraBtn/ExtraTabBtn"
+import CourseTagLine from "./components/tabExtraBtn/CourseTagLine"
 
 export type CourseType = GET_Responses[ApiRoutes.COURSE]
 
@@ -21,15 +23,14 @@ const Course: FC = () => {
   const course = useCourse()
   const isCourseAdmin = useIsCourseAdmin()
   const navigate = useNavigate()
-  const location = useLocation();
-
+  const location = useLocation()
 
   const items: TabsProps["items"] = useMemo(() => {
     let tabs: TabsProps["items"] = [
       {
         key: "info",
         label: t("course.info"),
-        icon: <InfoOutlined />,
+        icon: <InfoCircleOutlined />,
         children: <InformationTab />,
       },
       {
@@ -43,16 +44,15 @@ const Course: FC = () => {
         label: t("course.groups"),
         icon: <TeamOutlined />,
         children: <GroupsCard courseId={course.courseId!} />,
-      }
+      },
     ]
     if (isCourseAdmin) {
-
       tabs = tabs.concat([
         {
           key: "members",
           label: t("course.members"),
           icon: <UserOutlined />,
-          children: <MembersCard />
+          children: <MembersCard />,
         },
         {
           key: "settings",
@@ -67,30 +67,34 @@ const Course: FC = () => {
           key: "grades",
           label: t("course.grades"),
           icon: <ScheduleOutlined />,
-          children: <GradesCard />
+          children: <GradesCard />,
         },
       ])
     }
 
     return tabs
-  }, [t, isCourseAdmin,course])
+  }, [t, isCourseAdmin, course])
 
   return (
     <div style={{ margin: "3rem 0" }}>
       <div style={{ padding: "0 2rem" }}>
-        <Typography.Title style={{marginBottom:"0.5rem"}} level={1}>{course.name}</Typography.Title>
-        <Space direction="horizontal" size="small" style={{marginBottom:"0.5rem"}}>
-          <Tag color="blue">2024-2025</Tag> 
-           <Tag key={course.teacher.url} color="orange">{course.teacher.name} {course.teacher.surname}</Tag>
-          
-        </Space>
-        <br/>
+        <Typography.Title
+          style={{ marginBottom: "0.5rem" }}
+          level={1}
+        >
+          {course.name}
+        </Typography.Title>
+       <CourseTagLine course={course}/>
+        <br />
         <Tabs
           onChange={(k) => navigate(`#${k}`)}
           defaultActiveKey={location.hash.slice(1) || "1"}
           items={items}
+          tabBarExtraContent={<ExtraTabBtn/>}
         />
       </div>
+      <br />
+      <br />
     </div>
   )
 }

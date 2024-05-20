@@ -1,93 +1,175 @@
 import { Button, List, Typography } from "antd"
-import { FC, useMemo, useState } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
 import { useTranslation } from "react-i18next"
 import GroupInfoModal from "./GroupInfoModal"
+import useAppApi from "../../../../hooks/useAppApi"
+import { ProjectType } from "../../../project/Project"
+import { useParams } from "react-router-dom"
+import useApi from "../../../../hooks/useApi"
+import useIsCourseAdmin from "../../../../hooks/useIsCourseAdmin"
+import { ClusterType } from "./GroupsCard"
 
 export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
-const Group: FC<{ group: GroupType;capacity:number, canJoin: boolean; canLeave: boolean,onClick:()=>void,onLeave:()=>void, onJoin:()=>void }> = ({ group, canJoin, canLeave,onClick,onJoin,onLeave,capacity }) => {
+const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick: () => void; onLeave: () => void; onJoin: () => void; loading?: boolean }> = ({ group, canJoin, canLeave, onClick, onJoin, onLeave, loading }) => {
   const { t } = useTranslation()
+
   return (
     <List.Item
-    key={group.groupId}
+      key={group.groupId}
       actions={[
         <Typography.Text key="cap">
-          {group.members.length} / {capacity}
+          {group.members.length} / {group.capacity}
         </Typography.Text>,
         canLeave ? (
-          <Button  style={{width:"130px"}} size="small" onClick={onLeave} key="leave">{t("course.leaveGroup")}</Button>
+          <Button
+            style={{ width: "130px" }}
+            size="small"
+            loading={loading}
+            onClick={onLeave}
+            key="leave"
+          >
+            {t("course.leaveGroup")}
+          </Button>
         ) : (
           <Button
             key="join"
+            loading={loading}
             size="small"
-            disabled={canJoin}
+            disabled={!canJoin}
             onClick={onJoin}
-            style={{width:"130px"}}
           >
             {t("course.joinGroup")}
           </Button>
         ),
       ]}
     >
-      <List.Item.Meta title={<Button size="small" onClick={onClick} type="link">{group.name}</Button>} />
+      <List.Item.Meta
+        title={
+          <Button
+            size="small"
+            onClick={onClick}
+            type="link"
+          >
+            {group.name || "Groep " + group.members.map((m) => m.name).slice(25)}
+          </Button>
+        }
+      />
     </List.Item>
   )
 }
 
-const GroupList: FC<{ groups: GroupType[] | null, capacity:number }> = ({ groups,capacity }) => {
+const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void>, onGroupIdChange?: (groupId: number|null) => void }> = ({ groups, project, onChanged,onGroupIdChange,locked }) => {
   const [modalOpened, setModalOpened] = useState(false)
-  const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
-  const {t} = useTranslation()
+  const [selectedGroup, setSelectedGroup] = useState<number | null>(null)
+  const [groupId, setGroupId] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+  const { t } = useTranslation()
+  const { message } = useAppApi()
+  const { user } = useUser()
+  const { courseId } = useParams<{ courseId: string }>()
+  const isCourseAdmin = useIsCourseAdmin()
+  const API = useApi()
 
-  // TODO: fix this
-  let ownGroupId: number | null = useMemo(() => {
-    return 1 // groups?.find((group) => group.members.some((u) => u.userId === user?.id))?.groupId ?? null
-  }, [groups])
+  const isLocked = useMemo(()=> {
+    if(!locked) return false
+    return new Date(locked).getTime() < Date.now()
+  }, [locked])
 
+  useEffect(() => {
+    if (typeof project === "number") return setGroupId(project)
+    if (project !== undefined) return setGroupId(project?.groupId ?? null)
+    if (!courseId) return
 
-  const handleModalClick = (group:GroupType) => {
-    setSelectedGroup(group)
+    let ignore = false
+
+    // const fetchOwnGroup = async () => {
+    //   if (!user) return
+    //   try {
+    //     const response = await API.GET(ApiRoutes.PROJECT, { pathValues: { id: typeof project === "number"? project.toString() : project } }, "message")
+    //     if(!response.success) return
+
+    //     if (!ignore) setGroupId(response.response.data.groupId ?? null)
+
+    //   } catch (err) {
+    //     console.error(err)
+    //   }
+    // }
+    // fetchOwnGroup()
+    return () => {
+      ignore = true
+    }
+  }, [project, courseId])
+
+  const handleModalClick = (group: GroupType) => {
+    setSelectedGroup(group.groupId)
     setModalOpened(true)
   }
 
-  const onLeave = (group:GroupType) => {
-    // TODO: leave group request
+  const removeUserFromGroup = async (userId: number, groupId: number) => {
+    setLoading(true)
+    const response = await API.DELETE(ApiRoutes.GROUP_MEMBER, { pathValues: { id: groupId, userId: userId } }, "message")
+    if (!response.success) return setLoading(false)
+      
+    setGroupId(null)
+    if(onGroupIdChange) onGroupIdChange(null)
+    if (onChanged) await onChanged()
+
+    message.success(t("course.leftGroup"))
+
+    setLoading(false)
   }
 
-  const onJoin = (group:GroupType) => {
-    // TODO: join group request
+  const onLeave = async (group: GroupType) => {
+    if (!user) return
+    removeUserFromGroup(user.id, group.groupId)
   }
 
-  const removeUserFromGroup = (userId: number) => {
-      // TODO: remove user fom group request
+  const onJoin = async (group: GroupType) => {
+    if (!user) return
+    setLoading(true)
+    const response = await API.POST(ApiRoutes.GROUP_MEMBERS, { body: { id: user.id }, pathValues: { id: group.groupId } }, "message")
+    if (!response.success) return setLoading(false)
+    if (onChanged) await onChanged()
 
+    message.success(t("course.joinedGroup"))
+    setGroupId(group.groupId)
+    if(onGroupIdChange) onGroupIdChange(group.groupId)
+    setLoading(false)
   }
 
+  console.log("Group: ", groupId);
 
-  return (<>
-    <List
-      locale={{
-        emptyText: t("course.noGroups") ,
-      }}
-      loading={groups === null}
-      rowKey="groupId"
-      dataSource={groups ?? []}
-      renderItem={(g) => (
-        <Group
-          onClick={()=> handleModalClick(g)}
-          canJoin={g.members.length < capacity || ownGroupId !== null}
-          canLeave={ownGroupId === g.groupId}
-          group={g}
-          onJoin={() => onJoin(g)}
-          onLeave={() => onLeave(g)}
-          capacity={capacity}
-        />
-      )}
-    />
-    
-    <GroupInfoModal removeUserFromGroup={removeUserFromGroup} group={selectedGroup} open={modalOpened} setOpen={setModalOpened} />
+  return (
+    <>
+      <List
+        locale={{
+          emptyText: t("course.noGroups"),
+        }}
+        loading={groups === null}
+        rowKey="groupId"
+        dataSource={groups ?? []}
+        renderItem={(g) => (
+          <Group
+            onClick={() => handleModalClick(g)}
+            canJoin={g.members.length < g.capacity && groupId === null && !isCourseAdmin && !isLocked}
+            canLeave={groupId === g.groupId && !isLocked}
+            group={g}
+            loading={loading}
+            onJoin={() => onJoin(g)}
+            onLeave={() => onLeave(g)}
+          />
+        )}
+      />
+
+      <GroupInfoModal
+        removeUserFromGroup={removeUserFromGroup}
+        group={selectedGroup && groups ? groups.find((g) => g.groupId === selectedGroup) ?? null : null}
+        open={modalOpened}
+        setOpen={setModalOpened}
+      />
     </>
   )
 }

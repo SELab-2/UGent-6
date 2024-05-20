@@ -1,16 +1,12 @@
 import apiCall from "../../../util/apiFetch";
-import {ApiRoutes, GET_Responses} from "../../../@types/requests.d";
+import {ApiRoutes, GET_Responses, POST_Requests, PUT_Requests} from "../../../@types/requests.d";
 
 
-export interface ProjectFormData {
-    name: string;
-    description: string;
-    groupClusterId: number;
-    testId: number | null;
-    visible: boolean;
-    maxScore: number;
-    deadline: Date | null;
+export type ProjectFormData = POST_Requests[ApiRoutes.PROJECT_CREATE] & {
+    groups: PUT_Requests[ApiRoutes.CLUSTER_FILL]
 }
+
+
 
 export interface ProjectError {
     code: number;
@@ -26,7 +22,6 @@ class ProjectCreateService {
             if (!response.data || response.status !== 200) {
                 console.log(response.data)
                 // Handle error response
-                const errorData = response.data || {};
                 return {
                     code: response.status,
                     message: response.statusText || "Something went wrong",

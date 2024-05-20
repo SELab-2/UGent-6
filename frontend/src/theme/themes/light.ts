@@ -15,6 +15,9 @@ export const lightTheme: ThemeConfig = {
     Layout: {
       headerBg: "#1D64C7",
       headerHeight: 48,
+    },
+    Table: {
+      headerSortActiveBg: "#f9f6fa"
     }
 
   }

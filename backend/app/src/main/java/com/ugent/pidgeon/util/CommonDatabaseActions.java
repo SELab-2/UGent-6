@@ -1,8 +1,18 @@
 package com.ugent.pidgeon.util;
 
 
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
+import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.repository.*;
+import java.nio.file.Path;
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +41,11 @@ public class CommonDatabaseActions {
     @Autowired
     private FileUtil fileUtil;
 
+  @Autowired
+  private CourseRepository courseRepository;
+  @Autowired
+  private CourseUserRepository courseUserRepository;
+
 
     /**
      * Remove a group from the database
@@ -39,17 +54,20 @@ public class CommonDatabaseActions {
      */
     public boolean removeGroup(long groupId) {
         try {
-            // Delete the group
-            groupRepository.deleteGroupUsersByGroupId(groupId);
-            groupRepository.deleteSubmissionsByGroupId(groupId);
-            groupRepository.deleteGroupFeedbacksByGroupId(groupId);
-            groupRepository.deleteById(groupId);
+            GroupEntity group = groupRepository.findById(groupId).orElse(null);
+            if (group != null) {
+                // Delete the group
+                groupRepository.deleteGroupUsersByGroupId(groupId);
+                groupRepository.deleteSubmissionsByGroupId(groupId);
+                groupRepository.deleteGroupFeedbacksByGroupId(groupId);
+                groupRepository.deleteById(groupId);
 
-            // update groupcount in cluster
-            groupClusterRepository.findById(groupId).ifPresent(cluster -> {
-                cluster.setGroupAmount(cluster.getGroupAmount() - 1);
-                groupClusterRepository.save(cluster);
-            });
+                // update groupcount in cluster
+                groupClusterRepository.findById(group.getClusterId()).ifPresent(cluster -> {
+                    cluster.setGroupAmount(cluster.getGroupAmount() - 1);
+                    groupClusterRepository.save(cluster);
+                });
+            }
             return true;
         } catch (Exception e) {
             return false;
@@ -60,22 +78,22 @@ public class CommonDatabaseActions {
     /**
      * Create a new individual cluster group for course
      * @param courseId id of the course
-     * @param userId id of the user
+     * @param user user to add to the group
      * @return true if the group was created successfully
      */
-    public boolean createNewIndividualClusterGroup(long courseId, long userId) {
+    public boolean createNewIndividualClusterGroup(long courseId, UserEntity user) {
         GroupClusterEntity groupClusterEntity = groupClusterRepository.findIndividualClusterByCourseId(courseId).orElse(null);
         if (groupClusterEntity == null) {
             return false;
         }
         // Create new group for the cluster
-        GroupEntity groupEntity = new GroupEntity("", groupClusterEntity.getId());
+        GroupEntity groupEntity = new GroupEntity(user.getName() + " " + user.getSurname(), groupClusterEntity.getId());
         groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() + 1);
         groupClusterRepository.save(groupClusterEntity);
         groupEntity = groupRepository.save(groupEntity);
 
         // Add user to the group
-        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), userId);
+        GroupUserEntity groupUserEntity = new GroupUserEntity(groupEntity.getId(), user.getId());
         groupUserRepository.save(groupUserEntity);
         return true;
     }
@@ -93,7 +111,16 @@ public class CommonDatabaseActions {
         }
         // Find the group of the user
         Optional<GroupEntity> groupEntityOptional = groupRepository.groupByClusterAndUser(groupClusterEntity.getId(), userId);
-        return groupEntityOptional.filter(groupEntity -> removeGroup(groupEntity.getId())).isPresent();
+        if (!groupEntityOptional.isPresent()) {
+            return false;
+        }
+        GroupEntity groupEntity = groupEntityOptional.get();
+        // Delete the group
+        removeGroup(groupEntity.getId());
+
+        groupClusterEntity.setGroupAmount(groupClusterEntity.getGroupAmount() - 1);
+        groupClusterRepository.save(groupClusterEntity);
+        return true;
     }
 
     /**
@@ -117,13 +144,20 @@ public class CommonDatabaseActions {
                 }
             }
 
+            if (projectEntity.getTestId() != null) {
+                TestEntity testEntity = testRepository.findById(projectEntity.getTestId()).orElse(null);
+                if (testEntity == null) {
+                    return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
+                }
+                CheckResult<Void> delRes =  deleteTestById(projectEntity, testEntity);
+                if (!delRes.getStatus().equals(HttpStatus.OK)) {
+                    return delRes;
+                }
+            }
+
             projectRepository.delete(projectEntity);
 
-            TestEntity testEntity = testRepository.findById(projectEntity.getTestId()).orElse(null);
-            if (testEntity == null) {
-                return new CheckResult<>(HttpStatus.NOT_FOUND, "Test not found", null);
-            }
-            return deleteTestById(projectEntity, testEntity);
+            return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting project", null);
@@ -159,15 +193,15 @@ public class CommonDatabaseActions {
         try {
             projectEntity.setTestId(null);
             projectRepository.save(projectEntity);
-            testRepository.deleteById(testEntity.getId())   ;
-            CheckResult<Void> checkAndDeleteRes = fileUtil.deleteFileById(testEntity.getStructureTestId());
-            if (!checkAndDeleteRes.getStatus().equals(HttpStatus.OK)) {
-                return checkAndDeleteRes;
+            testRepository.deleteById(testEntity.getId());
+            if(!testRepository.imageIsUsed(testEntity.getDockerImage())){
+                DockerSubmissionTestModel.removeDockerImage(testEntity.getDockerImage());
             }
-            return fileUtil.deleteFileById(testEntity.getDockerTestId());
+            return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting test", null);
         }
+
     }
 
     /**
@@ -178,14 +212,158 @@ public class CommonDatabaseActions {
     public CheckResult<Void> deleteClusterById(long clusterId) {
         try {
             for (GroupEntity group : groupRepository.findAllByClusterId(clusterId)) {
-                // Delete all groupUsers
-                groupUserRepository.deleteAllByGroupId(group.getId());
-                groupRepository.deleteById(group.getId());
+                boolean res = removeGroup(group.getId());
+                if (!res) {
+                    return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting cluster", null);
+                }
             }
             groupClusterRepository.deleteById(clusterId);
             return new CheckResult<>(HttpStatus.OK, "", null);
         } catch (Exception e) {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting cluster", null);
         }
+    }
+
+
+    /**
+     * Copy a course and all its related data. Assumes that permissions are already checked
+     * @param course course to copy
+     * @return CheckResult with the status of the copy and the new course
+     */
+    public CheckResult<CourseEntity> copyCourse(CourseEntity course, long userId) {
+        // Copy the course
+        CourseEntity newCourse = new CourseEntity(course.getName(), course.getDescription(), course.getCourseYear());
+        // Change the createdAt, archivedAt and joinKey
+        newCourse.setCreatedAt(OffsetDateTime.now());
+        newCourse.setArchivedAt(null);
+        newCourse.setJoinKey(UUID.randomUUID().toString());
+
+        newCourse = courseRepository.save(newCourse);
+
+        Map<Long, Long> groupClusterMap = new HashMap<>();
+        // Copy the group(clusters) linked to the course
+        GroupClusterEntity groupCluster = groupClusterRepository.findIndividualClusterByCourseId(
+            course.getId()).orElse(null);
+        if (groupCluster != null) {
+            CheckResult<GroupClusterEntity> checkResult = copyGroupCluster(groupCluster, newCourse.getId(), false);
+            if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+            }
+            groupClusterMap.put(groupCluster.getId(), checkResult.getData().getId());
+        } else {
+            return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying course", null);
+        }
+
+        List<GroupClusterEntity> groupClusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(course.getId());
+        for (GroupClusterEntity cluster : groupClusters) {
+            CheckResult<GroupClusterEntity> checkResult = copyGroupCluster(cluster,
+                newCourse.getId(), true);
+            if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+            }
+            groupClusterMap.put(cluster.getId(), checkResult.getData().getId());
+        }
+
+        // Copy the projects linked to the course
+        List<ProjectEntity> projects = projectRepository.findByCourseId(course.getId());
+        for (ProjectEntity project : projects) {
+            CheckResult<ProjectEntity> checkResult = copyProject(project, newCourse.getId(), groupClusterMap.get(project.getGroupClusterId()));
+            if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+            }
+        }
+
+        // Add user to course
+        CourseUserEntity courseUserEntity = new CourseUserEntity(newCourse.getId(), userId, CourseRelation.creator);
+        courseUserRepository.save(courseUserEntity);
+
+        return new CheckResult<>(HttpStatus.OK, "", newCourse);
+    }
+
+    /**
+     * Copy a group cluster and all its related data. Assumes that permissions are already checked
+     * @param groupCluster group cluster that needs to be copied
+     * @return CheckResult with the status of the copy and the new group cluster
+     */
+    public CheckResult<GroupClusterEntity> copyGroupCluster(GroupClusterEntity groupCluster, long courseId, boolean copyGroups) {
+        GroupClusterEntity newGroupCluster = new GroupClusterEntity(
+            courseId,
+            groupCluster.getMaxSize(),
+            groupCluster.getName(),
+            copyGroups ? groupCluster.getGroupAmount() : 0
+        );
+        newGroupCluster.setCreatedAt(OffsetDateTime.now());
+
+        newGroupCluster = groupClusterRepository.save(newGroupCluster);
+        if (copyGroups) {
+            List<GroupEntity> groups = groupRepository.findAllByClusterId(groupCluster.getId());
+            for (GroupEntity group : groups) {
+                GroupEntity newGroup = new GroupEntity(group.getName(), newGroupCluster.getId());
+                groupRepository.save(newGroup);
+            }
+        }
+
+        return new CheckResult<>(HttpStatus.OK, "", newGroupCluster);
+    }
+
+
+
+    /**
+     * Copy a project and all its related data. Assumes that permissions are already checked
+     * @param project project that needs to be copied
+     * @param courseId id of the course the project is linked to
+     * @param clusterId id of the cluster the project is linked to
+     * @return CheckResult with the status of the copy and the new project
+     */
+    public CheckResult<ProjectEntity> copyProject(ProjectEntity project, long courseId, long clusterId) {
+        // Copy the project
+        ProjectEntity newProject = new ProjectEntity(
+            courseId,
+            project.getName(),
+            project.getDescription(),
+            clusterId,
+            null,
+            project.isVisible(),
+            project.getMaxScore(),
+            project.getDeadline());
+
+        newProject = projectRepository.save(newProject);
+
+
+        // Copy the test linked to the project
+        if (project.getTestId() != null) {
+            TestEntity test = testRepository.findById(project.getTestId()).orElse(null);
+            if (test != null) {
+                CheckResult<TestEntity> checkResult = copyTest(test);
+                if (!checkResult.getStatus().equals(HttpStatus.OK)) {
+                    return new CheckResult<>(checkResult.getStatus(), checkResult.getMessage(), null);
+                }
+                newProject.setTestId(checkResult.getData().getId());
+                newProject = projectRepository.save(newProject);
+            } else {
+                return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while copying project", null);
+            }
+        }
+
+
+        return new CheckResult<>(HttpStatus.OK, "", newProject);
+    }
+
+    /**
+     * Copy a test and all its related data. Assumes that permissions are already checked and that the parameters are valid.
+     * @param test test that needs to be copied
+     * @return CheckResult with the status of the copy and the new test
+     */
+    public CheckResult<TestEntity> copyTest(TestEntity test) {
+        // Copy the test
+        TestEntity newTest = new TestEntity(
+            test.getDockerImage(),
+            test.getDockerTestScript(),
+            test.getDockerTestTemplate(),
+            test.getStructureTemplate()
+        );
+
+        newTest = testRepository.save(newTest);
+        return new CheckResult<>(HttpStatus.OK, "", newTest);
     }
 }

@@ -19,6 +19,13 @@ export const darkTheme: ThemeConfig = {
    },
    Dropdown: {
     colorPrimary: "#eee"
+   },
+   Calendar: {
+    itemActiveBg: "#002b60"
+   },
+   Table: {
+    headerSortActiveBg:"#252525"
    }
-  }
+  },
+  
 };

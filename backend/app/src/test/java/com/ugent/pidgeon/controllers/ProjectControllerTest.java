@@ -1,14 +1,15 @@
 package com.ugent.pidgeon.controllers;
 
-import com.ugent.pidgeon.model.Auth;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ugent.pidgeon.CustomObjectMapper;
 import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.CourseReferenceJson;
-import com.ugent.pidgeon.model.json.ProjectJson;
+import com.ugent.pidgeon.model.json.GroupJson;
 import com.ugent.pidgeon.model.json.ProjectProgressJson;
-import com.ugent.pidgeon.model.json.userProjectsJson;
+import com.ugent.pidgeon.model.json.ProjectResponseJsonWithStatus;
+import com.ugent.pidgeon.model.json.UserProjectsJson;
 import com.ugent.pidgeon.postgre.models.*;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
-import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.*;
 import com.ugent.pidgeon.util.CheckResult;
 import com.ugent.pidgeon.util.ClusterUtil;
@@ -17,30 +18,30 @@ import com.ugent.pidgeon.util.CourseUtil;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.Pair;
 import com.ugent.pidgeon.util.ProjectUtil;
-import java.util.Objects;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.ArgumentMatchers;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ProjectControllerTest {
-
-  protected MockMvc mockMvc;
+public class ProjectControllerTest extends ControllerTest  {
 
   @InjectMocks
   private ProjectController projectController;
@@ -78,646 +79,742 @@ public class ProjectControllerTest {
   @Mock
   private GroupRepository grouprRepository;
 
+  private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+  private ProjectEntity projectEntity;
+  private ProjectEntity projectEntity2;
+  private ProjectResponseJson projectResponseJson;
+  private ProjectResponseJson projectResponseJson2;
+  private CourseEntity courseEntity;
+  private CourseEntity courseEntity2;
+  private final long groupClusterId = 7L;
+
   @BeforeEach
   void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
+    setUpController(projectController);
 
+    courseEntity = new CourseEntity("courseName", "courseUrl", 2020);
+    courseEntity.setId(24L);
+    courseEntity2 = new CourseEntity("courseName2", "courseUrl2", 2021);
+    courseEntity2.setId(25L);
 
-  @Test
-  void testGetProjectShouldReturnOneProject() {
-    // Mock data
-    Auth auth = mock(Auth.class);
-    ProjectEntity project = new ProjectEntity();
-    project.setName("Project 1");
-    project.setId(1L);
-    project.setVisible(true);
-    List<ProjectEntity> projects = new ArrayList<>();
-    projects.add(project);
-    UserEntity user = new UserEntity("Test", "De Tester", "test.tester@test.com", UserRole.student,
-        "azure");
-    user.setId(1L);
+    projectEntity = new ProjectEntity(
+      courseEntity.getId(),
+      "projectName",
+      "projectDescription",
+      groupClusterId,
+      38L,
+      true,
+      34,
+      OffsetDateTime.now()
+    );
+    projectEntity.setId(64);
+    projectResponseJson = new ProjectResponseJson(
+      new CourseReferenceJson(courseEntity.getName(), "course1URL", courseEntity.getId(), null),
+      OffsetDateTime.now(),
+      projectEntity.getName(),
+      projectEntity.getId(),
+      projectEntity.getDescription(),
+      "submissionUrl",
+      "testUrl",
+      projectEntity.getMaxScore(),
+      projectEntity.isVisible(),
+      new ProjectProgressJson(0, 0),
+      1L,
+      groupClusterId,
+        OffsetDateTime.now()
+    );
 
-    // Mock repository behavior
-    when(projectRepository.findProjectsByUserId(anyLong())).thenReturn(projects);
-    when(auth.getUserEntity()).thenReturn(user);
-    when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
-        .thenReturn(new CheckResult<>(HttpStatus.OK, "",
-            new Pair<>(new CourseEntity(), CourseRelation.enrolled)));
-
-    // Call controller method
-    ResponseEntity<?> response = projectController.getProjects(auth);
-
-    // Verify response
-    assertInstanceOf(userProjectsJson.class, response.getBody());
-    userProjectsJson responseBody = (userProjectsJson) response.getBody();
-    assertEquals(1, responseBody.enrolledProjects().size());
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-  }
-
-  @Test
-  void testGetProjectShouldReturnMultipleProject() {
-    // Mock data
-    Auth auth = mock(Auth.class);
-    ProjectEntity project1 = new ProjectEntity();
-    project1.setName("Project 1");
-    project1.setId(1L);
-    project1.setVisible(true);
-    ProjectEntity project2 = new ProjectEntity();
-    project2.setName("Project 2");
-    project2.setId(2L);
-    project2.setVisible(true);
-    List<ProjectEntity> projects = new ArrayList<>();
-    projects.add(project1);
-    projects.add(project2);
-    UserEntity user = new UserEntity("Test", "De Tester", "test.tester@test.com", UserRole.student,
-        "azure");
-    user.setId(1L);
-
-    // Mock repository behavior
-    when(projectRepository.findProjectsByUserId(anyLong())).thenReturn(projects);
-    when(auth.getUserEntity()).thenReturn(user);
-    when(courseUtil.getCourseIfUserInCourse(anyLong(), any()))
-        .thenReturn(new CheckResult<>(HttpStatus.OK, "",
-            new Pair<>(new CourseEntity(), CourseRelation.enrolled)));
-
-    // Call controller method
-    ResponseEntity<?> response = projectController.getProjects(auth);
-
-    // Verify response
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertInstanceOf(userProjectsJson.class, response.getBody());
-    userProjectsJson responseBody = (userProjectsJson) response.getBody();
-    assertEquals(2, responseBody.enrolledProjects().size());
-  }
-
-
-  @Test
-  void testGetProjectByIdShouldReturnProject() {
-    // Mock data
-    // auth object
-    Auth auth = mock(Auth.class);
-    // projects
-    ProjectEntity project1 = new ProjectEntity();
-    project1.setName("Project 1");
-    project1.setId(1L);
-    project1.setVisible(true);
-    ProjectEntity project2 = new ProjectEntity();
-    project2.setName("Project 2");
-    project2.setId(2L);
-    project2.setVisible(true);
-    project2.setCourseId(1L);
-    ProjectEntity project3 = new ProjectEntity();
-    project3.setName("Project 3");
-    project3.setId(3L);
-    project3.setVisible(true);
-    List<ProjectEntity> projects = new ArrayList<>();
-    projects.add(project1);
-    projects.add(project2);
-    projects.add(project3);
-    // users
-    UserEntity user = new UserEntity("Test", "De Tester", "test.tester@test.com", UserRole.student,
-        "azure");
-    user.setId(1L);
-    //check results
-    CourseEntity courseEntity = new CourseEntity();
-    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
-        project2);
-    CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = new CheckResult<>(HttpStatus.OK, "TestCourse",
-        new Pair<>(courseEntity, CourseRelation.enrolled));
-
-    // Mock repository behavior
-    when(projectUtil.canGetProject(2L, user)).thenReturn(checkResult);
-    when(courseUtil.getCourseIfUserInCourse(1L, user)).thenReturn(courseCheck);
-    when(auth.getUserEntity()).thenReturn(user);
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData().getFirst(),
-        user)).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
-        OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-        1L));
-
-    // Call controller method
-    ResponseEntity<?> response = projectController.getProjectById(2L, auth);
-    // Verify response
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    ProjectResponseJson responseBody = (ProjectResponseJson) response.getBody();
-    assert responseBody != null;
-    assertEquals(2L, responseBody.projectId());
+    projectEntity2 = new ProjectEntity(
+      courseEntity2.getId(),
+      "projectName2",
+      "projectDescription2",
+      groupClusterId,
+      39L,
+      true,
+      32,
+      OffsetDateTime.now()
+    );
+    projectEntity2.setId(65);
+    projectResponseJson2 = new ProjectResponseJson(
+      new CourseReferenceJson(courseEntity2.getName(), "course2URL", courseEntity2.getId(), null),
+      OffsetDateTime.now(),
+      projectEntity2.getName(),
+      projectEntity2.getId(),
+      projectEntity2.getDescription(),
+      "submissionUrl",
+      "testUrl",
+      projectEntity2.getMaxScore(),
+      projectEntity2.isVisible(),
+      new ProjectProgressJson(0, 0),
+      1L,
+      groupClusterId,
+        OffsetDateTime.now()
+    );
 
   }
 
 
   @Test
-  void testGetProjectByIdShouldFailReasonCanNotGetProject() {
-    // Mock data
-    // auth object
-    Auth auth = mock(Auth.class);
-    // projects
-    ProjectEntity project1 = new ProjectEntity();
-    project1.setName("Project 1");
-    project1.setId(1L);
-    ProjectEntity project2 = new ProjectEntity();
-    project2.setName("Project 2");
-    project2.setId(2L);
-    project2.setCourseId(1L);
-    ProjectEntity project3 = new ProjectEntity();
-    project3.setName("Project 3");
-    project3.setId(3L);
-    List<ProjectEntity> projects = new ArrayList<>();
-    projects.add(project1);
-    projects.add(project2);
-    projects.add(project3);
-    // users
-    UserEntity user = new UserEntity("Test", "De Tester", "test.tester@test.com", UserRole.student,
-        "azure");
-    user.setId(1L);
-    //check results
-    CourseEntity courseEntity = new CourseEntity();
-    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.FORBIDDEN,
-        "testProjectForbidden",
-        project2);
-    CheckResult<CourseEntity> courseCheck = new CheckResult<>(HttpStatus.OK, "TestCourse",
-        courseEntity);
+  void testGetProjects() throws Exception {
+    String url = ApiRoutes.PROJECT_BASE_PATH;
+    List<ProjectEntity> projectEntities = List.of(projectEntity, projectEntity2);
+    ProjectResponseJsonWithStatus projectJsonWithStatus = new ProjectResponseJsonWithStatus(
+        projectResponseJson2,
+        "completed"
+    );
+    when(courseUtil.getCourseIfUserInCourse(courseEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, CourseRelation.creator))
+    );
+    when(courseUtil.getCourseIfUserInCourse(courseEntity2.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity2, CourseRelation.enrolled))
+    );
+    when(projectRepository.findProjectsByUserId(getMockUser().getId())).thenReturn(projectEntities);
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, courseEntity, getMockUser()))
+        .thenReturn(projectResponseJson);
+    when(entityToJsonConverter.projectEntityToProjectResponseJsonWithStatus(projectEntity2, courseEntity2, getMockUser()))
+        .thenReturn(projectJsonWithStatus);
 
-    // Mock repository behavior
-    when(projectUtil.canGetProject(2L, user)).thenReturn(checkResult);
-    when(courseUtil.getCourseIfExists(1L)).thenReturn(courseCheck);
-    when(auth.getUserEntity()).thenReturn(user);
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData(),
-        user)).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
-        OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-        1L));
+    /* Returns the user's projects */
+    UserProjectsJson userProjectsJson = new UserProjectsJson(
+        List.of(projectJsonWithStatus),
+        List.of(projectResponseJson)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
 
-    // Call controller method
-    ResponseEntity<?> response = projectController.getProjectById(2L, auth);
-    // Verify response
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    assertEquals("testProjectForbidden", Objects.requireNonNull(response.getBody()).toString());
+    /* If project isn't visible and role enrolled, don't return it */
+    projectEntity2.setVisible(false);
+    userProjectsJson = new UserProjectsJson(
+        Collections.emptyList(),
+        List.of(projectResponseJson)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
 
-  }
+    /* If project isn't visible but visibleAfter is passed,  update visibility */
+    projectEntity2.setVisibleAfter(OffsetDateTime.now().minusDays(1));
+    userProjectsJson = new UserProjectsJson(
+        List.of(projectJsonWithStatus),
+        List.of(projectResponseJson)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
 
+    verify(projectRepository, times(1)).save(projectEntity2);
+    assertTrue(projectEntity2.isVisible());
 
-  @Test
-  void testGetProjectByIdShouldFailReasonCanNotGetCourse() {
-    // Mock data
-    // auth object
-    Auth auth = mock(Auth.class);
-    // projects
-    ProjectEntity project1 = new ProjectEntity();
-    project1.setName("Project 1");
-    project1.setId(1L);
-    project1.setVisible(true);
-    ProjectEntity project2 = new ProjectEntity();
-    project2.setName("Project 2");
-    project2.setId(2L);
-    project2.setVisible(true);
-    project2.setCourseId(1L);
-    ProjectEntity project3 = new ProjectEntity();
-    project3.setName("Project 3");
-    project3.setId(3L);
-    project3.setVisible(true);
-    List<ProjectEntity> projects = new ArrayList<>();
-    projects.add(project1);
-    projects.add(project2);
-    projects.add(project3);
-    // users
-    UserEntity user = new UserEntity("Test", "De Tester", "test.tester@test.com", UserRole.student,
-        "azure");
-    user.setId(1L);
-    //check results
-    CourseEntity courseEntity = new CourseEntity();
-    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
-        project2);
-    CheckResult<Pair<CourseEntity, CourseRelation>> courseCheck = new CheckResult<>(HttpStatus.FORBIDDEN, "testCourseForbidden",
-        new Pair<>(courseEntity, CourseRelation.enrolled));
+    /* If project isn't visible and visibleAfter is in the future, don't return it */
+    projectEntity2.setVisible(false);
+    projectEntity2.setVisibleAfter(OffsetDateTime.now().plusDays(1));
+    userProjectsJson = new UserProjectsJson(
+        Collections.emptyList(),
+        List.of(projectResponseJson)
+    );
 
-    // Mock repository behavior
-    when(projectUtil.canGetProject(2L, user)).thenReturn(checkResult);
-    when(courseUtil.getCourseIfUserInCourse(1L, user)).thenReturn(courseCheck);
-    when(auth.getUserEntity()).thenReturn(user);
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(project2, courseCheck.getData().getFirst(),
-        user)).thenReturn(new ProjectResponseJson(
-        new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
-        OffsetDateTime.MAX,
-        "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-        1L));
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(userProjectsJson)));
 
-    // Call controller method
-    ResponseEntity<?> response = projectController.getProjectById(2L, auth);
-    // Verify response
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    assertEquals("testCourseForbidden", Objects.requireNonNull(response.getBody()).toString());
+    assertFalse(projectEntity2.isVisible());
 
+    /* If a coursecheck fails, return corresponding status */
+    when(courseUtil.getCourseIfUserInCourse(courseEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isIAmATeapot());
   }
 
   @Test
-  public void testCreateProjectShouldMakeProject() {
-    // Mock data
-    long courseId = 1L;
-    ProjectJson projectJson =
-        new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX);
-    ProjectEntity projectEntity =
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX);
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    when(auth.getUserEntity()).thenReturn(user);
+  void testGetProject() throws Exception {
+    String url = ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId();
 
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
+    /* If user can get project, return project */
+    when(projectUtil.canGetProject(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(courseUtil.getCourseIfUserInCourse(projectEntity.getCourseId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, CourseRelation.enrolled))
+    );
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, courseEntity, getMockUser()))
+        .thenReturn(projectResponseJson);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(projectResponseJson)));
 
-    CheckResult<CourseEntity> checkAcces = new CheckResult<>(HttpStatus.OK, "TestIsAdmin",
-        courseEntity);
+    /* If user is enrolled and project not visible, return forbidden */
+    projectEntity.setVisible(false);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isNotFound());
 
-    CheckResult<Void> checkResult = new CheckResult<>(HttpStatus.OK, "TestProjectJson", null);
+    /* if visibleAfter is passed, update visibility */
+    projectEntity.setVisibleAfter(OffsetDateTime.now().minusDays(1));
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk());
 
-    // Mock repository behavior
-    when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
+    verify(projectRepository, times(1)).save(projectEntity);
+    assertTrue(projectEntity.isVisible());
 
-    when(courseUtil.getCourseIfAdmin(courseId, user)).thenReturn(checkAcces);
-    when(projectUtil.checkProjectJson(projectJson, courseId)).thenReturn(checkResult);
-    when(courseRepository.findById(courseId)).thenReturn(Optional.of(courseEntity));
-    when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(
-        Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
-    when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(
-        Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
-    when(projectRepository.save(ArgumentMatchers.any(ProjectEntity.class))).thenReturn(
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX));
-    // Call controller method
-    ResponseEntity<Object> responseEntity = projectController.createProject(courseId, projectJson,
-        auth);
+    /* If visibleAfter is in the future, return 404 */
+    projectEntity.setVisible(false);
+    projectEntity.setVisibleAfter(OffsetDateTime.now().plusDays(1));
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isNotFound());
 
-    // Verify response
-    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-  }
+    assertFalse(projectEntity.isVisible());
 
+    /* If user is not enrolled and project not visible, return project */
+    when(courseUtil.getCourseIfUserInCourse(projectEntity.getCourseId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", new Pair<>(courseEntity, CourseRelation.course_admin))
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(projectResponseJson)));
 
-  @Test
-  public void testCreateProjectShouldFailReasonCanNotGetCourse() {
-    // Mock data
-    long courseId = 1L;
-    ProjectJson projectJson =
-        new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX);
-    ProjectEntity projectEntity =
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX);
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    when(auth.getUserEntity()).thenReturn(user);
+    /* If get course with relation check fails, return correpsonding status */
+    when(courseUtil.getCourseIfUserInCourse(projectEntity.getCourseId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isIAmATeapot());
 
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
-
-    CheckResult<CourseEntity> checkAcces = new CheckResult<>(HttpStatus.FORBIDDEN, "TestIsAdmin",
-        courseEntity);
-
-    CheckResult<Void> checkResult = new CheckResult<>(HttpStatus.OK, "TestProjectJson", null);
-
-    // Mock repository behavior
-    when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
-
-    when(courseUtil.getCourseIfAdmin(courseId, user)).thenReturn(checkAcces);
-    when(projectUtil.checkProjectJson(projectJson, courseId)).thenReturn(checkResult);
-    when(courseRepository.findById(courseId)).thenReturn(Optional.of(courseEntity));
-    when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(
-        Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
-    when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(
-        Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
-    when(projectRepository.save(ArgumentMatchers.any(ProjectEntity.class))).thenReturn(
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX));
-    // Call controller method
-    ResponseEntity<Object> responseEntity = projectController.createProject(courseId, projectJson,
-        auth);
-
-    // Verify response
-    assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    /* If user can't get project, return corresponding status */
+    when(projectUtil.canGetProject(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isIAmATeapot());
   }
 
   @Test
-  public void testCreateProjectShouldFailReasonCanNotGetProjectJson() {
-    // Mock data
-    long courseId = 1L;
-    ProjectJson projectJson =
-        new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX);
-    ProjectEntity projectEntity =
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX);
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    when(auth.getUserEntity()).thenReturn(user);
+  public void testCreateProject() throws Exception {
+    String url = ApiRoutes.COURSE_BASE_PATH + "/" + courseEntity.getId() + "/projects";
+    projectEntity.setVisibleAfter(OffsetDateTime.now().plusDays(1));
+    String request = "{\n" +
+        "  \"name\": \"" + projectEntity.getName() + "\",\n" +
+        "  \"description\": \"" + projectEntity.getDescription() + "\",\n" +
+        "  \"groupClusterId\": " + projectEntity.getGroupClusterId() + ",\n" +
+        "  \"visible\": " + projectEntity.isVisible() + ",\n" +
+        "  \"maxScore\": " + projectEntity.getMaxScore() + ",\n" +
+        "  \"deadline\": \"" + projectEntity.getDeadline() + "\",\n" +
+        "  \"visibleAfter\": \"" + projectEntity.getVisibleAfter() + "\"\n" +
+        "}";
 
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
+    /* If all checks succeed, create course */
+    when(courseUtil.getCourseIfAdmin(courseEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", courseEntity)
+    );
+    when(projectUtil.checkProjectJson(argThat(
+        json -> json.getName().equals(projectEntity.getName() )
+              && json.getDescription().equals(projectEntity.getDescription())
+              && json.getGroupClusterId().equals(projectEntity.getGroupClusterId())
+              && json.isVisible().equals(projectEntity.isVisible())
+              && json.getMaxScore().equals(projectEntity.getMaxScore())
+              && json.getDeadline().toInstant().equals(projectEntity.getDeadline().toInstant())
+    ), eq(courseEntity.getId()))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    when(projectRepository.save(any())).thenReturn(projectEntity);
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, courseEntity,
+        getMockUser()))
+        .thenReturn(projectResponseJson);
+    mockMvc.perform(MockMvcRequestBuilders.post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(projectResponseJson)));
+    verify(projectRepository).save(argThat(
+        project -> project.getName().equals(projectEntity.getName())
+            && project.getDescription().equals(projectEntity.getDescription())
+            && project.getGroupClusterId() == projectEntity.getGroupClusterId()
+            && project.isVisible().equals(projectEntity.isVisible())
+            && project.getMaxScore().equals(projectEntity.getMaxScore())
+            && project.getDeadline().toInstant().equals(projectEntity.getDeadline().toInstant())
+            && project.getVisibleAfter().toInstant().equals(projectEntity.getVisibleAfter().toInstant())
+    ));
 
-    CheckResult<CourseEntity> checkAcces = new CheckResult<>(HttpStatus.OK, "TestIsAdmin",
-        courseEntity);
+    /* If groupClusterId is not provided, use invalid groupClusterId */
+    reset(projectUtil);
+    request = "{\n" +
+        "  \"name\": \"" + projectEntity.getName() + "\",\n" +
+        "  \"description\": \"" + projectEntity.getDescription() + "\",\n" +
+        "  \"visible\": " + projectEntity.isVisible() + ",\n" +
+        "  \"maxScore\": " + projectEntity.getMaxScore() + ",\n" +
+        "  \"deadline\": \"" + projectEntity.getDeadline() + "\"\n" +
+        "}";
+    GroupClusterEntity individualClusterEntity = new GroupClusterEntity(courseEntity.getId(), 2, "Individual", 1);
 
-    CheckResult<Void> checkResult = new CheckResult<>(HttpStatus.FORBIDDEN, "TestProjectJson",
-        null);
+    when(groupClusterRepository.findIndividualClusterByCourseId(courseEntity.getId())).thenReturn(
+        Optional.of(individualClusterEntity));
+    when(projectUtil.checkProjectJson(argThat(
+        json -> json.getName().equals(projectEntity.getName() )
+              && json.getDescription().equals(projectEntity.getDescription())
+              && json.getGroupClusterId().equals(individualClusterEntity.getId())
+              && json.isVisible().equals(projectEntity.isVisible())
+              && json.getMaxScore().equals(projectEntity.getMaxScore())
+              && json.getDeadline().toInstant().equals(projectEntity.getDeadline().toInstant())
+    ), eq(courseEntity.getId()))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    mockMvc.perform(MockMvcRequestBuilders.post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isOk());
+    verify(projectRepository).save(argThat(
+        project -> project.getName().equals(projectEntity.getName())
+            && project.getDescription().equals(projectEntity.getDescription())
+            && project.getGroupClusterId() == individualClusterEntity.getId()
+            && project.isVisible().equals(projectEntity.isVisible())
+            && project.getMaxScore().equals(projectEntity.getMaxScore())
+            && project.getDeadline().toInstant().equals(projectEntity.getDeadline().toInstant())
+    ));
 
-    // Mock repository behavior
-    when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
+    /* If unexpected error occurs, return internal server error */
+    doThrow(new RuntimeException()).when(projectRepository).save(any());
+    mockMvc.perform(MockMvcRequestBuilders.post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isInternalServerError());
 
-    when(courseUtil.getCourseIfAdmin(courseId, user)).thenReturn(checkAcces);
-    when(projectUtil.checkProjectJson(projectJson, courseId)).thenReturn(checkResult);
-    when(courseRepository.findById(courseId)).thenReturn(Optional.of(courseEntity));
-    when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(
-        Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
-    when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(
-        Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
-    when(projectRepository.save(ArgumentMatchers.any(ProjectEntity.class))).thenReturn(
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX));
-    // Call controller method
-    ResponseEntity<Object> responseEntity = projectController.createProject(courseId, projectJson,
-        auth);
+    /* If project json is invalid, return corresponding status */
+    reset(projectUtil);
+    when(projectUtil.checkProjectJson(any(), anyLong())).thenReturn(
+        new CheckResult<>(HttpStatus.BAD_REQUEST, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isBadRequest());
 
-    // Verify response
-    assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    /* If no individual cluster is found, return internal server error */
+    when(groupClusterRepository.findIndividualClusterByCourseId(courseEntity.getId())).thenReturn(Optional.empty());
+    mockMvc.perform(MockMvcRequestBuilders.post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isInternalServerError());
+
+    /* If user no access to course, return corresponding status code */
+    when(courseUtil.getCourseIfAdmin(courseEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isIAmATeapot());
   }
 
   @Test
-  public void testCreateProjectShouldFailReasonInternalServer1() {
-    // Mock data
-    long courseId = 1L;
-    ProjectJson projectJson =
-        new ProjectJson("Test Project", "Test Description", 1L, 1L, true, 100, OffsetDateTime.MAX);
-    ProjectEntity projectEntity =
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX);
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    when(auth.getUserEntity()).thenReturn(user);
+  void testPutProjectById() throws Exception {
+    String url = ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId();
+    OffsetDateTime newDeadline = OffsetDateTime.now().plusDays(1);
+    String request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\",\n" +
+        "  \"groupClusterId\": " + groupClusterId * 4 + ",\n" +
+        "  \"visible\": " + false + ",\n" +
+        "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
+        "  \"deadline\": \"" + newDeadline + "\"\n" +
+        "}";
+    String orginalName = projectEntity.getName();
+    String orginalDescription = projectEntity.getDescription();
+    long orginalGroupClusterId = projectEntity.getGroupClusterId();
+    boolean orginalVisible = projectEntity.isVisible();
+    int orginalMaxScore = projectEntity.getMaxScore();
+    OffsetDateTime orginalDeadline = projectEntity.getDeadline();
+    ProjectResponseJson updatedJson = new ProjectResponseJson(
+        new CourseReferenceJson(courseEntity.getName(), "course1URL", courseEntity.getId(), null),
+        newDeadline,
+        "UpdatedName",
+        projectEntity.getId(),
+        "UpdatedDescription",
+        "submissionUrl",
+        "testUrl",
+        projectEntity.getMaxScore() + 33,
+        false,
+        new ProjectProgressJson(0, 0),
+        1L,
+        groupClusterId * 4,
+        OffsetDateTime.now()
+    );
+    /* If all checks pass, update and return the project */
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(projectUtil.checkProjectJson(argThat(
+        json -> json.getName().equals("UpdatedName")
+              && json.getDescription().equals("UpdatedDescription")
+              && json.getGroupClusterId().equals(groupClusterId * 4)
+              && json.isVisible().equals(false)
+              && json.getMaxScore().equals(projectEntity.getMaxScore() + 33)
+              && json.getDeadline().toInstant().equals(newDeadline.toInstant())
+    ), eq(courseEntity.getId()))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    when(projectRepository.save(any())).thenReturn(projectEntity);
+    when(courseRepository.findById(courseEntity.getId())).thenReturn(Optional.of(courseEntity));
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, courseEntity,
+        getMockUser()))
+        .thenReturn(updatedJson);
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(updatedJson)));
+    assertEquals(projectEntity.getName(), "UpdatedName");
+    assertEquals(projectEntity.getDescription(), "UpdatedDescription");
+    assertEquals(projectEntity.getGroupClusterId(), groupClusterId * 4);
+    assertEquals(projectEntity.isVisible(), false);
+    assertEquals(projectEntity.getMaxScore(), orginalMaxScore + 33);
+    assertEquals(projectEntity.getDeadline().toInstant(), newDeadline.toInstant());
+    verify(projectRepository, times(1)).save(projectEntity);
+    projectEntity.setName(orginalName);
+    projectEntity.setDescription(orginalDescription);
+    projectEntity.setGroupClusterId(orginalGroupClusterId);
+    projectEntity.setVisible(orginalVisible);
+    projectEntity.setMaxScore(orginalMaxScore);
+    projectEntity.setDeadline(orginalDeadline);
 
-    CheckResult<Void> checkResult = new CheckResult<>(HttpStatus.FORBIDDEN, "TestProjectJson",
-        null);
+    /* If visible after is passed, update visibility */
+    projectEntity.setVisibleAfter(OffsetDateTime.now().minusDays(1));
+    request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\",\n" +
+        "  \"groupClusterId\": " + groupClusterId * 4 + ",\n" +
+        "  \"visible\": " + false + ",\n" +
+        "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
+        "  \"deadline\": \"" + newDeadline + "\",\n" +
+        "  \"visibleAfter\": \"" + OffsetDateTime.now().minusDays(1) + "\"\n" +
+        "}";
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(request));
 
-    // Mock repository behavior
-    when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
+    verify(projectRepository, times(2)).save(projectEntity);
+    assertTrue(projectEntity.isVisible());
 
-    when(projectUtil.checkProjectJson(projectJson, courseId)).thenReturn(checkResult);
-    when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(
-        Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
-    when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(
-        Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
-    when(projectRepository.save(ArgumentMatchers.any(ProjectEntity.class))).thenReturn(
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX));
-    // Call controller method
-    ResponseEntity<Object> responseEntity = projectController.createProject(courseId, projectJson,
-        auth);
+    /* If visible after isn't passed, don't update visibility */
+    projectEntity.setVisible(false);
+    request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\",\n" +
+        "  \"groupClusterId\": " + groupClusterId * 4 + ",\n" +
+        "  \"visible\": " + false + ",\n" +
+        "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
+        "  \"deadline\": \"" + newDeadline + "\",\n" +
+        "  \"visibleAfter\": \"" + OffsetDateTime.now().plusDays(1) + "\"\n" +
+        "}";
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(request));
 
-    // Verify response
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    assertFalse(projectEntity.isVisible());
+
+    projectEntity.setName(orginalName);
+    projectEntity.setDescription(orginalDescription);
+    projectEntity.setGroupClusterId(orginalGroupClusterId);
+    projectEntity.setVisible(orginalVisible);
+    projectEntity.setMaxScore(orginalMaxScore);
+    projectEntity.setDeadline(orginalDeadline);
+
+    /* If groupClusterId is not provided, use invalid groupClusterId */
+    reset(projectUtil);
+    request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\",\n" +
+        "  \"visible\": " + false + ",\n" +
+        "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
+        "  \"deadline\": \"" + newDeadline + "\"\n" +
+        "}";
+    GroupClusterEntity individualClusterEntity = new GroupClusterEntity(courseEntity.getId(), 2, "Individual", 1);
+
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(groupClusterRepository.findIndividualClusterByCourseId(courseEntity.getId())).thenReturn(
+        Optional.of(individualClusterEntity));
+    when(projectUtil.checkProjectJson(argThat(
+        json -> json.getName().equals("UpdatedName")
+              && json.getDescription().equals("UpdatedDescription")
+              && json.getGroupClusterId().equals(individualClusterEntity.getId())
+              && json.isVisible().equals(false)
+              && json.getMaxScore().equals(projectEntity.getMaxScore() + 33)
+              && json.getDeadline().toInstant().equals(newDeadline.toInstant())
+    ), eq(courseEntity.getId()))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isOk());
+    assertEquals(projectEntity.getName(), "UpdatedName");
+    assertEquals(projectEntity.getDescription(), "UpdatedDescription");
+    assertEquals(projectEntity.getGroupClusterId(), individualClusterEntity.getId());
+    assertEquals(projectEntity.isVisible(), false);
+    assertEquals(projectEntity.getMaxScore(), orginalMaxScore + 33);
+    assertEquals(projectEntity.getDeadline().toInstant(), newDeadline.toInstant());
+    verify(projectRepository, times(4)).save(projectEntity);
+    projectEntity.setGroupClusterId(orginalGroupClusterId);
+
+
+
+    /* If project json is invalid, return corresponding status */
+    reset(projectUtil);
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(projectUtil.checkProjectJson(any(), anyLong())).thenReturn(
+        new CheckResult<>(HttpStatus.BAD_REQUEST, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isBadRequest());
+
+    /* If individual cluster is not found, return internal server error */
+    when(groupClusterRepository.findIndividualClusterByCourseId(courseEntity.getId())).thenReturn(Optional.empty());
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isInternalServerError());
+
+    /* If user has no acces to project, return corresponding status */
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.put(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isIAmATeapot());
   }
 
+  @Test // Same as above but patch instead of put
+  void testPatchProjectById() throws Exception {
+    String url = ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId();
+    OffsetDateTime newDeadline = OffsetDateTime.now().plusDays(1);
+    String request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\",\n" +
+        "  \"groupClusterId\": " + groupClusterId * 4 + ",\n" +
+        "  \"visible\": " + false + ",\n" +
+        "  \"maxScore\": " + (projectEntity.getMaxScore() + 33) + ",\n" +
+        "  \"deadline\": \"" + newDeadline + "\",\n" +
+        "  \"visibleAfter\": \"" + OffsetDateTime.now().plusDays(1) + "\"\n" +
+        "}";
+    String orginalName = projectEntity.getName();
+    String orginalDescription = projectEntity.getDescription();
+    long orginalGroupClusterId = projectEntity.getGroupClusterId();
+    boolean orginalVisible = projectEntity.isVisible();
+    int orginalMaxScore = projectEntity.getMaxScore();
+    OffsetDateTime orginalDeadline = projectEntity.getDeadline();
+    ProjectResponseJson updatedJson = new ProjectResponseJson(
+        new CourseReferenceJson(courseEntity.getName(), "course1URL", courseEntity.getId(), null),
+        newDeadline,
+        "UpdatedName",
+        projectEntity.getId(),
+        "UpdatedDescription",
+        "submissionUrl",
+        "testUrl",
+        projectEntity.getMaxScore() + 33,
+        false,
+        new ProjectProgressJson(0, 0),
+        1L,
+        groupClusterId * 4,
+        OffsetDateTime.now()
+    );
+    /* If all checks pass, update and return the project */
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(projectUtil.checkProjectJson(argThat(
+        json -> json.getName().equals("UpdatedName")
+            && json.getDescription().equals("UpdatedDescription")
+            && json.getGroupClusterId().equals(groupClusterId * 4)
+            && json.isVisible().equals(false)
+            && json.getMaxScore().equals(projectEntity.getMaxScore() + 33)
+            && json.getDeadline().toInstant().equals(newDeadline.toInstant())
+    ), eq(courseEntity.getId()))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    when(projectRepository.save(any())).thenReturn(projectEntity);
+    when(courseRepository.findById(courseEntity.getId())).thenReturn(Optional.of(courseEntity));
+    when(entityToJsonConverter.projectEntityToProjectResponseJson(projectEntity, courseEntity,
+        getMockUser()))
+        .thenReturn(updatedJson);
+    mockMvc.perform(MockMvcRequestBuilders.patch(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(updatedJson)));
+    assertEquals(projectEntity.getName(), "UpdatedName");
+    assertEquals(projectEntity.getDescription(), "UpdatedDescription");
+    assertEquals(projectEntity.getGroupClusterId(), groupClusterId * 4);
+    assertEquals(projectEntity.isVisible(), false);
+    assertEquals(projectEntity.getMaxScore(), orginalMaxScore + 33);
+    assertEquals(projectEntity.getDeadline().toInstant(), newDeadline.toInstant());
+    verify(projectRepository, times(1)).save(projectEntity);
+    projectEntity.setName(orginalName);
+    projectEntity.setDescription(orginalDescription);
+    projectEntity.setGroupClusterId(orginalGroupClusterId);
+    projectEntity.setVisible(orginalVisible);
+    projectEntity.setMaxScore(orginalMaxScore);
+    projectEntity.setDeadline(orginalDeadline);
 
-  @Test
-  public void testCreateProjectShouldFailReasonInternalServer2() {
-    // Mock data
-    long courseId = 1L;
-    ProjectJson projectJson =
-        new ProjectJson("Test Project", "Test Description", null, 1L, true, 100,
-            OffsetDateTime.MAX);
-    ProjectEntity projectEntity =
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX);
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(1L);
-    when(auth.getUserEntity()).thenReturn(user);
+    /* If project json is invalid, return corresponding status */
+    reset(projectUtil);
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(projectUtil.checkProjectJson(any(), anyLong())).thenReturn(
+        new CheckResult<>(HttpStatus.BAD_REQUEST, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.patch(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isBadRequest());
 
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
+    /* Only update the fields that are provided */
+    reset(projectUtil);
+    request = "{\n" +
+        "  \"name\": \"" + "UpdatedName" + "\",\n" +
+        "  \"description\": \"" + "UpdatedDescription" + "\"\n" +
+        "}";
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(projectUtil.checkProjectJson(argThat(
+        json -> json.getName().equals("UpdatedName")
+            && json.getDescription().equals("UpdatedDescription")
+            && json.getGroupClusterId().equals(orginalGroupClusterId)
+            && json.isVisible().equals(orginalVisible)
+            && json.getMaxScore().equals(orginalMaxScore)
+            && json.getDeadline().toInstant().equals(orginalDeadline.toInstant())
+    ), eq(courseEntity.getId()))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    mockMvc.perform(MockMvcRequestBuilders.patch(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isOk());
+    assertEquals(projectEntity.getName(), "UpdatedName");
+    assertEquals(projectEntity.getDescription(), "UpdatedDescription");
+    assertEquals(projectEntity.getGroupClusterId(), orginalGroupClusterId);
+    assertEquals(projectEntity.isVisible(), orginalVisible);
+    assertEquals(projectEntity.getMaxScore(), orginalMaxScore);
+    assertEquals(projectEntity.getDeadline().toInstant(), orginalDeadline.toInstant());
+    verify(projectRepository, times(2)).save(projectEntity);
+    projectEntity.setName(orginalName);
+    projectEntity.setDescription(orginalDescription);
 
-    CheckResult<CourseEntity> checkAcces = new CheckResult<>(HttpStatus.OK, "TestIsAdmin",
-        courseEntity);
+    /* Different fields not present */
+    reset(projectUtil);
+    request = "{\n" +
+        "  \"deadline\": \"" + newDeadline + "\"\n" +
+        "}";
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(projectUtil.checkProjectJson(argThat(
+        json -> json.getName().equals(orginalName)
+            && json.getDescription().equals(orginalDescription)
+            && json.getGroupClusterId().equals(orginalGroupClusterId)
+            && json.isVisible().equals(orginalVisible)
+            && json.getMaxScore().equals(orginalMaxScore)
+            && json.getDeadline().toInstant().equals(newDeadline.toInstant())
+    ), eq(courseEntity.getId()))).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    mockMvc.perform(MockMvcRequestBuilders.patch(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isOk());
+    assertEquals(projectEntity.getName(), orginalName);
+    assertEquals(projectEntity.getDescription(), orginalDescription);
+    assertEquals(projectEntity.getGroupClusterId(), orginalGroupClusterId);
+    assertEquals(projectEntity.isVisible(), orginalVisible);
+    assertEquals(projectEntity.getMaxScore(), orginalMaxScore);
+    assertEquals(projectEntity.getDeadline().toInstant(), newDeadline.toInstant());
+    verify(projectRepository, times(3)).save(projectEntity);
+    projectEntity.setDeadline(orginalDeadline);
 
-    CheckResult<Void> checkResult = new CheckResult<>(HttpStatus.OK, "TestProjectJson",
-        null);
-
-    // Mock repository behavior
-    when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
-    when(courseUtil.getCourseIfAdmin(courseId, user)).thenReturn(checkAcces);
-    when(projectUtil.checkProjectJson(projectJson, courseId)).thenReturn(checkResult);
-    when(courseRepository.findById(courseId)).thenReturn(Optional.of(courseEntity));
-    when(courseUserRepository.findById(ArgumentMatchers.any(CourseUserId.class))).thenReturn(
-        Optional.of(new CourseUserEntity(1, 1, CourseRelation.course_admin)));
-    when(groupClusterRepository.findById(projectJson.getGroupClusterId())).thenReturn(
-        Optional.of(new GroupClusterEntity(1L, 20, "Testcluster", 10)));
-    when(projectRepository.save(ArgumentMatchers.any(ProjectEntity.class))).thenReturn(
-        new ProjectEntity(1, "Test Project", "Test Description", 1L, 1L, true, 100,
-            OffsetDateTime.MAX));
-
-    // Call controller method
-    ResponseEntity<Object> responseEntity = projectController.createProject(courseId, projectJson,
-        auth);
-
-    // Verify response
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-    assertEquals("Internal error while creating project without group, contact an administrator",
-        responseEntity.getBody());
-  }
-
-
-  @Test
-  void testPutProjectByIdShouldUpdateProject() {
-    // Mock data
-    long projectId = 1L;
-    long userId = 1L;
-    long courseId = 1L;
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(userId);
-    ProjectEntity projectEntity = new ProjectEntity(1, "Test Project", "old description", 1L, 1L,
-        false, 100, OffsetDateTime.MAX);
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
-    ProjectJson projectJson = new ProjectJson("Test Project", "new description", 1L, 1L, true, 100,
-        OffsetDateTime.MAX);
-
-    ProjectEntity newProjectEntity = new ProjectEntity(1, "Test Project", "new description", 1L, 1L,
-        true, 100, OffsetDateTime.MAX);
-
-    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
-        projectEntity);
-    CheckResult<Void> checkProject = new CheckResult<>(HttpStatus.OK, "TestProjectJson", null);
-
-    // Mock behavior
-    when(auth.getUserEntity()).thenReturn(user);
-    when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(checkResult);
-    when(projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId())).thenReturn(
-        checkProject);
-    when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
-    when(courseRepository.findById(projectId)).thenReturn(Optional.of(courseEntity));
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(
-        new ProjectResponseJson(
-            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
-            OffsetDateTime.MAX,
-            "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-            1L));
-    // Call controller method
-    ResponseEntity<?> responseEntity = projectController.putProjectById(projectId, projectJson,
-        auth);
-
-    // Verify response
-    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-
-
-  }
-
-  @Test
-  void testPatchProjectByIdShouldUpdateProject() {
-    // Mock data
-    long projectId = 1L;
-    long userId = 1L;
-    long courseId = 1L;
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(userId);
-    ProjectEntity projectEntity = new ProjectEntity(1, "Test Project", "old description", 1L, 1L,
-        false, 100, OffsetDateTime.MAX);
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
-    ProjectJson projectJson = new ProjectJson("Test Project", "new description", null, 1L, true,
-        100,
-        OffsetDateTime.MAX);
-
-    ProjectEntity newProjectEntity = new ProjectEntity(1, "Test Project", "new description", 1L, 1L,
-        true, 100, OffsetDateTime.MAX);
-
-    CheckResult<ProjectEntity> checkResult = new CheckResult<>(HttpStatus.OK, "TestProject",
-        projectEntity);
-    CheckResult<Void> checkProject = new CheckResult<>(HttpStatus.OK, "TestProjectJson", null);
-
-    // Mock behavior
-    when(auth.getUserEntity()).thenReturn(user);
-    when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(checkResult);
-    when(projectUtil.checkProjectJson(projectJson, projectEntity.getCourseId())).thenReturn(
-        checkProject);
-    when(projectRepository.save(projectEntity)).thenReturn(projectEntity);
-    when(courseRepository.findById(projectId)).thenReturn(Optional.of(courseEntity));
-    when(entityToJsonConverter.projectEntityToProjectResponseJson(any(), any(), any())).thenReturn(
-        new ProjectResponseJson(
-            new CourseReferenceJson("TestCourse", ApiRoutes.COURSE_BASE_PATH + "/" + 1L, 1L),
-            OffsetDateTime.MAX,
-            "Test", 2L, "TestProject", "testUrl", "testUrl", 0, true, new ProjectProgressJson(0, 0),
-            1L));
-    // Call controller method
-    ResponseEntity<?> responseEntity = projectController.patchProjectById(projectId, projectJson,
-        auth);
-
-    // Verify response
-    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-  }
-
-
-  @Test
-  void testDeleteProjectByIdShouldDeleteProject() {
-    // Mock data
-    long projectId = 1L;
-    long userId = 1L;
-    long courseId = 1L;
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(userId);
-    ProjectEntity projectEntity = new ProjectEntity(1, "Test Project", "old description", 1L, 1L,
-        false, 100, OffsetDateTime.MAX);
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
-
-    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.OK, "TestProject",
-        projectEntity);
-    CheckResult<Void> deleteResult = new CheckResult<>(HttpStatus.OK, "TestDelete", null);
-    // Mock behavior
-    when(auth.getUserEntity()).thenReturn(user);
-    when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(projectCheck);
-    when(commonDatabaseActions.deleteProject(projectId)).thenReturn(deleteResult);
-
-    // Call controller method
-    ResponseEntity<?> responseEntity = projectController.deleteProjectById(projectId, auth);
-
-    // Verify response
-    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    /* If user has no acces to project, return corresponding status */
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.patch(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+        .andExpect(status().isIAmATeapot());
   }
 
   @Test
-  void testDeleteProjectByIdShouldFailReasonCanNotGetProject() {
-    // Mock data
-    long projectId = 1L;
-    long userId = 1L;
-    long courseId = 1L;
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(userId);
-    ProjectEntity projectEntity = new ProjectEntity(1, "Test Project", "old description", 1L, 1L,
-        false, 100, OffsetDateTime.MAX);
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
-
-    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.FORBIDDEN, "TestProject",
-        projectEntity);
-    CheckResult<Void> deleteResult = new CheckResult<>(HttpStatus.OK, "TestDelete", null);
-    // Mock behavior
-    when(auth.getUserEntity()).thenReturn(user);
-    when(projectUtil.getProjectIfAdmin(projectId, user)).thenReturn(projectCheck);
-    when(commonDatabaseActions.deleteProject(projectId)).thenReturn(deleteResult);
-
-    // Call controller method
-    ResponseEntity<?> responseEntity = projectController.deleteProjectById(projectId, auth);
-
-    // Verify response
-    assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-  }
-
-  @Test
-  void testGetGroupsOfProjectShouldReturnGroups() {
-    // Mock data
-    long projectId = 1L;
-    long userId = 1L;
-    long courseId = 1L;
-    long groupId = 1L;
-    Auth auth = mock(Auth.class);
-    UserEntity user = new UserEntity();
-    user.setId(userId);
-    ProjectEntity projectEntity = new ProjectEntity(1, "Test Project", "old description", 1L, 1L,
-        false, 100, OffsetDateTime.MAX);
-    CourseEntity courseEntity = new CourseEntity();
-    courseEntity.setId(courseId);
-    List<Long> groupIds = new ArrayList<>();
-    groupIds.add(groupId);
-    List<GroupEntity> groups = new ArrayList<>();
-    GroupEntity groupEntity = new GroupEntity();
+  void testGetGroupsOfProject() throws Exception {
+    String url = ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId() + "/groups";
+    GroupEntity groupEntity = new GroupEntity("groupName",  1L);
+    long groupId = 83L;
     groupEntity.setId(groupId);
-    groups.add(groupEntity);
+    GroupJson groupJson = new GroupJson(44, groupEntity.getId(), groupEntity.getName(), "groupClusterUrl");
 
-    CheckResult<ProjectEntity> projectCheck = new CheckResult<>(HttpStatus.OK, "TestProject",
-        projectEntity);
-    CheckResult<List<GroupEntity>> groupCheck = new CheckResult<>(HttpStatus.OK, "TestGroups",
-        groups);
-    // Mock behavior
-    when(auth.getUserEntity()).thenReturn(user);
-    when(projectUtil.canGetProject(projectId, user)).thenReturn(projectCheck);
+    /* If all checks pass, return groups */
+    when(projectUtil.canGetProject(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
     when(clusterUtil.isIndividualCluster(projectEntity.getGroupClusterId())).thenReturn(false);
-    when(projectRepository.findGroupIdsByProjectId(projectId)).thenReturn(groupIds);
+    when(projectRepository.findGroupIdsByProjectId(projectEntity.getId())).thenReturn(List.of(groupId));
     when(grouprRepository.findById(groupId)).thenReturn(Optional.of(groupEntity));
-    // Call controller method
-    ResponseEntity<?> responseEntity = projectController.getGroupsOfProject(projectId, auth);
+    /* User is admin so studentNumber shouldn't be hidden */
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    when(entityToJsonConverter.groupEntityToJson(groupEntity, false)).thenReturn(groupJson);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupJson))));
 
-    // Verify response
-    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, false);
+
+    /* If user is not admin, studentNumber should be hidden */
+    when(projectUtil.isProjectAdmin(projectEntity.getId(), getMockUser())).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+    when(entityToJsonConverter.groupEntityToJson(groupEntity, true)).thenReturn(groupJson);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().json(objectMapper.writeValueAsString(List.of(groupJson))));
+
+    verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, true);
+
+    /* If inidividual cluster return no content */
+    when(clusterUtil.isIndividualCluster(projectEntity.getGroupClusterId())).thenReturn(true);
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isNoContent());
+
+    /* If user has no acces to project, return corresponding status */
+    when(projectUtil.canGetProject(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.get(url))
+        .andExpect(status().isIAmATeapot());
   }
 
+  @Test
+  void testDeleteProjectById() throws Exception {
+    String url = ApiRoutes.PROJECT_BASE_PATH + "/" + projectEntity.getId();
 
+    /* If all checks pass, delete project */
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.OK, "", projectEntity)
+    );
+    when(commonDatabaseActions.deleteProject(projectEntity.getId())).thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+    mockMvc.perform(MockMvcRequestBuilders.delete(url))
+        .andExpect(status().isOk());
+
+    /* If deleting project fails, return corresponding status */
+    when(commonDatabaseActions.deleteProject(projectEntity.getId())).thenReturn(new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "", null));
+    mockMvc.perform(MockMvcRequestBuilders.delete(url))
+        .andExpect(status().isInternalServerError());
+
+    /* If user has no acces to project, return corresponding status */
+    when(projectUtil.getProjectIfAdmin(projectEntity.getId(), getMockUser())).thenReturn(
+        new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null)
+    );
+    mockMvc.perform(MockMvcRequestBuilders.delete(url))
+        .andExpect(status().isIAmATeapot());
+  }
 }
