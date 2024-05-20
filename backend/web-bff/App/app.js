@@ -42,8 +42,8 @@ if (DEVELOPMENT) {
             secure: false, // make sure this is true in production
             maxAge: 7 * 24 * 60 * 60 * 1000,
         },
-        store: MongoStore.create(
-            {mongoUrl: connection_string})
+        //store: MongoStore.create(
+        //    {mongoUrl: connection_string})
 
     }));
 } else {
