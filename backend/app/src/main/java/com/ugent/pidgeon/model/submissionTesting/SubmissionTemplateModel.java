@@ -239,7 +239,7 @@ public class SubmissionTemplateModel {
 
                 // first check if file contains valid file names
                 if(line.substring(0,line.length() - 1).contains("/")){
-                    throw new IllegalArgumentException("File at line "+ line_index + " contains invalid characters");
+                    throw new IllegalArgumentException("File/folder at line "+ (line_index+1) + " contains invalid characters");
                 }
                 // check if file is a folder
                 if(line.charAt(line.length() - 1) == '/') {
