@@ -18,18 +18,7 @@ router.get('/signin', authProvider.login({
     successRedirect: FRONTEND_URI,
 }));
 
-/**
- * No longer used. TODO: remove
- *
- * Route that acquires a token for accessing the backend resource server.
- * It stores this token in the session, it does not return the token.
- *
- *  @route GET /web/auth/acquireToken
- */
-router.get('/acquireToken', authProvider.acquireToken({
-    scopes: [msalConfig.auth.clientId + "/.default"],
-    redirectUri: REDIRECT_URI
-}));
+
 
 /**
  * Route that starts the logout flow for msal.
