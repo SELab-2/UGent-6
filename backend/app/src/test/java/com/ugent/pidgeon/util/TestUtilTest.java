@@ -102,9 +102,14 @@ public class TestUtilTest {
 
     doReturn(testEntity).when(testUtil).getTestIfExists(projectEntity.getId());
 
-    try (MockedStatic<DockerSubmissionTestModel> mockedTestModel = mockStatic(DockerSubmissionTestModel.class)) {
+    try (MockedStatic<DockerSubmissionTestModel> mockedTestModel = mockStatic(DockerSubmissionTestModel.class);
+          MockedStatic<SubmissionTemplateModel> mockedTemplateModel = mockStatic(SubmissionTemplateModel.class)
+    ) {
       mockedTestModel.when(() -> DockerSubmissionTestModel.imageExists(dockerImage)).thenReturn(true);
-      mockedTestModel.when(() -> DockerSubmissionTestModel.isValidTemplate(any())).thenReturn(true);
+      mockedTestModel.when(() -> DockerSubmissionTestModel.tryTemplate(dockerTemplate)).then(
+          invocation -> null);
+      mockedTemplateModel.when(() -> SubmissionTemplateModel.tryTemplate(structureTemplate)).then(
+          invocation -> null);
 
       projectEntity.setTestId(null);
       CheckResult<Pair<TestEntity, ProjectEntity>> result = testUtil.checkForTestUpdate(
@@ -128,15 +133,16 @@ public class TestUtilTest {
           dockerImage,
           dockerScript,
           dockerTemplate,
-          structureTemplate,
+          null,
           HttpMethod.POST
       );
       assertEquals(HttpStatus.OK, result.getStatus());
       doReturn(testEntity).when(testUtil).getTestIfExists(projectEntity.getId());
 
 
-      /* Not a valid template */
-      when(DockerSubmissionTestModel.isValidTemplate(any())).thenReturn(false);
+      /* Not a valid docker template */
+      mockedTestModel.when(() -> DockerSubmissionTestModel.tryTemplate(dockerTemplate))
+          .thenThrow(new IllegalArgumentException("Invalid template"));
       result = testUtil.checkForTestUpdate(
           projectEntity.getId(),
           userEntity,
@@ -147,7 +153,24 @@ public class TestUtilTest {
           httpMethod
       );
       assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
-      when(DockerSubmissionTestModel.isValidTemplate(any())).thenReturn(true);
+      mockedTestModel.when(() -> DockerSubmissionTestModel.tryTemplate(dockerTemplate)).then(
+          invocation -> null);
+
+      /* Invalid structure template */
+      mockedTemplateModel.when(() -> SubmissionTemplateModel.tryTemplate(structureTemplate))
+          .thenThrow(new IllegalArgumentException("Invalid template"));
+      result = testUtil.checkForTestUpdate(
+          projectEntity.getId(),
+          userEntity,
+          dockerImage,
+          dockerScript,
+          dockerTemplate,
+          structureTemplate,
+          httpMethod
+      );
+      assertEquals(HttpStatus.BAD_REQUEST, result.getStatus());
+      mockedTemplateModel.when(() -> SubmissionTemplateModel.tryTemplate(structureTemplate)).
+          then(invocation -> null);
 
 
       /* Method is patch and no template provided */

@@ -3,6 +3,7 @@ package com.ugent.pidgeon.util;
 import com.ugent.pidgeon.controllers.ApiRoutes;
 import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
@@ -80,7 +81,6 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A docker image is required if u add a script", null);
         }
 
-        // This returns false if the image isn't pullt yet! FIX PLS
         if(dockerImage != null && !DockerSubmissionTestModel.imageExists(dockerImage)) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A valid docker image is required in a docker test.", null);
         }
@@ -97,23 +97,16 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "No docker test script is configured for this test", null);
         }
 
-        try{
+        try {
             // throws error if there are issues in the template
             if(dockerTemplate != null) DockerSubmissionTestModel.tryTemplate(dockerTemplate);
-            if(structureTemplate != null) DockerSubmissionTestModel.tryTemplate(structureTemplate);
+            if(structureTemplate != null) SubmissionTemplateModel.tryTemplate(structureTemplate);
 
-        }catch(IllegalArgumentException e){
+        } catch(IllegalArgumentException e){
             return new CheckResult<>(HttpStatus.BAD_REQUEST, e.getMessage(), null);
         }
 
-        if(dockerTemplate != null){
-            try{
-                DockerSubmissionTestModel.tryTemplate(dockerTemplate);
-            }catch (IllegalArgumentException e){
-                return new CheckResult<>(HttpStatus.BAD_REQUEST, e.getMessage(), null);
-            }
 
-        }
 
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, projectEntity));
     }

@@ -596,7 +596,7 @@ public class TestControllerTest extends ControllerTest{
             eq(null),
             eq(null),
             eq(null),
-            eq(null),
+            eq(structureTemplate),
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
