@@ -5,7 +5,6 @@ services:
     ports:
       - 80:80
       - 443:443
-    restart: always
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
@@ -13,23 +12,6 @@ services:
     networks:
       docker_network:
         ipv4_address: 10.5.0.3
-  backend:
-    container_name: spring_container
-    build: backend/app/
-    depends_on:
-      - db
-    ports:
-      - 8080:8080
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=${PGU}
-      - SPRING_DATASOURCE_PASSWORD=${PGP}
-    restart: always
-    volumes:
-      - ./backend/app/data:/data:rw 
-    networks:
-      docker_network:
-        ipv4_address: 10.5.0.9
   db:
     container_name: db
     image: 'postgres:latest'
@@ -44,33 +26,6 @@ services:
     networks:
       docker_network:
         ipv4_address: 10.5.0.8
-  dind:
-    container_name: dind
-    image: docker:dind
-    privileged: true
-    volumes:
-      - /var/lib/docker
-    ports:
-      - 2375:2375
-    networks:
-      docker_network:
-        ipv4_address: 10.5.0.4
- 
-
-  pgadmin:
-    container_name: container-pgadmin
-    image: dpage/pgadmin4
-    depends_on:
-      - db
-    ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-    restart: unless-stopped
-    networks:
-      docker_network:
-        ipv4_address: 10.5.0.13
   certbot:
     image: certbot/certbot:latest
     volumes:

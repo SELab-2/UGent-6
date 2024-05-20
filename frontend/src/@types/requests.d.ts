@@ -427,6 +427,6 @@ export type GET_Responses = {
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: GET_Responses[ApiRoutes.COURSE]
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: Blob
   [ApiRoutes.PROJECT_DOWNLOAD_ALL_SUBMISSIONS]: Blob
-  [ApiRoutes.AUTH_INFO]: {isAuthenticated:boolean, account: Account}
+  [ApiRoutes.AUTH_INFO]: {isAuthenticated:boolean, account: Account|null}
 }
 
