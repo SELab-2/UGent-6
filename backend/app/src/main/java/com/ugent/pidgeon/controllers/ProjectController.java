@@ -50,7 +50,7 @@ public class ProjectController {
   /**
    * Function to get all projects of a user
    * @param auth authentication object of the requesting user
-   * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883808">apiDog documentation</a>
+   * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6362262">apiDog documentation</a>
    * @HttpMethod GET
    * @AllowedRoles teacher, student
    * @ApiPath /api/projects
@@ -206,7 +206,7 @@ public class ProjectController {
    * @param projectJson ProjectUpdateDTO object containing the new project's information
    * @param auth authentication object of the requesting user
    * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
-   * @HttpMethod Put
+   * @HttpMethod PUT
    * @AllowedRoles teacher
    * @ApiPath /api/projects/{projectId}
    * @return ResponseEntity with the created project
@@ -243,7 +243,7 @@ public class ProjectController {
    * @param projectJson ProjectUpdateDTO object containing the new project's information
    * @param auth authentication object of the requesting user
    * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
-   * @HttpMethod Patch
+   * @HttpMethod PATCH
    * @AllowedRoles teacher
    * @ApiPath /api/projects/{projectId}
    * @return ResponseEntity with the created project
