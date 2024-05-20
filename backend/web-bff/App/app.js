@@ -49,6 +49,7 @@ if (DEVELOPMENT) {
 } else {
     // When using production mode, please make sure a mongodb instance is running and accepting connections
     // on port PORT. Also make sure the user exists.
+    app.set('trust proxy', 1)
     app.use(session({
         name: 'pigeon session',
         secret: process.env.EXPRESS_SESSION_SECRET,
