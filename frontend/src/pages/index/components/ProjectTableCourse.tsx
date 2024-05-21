@@ -98,7 +98,7 @@ const ProjectTableCourse: FC<{ projects: ProjectType[] | null, ignoreColumns?: s
                                     hour: "2-digit",
                                     minute: "2-digit",
                                 })}`}>
-                                    <Tag icon={<ClockCircleOutlined />} color="default">{t("home.projects.visibleStatus.scheduled")}</Tag>
+                                    <Tag icon={<EyeInvisibleOutlined />} color="default">{t("home.projects.visibleStatus.scheduled")}</Tag>
                                 </Tooltip>
                             )
                         } else {

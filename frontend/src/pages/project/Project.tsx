@@ -7,6 +7,7 @@ import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
 import {
+    CalendarOutlined,
     ClockCircleOutlined,
     DeleteOutlined, EyeInvisibleOutlined, EyeOutlined,
     FileDoneOutlined,
@@ -24,6 +25,7 @@ import SubmissionsTab from "./components/SubmissionsTab"
 import MarkdownTextfield from "../../components/input/MarkdownTextfield"
 import useApi from "../../hooks/useApi"
 import i18n from "i18next";
+import useUser from "../../hooks/useUser";
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -61,6 +63,18 @@ const Project = () => {
                   minute: "2-digit",
               })} </Tag>
               <Tag color="default" icon={<StarOutlined/>}> {t("home.projects.maxScore")}: {project.maxScore}</Tag>
+                {courseAdmin && (
+                    <Tooltip title={project?.visible ? t("home.projects.visibleStatus.visible") : project?.visibleAfter ? `${t("home.projects.visibleStatus.visibleFrom")} ${new Date(project.visibleAfter).toLocaleString(i18n.language, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    })}` : t("home.projects.visibleStatus.invisible")}>
+                        <Tag icon={project?.visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                             color="default"/>
+                    </Tooltip>
+                )}
               <MarkdownTextfield content={project.description} />
             </div>
           </div>
@@ -170,17 +184,6 @@ const Project = () => {
                 extra={
                     courseAdmin ? (
                         <>
-                            <Tooltip title={project?.visible ? t("home.projects.visibleStatus.visible") : project?.visibleAfter ? `${t("home.projects.visibleStatus.visibleFrom")} ${new Date(project.visibleAfter).toLocaleString(i18n.language, {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}` : t("home.projects.visibleStatus.invisible")}>
-                                <Tag icon={project?.visible ? <EyeOutlined /> : project?.visibleAfter ? <ClockCircleOutlined /> : <EyeInvisibleOutlined />}
-                                     color={project?.visible ? token.colorSuccess : project?.visibleAfter ? "default" : token.colorHighlight} />
-                            </Tooltip>
-
                             <Button
                                 type="primary"
                                 onClick={handleNewSubmission}
