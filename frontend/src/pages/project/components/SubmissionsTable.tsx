@@ -12,8 +12,11 @@ import { ApiRoutes, PUT_Requests } from "../../../@types/requests.d"
 import useAppApi from "../../../hooks/useAppApi"
 import useApi from "../../../hooks/useApi"
 
-const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number]) => {
-  return <List.Item>{name}</List.Item>
+const GroupMember = ({ name,studentNumber }: ProjectSubmissionsType["group"]["members"][number]) => {
+  return <List.Item   >
+
+    <List.Item.Meta  title={name} description={studentNumber||""}/>
+  </List.Item>
 }
 
 const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onChange: (s: ProjectSubmissionsType[]) => void, withArtifacts?:boolean }> = ({ submissions, onChange,withArtifacts }) => {
@@ -192,14 +195,14 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
               <Typography.Text strong>{t("project.feedback")}:</Typography.Text>
               <br />
               <br />
+
               <Typography.Paragraph
                 editable={{
                   autoSize: { maxRows: 5, minRows: 3 },
                   onChange: (value) => updateFeedback(g, value),
                 }}
-                type={g.feedback?.feedback ? undefined : "secondary"}
-              >
-                {g.feedback?.feedback || t('project.noFeedbackLabel')}
+                >
+                {g.feedback?.feedback??t('project.noFeedbackLabel')}
               </Typography.Paragraph>
             </div>
 

@@ -1,4 +1,4 @@
-import { Collapse, Flex, Input, Spin, Typography } from "antd"
+import { Collapse, Flex, Input, Spin, Tag, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import { SubTest } from "../../../@types/requests"
 import { FC } from "react"
@@ -15,17 +15,17 @@ const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) =
         return (
           <Collapse.Panel
             key={index}
-            header={<Typography.Text type={successType}>{`${test.testName}: ${successText}`}</Typography.Text>}
+            header={<><Typography.Text type={successType}>{`${test.testName}: ${successText}`}</Typography.Text> {!test.required && <Typography.Text style={{marginLeft:"0.5rem"}} type="secondary" >({t("submission.optional")})</Typography.Text>}</>}
           >
             <Typography.Paragraph type="secondary">{test.testDescription}</Typography.Paragraph>
             <Flex justify="space-around" gap="1rem">
               <div style={{width:"100%"}}>
                 <Typography.Title level={5}>{t("submission.expected")}</Typography.Title>
-                <Input.TextArea autoSize={{ minRows: 3, maxRows: 20 }} readOnly value={test.correct} style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono" }} />
+                <Input.TextArea  autoSize={{ minRows: 3, maxRows: 20 }} readOnly value={test.correct} style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono"}} />
               </div>
               <div style={{width:"100%"}}>
                 <Typography.Title level={5}>{t("submission.received")}</Typography.Title>
-                <Input.TextArea autoSize={{ minRows: 3, maxRows: 20 }} readOnly value={test.output} style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono" }} />
+                <Input.TextArea  autoSize={{ minRows: 3, maxRows: 20 }} readOnly value={test.output} style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono" }} />
 
               </div>
             </Flex>

@@ -1,12 +1,11 @@
-import { useEffect, useState, useRef } from "react"
-import { Row, Col, Form, Input, Button, Spin, Select, Typography } from "antd"
+import { useEffect, useState } from "react"
+import { Form, Input, Spin, Select, Typography } from "antd"
 import UserList from "./components/UserList"
 import { ApiRoutes, GET_Responses, UserRole } from "../../@types/requests.d"
 import apiCall from "../../util/apiFetch"
 import { useTranslation } from "react-i18next"
 import { UsersListItem } from "./components/UserList"
 import { useDebounceValue } from "usehooks-ts"
-import { User } from "../../providers/UserProvider"
 
 export type UsersType = GET_Responses[ApiRoutes.USERS]
 type SearchType = "name" | "surname" | "email"
@@ -105,10 +104,7 @@ const ProfileContent = () => {
         <>
           {loading ? (
             <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <Spin
-                tip="Loading..."
-                size="large"
-            ><span> </span></Spin>
+                    <Spin />
             </div>
           ) : (
             <UserList

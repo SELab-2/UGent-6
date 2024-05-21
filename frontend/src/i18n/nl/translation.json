@@ -63,8 +63,8 @@
       },
       "groupProgress": "Voortgang groep",
       "completeProgress": "{{count}} / {{total}} voltooid",
-      "activeProjects": "{{count}} actief project",
-      "activeProjects_plural": "{{count}} actieve projecten",
+      "activeProjects": "{{count}} project",
+      "activeProjects_plural": "{{count}} projecten",
       "submit": "Indienen",
       "userCourseCount_plural": "{{count}} gebruikers in dit vak",
       "userCourseCount": "{{count}} gebruiker in dit vak"
@@ -244,6 +244,7 @@
     "failed": "Niet geslaagd",
     "expected": "Vewachte output:",
     "received": "Ontvangen output:",
+    "optional": "optioneel",
     "status": {
       "accepted": "Alle testen zijn geslaagd.",
       "failed": "Sommige testen zijn niet geslaagd."

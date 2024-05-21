@@ -60,18 +60,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
         },
       }}
       type="inner"
-      title={
-        <span>
-          <Button
-            onClick={() => navigate("..")}
-            type="text"
-            style={{ marginRight: 16 }}
-          >
-            <ArrowLeftOutlined />
-          </Button>
-          {t("submission.submission")}
-        </span>
-      }
+      title= {t("submission.submission")}
       extra={<Space>
 
         {submission.fileUrl && <Button key="file" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>}

@@ -40,12 +40,7 @@ const Submission = () => {
   if (submission === null) {
     return (
       <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Spin
-          tip="Loading..."
-          size="large"
-        >
-          <span> </span>
-        </Spin>
+               <Spin />
       </div>
     )
   }
