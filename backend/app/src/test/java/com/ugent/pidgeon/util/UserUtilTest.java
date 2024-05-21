@@ -34,7 +34,7 @@ public class UserUtilTest {
 
   @BeforeEach
   public void setUp() {
-    user = new UserEntity("name", "surname", "email", UserRole.student, "azureid");
+    user = new UserEntity("name", "surname", "email", UserRole.student, "azureid", "");
     user.setId(87L);
   }
 

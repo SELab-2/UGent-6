@@ -29,6 +29,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -74,11 +76,26 @@ public class GroupControllerTest extends ControllerTest {
             .thenReturn(new CheckResult<>(HttpStatus.OK, "", groupEntity));
         when(groupUtil.canGetGroup(groupEntity.getId(), getMockUser()))
             .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
-        when(entityToJsonConverter.groupEntityToJson(groupEntity)).thenReturn(groupJson);
+        /* User is admin, student number should not be hidden */
+        when(groupUtil.isAdminOfGroup(groupEntity.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
+        when(entityToJsonConverter.groupEntityToJson(groupEntity, false)).thenReturn(groupJson);
         mockMvc.perform(MockMvcRequestBuilders.get(url))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().string(objectMapper.writeValueAsString(groupJson)));
+        verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, false);
+
+        /* User is not admin, student number should be hidden */
+        when(groupUtil.isAdminOfGroup(groupEntity.getId(), getMockUser()))
+            .thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "", null));
+        when(entityToJsonConverter.groupEntityToJson(groupEntity, true)).thenReturn(groupJson);
+        mockMvc.perform(MockMvcRequestBuilders.get(url))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(objectMapper.writeValueAsString(groupJson)));
+        verify(entityToJsonConverter, times(1)).groupEntityToJson(groupEntity, true);
+
 
         /* If the user doesn't have acces to group, return forbidden */
         when(groupUtil.canGetGroup(anyLong(), any()))

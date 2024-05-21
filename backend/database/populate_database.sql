@@ -20,46 +20,26 @@ INSERT INTO courses (course_id,course_name, description, course_year) VALUES
 -- Inserting into `course_users`
 -- Assume course_id and user_id start from 1 and match accordingly
 INSERT INTO course_users (course_id, user_id, course_relation) VALUES
-                                                                   (1, 1, 'enrolled'),
-                                                                   (2, 1, 'enrolled'),
-                                                                   (3, 2, 'creator'),
-                                                                   (4, 3, 'course_admin'),
-                                                                   (5, 4, 'enrolled');
-
--- Inserting into `files`
--- Assume files are uploaded by different users
-INSERT INTO files (file_path, file_name, uploaded_by) VALUES
-                                                          ('/path/to/file1', 'file1.txt', 1),
-                                                          ('/path/to/file2', 'file2.txt', 2),
-                                                          ('/path/to/file3', 'file3.txt', 3),
-                                                          ('/path/to/file4', 'file4.txt', 4),
-                                                          ('/path/to/file5', 'file5.txt', 1),
-                                                          ('/path/to/file6', 'file6.txt', 2),
-                                                          ('/path/to/file7', 'file7.txt', 3),
-                                                          ('/path/to/file8', 'file8.txt', 4),
-                                                          ('/path/to/file9', 'file9.txt', 1),
-                                                          ('/path/to/file10', 'file10.txt', 2),
-                                                          ('/path/to/file11', 'file11.txt', 3),
-                                                          ('/path/to/file12', 'file12.txt', 4),
-                                                          ('/path/to/file13', 'file13.txt', 5),
-                                                          ('/path/to/file14', 'file14.txt', 4),
-                                                          ('/path/to/file15', 'file15.txt', 5),
-                                                          ('/path/to/file16', 'file16.txt', 1),
-                                                          ('/path/to/file17', 'file17.txt', 2),
-                                                          ('/path/to/file18', 'file18.txt', 3),
-                                                          ('/path/to/file19', 'file19.txt', 4),
-                                                          ('/path/to/file20', 'file20.txt', 1),
-                                                          ('/path/to/file21', 'file21.txt', 2),
-                                                          ('/path/to/file22', 'file22.txt', 3);
+                                                                    (1, 1, 'creator'),
+                                                                    (2, 1, 'enrolled'),
+                                                                    (2, 2, 'creator'),
+                                                                    (3, 2, 'creator'),
+                                                                    (4, 3, 'creator'),
+                                                                    (5, 4, 'creator');
 
 
 -- Inserting into `group_clusters`
 INSERT INTO group_clusters (course_id, cluster_name, max_size, group_amount) VALUES
-                                                                                 (1, 'Project: priemgetallen', 4, 20),
-                                                                                 (2, 'Analyse van alkanen', 3, 10),
-                                                                                 (3, 'Groepswerk industriële revolutie', 5, 13),
-                                                                                 (4, 'Linux practica', 2, 100),
-                                                                                 (5, 'Review: A shaskespeare story', 3, 30);
+                           (1, 'Project: priemgetallen', 4, 0),
+                         (2, 'Analyse van alkanen', 3, 0),
+                         (3, 'Groepswerk industriële revolutie', 5, 0),
+                         (4, 'Linux practica', 2, 0),
+                         (5, 'Review: A shaskespeare story', 3, 0),
+                           (1, 'Students', 1, 0),
+                           (2, 'Students', 1, 0),
+                           (3, 'Students', 1, 0),
+                           (4, 'Students', 1, 0),
+                           (5, 'Students', 1, 0);
 
 -- Inserting into `groups`
 INSERT INTO groups (group_name, group_cluster) VALUES
@@ -67,16 +47,13 @@ INSERT INTO groups (group_name, group_cluster) VALUES
                                                    ('Group 2', 2),
                                                    ('Group 3', 3),
                                                    ('Group 4', 4),
-                                                   ('Group 5', 5);
+                                                   ('Group 5', 5),
+                                                   ('Naam van degene die het script heeft uitgevoerd', 7);
 
 -- Inserting into `group_users`
 -- Linking users to groups, assuming group_id and user_id start from 1
 INSERT INTO group_users (group_id, user_id) VALUES
-                                                (1, 1),
-                                                (2, 2),
-                                                (3, 3),
-                                                (4, 4),
-                                                (5, 5);
+                                                (6, 1);
 
 
 
@@ -133,36 +110,6 @@ def global_multiple_alignment(infile: str | Path, output: str | Path | None = No
 ```', 2, 6, '2024-06-22 12:00:00+02'),
     (3, null, 'History Essay 1', 'Discuss historical event', 3, NULL, '2024-03-22 12:00:00+02'),
     (4, null, 'Programming Assignment 1', 'Write code', 4, 4, '2024-03-23 14:45:00+02'),
-    (5, null, 'Literature Analysis', 'Analyze text', 5, 10, '2024-03-24 10:00:00+02');
-
-
--- Inserting into `group_grades`
--- Assign grades to group solutions
-INSERT INTO group_feedback(group_id, project_id, grade, feedback) VALUES
-                                                                      (1, 1, 95.0, ''),
-                                                                      (2, 2, 88.5, ''),
-                                                                      (3, 3, NULL, ''),
-                                                                      (4, 4, 89.0, ''),
-                                                                      (5, 5, 94.5, '');
-
-
-INSERT INTO submissions (
-    project_id,
-    group_id,
-    file_id,
-    structure_accepted,
-    docker_accepted,
-    structure_feedback,
-    docker_feedback,
-    docker_test_state,
-    docker_type
-) VALUES
-      (1, 1, 1, true, true, NULL, NULL, 'finished', 'simple'),
-      (2, 2, 2, false, true, 'ERROR: .....', NULL, 'finished', 'simple'),
-      (3, 3, 3, true, false, NULL, 'Docker configuration needs improvement', 'finished', 'simple'),
-      (4, 4, 4, false, false, 'Structure needs improvement', 'Docker configuration needs improvement', 'finished', 'simple');
-
-
-
--- Makes user with id 1 the creator of courses
-UPDATE course_users SET course_relation = 'creator' WHERE user_id = 1
+    (5, null, 'Literature Analysis', 'Analyze text', 5, 10, '2024-03-24 10:00:00+02'),
+    (1, null, 'Individueel project', 'Beschrijving voor individueel project', 6, 20, '2024-05-22 12:00:00+02'),
+    (2, null, 'Individueel project', 'Beschrijving voor individueel project', 7, 20, '2024-05-22 12:00:00+02');

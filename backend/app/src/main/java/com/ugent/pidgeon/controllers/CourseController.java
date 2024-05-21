@@ -185,6 +185,18 @@ public class CourseController {
         }
     }
 
+    /**
+     * Function to update a course
+     *
+     * @param courseJson JSON object containing the course name and description
+     * @param courseId   ID of the course to update
+     * @param auth       authentication object of the requesting user
+     * @return ResponseEntity with the updated course entity
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6678309">apiDog documentation</a>
+     * @HttpMethod PATCH
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}
+     */
     @PatchMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchCourse(@RequestBody CourseJson courseJson, @PathVariable long courseId, Auth auth) {
@@ -417,7 +429,7 @@ public class CourseController {
      * @param auth     authentication object of the requesting user
      * @param courseId ID of the course to get the join key from
      * @return ResponseEntity with a statuscode and a JSON object containing the course information
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6698822">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6768820">apiDog documentation</a>
      * @HttpMethod GET
      * @AllowedRoles teacher, student
      * @ApiPath /api/courses/{courseId}/join
@@ -496,7 +508,7 @@ public class CourseController {
      * @param courseId ID of the course to add the user to
      * @param request  JSON object containing the user id and relation
      * @return ResponseEntity with a statuscode and no body
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883723">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6697093">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, admin, student
      * @ApiPath /api/courses/{courseId}/members
@@ -591,6 +603,8 @@ public class CourseController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
 
+        boolean hideStudentNumber = checkResult.getData().getSecond().equals(CourseRelation.enrolled);
+
         List<CourseUserEntity> members = courseUserRepository.findAllMembers(courseId);
         List<UserReferenceWithRelation> memberJson = members.stream().
                 map(cue -> {
@@ -598,7 +612,7 @@ public class CourseController {
                     if (user == null) {
                         return null;
                     }
-                    return entityToJsonConverter.userEntityToUserReferenceWithRelation(user, cue.getRelation());
+                    return entityToJsonConverter.userEntityToUserReferenceWithRelation(user, cue.getRelation(), hideStudentNumber);
                 }).
                 filter(Objects::nonNull).toList();
 
@@ -678,6 +692,17 @@ public class CourseController {
         return ResponseEntity.ok("");
     }
 
+    /**
+     * Function to copy a course
+     *
+     * @param courseId ID of the course to copy
+     * @param auth     authentication object of the requesting user
+     * @return ResponseEntity with the copied course entity
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7254402">apiDog documentation</a>
+     * @HttpMethod POST
+     * @AllowedRoles teacher
+     * @ApiPath /api/courses/{courseId}/copy
+     */
     @PostMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/copy")
     @Roles({UserRole.teacher})
     @Transactional

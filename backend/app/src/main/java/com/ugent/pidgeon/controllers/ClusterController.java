@@ -65,10 +65,15 @@ public class ClusterController {
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+
+        CourseRelation courseRelation = checkResult.getData().getSecond();
+        boolean hideStudentNumber = courseRelation.equals(CourseRelation.enrolled);
+
         // Get the clusters for the course
         List<GroupClusterEntity> clusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(courseid);
         List<GroupClusterJson> clusterJsons = clusters.stream().map(
-                entityToJsonConverter::clusterEntityToClusterJson).toList();
+            g -> entityToJsonConverter.clusterEntityToClusterJson(g, hideStudentNumber)
+        ).toList();
         // Return the clusters
         return ResponseEntity.ok(clusterJsons);
     }
@@ -107,20 +112,21 @@ public class ClusterController {
                 clusterJson.groupCount()
         );
         cluster.setCreatedAt(OffsetDateTime.now());
+        cluster.setLockGroupsAfter(clusterJson.lockGroupsAfter());
         GroupClusterEntity clusterEntity = groupClusterRepository.save(cluster);
 
         for (int i = 0; i < clusterJson.groupCount(); i++) {
             groupRepository.save(new GroupEntity("Group " + (i + 1), cluster.getId()));
         }
 
-        GroupClusterJson clusterJsonResponse = entityToJsonConverter.clusterEntityToClusterJson(clusterEntity);
+        GroupClusterJson clusterJsonResponse = entityToJsonConverter.clusterEntityToClusterJson(clusterEntity, false);
 
         // Return the cluster
         return ResponseEntity.status(HttpStatus.CREATED).body(clusterJsonResponse);
     }
 
     /**
-     * Returns all groups for a cluster
+     * Get cluster by ID
      *
      * @param clusterid identifier of a cluster
      * @param auth authentication object of the requesting user
@@ -138,8 +144,11 @@ public class ClusterController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         GroupClusterEntity cluster = checkResult.getData();
+
+        CheckResult<CourseEntity> courseAdmin = courseUtil.getCourseIfAdmin(cluster.getCourseId(), auth.getUserEntity());
+        boolean hideStudentNumber = !courseAdmin.getStatus().equals(HttpStatus.OK);
         // Return the cluster
-        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(cluster));
+        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(cluster, hideStudentNumber));
     }
 
 
@@ -174,8 +183,9 @@ public class ClusterController {
         }
         clusterEntity.setMaxSize(clusterJson.getCapacity());
         clusterEntity.setName(clusterJson.getName());
+        clusterEntity.setLockGroupsAfter(clusterJson.getLockGroupsAfter());
         clusterEntity = groupClusterRepository.save(clusterEntity);
-        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity));
+    return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity, false));
     }
 
     /**
@@ -183,9 +193,9 @@ public class ClusterController {
      *
      * @param clusterid  identifier of a cluster
      * @param auth authentication object of the requesting user
-     * @param clusterFillMap Map object containing a map of all groups and their
-     *                        members of that cluster
+     * @param clusterFillMap Map object containing a map of all groups and their members of that cluster
      * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7431004">apiDog documentation</a>
      * @HttpMethod PUT
      * @ApiPath /api/clusters/{clusterid}/fill
      * @AllowedRoles student, teacher
@@ -226,14 +236,25 @@ public class ClusterController {
 
             groupCluster.setGroupAmount(clusterFillJson.getClusterGroupMembers().size());
             groupClusterRepository.save(groupCluster);
-            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.clusterEntityToClusterJson(groupCluster));
+            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.clusterEntityToClusterJson(groupCluster, false));
         } catch (Exception e) {
             Logger.getGlobal().severe(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
         }
     }
 
-
+    /**
+     * Updates a cluster
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @param clusterJson ClusterJson object containing the cluster data
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883519">apiDog documentation</a>
+     * @HttpMethod PATCH
+     * @ApiPath /api/clusters/{clusterid}
+     * @AllowedRoles student, teacher
+     */
     @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
@@ -251,6 +272,10 @@ public class ClusterController {
 
         if (clusterJson.getName() == null) {
             clusterJson.setName(cluster.getName());
+        }
+
+        if (clusterJson.getLockGroupsAfter() == null) {
+            clusterJson.setLockGroupsAfter(cluster.getLockGroupsAfter());
         }
 
         return doGroupClusterUpdate(cluster, clusterJson);
@@ -317,6 +342,6 @@ public class ClusterController {
 
         cluster.setGroupAmount(cluster.getGroupAmount() + 1);
         groupClusterRepository.save(cluster);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupEntityToJson(group));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupEntityToJson(group, false));
     }
 }

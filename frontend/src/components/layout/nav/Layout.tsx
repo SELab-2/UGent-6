@@ -1,4 +1,4 @@
-import { AuthenticatedTemplate, useIsAuthenticated } from "@azure/msal-react"
+
 import AuthNav from "./AuthNav"
 import { FC, PropsWithChildren } from "react"
 import { Layout as AntLayout, Flex } from "antd"
@@ -6,29 +6,24 @@ import Logo from "../../Logo"
 
 import Sidebar from "../sidebar/Sidebar"
 import LanguageDropdown from "../../LanguageDropdown"
-
+import useAuth from "../../../hooks/useAuth";
 
 const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
-  const isAuthenticated = useIsAuthenticated()
+  const auth = useAuth()
 
 
 
-  if(!isAuthenticated) return <>{children}</>
+  if(!auth.isAuthenticated) return <>{children}</>
 
   return (
     <div style={{ position: "fixed", width: "100vw" }}>
         <AntLayout.Header style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
           <Sidebar />
-
           <Logo className="nav-logo" style={{ margin: 0, padding: 0, width: "100%" }} />
           {/* <UnauthenticatedTemplate>
           <UnauthNav />
         </UnauthenticatedTemplate> */}
-          <AuthenticatedTemplate>
-            <AuthNav />
-          </AuthenticatedTemplate>
-
-
+          <AuthNav/>
           <LanguageDropdown/>
         </AntLayout.Header>
       <AntLayout style={{ height: "calc(100vh - 48px)", overflow: "auto" }}>

@@ -14,6 +14,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -56,6 +59,7 @@ public class DockerSubmissionTestModel {
     new File(localMountFolder + "input/").mkdirs();
     new File(localMountFolder + "output/").mkdirs();
     new File(localMountFolder + "artifacts/").mkdirs();
+    new File(localMountFolder + "extra/").mkdirs();
   }
 
 
@@ -83,6 +87,33 @@ public class DockerSubmissionTestModel {
       } catch (IOException e) {
         e.printStackTrace();
       }
+    }
+  }
+
+  public void addUtilFiles(Path pathToZip){
+    // first unzip files to the utils folder
+    try {
+      ZipFile zipFile = new ZipFile(pathToZip.toFile());
+      Enumeration<? extends ZipEntry> entries = zipFile.entries();
+      while (entries.hasMoreElements()) {
+        ZipEntry entry = entries.nextElement();
+        File entryDestination = new File(localMountFolder + "extra/", entry.getName());
+        if (entry.isDirectory()) {
+          entryDestination.mkdirs();
+        } else {
+          File parent = entryDestination.getParentFile();
+          if (parent != null) {
+            parent.mkdirs();
+          }
+          try {
+            FileUtils.copyInputStreamToFile(zipFile.getInputStream(entry), entryDestination);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -283,23 +314,34 @@ public class DockerSubmissionTestModel {
   }
 
   public static boolean imageExists(String image) {
-    DockerClient dockerClient = DockerClientInstance.getInstance();
     try {
-      dockerClient.inspectImageCmd(image).exec();
-    } catch (Exception e) {
+      // Split the image into repository and tag
+      String[] parts = image.split(":");
+      String repository = parts[0];
+      String tag = parts.length > 1 ? parts[1] : "latest";
+
+      // Construct the URL for the Docker Hub API
+      String apiUrl = "https://hub.docker.com/v2/repositories/library/" + repository + "/tags/" + tag;
+      URL url = new URL(apiUrl);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("GET");
+      connection.connect();
+      int responseCode = connection.getResponseCode();
+
+      return (responseCode == 200);
+    } catch (IOException e) {
       return false;
     }
-    return true;
   }
 
-  public static boolean isValidTemplate(String template) {
+  public static void tryTemplate(String template) {
     // lines with @ should be the first of a string
     // @ is always the first character
     // ">" options under the template should be "required, optional or description="..."
     boolean atLeastOne = false; // Template should not be empty
     String[] lines = template.split("\n");
     if (lines[0].charAt(0) != '@') {
-      return false;
+    throw new IllegalArgumentException("Template should start with a '@'");
     }
     boolean isConfigurationLine = false;
     for (String line : lines) {
@@ -317,14 +359,25 @@ public class DockerSubmissionTestModel {
           // option lines
           if (!line.equalsIgnoreCase(">Required") && !line.equalsIgnoreCase(">Optional")
               && !isDescription) {
-            return false;
+            throw new IllegalArgumentException("Invalid option in template");
           }
         } else {
           isConfigurationLine = false;
         }
       }
     }
-    return atLeastOne;
+    if(! atLeastOne){
+      throw new IllegalArgumentException("Template should not be empty");
+    }
+  }
+
+  public static boolean isValidTemplate(String template){
+    try{
+      tryTemplate(template);
+      return true;
+    }catch (Exception e){
+      return false;
+    }
   }
 
 }

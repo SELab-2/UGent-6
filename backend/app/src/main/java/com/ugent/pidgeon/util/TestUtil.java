@@ -3,6 +3,7 @@ package com.ugent.pidgeon.util;
 import com.ugent.pidgeon.controllers.ApiRoutes;
 import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
@@ -50,6 +51,7 @@ public class TestUtil {
             String dockerImage,
             String dockerScript,
             String dockerTemplate,
+            String structureTemplate,
             HttpMethod httpMethod
     ) {
 
@@ -95,9 +97,16 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "No docker test script is configured for this test", null);
         }
 
-        if(dockerTemplate != null && !DockerSubmissionTestModel.isValidTemplate(dockerTemplate)) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Invalid docker template", null);
+        try {
+            // throws error if there are issues in the template
+            if(dockerTemplate != null) DockerSubmissionTestModel.tryTemplate(dockerTemplate);
+            if(structureTemplate != null) SubmissionTemplateModel.tryTemplate(structureTemplate);
+
+        } catch(IllegalArgumentException e){
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, e.getMessage(), null);
         }
+
+
 
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, projectEntity));
     }

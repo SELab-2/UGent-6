@@ -49,6 +49,7 @@ public class TestRunnerTest {
   private SubmissionResult submissionResult;
   private DockerTestOutput dockerTestOutput;
   private DockerTemplateTestOutput dockerTemplateTestOutput;
+  private final long projectId = 876L;
 
   @BeforeEach
   public void setUp() {
@@ -95,8 +96,12 @@ public class TestRunnerTest {
 
   @Test
   public void testRunDockerTest() throws IOException {
+    Path outputPath = Path.of("outputPath");
+    Path extraFilesPath = Path.of("extraFilesPath");
+    Path extraFilesPathResolved = extraFilesPath.resolve(Filehandler.EXTRA_TESTFILES_FILENAME);
+    
     try (MockedStatic<Filehandler> filehandler = org.mockito.Mockito.mockStatic(Filehandler.class)) {
-      Path outputPath = Path.of("outputPath");
+      
       AtomicInteger filehandlerCalled = new AtomicInteger();
       filehandlerCalled.set(0);
       filehandler.when(() -> Filehandler.copyFilesAsZip(artifacts, outputPath)).thenAnswer(
@@ -104,49 +109,54 @@ public class TestRunnerTest {
             filehandlerCalled.getAndIncrement();
             return null;
           });
+      filehandler.when(() -> Filehandler.getTestExtraFilesPath(projectId)).thenReturn(extraFilesPath);
       when(dockerModel.runSubmissionWithTemplate(testEntity.getDockerTestScript(), testEntity.getDockerTestTemplate()))
           .thenReturn(dockerTemplateTestOutput);
       when(dockerModel.getArtifacts()).thenReturn(artifacts);
 
-      DockerOutput result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel);
+      DockerOutput result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel, projectId);
       assertEquals(dockerTemplateTestOutput, result);
 
       verify(dockerModel, times(1)).addZipInputFiles(file);
       verify(dockerModel, times(1)).cleanUp();
+      verify(dockerModel, times(1)).addUtilFiles(extraFilesPathResolved);
       assertEquals(1, filehandlerCalled.get());
 
       /* artifacts are empty */
       when(dockerModel.getArtifacts()).thenReturn(Collections.emptyList());
-      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel);
+      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel, projectId);
       assertEquals(dockerTemplateTestOutput, result);
       verify(dockerModel, times(2)).addZipInputFiles(file);
       verify(dockerModel, times(2)).cleanUp();
+      verify(dockerModel, times(2)).addUtilFiles(extraFilesPathResolved);
       assertEquals(1, filehandlerCalled.get());
 
       /* aritifacts are null */
       when(dockerModel.getArtifacts()).thenReturn(null);
-      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel);
+      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel, projectId);
       assertEquals(dockerTemplateTestOutput, result);
       verify(dockerModel, times(3)).addZipInputFiles(file);
       verify(dockerModel, times(3)).cleanUp();
+      verify(dockerModel, times(3)).addUtilFiles(extraFilesPathResolved);
       assertEquals(1, filehandlerCalled.get());
 
       /* No template */
       testEntity.setDockerTestTemplate(null);
       when(dockerModel.runSubmission(testEntity.getDockerTestScript())).thenReturn(dockerTestOutput);
-      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel);
+      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel, projectId);
       assertEquals(dockerTestOutput, result);
       verify(dockerModel, times(4)).addZipInputFiles(file);
       verify(dockerModel, times(4)).cleanUp();
+      verify(dockerModel, times(4)).addUtilFiles(extraFilesPathResolved);
 
       /* Error gets thrown */
       when(dockerModel.runSubmission(testEntity.getDockerTestScript())).thenThrow(new RuntimeException("Error"));
-      assertThrows(Exception.class, () -> new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel));
+      assertThrows(Exception.class, () -> new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel, projectId));
       verify(dockerModel, times(5)).cleanUp();
 
       /* No script */
       testEntity.setDockerTestScript(null);
-      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel);
+      result = new TestRunner().runDockerTest(file, testEntity, outputPath, dockerModel, projectId);
       assertNull(result);
     }
 

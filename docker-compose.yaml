@@ -56,7 +56,6 @@ services:
     networks:
       docker_network:
         ipv4_address: 10.5.0.13
-
 volumes:
   postgres-data:
 networks:
@@ -66,3 +65,4 @@ networks:
      config:
        - subnet: 10.5.0.0/16
          gateway: 10.5.0.1
+
