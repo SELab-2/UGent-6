@@ -1,9 +1,8 @@
-import { Button, Dropdown, List, Popconfirm, Radio, Select, Space, Tooltip } from "antd"
+import { Button, Dropdown, List, Popconfirm, Space, Tooltip } from "antd"
 import { FC, useContext } from "react"
 import { useTranslation } from "react-i18next"
 import { DownOutlined, UserDeleteOutlined } from "@ant-design/icons"
 import { CourseMemberType } from "./MemberCard"
-import useIsCourseAdmin from "../../../../hooks/useIsCourseAdmin"
 import { MenuProps } from "antd/lib"
 import { ApiRoutes, CourseRelation } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
@@ -13,7 +12,6 @@ import useApi from "../../../../hooks/useApi"
 
 const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: CourseMemberType[]) => void }> = ({ members, onChange }) => {
   const { t } = useTranslation()
-  const isCourseAdmin = useIsCourseAdmin()
   const relation = useContext(CourseContext).member.relation
   const { courseId } = useParams()
   const API = useApi()
@@ -89,7 +87,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
                 <Button
                   danger
                   key="remove"
-                  disabled={u.user.userId === user?.id && relation === "creator"}
+                  disabled={u.user.userId === user?.id && relation === "creator" || u.relation !== "enrolled" && relation !== "creator"}
                   icon={<UserDeleteOutlined />}
                 />
               </Tooltip>
@@ -99,7 +97,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
           <List.Item.Meta
             title={u.user.name}
             description={
-              isCourseAdmin ? (
+              relation === "creator" ? (
                 <Dropdown
                   disabled={u.user.userId === user?.id}
                   menu={{ items, onClick: (e) => onRoleChange(u.user.userId, e.key as CourseRelation), defaultSelectedKeys: [u.relation] }}

@@ -22,7 +22,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const { courseId, projectId } = useParams()
   const { message } = useAppApi()
   const API = useApi()
-  const updateTable = async (groupId: number, feedback: Partial<PUT_Requests[ApiRoutes.PROJECT_SCORE]>, usePost: boolean) => {
+  const updateTable = async (groupId: number, feedback: Omit<PUT_Requests[ApiRoutes.PROJECT_SCORE], "projectId" | "groupId">, usePost: boolean) => {
     if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found")
 
     let res
@@ -30,17 +30,13 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
       res = await API.POST(
         ApiRoutes.PROJECT_SCORE,
         {
-          body: {
-            score: 0,
-            feedback: "",
-            ...feedback,
-          },
+          body: feedback,
           pathValues: { id: projectId, groupId },
         },
         "message"
       )
     } else {
-      res = await API.PATCH(ApiRoutes.PROJECT_SCORE, { body: feedback, pathValues: { id: projectId, groupId } }, "message")
+      res = await API.PUT(ApiRoutes.PROJECT_SCORE, { body: feedback, pathValues: { id: projectId, groupId } }, "message")
     }
     if (!res.success) return
 
@@ -69,11 +65,11 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
     else score = parseFloat(scoreStr)
     if (isNaN(score as number)) score = null
     if (score !== null && score > project.maxScore) return message.error(t("project.scoreTooHigh"))
-    await updateTable(s.group.groupId, { score }, s.feedback === null)
+    await updateTable(s.group.groupId, { score:score||null, feedback:s.feedback?.feedback??"" }, s.feedback === null)
   }
 
   const updateFeedback = async (s: ProjectSubmissionsType, feedback: string) => {
-    await updateTable(s.group.groupId, { feedback }, s.feedback === null)
+    await updateTable(s.group.groupId, { feedback, score: s.feedback?.score||null }, s.feedback === null)
   }
 
   const downloadFile = async (route: ApiRoutes.SUBMISSION_FILE | ApiRoutes.SUBMISSION_ARTIFACT, filename: string) => {
@@ -147,12 +143,6 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         dataIndex: "submission",
         key: "submission",
         render: (time: ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
-        sorter: (a: ProjectSubmissionsType, b: ProjectSubmissionsType) => {
-          // Implement sorting logic for submissionTime column
-          const timeA: any = a.submission?.submissionTime || 0
-          const timeB: any = b.submission?.submissionTime || 0
-          return timeA - timeB
-        },
       },
     ]
 

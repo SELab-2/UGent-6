@@ -1,12 +1,11 @@
 import { HomeFilled } from "@ant-design/icons"
-import { Breadcrumb, BreadcrumbItemProps, BreadcrumbProps, Skeleton } from "antd"
+import { Breadcrumb, BreadcrumbItemProps, BreadcrumbProps } from "antd"
 import { FC, useContext, useMemo } from "react"
 import { ProjectType } from "../../../pages/index/components/ProjectTableCourse"
-import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom"
+import { Link, useMatch } from "react-router-dom"
 import useCourse from "../../../hooks/useCourse"
 import { AppRoutes } from "../../../@types/routes"
 import { useTranslation } from "react-i18next"
-import useCourseUser from "../../../hooks/useCourseUser"
 import { UserContext } from "../../../providers/UserProvider"
 
 const ProjectBreadcrumbs: FC<{ project: ProjectType | null }> = ({ project }) => {
@@ -72,15 +71,14 @@ const ProjectBreadcrumbs: FC<{ project: ProjectType | null }> = ({ project }) =>
       })
 
       return (
-        <div style={{display:"flex",justifyContent:"center", width:"100%"}}>
-<div style={{ maxWidth: "700px", width: "100%"}}>
-  
-        <Breadcrumb
-          style={{ marginTop: "1rem" }}
-          items={breadcrumbs}
-          />
-</div>
+        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+          <div style={{ maxWidth: "700px", width: "100%" }}>
+            <Breadcrumb
+              style={{ marginTop: "1rem" }}
+              items={breadcrumbs}
+            />
           </div>
+        </div>
       )
     }
   }

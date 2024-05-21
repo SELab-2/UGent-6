@@ -56,7 +56,6 @@ const ProjectTableCourse: FC<{ projects: ProjectType[] | null, ignoreColumns?: s
                         const deadlineTimestamp = new Date(record.deadline).getTime();
                         return value === 'notPassed' ? deadlineTimestamp >= currentTimestamp : true;
                     },
-                    defaultFilteredValue: ["notPassed"],
                     render: (text: string) =>
                         new Date(text).toLocaleString(i18n.language, {
                             year: "numeric",
