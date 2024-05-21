@@ -245,6 +245,7 @@
     "optional": "optional",
     "structureTestSuccess": "Submission meets the structure requirements",
     "structureTestFailed": "Submission does not meets the structure requirements",
+    "tests": "Automated tests:",
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."

@@ -74,7 +74,6 @@ const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) =
     )
   return (
     <>
-      {!submission.structureAccepted && (
         <>
           <Typography.Text strong>{t("submission.structuretest")}</Typography.Text>
           <li>
@@ -93,12 +92,12 @@ const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) =
             )}
           </li>
         </>
-      )}
 
       {submission.dockerStatus === "no_test" && submission.structureAccepted && <Typography.Text style={{marginTop:"1rem"}} type="success">{t("submission.submissionSuccess")}</Typography.Text>}
 
       {submission.dockerStatus === "finished" && (
         <div style={{ marginTop: "1rem" }}>
+          <Typography.Text strong>{t("submission.tests")}:</Typography.Text><br/>
           <>          
             <Typography.Text type={submission.dockerFeedback.allowed ? "success" : "danger"}>{submission.dockerFeedback.allowed ? t("submission.status.accepted") : t("submission.status.failed")}</Typography.Text>
             {submission.dockerFeedback.type === "SIMPLE" ? (

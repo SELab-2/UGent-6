@@ -249,6 +249,7 @@
     "structureTestFailed": "Indiening voldoet niet aan de structuur",
     "submissionSuccess": "Indiening geslaagd",
     "submissionFailed": "Indiening niet geslaagd",
+    "tests": "Automatische testen",
     "status": {
       "accepted": "Alle testen zijn geslaagd.",
       "failed": "Sommige testen zijn niet geslaagd."
