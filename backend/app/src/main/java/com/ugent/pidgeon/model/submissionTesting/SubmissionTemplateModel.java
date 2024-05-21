@@ -221,7 +221,7 @@ public class SubmissionTemplateModel {
             if(line.isEmpty()){
                 throw new IllegalArgumentException("Empty file name in template, remove blank lines");
             }
-            if(newFolder && indentation > indentionAmounts.getLast()){
+            if(newFolder && indentation > indentionAmounts.get(indentionAmounts.size() - 1)){
                 // since the indentation is larger than the previous, we are dealing with the first file in a new folder
                 indentionAmounts.add(indentation);
                 newFolder = false;
