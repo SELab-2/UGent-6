@@ -66,7 +66,7 @@ public class GroupMemberController {
      * @param groupId ID of the group to remove the member from
      * @param auth    authentication object of the requesting user
      * @return ResponseEntity with a string message about the operation result
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883809">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7437010">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}/members
@@ -128,7 +128,7 @@ public class GroupMemberController {
      * @param groupId ID of the group to add the member to
      * @param auth    authentication object of the requesting user
      * @return ResponseEntity with a list of UserJson objects containing the members of the group
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883807">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7437022">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}/members
