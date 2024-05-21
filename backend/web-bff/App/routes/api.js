@@ -25,7 +25,7 @@ router.all('/*',
 
     try {
         const response = await fetch( "api" + req.url , req.session.accessToken, req.method, req.body, req.headers)
-        res.send(response)
+        res.status(response.code).send(response.data)
     } catch(error) {
         next(error);
     }
