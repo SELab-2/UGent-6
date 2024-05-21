@@ -229,7 +229,7 @@ export type GET_Responses = {
     projectUrl: ApiRoutes.PROJECT
     groupUrl: ApiRoutes.GROUP | null
     fileUrl: ApiRoutes.SUBMISSION_FILE
-    structureFeedback: ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK
+    structureFeedback: string
     dockerFeedback: DockerFeedback,
     artifactUrl: ApiRoutes.SUBMISSION_ARTIFACT | null
   }

@@ -243,6 +243,8 @@
     "expected": "Expected output:",
     "received": "Received output:",
     "optional": "optional",
+    "structureTestSuccess": "Submission meets the structure requirements",
+    "structureTestFailed": "Submission does not meets the structure requirements",
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."

@@ -13,7 +13,6 @@ export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const API = useApi()
 
 

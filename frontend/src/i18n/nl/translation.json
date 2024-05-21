@@ -245,6 +245,10 @@
     "expected": "Vewachte output:",
     "received": "Ontvangen output:",
     "optional": "optioneel",
+    "structureTestSuccess": "Indiening voldoet aan de structuur",
+    "structureTestFailed": "Indiening voldoet niet aan de structuur",
+    "submissionSuccess": "Indiening geslaagd",
+    "submissionFailed": "Indiening niet geslaagd",
     "status": {
       "accepted": "Alle testen zijn geslaagd.",
       "failed": "Sommige testen zijn niet geslaagd."
