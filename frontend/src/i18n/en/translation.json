@@ -202,7 +202,16 @@
       "dockerScriptHeader": "Docker script",
       "modeHeader": "Template",
       "fileStructure": "File structure",
-      "fileStructurePreview": "File structure preview"
+      "fileStructurePreview": "File structure preview",
+      "simpleMode": "Simple mode",
+      "templateMode": "Template mode",
+      "fileStructureTooltip": "Describe the project structure with a simple template, which is indentation-sensitive. Each filename is in regex, where the dot is converted to a (non-)escaped dot. Under each directory, describe the files in that directory by listing them on the following lines with the same indentation. To specify that it is a directory, end the filename with a '/'. You can also blacklist files by prefixing the filename with a '-'.",
+      "dockerImageTooltip": "Enter the Docker image that will be used to run the container. This must be a valid image available on Docker Hub.",
+      "dockerScriptTooltip": "The Docker script is the script that will be executed when starting a container with the above image. This script is always executed in bash on the container. You can also upload a script. This script has access to the files in /shared/input, where the student's files are located.",
+      "dockerTemplateTooltip": "To specify specific tests, you need to provide a template. First, enter the test name with '@{test}'. Below this, you can use '>' to provide options such as ('>required', '>optional', '>description'). Everything under these options until the next test or the end of the file is the expected output.",
+      "dockerTestDirTooltip": "Here you can upload additional test utility files that will be available in the container. They will be located in the /shared/extra folder.",
+      "simpleModeInfo": "In simple mode, the container will execute the Docker script. Everything logged to the console will be visible to the student as feedback. This allows you to provide feedback to the student using print statements. To specify whether the submission was successful or not, you must write 'Push allowed/denied' to the file /shared/output/dockerOutput.",
+      "templateModeInfo": "In template mode, the student receives feedback in a more structured format. You can specify multiple small subtests, and the student will see the differences between their output and the expected output in these tests."
     },
     "noScore": "No score available",
     "noFeedback": "No feedback provided",

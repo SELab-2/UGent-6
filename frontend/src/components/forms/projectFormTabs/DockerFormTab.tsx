@@ -1,8 +1,8 @@
 import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
-import { Button, Form, Input, Upload } from "antd"
+import {Button, Form, Input, Switch, Upload} from "antd"
 import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
-import { FC } from "react"
+import {FC, useState} from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes } from "../../../@types/requests"
 import useAppApi from "../../../hooks/useAppApi"
@@ -79,6 +79,7 @@ function isValidTemplate(template: string): string {
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
+  const [withArtifacts, setWithArtifacts] = useState<boolean>(true)
   const dockerImage = Form.useWatch("dockerImage", form)
 
   const dockerDisabled = !dockerImage?.length
@@ -97,8 +98,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
       <Form.Item
         label="Docker image"
         name="dockerImage"
-        tooltip="TODO write docs for this"
-      >
+        tooltip={t("project.tests.dockerImageTooltip")}      >
         <Input
           style={{ marginTop: "8px" }}
           placeholder={t("project.tests.dockerImagePlaceholder")}
@@ -110,7 +110,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           rules={[{ required: !dockerDisabled, message: "Docker script is required" }]}
           label="Docker start script"
           name="dockerScript"
-          tooltip="TODO write docs for this"
+          tooltip={t("project.tests.dockerScriptTooltip")}
         >
           <Input.TextArea
             disabled={dockerDisabled}
@@ -123,37 +123,58 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           disabled={dockerDisabled}
           fieldName="dockerScript"
         />
-
-        <Form.Item
-          label="Docker template"
-          name="dockerTemplate"
-          tooltip="TODO write docs for this"
-          rules={[
-            {
-              validator: (_, value) => {
-                const errorMessage = isValidTemplate(value)
-                return errorMessage === "" ? Promise.resolve() : Promise.reject(new Error(errorMessage))
-              },
-            },
-          ]}
-        >
-          <Input.TextArea
-            autoSize={{ minRows: 3 }}
-            disabled={dockerDisabled}
-            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
+        <div style={{ paddingBottom: '14px' }}>
+          <Switch
+              checked={withArtifacts}
+              checkedChildren={t("project.tests.templateMode")}
+              unCheckedChildren={t("project.tests.simpleMode")}
+              onChange={setWithArtifacts}
           />
-        </Form.Item>
-        <UploadBtn
-          form={form}
-          disabled={dockerDisabled}
-          fieldName="dockerTemplate"
-        />
+        </div>
+
+        {withArtifacts ?
+            <div>
+              <span style={{ color: 'darkgray', fontSize: '0.8em' }}>{t("project.tests.templateModeInfo")}
+                  <br/>
+                  <br/>
+              </span>
+
+            <Form.Item
+                label="Template"
+                name="dockerTemplate"
+                tooltip={t("project.tests.dockerTemplateTooltip")}
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      const errorMessage = isValidTemplate(value)
+                      return errorMessage === "" ? Promise.resolve() : Promise.reject(new Error(errorMessage))
+                    },
+                  },
+                ]}
+            >
+
+              <Input.TextArea
+                  autoSize={{minRows: 4}}
+                  disabled={dockerDisabled}
+                  style={{fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
+                  placeholder={"@helloWorldTest\n>required\n>description=\"This is a test\"\nExpected output 1\n@helloUGent\n>optional\nExpected output 2\n"}
+              />
+              <UploadBtn
+                  form={form}
+                  disabled={dockerDisabled}
+                  fieldName="dockerTemplate"
+              />
+            </Form.Item> </div>: <Form.Item
+          name="simpleMode"
+          children={<span style={{color: 'darkgray', fontSize: '0.8em' }}>{t("project.tests.simpleModeInfo")}</span>}
+            rules={[{ required: true}]}
+        />}
       </>
 
       <Form.Item
         label="Docker test directory"
         name="dockerTestDir"
-        tooltip="TODO write docs for this"
+        tooltip={t("project.tests.dockerTestDirTooltip")}
         valuePropName="fileList"
         getValueFromEvent={normFile}
       >

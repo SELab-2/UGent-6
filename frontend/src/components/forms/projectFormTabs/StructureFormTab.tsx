@@ -15,11 +15,17 @@ const StructureFormTab: FC<{ form: FormInstance }> = ({ form }) => {
       <Form.Item
         label={t("project.change.fileStructure")}
         name="structureTest"
-        tooltip="TODO write docs for this"
-      >
+        tooltip={t("project.tests.fileStructureTooltip")}>
         <Input.TextArea
-          autoSize={{ minRows: 3 }}
+          autoSize={{ minRows: 5 }}
           style={{ fontFamily: "monospace" }}
+          placeholder={
+              'src/\n' +
+              '  index.js\n' +
+              '  \\\.*\n'+
+              'common/\n' +
+              '  index.css\n' +
+              '-node_modules/\n'}
           onKeyDown={(e) => {
             if (e.key === "Tab") {
               e.preventDefault()
