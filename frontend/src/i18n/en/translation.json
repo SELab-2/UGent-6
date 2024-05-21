@@ -42,13 +42,14 @@
     "projects": {
       "noProjects": "No projects",
       "name": "Name",
-      "description": "Description",
+      "description": "Info",
       "course": "Course",
       "deadline": "Deadline",
       "deadlineNotPassed": "Only show active projects",
       "showMore": "Show more",
       "submit": "Submit",
       "projectStatus": "Status",
+      "maxScore": "Maximum score",
       "visibility": "Visibility",
       "visibleStatus": {
         "visible": "Visible",

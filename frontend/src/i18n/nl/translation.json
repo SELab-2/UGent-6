@@ -42,12 +42,13 @@
     "projects": {
       "noProjects": "Geen projecten",
       "name": "Naam",
-      "description": "Beschrijving",
+      "description": "Info",
       "course": "Vak",
       "deadline": "Deadline",
       "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
       "projectStatus": "Status",
+      "maxScore": "Maximum score",
       "visibility": "Zichtbaarheid",
       "visibleStatus": {
         "visible": "Zichtbaar",
