@@ -15,7 +15,7 @@ describe('UserList', () => {
     // see: https://on.cypress.io/mounting-react
     cy.mount(<UserList users={[]} updateRole={(user, role) => {return}}/>)
         .should("exist")
-    cy.get("body").should("contain.text", "No data")
+    cy.get("body").should("contain.text", "editRole.noUsersFound")
   })
 
   it('renders with users', () => {
