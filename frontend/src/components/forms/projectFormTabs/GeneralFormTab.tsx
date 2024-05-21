@@ -35,6 +35,7 @@ const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
             {!visible && (
                 <Form.Item
                     label={t("project.change.visibleAfter")}
+                    tooltip={t("project.change.visibleAfterTooltip")}
                     name="visibleAfter"
                 >
                     <DatePicker

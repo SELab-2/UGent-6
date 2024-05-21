@@ -12,7 +12,6 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
     const reader = new FileReader()
     reader.onload = (e) => {
       const contents = e.target?.result as string
-      console.log(contents)
       form.setFieldValue(fieldName, contents)
     }
     reader.readAsText(file)
@@ -118,11 +117,11 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
             style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
           />
         </Form.Item>
-        <UploadBtn
+        {/* <UploadBtn
           form={form}
           disabled={dockerDisabled}
           fieldName="dockerScript"
-        />
+        /> */}
         <div style={{ paddingBottom: '14px' }}>
           <Switch
               checked={withArtifacts}
@@ -159,11 +158,11 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                   style={{fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
                   placeholder={"@helloWorldTest\n>required\n>description=\"This is a test\"\nExpected output 1\n@helloUGent\n>optional\nExpected output 2\n"}
               />
-              <UploadBtn
+                {/*<UploadBtn
                   form={form}
                   disabled={dockerDisabled}
                   fieldName="dockerTemplate"
-              />
+              />*/}
             </Form.Item> </div>: <Form.Item
           name="simpleMode"
           children={<span style={{color: 'darkgray', fontSize: '0.8em' }}>{t("project.tests.simpleModeInfo")}</span>}
@@ -184,8 +183,8 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           disabled={dockerDisabled}
           accept="application/zip, application/x-zip-compressed, application/octet-stream, application/x-zip, *.zip"
           beforeUpload={ (file) => {
-            const isPNG = file.type === 'application/zip'
-            if (!isPNG) {
+            const isZIP = file.type.includes('zip') || file.name.includes('.zip')
+            if (!isZIP) {
               message.error(`${file.name} is not a zip file`);
               return Upload.LIST_IGNORE
             }

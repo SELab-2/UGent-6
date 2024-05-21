@@ -25,7 +25,6 @@ const GroupClusterModalContent: FC<{ onClose: () => void; onClusterCreated: (clu
     setLoading(false)
     if (!response.success) return
 
-    console.log(response.response.data)
     onClusterCreated(response.response.data)
   }
 

@@ -33,7 +33,6 @@ const SettingsCard: FC = () => {
     await form.validateFields()
     
     const values:{name:string, description:string} = form.getFieldsValue()
-    console.log(values);
     values.description ??= ""
     setLoading(true)
     const res = await API.PATCH(ApiRoutes.COURSE, { body: values, pathValues: { courseId: course.courseId } }, "message")

@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { Button, Form, UploadProps } from "antd"
 import { useTranslation } from "react-i18next"
 import ProjectForm from "../../components/forms/ProjectForm"
-import { EditFilled } from "@ant-design/icons"
+import { SaveFilled } from "@ant-design/icons"
 import { FormProps } from "antd/lib"
 import { ProjectFormData } from "../projectCreate/components/ProjectCreateService"
 import useProject from "../../hooks/useProject"
 import dayjs from "dayjs"
-import { ApiRoutes, GET_Responses, POST_Requests, POST_Responses } from "../../@types/requests.d"
+import { ApiRoutes, POST_Requests } from "../../@types/requests.d"
 import { AppRoutes } from "../../@types/routes"
 import { ProjectContext } from "../../router/ProjectRoutes"
 import useApi from "../../hooks/useApi"
@@ -25,11 +25,13 @@ const EditProject: React.FC = () => {
     const project = useProject()
     const { updateProject } = useContext(ProjectContext)
     const [initialDockerValues, setInitialDockerValues] = useState<POST_Requests[ApiRoutes.PROJECT_TESTS] | null>(null)
-    const location = useLocation()
+    const [disabled, setDisabled] = useState(true)
+
 
     const updateDockerForm = async () => {
         if (!projectId) return
         const response = await API.GET(ApiRoutes.PROJECT_TESTS, { pathValues: { id: projectId } })
+        setDisabled(false)
         if (!response.success) return setInitialDockerValues(null)
 
         let formVals: POST_Requests[ApiRoutes.PROJECT_TESTS] = {
@@ -69,7 +71,6 @@ const EditProject: React.FC = () => {
         setInitialDockerValues(formVals)
     }
 
-    console.log(initialDockerValues)
 
     useEffect(() => {
         if (!project) return
@@ -82,8 +83,6 @@ const EditProject: React.FC = () => {
         if (values.visible) {
             values.visibleAfter = null
         }
-
-        console.log(values)
 
         if (!courseId || !projectId) return console.error("courseId or projectId is undefined")
         setLoading(true)
@@ -110,7 +109,8 @@ const EditProject: React.FC = () => {
             promises.push(API.PUT(ApiRoutes.CLUSTER_FILL, { body: values.groups, pathValues: { id: values.groupClusterId } }, "message"))
         }
 
-        await Promise.all(promises)
+        const r = await Promise.all(promises)
+        if(!r[0]) return // If one of the promises was not successful
 
         const result = response.response.data
         updateProject(result)
@@ -155,8 +155,9 @@ const EditProject: React.FC = () => {
                                     <Button
                                         type="primary"
                                         htmlType="submit"
-                                        icon={<EditFilled />}
+                                        icon={<SaveFilled />}
                                         loading={loading}
+                                        disabled={disabled}
                                     >
                                         {t("project.change.update")}
                                     </Button>

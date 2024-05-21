@@ -140,7 +140,6 @@ const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[]
     setLoading(false)
   }
 
-  console.log("Group: ", groupId);
 
   return (
     <>

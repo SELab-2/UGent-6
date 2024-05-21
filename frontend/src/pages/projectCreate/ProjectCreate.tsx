@@ -39,7 +39,6 @@ const ProjectCreate: React.FC = () => {
             visibleAfter: values.visibleAfter,
         }
 
-        console.log(values)
 
         if (!courseId) return console.error("courseId is undefined")
         setLoading(true)

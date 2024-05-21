@@ -41,15 +41,12 @@ const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
   const updateUser = async () => {
-    try {
       const res = await API.GET(ApiRoutes.USER_AUTH, {}, "page")
       if(!res.success) return setUser(null)
       setUser(res.response.data)
 
       await updateCourses(res.response.data.id)
-    } catch (err) {
-      console.log(err)
-    }
+  
   }
 
   if (!user && (!(inProgress === InteractionStatus.Startup || inProgress === InteractionStatus.None || inProgress === InteractionStatus.Logout) || isAuthenticated))

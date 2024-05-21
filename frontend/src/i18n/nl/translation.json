@@ -10,7 +10,7 @@
   },
   "courses":{
     "courses": "Vakken",
-    "searchCourse": "Zoek ak",
+    "searchCourse": "Zoek vak",
     "member": "Lid",
     "members": "Leden",
     "archived": "Gearchiveerd",
@@ -33,7 +33,8 @@
     "table": "Tabel",
     "docs": "Documentatie",
     "calendar": "Kalender",
-    "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",
+    "noCoursesStudent": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen",
+    "noCoursesTeacher": "Je bent nog niet verbonden aan een vak. Je kan zelf een vak maken door op de knop hierboven te klikken",
     "courseNameMaxLength": "Vak naam mag maximaal 50 karakters bevatten",
     "courseNameRequired": "Vak naam is verplicht",
     "courseNameMinLength": "Vak naam moet minimaal 3 karakters bevatten",
@@ -42,12 +43,13 @@
     "projects": {
       "noProjects": "Geen projecten",
       "name": "Naam",
-      "description": "Beschrijving",
+      "description": "Info",
       "course": "Vak",
       "deadline": "Deadline",
       "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
       "projectStatus": "Status",
+      "maxScore": "Maximum score",
       "visibility": "Zichtbaarheid",
       "visibleStatus": {
         "visible": "Zichtbaar",
@@ -63,8 +65,8 @@
       },
       "groupProgress": "Voortgang groep",
       "completeProgress": "{{count}} / {{total}} voltooid",
-      "activeProjects": "{{count}} actief project",
-      "activeProjects_plural": "{{count}} actieve projecten",
+      "activeProjects": "{{count}} project",
+      "activeProjects_plural": "{{count}} projecten",
       "submit": "Indienen",
       "userCourseCount_plural": "{{count}} gebruikers in dit vak",
       "userCourseCount": "{{count}} gebruiker in dit vak"
@@ -142,6 +144,7 @@
     "successfullyDeleted": "Project succesvol verwijderd",
     "deleteProject": "Project verwijderen",
     "deleteProjectDescription": "Bent u zeker dat u dit project wilt verwijderen? Alle indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
+    "noStructure": "Er is specifiek geen bestanden structuur nodig",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",
@@ -152,7 +155,8 @@
       "groupClusterId": "Groepen",
       "groupClusterIdMessage": "Vul de Groep cluster in",
       "visible": "Project zichtbaar maken",
-      "visibleAfter": "Kies wanneer het project automatisch zichtbaar wordt voor studenten. Als je niets invult, blijft het project onzichtbaar",
+      "visibleAfter": "Zichtbaar maken na",
+      "visibleAfterTooltip": "Kies wanneer het project automatisch zichtbaar wordt voor studenten. Als je niets invult, blijft het project onzichtbaar",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in",
       "maxScoreHelp": "Wat is de maximale score die je kunt behalen voor dit project? Als je het leeg laat, wordt het project niet beoordeeld",
@@ -168,7 +172,7 @@
       "groupClusterCreated": "Groep cluster aangemaakt",
       "fileStructure": "Bestandsstructuur",
       "fileStructurePreview": "Voorbeeld van bestandsstructuur",
-      "update": "Project aanpassen",
+      "update": "Bewaren",
       "newGroupCluster": "Voeg een nieuwe groep cluster toe",
       "makeCluster": "Groep cluster aanmaken",
       "clusterName": "Cluster naam",
@@ -219,7 +223,12 @@
     "noFeedback": "Geen feedback gegeven",
     "noScoreLabel": "Geen score",
     "noFeedbackLabel": "Geen feedback",
-    "noSubmissionDownload": "Geen indiening gevonden"
+    "noSubmissionDownload": "Geen indiening gevonden",
+    "breadcrumbs": {
+      "editPage": "project aanpassen",
+      "submit": "indienen",
+      "submission": "indiening"
+    }
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
@@ -246,6 +255,12 @@
     "failed": "Niet geslaagd",
     "expected": "Vewachte output:",
     "received": "Ontvangen output:",
+    "optional": "optioneel",
+    "structureTestSuccess": "Indiening voldoet aan de structuur",
+    "structureTestFailed": "Indiening voldoet niet aan de structuur",
+    "submissionSuccess": "Indiening geslaagd",
+    "submissionFailed": "Indiening niet geslaagd",
+    "tests": "Automatische testen",
     "status": {
       "accepted": "Alle testen zijn geslaagd.",
       "failed": "Sommige testen zijn niet geslaagd."

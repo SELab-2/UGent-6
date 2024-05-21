@@ -12,8 +12,11 @@ import { ApiRoutes, PUT_Requests } from "../../../@types/requests.d"
 import useAppApi from "../../../hooks/useAppApi"
 import useApi from "../../../hooks/useApi"
 
-const GroupMember = ({ name }: ProjectSubmissionsType["group"]["members"][number]) => {
-  return <List.Item>{name}</List.Item>
+const GroupMember = ({ name,studentNumber }: ProjectSubmissionsType["group"]["members"][number]) => {
+  return <List.Item   >
+
+    <List.Item.Meta  title={name} description={studentNumber||""}/>
+  </List.Item>
 }
 
 const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onChange: (s: ProjectSubmissionsType[]) => void, withArtifacts?:boolean }> = ({ submissions, onChange,withArtifacts }) => {
@@ -22,7 +25,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const { courseId, projectId } = useParams()
   const { message } = useAppApi()
   const API = useApi()
-  const updateTable = async (groupId: number, feedback: Partial<PUT_Requests[ApiRoutes.PROJECT_SCORE]>, usePost: boolean) => {
+  const updateTable = async (groupId: number, feedback: Omit<PUT_Requests[ApiRoutes.PROJECT_SCORE], "projectId" | "groupId">, usePost: boolean) => {
     if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found")
 
     let res
@@ -30,17 +33,13 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
       res = await API.POST(
         ApiRoutes.PROJECT_SCORE,
         {
-          body: {
-            score: 0,
-            feedback: "",
-            ...feedback,
-          },
+          body: feedback,
           pathValues: { id: projectId, groupId },
         },
         "message"
       )
     } else {
-      res = await API.PATCH(ApiRoutes.PROJECT_SCORE, { body: feedback, pathValues: { id: projectId, groupId } }, "message")
+      res = await API.PUT(ApiRoutes.PROJECT_SCORE, { body: feedback, pathValues: { id: projectId, groupId } }, "message")
     }
     if (!res.success) return
 
@@ -69,11 +68,11 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
     else score = parseFloat(scoreStr)
     if (isNaN(score as number)) score = null
     if (score !== null && score > project.maxScore) return message.error(t("project.scoreTooHigh"))
-    await updateTable(s.group.groupId, { score }, s.feedback === null)
+    await updateTable(s.group.groupId, { score:score||null, feedback:s.feedback?.feedback??"" }, s.feedback === null)
   }
 
   const updateFeedback = async (s: ProjectSubmissionsType, feedback: string) => {
-    await updateTable(s.group.groupId, { feedback }, s.feedback === null)
+    await updateTable(s.group.groupId, { feedback, score: s.feedback?.score||null }, s.feedback === null)
   }
 
   const downloadFile = async (route: ApiRoutes.SUBMISSION_FILE | ApiRoutes.SUBMISSION_ARTIFACT, filename: string) => {
@@ -88,7 +87,6 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         "message"
       )
       if (!response.success) return
-      console.log(response)
       const url = window.URL.createObjectURL(new Blob([response.response.data]))
       const link = document.createElement("a")
       link.href = url
@@ -148,12 +146,6 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         dataIndex: "submission",
         key: "submission",
         render: (time: ProjectSubmissionsType["submission"]) => time?.submissionTime && <Typography.Text>{new Date(time.submissionTime).toLocaleString()}</Typography.Text>,
-        sorter: (a: ProjectSubmissionsType, b: ProjectSubmissionsType) => {
-          // Implement sorting logic for submissionTime column
-          const timeA: any = a.submission?.submissionTime || 0
-          const timeB: any = b.submission?.submissionTime || 0
-          return timeA - timeB
-        },
       },
     ]
 
@@ -203,14 +195,14 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
               <Typography.Text strong>{t("project.feedback")}:</Typography.Text>
               <br />
               <br />
+
               <Typography.Paragraph
                 editable={{
                   autoSize: { maxRows: 5, minRows: 3 },
                   onChange: (value) => updateFeedback(g, value),
                 }}
-                type={g.feedback?.feedback ? undefined : "secondary"}
-              >
-                {g.feedback?.feedback || t('project.noFeedbackLabel')}
+                >
+                {g.feedback?.feedback??t('project.noFeedbackLabel')}
               </Typography.Paragraph>
             </div>
 

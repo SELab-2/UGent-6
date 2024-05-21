@@ -40,7 +40,7 @@ const StructureFormTab: FC<{ form: FormInstance }> = ({ form }) => {
       </Form.Item>
 
       <Typography.Text strong>{t("project.change.fileStructurePreview")}:</Typography.Text>
-      <SubmitStructure structure={debouncedValue} />
+      <SubmitStructure structure={debouncedValue} hideEmpty />
     </>
   )
 }
