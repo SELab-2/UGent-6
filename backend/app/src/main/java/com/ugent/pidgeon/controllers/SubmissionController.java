@@ -124,7 +124,6 @@ public class    SubmissionController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions") //Route to get all submissions for a project
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
-        try {
             CheckResult<Void> checkResult = projectUtil.isProjectAdmin(projectid, auth.getUserEntity());
             if (!checkResult.getStatus().equals(HttpStatus.OK)) {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
@@ -154,9 +153,6 @@ public class    SubmissionController {
             }
 
             return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     /**
