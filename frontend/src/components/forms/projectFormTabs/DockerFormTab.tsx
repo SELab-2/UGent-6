@@ -2,7 +2,7 @@ import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
 import {Button, Dropdown, Form, Input, Menu, Select, Switch, Upload} from "antd"
 import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
-import {FC, useState} from "react"
+import {FC, useEffect, useState} from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes } from "../../../@types/requests"
 import useAppApi from "../../../hooks/useAppApi"
@@ -58,15 +58,20 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const {message} = useAppApi()
   const [withTemplate, setWithTemplate] = useState<boolean>(true)
   const [imageSelect, setImageSelect] = useState<string>("alpine")
-  const dockerImage = Form.useWatch("dockerImage", form)
+  const [dockerDisabled, setDockerImage] = useState<boolean>(false)
 
-  const dockerDisabled = !dockerImage?.length
+
+
   const languageOptions:ScriptCollection = {
     "bash": {displayName:"Bash", scriptGenerator: (script: string) => script, image: "fedora"},
     "python": {displayName:"Python", scriptGenerator: (script: string) => `python -c '${script}'`, image: "python"},
     "javascript": {displayName:"Javascript (node)", scriptGenerator: (script: string) => `node -e '${script}', image: "node"`},
     "haskell": {displayName:"Haskell", scriptGenerator: (script: string) => `runhaskell -e '${script}'`, image: "haskell"}
   }
+
+  useEffect(() => {
+    setDockerImage(imageSelect.length == 0)
+  }, [imageSelect]);
 
   function isValidTemplate(template: string): string {
     if (!template?.length) return "" // Template is optional
@@ -132,17 +137,23 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
             placement="right"
           />
         }
-
-        name="dockerImage"
+        //name = "dockerImage"    //Als je deze uncomment dan werkt de value van de input niet meer.
       >
-        { <Input
+        <Input
           style={{ marginTop: "8px" }}
           value={imageSelect}
-          placeholder={t("project.tests.dockerImagePlaceholder")}
-        />}
+          onChange={(event) => setImageSelect(event.target.value)}
+        />
+      </Form.Item>
+      <Form.Item
+      >
+        <Input
+          value = {"WAHOOO"}
+        />
+
       </Form.Item>
 
-      <Select defaultValue={Object.keys(languageOptions)[0]}>
+      <Select defaultValue={Object.keys(languageOptions)[0]} onChange={(val) => setImageSelect(val)} >
         {Object.keys(languageOptions).map((key) => (
             <Select.Option value={key}>{languageOptions[key].displayName}</Select.Option>
         ))}
