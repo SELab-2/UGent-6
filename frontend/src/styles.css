@@ -257,3 +257,13 @@ html {
     display: none;
   }
 }
+
+.list-item-hover {
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+  border-radius: 8px;
+}
+
+.list-item-hover:hover {
+  background-color: #5a5a5a69;
+}

@@ -61,7 +61,13 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
         locale={{ emptyText: t("home.projects.noProjects") }}
         rowKey="projectId"
         renderItem={(project) => (
+          <Link 
+      to={AppRoutes.PROJECT.replace(":courseId", courseProjects.course.courseId.toString()).replace(":projectId", project.projectId.toString())} 
+      style={{ color: token.colorPrimary, textDecoration: 'none' }}
+      onClick={(event) => event.stopPropagation()}
+    >
           <List.Item
+            className="list-item-hover"
             actions={[
               project.status ? (
                 <ProjectStatusTag
@@ -78,12 +84,12 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
             <List.Item.Meta title={
               <Link to={AppRoutes.PROJECT.replace(":courseId", courseProjects.course.courseId.toString()).replace(":projectId", project.projectId.toString())} style={{ color: token.colorPrimary }}
                 onClick={(event) => event.stopPropagation()}>
-                <Typography.Text ellipsis>{project.name}</Typography.Text>
+                <Typography.Text ellipsis style={{marginLeft: '10px'}}>{project.name}</Typography.Text>
               </Link>}/>
           </List.Item>
+          </Link>
         )}
       >
-        {courseProjects.projects.length > 3 && <Typography.Text style={{ textAlign: 'left', display: 'block' }}>...</Typography.Text>}
       </List>
     </Card>
   )
