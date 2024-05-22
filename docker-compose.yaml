@@ -37,8 +37,6 @@ services:
     container_name: dind
     image: docker:dind
     privileged: true
-    volumes:
-      - /var/lib/docker
     ports:
       - 2375:2375
     networks:
