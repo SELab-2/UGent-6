@@ -58,6 +58,10 @@ const EditProject: React.FC = () => {
                 form.setFieldValue("dockerTestDir", uploadVal)
             }
 
+            if(tests.dockerTemplate) {
+                form.setFieldValue("dockerMode", true)
+            }
+
             formVals = {
                 structureTest: tests.structureTest ?? "",
                 dockerTemplate: tests.dockerTemplate ?? "",
@@ -138,6 +142,7 @@ const EditProject: React.FC = () => {
                     visibleAfter: project.visible ? null : (project.visibleAfter ? dayjs(project.visibleAfter) : null),
                     maxScore: project.maxScore,
                     deadline: dayjs(project.deadline),
+                    dockerMode: null
                 }}
                 form={form}
                 onFinishFailed={onInvalid}
