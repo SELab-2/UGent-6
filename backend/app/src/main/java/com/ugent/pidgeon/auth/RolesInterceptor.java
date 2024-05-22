@@ -71,10 +71,11 @@ public class RolesInterceptor implements HandlerInterceptor {
                     userEntity = userRepository.save(userEntity);
                     System.out.println("User created with id: " + userEntity.getId());
 
-
+                    auth.setUserEntity(userEntity);
                     dg.generate(auth);
+                } else {
+                    auth.setUserEntity(userEntity);
                 }
-                auth.setUserEntity(userEntity);
 
                 if (!requiredRoles.contains(userEntity.getRole()) && userEntity.getRole() != UserRole.admin) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "User does not have required role");
