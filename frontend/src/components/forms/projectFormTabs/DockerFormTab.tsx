@@ -45,15 +45,33 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
-  const [withTemplate, setWithTemplate] = useState<boolean>(true)
+  const [withTemplate, setWithTemplate] = useState<boolean>(form.getFieldValue("dockerTemplate") !== undefined && form.getFieldValue("dockerTemplate").length > 0)
+  const [oldSjabloon, setOldSjabloon] = useState<string>(form.getFieldValue("dockerTemplate"))
   const dockerImage = Form.useWatch("dockerImage", form)
+  const dockerTemplate = Form.useWatch("dockerTemplate", form)
 
   const dockerDisabled = !dockerImage?.length
 
+  useEffect(() => {
+    const newWithTemplate = dockerTemplate !== undefined && dockerTemplate.length > 0;
+    if (newWithTemplate !== withTemplate) {
+      console.log("Setting withTemplate to " + newWithTemplate)
+      setWithTemplate(newWithTemplate);
+
+      if (newWithTemplate) {
+        form.setFieldValue("dockerTemplate", oldSjabloon)
+      } else {
+        setOldSjabloon(dockerTemplate)
+        form.setFieldValue("dockerTemplate", "")
+      }
+    }
+  }, [dockerTemplate]);
+
     useEffect(() =>  {
-      
+  
         form.validateFields(["dockerScript", "dockerTemplate"])
     }, [dockerDisabled])
+
 
   function isValidTemplate(template: string): string {
     if (template.length === 0) {
@@ -203,9 +221,9 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           />
         </div>
 
-        {withTemplate ?
-            <div>
-              <MarkdownTextfield content={t("project.tests.templateModeInfo")} />
+        
+          <div style={withTemplate ? {} : {display: "none"}}>
+            <MarkdownTextfield content={t("project.tests.templateModeInfo")} />
 
             <Form.Item
                 label={t("project.tests.dockerTemplate")}
@@ -214,7 +232,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                   {
                     validator: (_, value) => {
                       value ??= ""
-                      if (dockerDisabled) {
+                      if (dockerDisabled || !withTemplate) {
                         return Promise.resolve()
                       }
                       const errorMessage = isValidTemplate(value)
@@ -235,11 +253,15 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                   disabled={dockerDisabled}
                   fieldName="dockerTemplate"
               />*/}
-            </Form.Item> </div>: <Form.Item
-          name="simpleMode"
-          children={<MarkdownTextfield content={t("project.tests.simpleModeInfo")} />}
+            </Form.Item> 
+          </div> 
+
+          <Form.Item
+            name="simpleMode"
+            children={<MarkdownTextfield content={t("project.tests.simpleModeInfo")} />}
             rules={[{ required: false}]}
-        />}
+            style={withTemplate ? {display: "none"} : {}}
+          />
       </>
     </>
   )
