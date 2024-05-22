@@ -10,61 +10,35 @@ import MarkdownTooltip from "../../common/MarkdownTooltip"
 import { classicNameResolver } from "typescript"
 import MarkdownTextfield from "../../input/MarkdownTextfield"
 
-const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProps?: TextAreaProps; disabled?: boolean }> = ({ form, fieldName, disabled }) => {
-  const handleFileUpload = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const contents = e.target?.result as string
-      form.setFieldValue(fieldName, contents)
-    }
-    reader.readAsText(file)
-    // Prevent default upload action
-    return false
-  }
 
-  return (
-    <>
-      <div style={{ marginTop: "8px", display: "flex", justifyContent: "flex-end" }}>
-        <Upload
-          showUploadList={false}
-          beforeUpload={handleFileUpload}
-          disabled={disabled}
-        >
-          <Button
-            disabled={disabled}
-            icon={<InboxOutlined />}
-          >
-            Upload
-          </Button>
-        </Upload>
-      </div>
-    </>
-  )
-}
 
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
-  const [withTemplate, setWithTemplate] = useState<boolean>(form.getFieldValue("dockerTemplate") !== undefined && form.getFieldValue("dockerTemplate").length > 0)
-  const [oldSjabloon, setOldSjabloon] = useState<string>(form.getFieldValue("dockerTemplate"))
+
   const dockerImage = Form.useWatch("dockerImage", form)
   const dockerTemplate = Form.useWatch("dockerTemplate", form)
 
+  const [template, setTemplate] = useState<null | boolean>(null)
+
   const dockerDisabled = !dockerImage?.length
+
+
+  const withTemplate = (template === null && !!dockerTemplate?.length) || !!template
 
   useEffect(() => {
     const newWithTemplate = dockerTemplate !== undefined && dockerTemplate.length > 0;
-    if (newWithTemplate !== withTemplate) {
-      console.log("Setting withTemplate to " + newWithTemplate)
-      setWithTemplate(newWithTemplate);
+    // if (newWithTemplate !== withTemplate) {
+    //   console.log("Setting withTemplate to " + newWithTemplate)
+    //   setWithTemplate(newWithTemplate);
 
-      if (newWithTemplate) {
-        form.setFieldValue("dockerTemplate", oldSjabloon)
-      } else {
-        setOldSjabloon(dockerTemplate)
-        form.setFieldValue("dockerTemplate", "")
-      }
-    }
+    //   if (newWithTemplate) {
+    //     form.setFieldValue("dockerTemplate", oldSjabloon)
+    //   } else {
+    //     setOldSjabloon(dockerTemplate)
+    //     form.setFieldValue("dockerTemplate", "")
+    //   }
+    // }
   }, [dockerTemplate]);
 
     useEffect(() =>  {
@@ -114,6 +88,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   }
 
 
+
   const normFile = (e: any) => {
     console.log('Upload event:', e);
     if (Array.isArray(e)) {
@@ -139,6 +114,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
     "  echo 'Test one failed: script failed to print \"Hello World\"'\n"+
     "fi"
   }
+  
 
   return (
     <>
@@ -216,7 +192,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
               checked={withTemplate}
               checkedChildren={t("project.tests.templateMode")}
               unCheckedChildren={t("project.tests.simpleMode")}
-              onChange={setWithTemplate}
+              onChange={setTemplate}
               className={switchClassName}
           />
         </div>
@@ -258,10 +234,9 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
           <Form.Item
             name="simpleMode"
-            children={<MarkdownTextfield content={t("project.tests.simpleModeInfo")} />}
             rules={[{ required: false}]}
             style={withTemplate ? {display: "none"} : {}}
-          />
+          ><MarkdownTextfield content={t("project.tests.simpleModeInfo")} /></Form.Item>
       </>
     </>
   )

@@ -23,17 +23,14 @@ const saveDockerForm = async (form: FormInstance, initialDockerValues: DockerFor
 
     if (!initialDockerValues) {
       // We do a POST request
-      console.log("POST", data)
       const r = await API.POST(ApiRoutes.PROJECT_TESTS, { body: data, pathValues: { id: projectId } },"message")
       success &&= r.success
     } else if ((data.dockerImage == null || data.dockerImage.length === 0) && !data.structureTest?.length) {
       // We do a delete
-      console.log("DELETE", data)
       const r = await API.DELETE(ApiRoutes.PROJECT_TESTS, { pathValues: { id: projectId } },"message")
       success &&= r.success
     } else {
       // We do a PUT
-      console.log("PUT", data)
       const r = await API.PUT(ApiRoutes.PROJECT_TESTS, { body: data, pathValues: { id: projectId }, headers: {} },"message")
       success &&= r.success
     }
@@ -64,7 +61,6 @@ const saveDockerForm = async (form: FormInstance, initialDockerValues: DockerFor
       //   "message"
       // )
     }
-    console.log(val)
   }
   return success
 }
