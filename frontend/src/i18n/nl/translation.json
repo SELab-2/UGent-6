@@ -232,9 +232,9 @@
     "noFeedbackLabel": "Geen feedback",
     "noSubmissionDownload": "Geen indiening gevonden",
     "breadcrumbs": {
-      "editPage": "project aanpassen",
-      "submit": "indienen",
-      "submission": "indiening"
+      "editPage": "Project aanpassen",
+      "submit": "Indienen",
+      "submission": "Indiening #{{number}}"
     }
   },
   "group": {
@@ -250,7 +250,7 @@
   },
   
   "submission": {
-    "submission": "Indiening",
+    "submission": "Indiening #{{number}}",
     "submittedFiles": "Ingediende bestanden:",
     "running": "Testen uitvoeren...",
     "structuretest": "Resultaten structuurtest:",

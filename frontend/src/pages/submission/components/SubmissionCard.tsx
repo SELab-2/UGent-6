@@ -59,7 +59,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
         },
       }}
       type="inner"
-      title= {t("submission.submission")}
+      title= {t("submission.submission", {number: submission.submissionId})}
       extra={<Space>
 
         {submission.fileUrl && <Button key="file" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>}

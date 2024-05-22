@@ -232,7 +232,7 @@
     "breadcrumbs": {
       "editPage": "Edit project",
       "submit": "Submit",
-      "submission": "Submission"
+      "submission": "Submission #{{number}}"
     }
   },
   "group": {
@@ -248,7 +248,7 @@
   },
 
   "submission": {
-    "submission": "Submission",
+    "submission": "Submission #{{number}}",
     "running": "Running tests",
     "submittedFiles": "Submitted files:",
     "structuretest": "Structure test results:",

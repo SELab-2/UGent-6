@@ -60,7 +60,7 @@ const ProjectBreadcrumbs: FC<{ project: ProjectType | null }> = ({ project }) =>
 
       if (submissionMatch) {
         breadcrumbs.push({
-          title: t("project.breadcrumbs.submission"),
+          title: t("project.breadcrumbs.submission", {number: submissionMatch.params.submissionId}),
         })
       }
     }
