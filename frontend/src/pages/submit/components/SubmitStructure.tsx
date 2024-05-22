@@ -1,9 +1,9 @@
 import { Tree, Typography } from "antd"
 import type { TreeDataNode } from "antd"
-import { FC, memo, useMemo } from "react"
+import { FC, Key, memo, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-type TreeDataOutput = { tree: TreeDataNode[] | null; error: string | null, directoryIds: string[] }
+type TreeDataOutput = { tree: TreeDataNode[] | null; error: string | null; directoryIds: string[] }
 
 type TreeNode = {
   title: string
@@ -64,7 +64,7 @@ function parseSubmissionTemplate(lines: string[], directoryIds: string[], prefix
 }
 
 export function generateTreeData(structure: string): TreeDataOutput {
-  if (!structure) return { tree: null, error: "No structure", directoryIds:[] }
+  if (!structure) return { tree: null, error: "No structure", directoryIds: [] }
   // Remove comments (lines that include # until end of the line)
   structure = structure.replace(/#.*?(?=\n)/g, "")
   // Split the string into lines
@@ -75,19 +75,24 @@ export function generateTreeData(structure: string): TreeDataOutput {
     result = parseSubmissionTemplate(lines, directoryIds)
   } catch (error) {
     console.error(error)
-    return { tree: null, error: "Woops something went wrong while parsing!",directoryIds:[] } // If you get this, then there's a bug in the parser
+    return { tree: null, error: "Woops something went wrong while parsing!", directoryIds: [] } // If you get this, then there's a bug in the parser
   }
 
   return {
     tree: result,
     error: null,
-    directoryIds
+    directoryIds,
   }
 }
 
 const SubmitStructure: FC<{ structure: string | null; hideEmpty?: boolean }> = ({ structure, hideEmpty }) => {
   const { t } = useTranslation()
-  const treeData: TreeDataOutput = structure === null ? { tree: [{ isLeaf: true, title: "Loading...", key: "loading" }], error: null,directoryIds:[] } : generateTreeData(structure)
+  const treeData: TreeDataOutput = useMemo(() =>  structure === null ? { tree: [{ isLeaf: true, title: "Loading...", key: "loading" }], error: null, directoryIds: [] } : generateTreeData(structure), [structure])
+  const [expandedKeys, setExpandedKeys] = useState<Key[]>(treeData.directoryIds)
+
+  useEffect(() => {
+    setExpandedKeys(treeData.directoryIds)
+  }, [treeData])
 
   if (structure === "" && !hideEmpty) return <Typography.Text type="secondary">{t("project.noStructure")}</Typography.Text>
   if (!treeData.tree) return null
@@ -96,8 +101,9 @@ const SubmitStructure: FC<{ structure: string | null; hideEmpty?: boolean }> = (
       multiple
       defaultExpandAll
       autoExpandParent
-      expandedKeys={treeData.directoryIds}
-      loadedKeys={!structure ? undefined : ["loading"]}
+      expandedKeys={expandedKeys}
+      onActiveChange={console.log}
+      onExpand={(e,a) => {console.log(e,a); setExpandedKeys(e)}}
       selectable={false}
       treeData={treeData.tree}
     />

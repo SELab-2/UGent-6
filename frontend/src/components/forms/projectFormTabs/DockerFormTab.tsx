@@ -2,7 +2,7 @@ import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
 import {Button, Form, Input, Switch, Upload} from "antd"
 import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
-import React, {FC, useState} from "react"
+import React, {FC, useEffect, useLayoutEffect, useState} from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes } from "../../../@types/requests"
 import useAppApi from "../../../hooks/useAppApi"
@@ -50,7 +50,8 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
   const dockerDisabled = !dockerImage?.length
 
-    React.useEffect(() =>  {
+    useEffect(() =>  {
+      
         form.validateFields(["dockerScript", "dockerTemplate"])
     }, [dockerDisabled])
 
@@ -212,10 +213,11 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                 rules={[
                   {
                     validator: (_, value) => {
-                      const errorMessage = isValidTemplate(value)
+                      value ??= ""
                       if (dockerDisabled) {
                         return Promise.resolve()
                       }
+                      const errorMessage = isValidTemplate(value)
                       return errorMessage === "" ? Promise.resolve() : Promise.reject(new Error(errorMessage))
                     }, required: true
                   }
