@@ -61,7 +61,6 @@ const saveDockerForm = async (form: FormInstance, initialDockerValues: DockerFor
       //   "message"
       // )
     }
-    console.log(val)
   }
   return success
 }
