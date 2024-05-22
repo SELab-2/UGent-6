@@ -71,6 +71,66 @@ html {
   
 }
 
+.template-switch {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.template-switch .ant-switch-inner {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.template-switch-active .ant-switch-inner-checked{
+  font-size: 16px !important;
+}
+
+.template-switch-inactive .ant-switch-inner-checked{
+  
+  font-size: 0px !important;
+}
+
+.template-switch-inactive .ant-switch-inner-unchecked{
+  margin-top: 2px !important;
+  font-size: 16px !important;
+}
+
+.template-switch-active .ant-switch-inner-unchecked{
+  width: 0px !important;
+  font-size: 0px !important;
+}
+
+
+
+
+.template-switch-active .ant-switch-handle {
+  height: 20px;
+  width: 20px;
+  margin-top: 3px;
+  margin-right: 3px;
+  margin-left: -5px
+}
+
+.template-switch-inactive .ant-switch-handle {
+  height: 20px;
+  width: 20px;
+  margin-top: 3px;
+  margin-right: -5px;
+  margin-left: 3px
+}
+
+
+
+
+.markdown-textfield-intooltip a {
+  color: #1890ff;
+}
+
 @font-face {
   font-family: 'JetBrains Mono';
   src: url('\theme\fonts\JetBrainsMono-Regular.ttf') format('truetype');
@@ -249,6 +309,7 @@ html {
     padding: 0 2rem;
   }
 }
+
 
 
 
