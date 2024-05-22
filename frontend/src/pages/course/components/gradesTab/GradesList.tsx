@@ -47,6 +47,7 @@ const GradesList: FC<{ feedback: CourseGradesType[]; courseId: number }> = ({ fe
                 </div>
               }
               description={score.groupFeedback!.feedback}
+              style={{whiteSpace: "pre-wrap"}}
             />
           </List.Item>
         )}
