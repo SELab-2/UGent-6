@@ -2,7 +2,7 @@ import { ProjectSubmissionsType } from "./SubmissionsTab"
 import { saveAs } from "file-saver"
 import { unparse } from "papaparse"
 
-function exportSubmissionStatusToCSV(submissions: ProjectSubmissionsType[]): void {
+function exportSubmissionStatusToCSV(submissions: ProjectSubmissionsType[], filename: string): void {
   const csvData = submissions.map((submission) => {
     const groupId = submission.group.groupId
     const groupName = submission.group.name
@@ -30,12 +30,12 @@ function exportSubmissionStatusToCSV(submissions: ProjectSubmissionsType[]): voi
   const csvString = unparse(csvData)
 
   const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" })
-  saveAs(blob, "project_submissions.csv")
+  saveAs(blob, filename)
 }
 
 
 
-function exportToUfora(submissions: ProjectSubmissionsType[],maxScore:number): void {
+function exportToUfora(submissions: ProjectSubmissionsType[],maxScore:number, filename: string): void {
 
   const evaluationHeader = `Evaluation 1 Exercise 1 Points Grade <Numeriek MaxAantalPunten:${maxScore}>`;
 
@@ -56,7 +56,7 @@ function exportToUfora(submissions: ProjectSubmissionsType[],maxScore:number): v
   });
   
   const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-  saveAs(blob, 'ufora_submissions.csv');
+  saveAs(blob, filename);
 }
 
 export { exportSubmissionStatusToCSV,exportToUfora }
