@@ -16,10 +16,13 @@ const saveDockerForm = async (form: FormInstance, initialDockerValues: DockerFor
 
   if (form.isFieldsTouched(["dockerImage", "dockerScript", "dockerTemplate", "structureTest"]) && (!initialDockerValues || initialDockerValues.dockerImage !== dockerImage || initialDockerValues.dockerScript !== dockerScript || initialDockerValues.dockerTemplate !== dockerTemplate || initialDockerValues.structureTest !== structureTest)) {
     let data: DockerFormData = form.getFieldsValue(["dockerImage", "dockerScript", "dockerTemplate", "structureTest"])
-    if(!data.dockerImage) {
+    if(!data.dockerImage?.length) {
       data.dockerScript = null
       data.dockerTemplate = null
     }
+
+    const dockerMode = form.getFieldValue("dockerMode")
+    if( !dockerMode) data.dockerTemplate = null
 
     if (!initialDockerValues) {
       // We do a POST request

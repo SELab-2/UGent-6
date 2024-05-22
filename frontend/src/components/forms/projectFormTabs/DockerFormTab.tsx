@@ -1,13 +1,10 @@
-import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
+import { UploadOutlined } from "@ant-design/icons"
 import {Button, Form, Input, Switch, Upload} from "antd"
-import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
-import React, {FC, useEffect, useLayoutEffect, useState} from "react"
+import {FC, useEffect} from "react"
 import { useTranslation } from "react-i18next"
-import { ApiRoutes } from "../../../@types/requests"
 import useAppApi from "../../../hooks/useAppApi"
 import MarkdownTooltip from "../../common/MarkdownTooltip"
-import { classicNameResolver } from "typescript"
 import MarkdownTextfield from "../../input/MarkdownTextfield"
 
 
@@ -18,31 +15,16 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
   const dockerImage = Form.useWatch("dockerImage", form)
   const dockerTemplate = Form.useWatch("dockerTemplate", form)
-
-  const [template, setTemplate] = useState<null | boolean>(null)
+  const dockerMode = Form.useWatch("dockerMode", form)
 
   const dockerDisabled = !dockerImage?.length
 
 
-  const withTemplate = (template === null && !!dockerTemplate?.length) || !!template
+  const withTemplate = (dockerMode === null && !!dockerTemplate?.length) || !!dockerMode
 
-  useEffect(() => {
-    const newWithTemplate = dockerTemplate !== undefined && dockerTemplate.length > 0;
-    // if (newWithTemplate !== withTemplate) {
-    //   console.log("Setting withTemplate to " + newWithTemplate)
-    //   setWithTemplate(newWithTemplate);
-
-    //   if (newWithTemplate) {
-    //     form.setFieldValue("dockerTemplate", oldSjabloon)
-    //   } else {
-    //     setOldSjabloon(dockerTemplate)
-    //     form.setFieldValue("dockerTemplate", "")
-    //   }
-    // }
-  }, [dockerTemplate]);
-
+ 
     useEffect(() =>  {
-  
+      
         form.validateFields(["dockerScript", "dockerTemplate"])
     }, [dockerDisabled])
 
@@ -188,13 +170,14 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           fieldName="dockerScript"
         /> */}
         <div style={{ paddingBottom: '14px'}}>
+          <Form.Item name="dockerMode" label="" valuePropName="checked">
+
           <Switch
-              checked={withTemplate}
               checkedChildren={t("project.tests.templateMode")}
               unCheckedChildren={t("project.tests.simpleMode")}
-              onChange={setTemplate}
               className={switchClassName}
-          />
+              />
+              </Form.Item>
         </div>
 
         
