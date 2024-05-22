@@ -151,16 +151,16 @@ public class SubmissionTemplateModel {
             boolean passed = (filesMissing.size() + filesUnrequested.size() + filesDenied.size()) == 0;
             String feedback = passed ? "File structure is correct" : "File structure failed to pass the template, because: \n ";
             if (!filesMissing.isEmpty()) {
-                feedback += " -The following files are required from the template and are not found in the project: \n    -";
-                feedback += String.join("\n    -", filesMissing);
+                feedback += "- The following files are required from the template and are not found in the project: \n    - ";
+                feedback += String.join("\n    - ", filesMissing);
             }
             if (!filesUnrequested.isEmpty()) {
-                feedback += "\n -The following files are not requested in the template: \n    -";
-                feedback += String.join("\n    -", filesUnrequested);
+                feedback += "\n - The following files are not requested in the template: \n    - ";
+                feedback += String.join("\n    - ", filesUnrequested);
             }
             if (!filesDenied.isEmpty()) {
-                feedback += "\n -The following files are not allowed in the project: \n    -";
-                feedback += String.join("\n    -", filesDenied);
+                feedback += "\n - The following files are not allowed in the project: \n    - ";
+                feedback += String.join("\n    - ", filesDenied);
             }
 
             return new SubmissionResult(passed, feedback);
