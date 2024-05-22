@@ -57,7 +57,6 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
   const [withTemplate, setWithTemplate] = useState<boolean>(true)
-  const [imageSelect, setImageSelect] = useState<string>("alpine")
   const dockerImage = Form.useWatch("dockerImage", form)
 
   const dockerDisabled = !dockerImage?.length
@@ -137,12 +136,11 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
       >
         { <Input
           style={{ marginTop: "8px" }}
-          value={imageSelect}
           placeholder={t("project.tests.dockerImagePlaceholder")}
         />}
       </Form.Item>
 
-      <Select defaultValue={Object.keys(languageOptions)[0]}>
+      <Select defaultValue={Object.keys(languageOptions)[0]} onChange={(val) => form.setFieldValue( "dockerImage", val)}>
         {Object.keys(languageOptions).map((key) => (
             <Select.Option value={key}>{languageOptions[key].displayName}</Select.Option>
         ))}
