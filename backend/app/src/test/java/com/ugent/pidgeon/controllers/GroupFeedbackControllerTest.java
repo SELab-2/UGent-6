@@ -281,7 +281,7 @@ public class GroupFeedbackControllerTest extends ControllerTest {
     when(groupFeedbackUtil.checkGroupFeedbackUpdate(groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId(), getMockUser(), HttpMethod.POST))
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
     when(groupFeedbackUtil.checkGroupFeedbackUpdateJson(argThat(
-        json -> json.getScore() == groupFeedbackEntity.getScore() && json.getFeedback().equals(groupFeedbackEntity.getFeedback())), eq(groupFeedbackEntity.getProjectId())))
+        json -> Objects.equals(json.getScore(), groupFeedbackEntity.getScore()) && json.getFeedback().equals(groupFeedbackEntity.getFeedback())), eq(groupFeedbackEntity.getProjectId())))
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
     when(groupFeedbackRepository.save(any())).thenReturn(groupFeedbackEntity);
     when(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity)).thenReturn(groupFeedbackJson);
@@ -292,7 +292,7 @@ public class GroupFeedbackControllerTest extends ControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(objectMapper.writeValueAsString(groupFeedbackJson)));
     verify(groupFeedbackRepository, times(1)).save(argThat(
-        groupFeedback -> groupFeedback.getScore() == groupFeedbackEntity.getScore() &&
+        groupFeedback -> Objects.equals(groupFeedback.getScore(), groupFeedbackEntity.getScore()) &&
         groupFeedback.getFeedback().equals(groupFeedbackEntity.getFeedback()) &&
         groupFeedback.getGroupId() == groupFeedbackEntity.getGroupId() &&
         groupFeedback.getProjectId() == groupFeedbackEntity.getProjectId()));

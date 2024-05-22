@@ -54,7 +54,7 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
           value={url}
           suffix={
             <Tooltip title={"Share"}>
-              <InfoCircleOutlined style={{ color: "rgba(0,0,0,.45)" }} />
+              <InfoCircleOutlined  />
             </Tooltip>
           }
         />

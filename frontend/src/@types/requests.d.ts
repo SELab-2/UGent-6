@@ -10,7 +10,7 @@ export enum ApiRoutes {
 
   USER_COURSES = "/web/api/courses",
   COURSES = "/web/api/courses",
-  
+
 
   COURSE = "/web/api/courses/:courseId",
   COURSE_MEMBERS = "/web/api/courses/:courseId/members",
@@ -19,11 +19,11 @@ export enum ApiRoutes {
   COURSE_CLUSTERS = "/web/api/courses/:id/clusters",
   COURSE_GRADES = "/web/api/courses/:id/grades",
   COURSE_LEAVE = "/web/api/courses/:courseId/leave",
-  COURSE_COPY = "/web/api/courses/:courseId/copy", 
+  COURSE_COPY = "/web/api/courses/:courseId/copy",
   COURSE_JOIN = "/web/api/courses/:courseId/join/:courseKey",
   COURSE_JOIN_WITHOUT_KEY = "/web/api/courses/:courseId/join",
   COURSE_JOIN_LINK = "/web/api/courses/:courseId/joinKey",
-    
+
   PROJECTS = "/web/api/projects",
   PROJECT = "/web/api/projects/:id",
   PROJECT_CREATE = "/web/api/courses/:courseId/projects",
@@ -36,8 +36,8 @@ export enum ApiRoutes {
   PROJECT_TEST_SUBMISSIONS = "/web/api/projects/:projectId/adminsubmissions",
   PROJECT_TESTS_UPLOAD = "/web/api/projects/:id/tests/extrafiles",
   PROJECT_SUBMIT = "/web/api/projects/:id/submit",
-  PROJECT_DOWNLOAD_ALL_SUBMISSIONS = "/web/api/projects/:id/submissions/files",  
-  
+  PROJECT_DOWNLOAD_ALL_SUBMISSIONS = "/web/api/projects/:id/submissions/files",
+
 
   SUBMISSION = "/web/api/submissions/:id",
   SUBMISSION_FILE = "/web/api/submissions/:id/file",
@@ -49,7 +49,7 @@ export enum ApiRoutes {
 
   CLUSTER = "/web/api/clusters/:id",
   CLUSTER_FILL = "/web/api/clusters/:id/fill",
-  
+
   GROUP = "/web/api/groups/:id",
   GROUP_MEMBERS = "/web/api/groups/:id/members",
   GROUP_MEMBER = "/web/api/groups/:id/members/:userId",
@@ -236,7 +236,7 @@ export type GET_Responses = {
     projectUrl: ApiRoutes.PROJECT
     groupUrl: ApiRoutes.GROUP | null
     fileUrl: ApiRoutes.SUBMISSION_FILE
-    structureFeedback: ApiRoutes.SUBMISSION_STRUCTURE_FEEDBACK
+    structureFeedback: string
     dockerFeedback: DockerFeedback,
     artifactUrl: ApiRoutes.SUBMISSION_ARTIFACT | null
   }

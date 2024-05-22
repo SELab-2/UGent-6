@@ -23,7 +23,6 @@ const GroupTab: FC<{}> = () => {
     if (!projectId) return console.error("No projectId found")
     const res = await API.GET(ApiRoutes.PROJECT_GROUPS, { pathValues: { id: projectId } })
     if (!res.success) return
-    console.log(res.response.data)
     setGroups(res.response.data)
   }
 

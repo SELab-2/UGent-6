@@ -14,7 +14,6 @@ export enum SubmissionStatus {
 }
 
 export function createStatusBitVector(submission: GET_Responses[ApiRoutes.SUBMISSION] | null) {
-  console.log(submission);
   if(submission === null) return SubmissionStatus.NOT_SUBMITTED
   let status = 0
   if(submission.dockerStatus === "running") {

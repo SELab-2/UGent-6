@@ -13,7 +13,6 @@ export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const API = useApi()
 
 
@@ -30,7 +29,6 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       "message"
     )
     if (!response.success) return
-    console.log(response)
     const url = window.URL.createObjectURL(new Blob([response.response.data]))
     const link = document.createElement("a")
     link.href = url
@@ -61,18 +59,7 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
         },
       }}
       type="inner"
-      title={
-        <span>
-          <Button
-            onClick={() => navigate("..")}
-            type="text"
-            style={{ marginRight: 16 }}
-          >
-            <ArrowLeftOutlined />
-          </Button>
-          {t("submission.submission")}
-        </span>
-      }
+      title= {t("submission.submission", {number: submission.submissionId})}
       extra={<Space>
 
         {submission.fileUrl && <Button key="file" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>}

@@ -60,6 +60,7 @@ const ProjectCard: FC<{ courseId?: number }> = ({ courseId }) => {
                     />
                 ) : (
                     <ProjectTable
+                        noFilter
                         ignoreColumns={["course"] }
                         projects={projects as NormalProjectType[]}
                     />

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
 import GroupProgress from "./GroupProgress"
 import { CourseProjectsType } from "./CourseSection"
+import { Link } from "react-router-dom"
 
 const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:boolean }> = ({ courseProjects,adminView }) => {
   const { t } = useTranslation()
@@ -32,7 +33,7 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
       onClick={() => navigate(AppRoutes.COURSE.replace(":courseId", courseProjects.course.courseId.toString()))}
       type="inner"
       title={courseProjects.course.name}
-      style={{ width: 300,height:"100%" }}
+      style={{ width: 300, height:"100%" }}
       actions={[
         <Tooltip title={t(courseProjects.course.memberCount > 1? "home.projects.userCourseCount_plural": "home.projects.userCourseCount", { count: courseProjects.course.memberCount })}>
           <span>
@@ -60,7 +61,13 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
         locale={{ emptyText: t("home.projects.noProjects") }}
         rowKey="projectId"
         renderItem={(project) => (
+          <Link 
+      to={AppRoutes.PROJECT.replace(":courseId", courseProjects.course.courseId.toString()).replace(":projectId", project.projectId.toString())} 
+      style={{ color: token.colorPrimary, textDecoration: 'none' }}
+      onClick={(event) => event.stopPropagation()}
+    >
           <List.Item
+            className="list-item-hover"
             actions={[
               project.status ? (
                 <ProjectStatusTag
@@ -74,10 +81,16 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
             />,
             ]}
           >
-            <List.Item.Meta title={<Typography.Text ellipsis>{project.name}</Typography.Text>} />
+            <List.Item.Meta title={
+              <Link to={AppRoutes.PROJECT.replace(":courseId", courseProjects.course.courseId.toString()).replace(":projectId", project.projectId.toString())} style={{ color: token.colorPrimary }}
+                onClick={(event) => event.stopPropagation()}>
+                <Typography.Text ellipsis style={{marginLeft: '10px'}}>{project.name}</Typography.Text>
+              </Link>}/>
           </List.Item>
+          </Link>
         )}
-      ></List>
+      >
+      </List>
     </Card>
   )
 }

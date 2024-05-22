@@ -33,7 +33,8 @@
     "docs": "Documentation",
     "calendar": "Calendar",
     "academicYearRequired": "Academic year is required",
-    "noCourses": "You're not in any courses yet, you can join a course by opening a course join link.",
+    "noCoursesStudent": "You're not in any courses yet, you can join a course by opening a course join link",
+    "noCoursesTeacher": "You're not in any courses yet you can create a course by clicking the button above",
     "courseNameRequired": "Course name is required",
     "courseNameMaxLength": "Course name must be less than 50 characters",
     "courseNameMinLength": "Course name must be at least 3 characters",
@@ -42,13 +43,14 @@
     "projects": {
       "noProjects": "No projects",
       "name": "Name",
-      "description": "Description",
+      "description": "Info",
       "course": "Course",
       "deadline": "Deadline",
       "deadlineNotPassed": "Only show active projects",
       "showMore": "Show more",
       "submit": "Submit",
       "projectStatus": "Status",
+      "maxScore": "Maximum score",
       "visibility": "Visibility",
       "visibleStatus": {
         "visible": "Visible",
@@ -64,8 +66,8 @@
       },
       "groupProgress": "Group progress",
       "completeProgress": "{{count}} / {{total}} completed",
-      "activeProjects": "{{count}} active project",
-      "activeProjects_plural": "{{count}} active projects",
+      "activeProjects": "{{count}} project",
+      "activeProjects_plural": "{{count}} projects",
       "userCourseCount": "{{count}} user is in this course",
       "userCourseCount_plural": "{{count}} users are in this course"
     },
@@ -140,6 +142,8 @@
     "successfullyDeleted": "Project deleted successfully",
     "deleteProject": "Delete project",
     "deleteProjectDescription": "Are you sure you want to delete this project? All submissions will be deleted, you cannot undo this action.",
+    "noStructure": "No specific file structure needed",
+    "saveFeedback": "Save feedback",
     "change": {
       "title": "Create project",
       "updateTitle": "Update {{name}}",
@@ -150,7 +154,8 @@
       "groupClusterId": "Groups",
       "groupClusterIdMessage": "Please enter the group cluster",
       "visible": "Make the project visible",
-      "visibleAfter": "Choose when the project will be made visible to students, leaving this empty will keep the project invisible",
+      "visibleAfter": "Make the project visible after",
+      "visibleAfterTooltip": "Choose when the project will be made visible to students, leaving this empty will keep the project invisible",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Please enter the maximum score for the project",
       "maxScoreHelp": "What is the maximum achievable score for this project? Leaving it empty means the project won't be graded.",
@@ -166,7 +171,7 @@
       "groupClusterCreated": "Group cluster created",
       "fileStructure": "File structure",
       "fileStructurePreview": "File structure preview",
-      "update": "Update project",
+      "update": "Save",
       "newGroupCluster": "Add a new group cluster",
       "makeCluster": "Create group cluster",
       "clusterName": "Cluster name",
@@ -200,15 +205,36 @@
       "structureTemplateHeader": "Structure",
       "dockerImageHeader": "Docker image",
       "dockerScriptHeader": "Docker script",
+      "dockerTemplate": "Docker template",
       "modeHeader": "Template",
       "fileStructure": "File structure",
-      "fileStructurePreview": "File structure preview"
+      "fileStructurePreview": "File structure preview",
+      "simpleMode": "Without template",
+      "templateMode": "With template",
+      "fileStructureTooltip": "This templates specifies the file structure a submission has to follow.\nIt uses the following syntax:\n* Folders end on `'/'`\n* Use indents to specify files inside a folder\n* Regex can be used\n\t* `'.'` is still a normal `'.'`\n\t* `'\\.'` can be used as regex `'.'`\n* `'-'` at the start of a line specifies a file/folder that is not allowed",
+      "dockerImageTooltip": "Specify a valid Docker-container from [Docker Hub](https://hub.docker.com/) on which the test script will be run.",
+      "dockerScriptTooltip": "Bash-script that is executed.\n* The files of the student's submission can be found in `'/shared/input'`\n* Extra files uploaded below can be found in `'/shared/extra'`\n\n More information about the required output depends on the mode and can be found below.",
+      "dockerTemplateTooltip": "To specify specific tests, you need to provide a template. First, enter the test name with '@{test}'. Below this, you can use '>' to provide options such as ('>required', '>optional', '>description'). Everything under these options until the next test or the end of the file is the expected output.",
+      "dockerTestDirTooltip": "Upload additional files needed for the Docker test.\n\nThese files are available in the folder `'/shared/extra'`.",
+      "simpleModeInfo": "Without template, the student will see everything that the scripts prints/logs as feedback.\n\nIf the test is successful, `'Push allowed'` must be written to `'/shared/output/testOutput'`. If this does not happen, the test is considered failed.",
+      "templateModeInfo": "If you provide a template, the student will see a comparison between the expected output and the student's output for each test.\n\nThe template uses the following syntax:\n* `@testName`: the first line of a test starts with `'@'` followed by the name of the test\n* Optionally, a number of options can be provided:\n\t* `>[required|optional]`: indicates whether the test is mandatory or optional\n\t* `>description=\"...\"`: description of the test\n* The lines after the options are the expected output of the test. The last newline is not considered part of the output.",
+      "dockerTemplateValidation": {
+        "inValidFirstLine": "The first line of a test must be '@' followed by the name of the test",
+        "inValidOptions": "Line {{line}}: Invalid option",
+        "emptyTemplate": "Template cannot be empty"
+      },
+      "dockerScriptRequired": "Docker script is required if u specify a Docker image"
     },
     "noScore": "No score available",
     "noFeedback": "No feedback provided",
     "noScoreLabel": "No score",
     "noFeedbackLabel": "No feedback",
-    "noSubmissionDownload": "No submission found"
+    "noSubmissionDownload": "No submission found",
+    "breadcrumbs": {
+      "editPage": "Edit project",
+      "submit": "Submit",
+      "submission": "Submission #{{number}}"
+    }
   },
   "group": {
     "removeUserFromGroup": "Remove {{name}} from group"
@@ -223,7 +249,7 @@
   },
 
   "submission": {
-    "submission": "Submission",
+    "submission": "Submission #{{number}}",
     "running": "Running tests",
     "submittedFiles": "Submitted files:",
     "structuretest": "Structure test results:",
@@ -235,6 +261,10 @@
     "failed": "failed",
     "expected": "Expected output:",
     "received": "Received output:",
+    "optional": "optional",
+    "structureTestSuccess": "Submission meets the structure requirements",
+    "structureTestFailed": "Submission does not meets the structure requirements",
+    "tests": "Automated tests:",
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."

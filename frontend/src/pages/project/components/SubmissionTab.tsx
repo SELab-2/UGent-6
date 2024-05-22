@@ -8,6 +8,7 @@ export type GroupSubmissionType = GET_Responses[ApiRoutes.PROJECT_GROUP_SUBMISSI
 
 const SubmissionTab: FC<{ projectId: number; courseId: number; testSubmissions?: boolean }> = ({ projectId, courseId, testSubmissions }) => {
   const [submissions, setSubmissions] = useState<GroupSubmissionType[] | null>(null)
+  const [indices, setIndices] = useState<Map<number, number>>(new Map())
   const project = useProject()
   const API = useApi()
 
@@ -15,13 +16,19 @@ const SubmissionTab: FC<{ projectId: number; courseId: number; testSubmissions?:
     if (!project) return
     if (!project.submissionUrl) return setSubmissions([])
     if (!project.groupId && !testSubmissions) return console.error("No groupId found")
-    console.log(project)
     let ignore = false
-    console.log("Sending request to: ", project.submissionUrl)
     API.GET(testSubmissions ? ApiRoutes.PROJECT_TEST_SUBMISSIONS : ApiRoutes.PROJECT_GROUP_SUBMISSIONS, { pathValues: { projectId: project.projectId, groupId: project.groupId ?? "" } }).then((res) => {
-      console.log(res)
       if (!res.success || ignore) return
-      setSubmissions(res.response.data.sort((a, b) => b.submissionId - a.submissionId))
+      console.log(res.response.data)
+      //this is sorts the submissions by submission time, with the oldest submission first
+      const ascending = res.response.data.sort((a, b) => new Date(a.submissionTime).getTime() - new Date(b.submissionTime).getTime())
+      const tmp = new Map()
+      ascending.forEach((submission, index) => {
+        tmp.set(submission.submissionId, index+1)
+      })
+      setIndices(tmp)
+      //we need descending order, so we reverse the array
+      setSubmissions(ascending.reverse())
     })
 
     return () => {
@@ -33,7 +40,7 @@ const SubmissionTab: FC<{ projectId: number; courseId: number; testSubmissions?:
     <>
  
 
-      <SubmissionList submissions={submissions} />
+      <SubmissionList submissions={submissions} indices={indices} />
     </>
   )
 }

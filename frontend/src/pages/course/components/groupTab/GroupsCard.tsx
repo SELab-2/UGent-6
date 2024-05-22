@@ -13,7 +13,6 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   const { t } = useTranslation()
   const API = useApi()
   useEffect(() => {
-    // TODO: do the fetch (get all clusters from the course )
       fetchGroups().catch(console.error)
 
   }, [courseId])
@@ -25,9 +24,6 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
       setGroups(res.response.data)
     }
 
-  // if(!groups) return <div style={{width:"100%",height:"400px",display:"flex",justifyContent:"center",alignItems:"center"}}>
-  //   <Spin tip="Loading"></Spin>
-  // </div>
 
   const items: CollapseProps["items"] = useMemo(()=> groups?.map((cluster) => ({
     key: cluster.clusterId.toString(),
@@ -51,9 +47,7 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   if (!items)
     return (
       <div style={{ width: "100%", height: "400px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Spin tip="Loading">
-          <span></span>
-        </Spin>
+        <Spin />
       </div>
     )
   return (

@@ -17,6 +17,7 @@ const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardPr
   const location = useLocation()
   const navigate = useNavigate()
 
+
   const tabs: TabsProps["items"] = [
     {
       key: "general",
@@ -47,7 +48,7 @@ const ProjectForm: FC<PropsWithChildren<{ form: FormInstance, cardProps?: CardPr
   return (
     <Card
       {...cardProps}
-      style={{ maxWidth: "700px", width: "100%", margin: "2rem 0" }}
+      style={{ maxWidth: "700px", width: "100%", margin: "1rem 0" }}
       tabList={tabs}
       tabProps={{
         size: "middle",

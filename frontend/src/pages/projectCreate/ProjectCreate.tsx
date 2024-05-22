@@ -39,7 +39,6 @@ const ProjectCreate: React.FC = () => {
             visibleAfter: values.visibleAfter,
         }
 
-        console.log(values)
 
         if (!courseId) return console.error("courseId is undefined")
         setLoading(true)
@@ -69,6 +68,7 @@ const ProjectCreate: React.FC = () => {
         else if (errField === "structureTest") navigate("#structure")
         else if (errField === "dockerScript" || errField === "dockerImage" || errField === "dockerTemplate") navigate("#tests")
         else navigate("#general")
+        form.scrollToField(errField)
     }
 
     return (
