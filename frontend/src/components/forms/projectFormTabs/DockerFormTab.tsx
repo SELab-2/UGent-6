@@ -2,7 +2,7 @@ import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
 import {Button, Form, Input, Switch, Upload} from "antd"
 import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
-import {FC, useState} from "react"
+import React, {FC, useState} from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes } from "../../../@types/requests"
 import useAppApi from "../../../hooks/useAppApi"
@@ -50,8 +50,14 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
   const dockerDisabled = !dockerImage?.length
 
+    React.useEffect(() =>  {
+        form.validateFields(["dockerScript", "dockerTemplate"])
+    }, [dockerDisabled])
+
   function isValidTemplate(template: string): string {
-    if (!template?.length) return "" // Template is optional
+    if (template.length === 0) {
+      return t("project.tests.dockerTemplateValidation.emptyTemplate")
+    }
     let atLeastOne = false // Template should not be empty
     const lines = template.split("\n")
     if (lines[0].charAt(0) !== "@") {
@@ -98,10 +104,21 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   };
 
   let switchClassName = 'template-switch'
+  let scriptPlaceholder
+  
   if (withTemplate) {
     switchClassName += ' template-switch-active'
+    scriptPlaceholder = "bash /shared/input/helloworld.sh > \"/shared/output/helloWorldTest\n"+
+    "bash /shared/input/helloug.sh > \"/shared/output/helloUGent\n"
   } else {
     switchClassName += ' template-switch-inactive'
+    scriptPlaceholder = "output=$(bash /shared/input/helloworld.sh)\n"+ 
+    "if [[ \"$output\" == \"Hello World\" ]]; then \n"+
+    "  echo 'Test one is successful\n"+
+    "  echo 'PUSH ALLOWED' > /shared/output/testOutput\n"+ 
+    "else\n"+
+    "  echo 'Test one failed: script failed to print \"Hello World\"'\n"+
+    "fi"
   }
 
   return (
@@ -124,7 +141,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
       <>
         <Form.Item
-          rules={[{ required: !dockerDisabled, message: "Docker script is required" }]}
+          rules={[{ required: !dockerDisabled, message: t("project.tests.dockerScriptRequired") }]}
           label={
             <MarkdownTooltip
               label={"Docker start script"}
@@ -136,8 +153,9 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         >
           <Input.TextArea
             disabled={dockerDisabled}
-            autoSize={{ minRows: 3 }}
-            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
+            autoSize={{ minRows: 8 }}
+            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
+            placeholder={scriptPlaceholder}
           />
         </Form.Item>
         <Form.Item
@@ -195,6 +213,9 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                   {
                     validator: (_, value) => {
                       const errorMessage = isValidTemplate(value)
+                      if (dockerDisabled) {
+                        return Promise.resolve()
+                      }
                       return errorMessage === "" ? Promise.resolve() : Promise.reject(new Error(errorMessage))
                     }, required: true
                   }

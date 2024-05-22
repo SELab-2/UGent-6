@@ -223,7 +223,8 @@
         "inValidFirstLine": "De eerste lijn van een regel moet beginnen met '@' gevolgd door de naam van de test",
         "inValidOptions": "Lijn {{line}}: Ongeldige optie",
         "emptyTemplate": "Template kan niet leeg zijn"
-      }
+      },
+      "dockerScriptRequired": "Docker script is verplicht als je een Docker image hebt ingevuld"
     },
     "noScore": "Nog geen score beschikbaar",
     "noFeedback": "Geen feedback gegeven",

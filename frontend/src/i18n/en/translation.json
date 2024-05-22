@@ -221,7 +221,8 @@
         "inValidFirstLine": "The first line of a test must be '@' followed by the name of the test",
         "inValidOptions": "Line {{line}}: Invalid option",
         "emptyTemplate": "Template cannot be empty"
-      }
+      },
+      "dockerScriptRequired": "Docker script is required if u specify a Docker image"
     },
     "noScore": "No score available",
     "noFeedback": "No feedback provided",
