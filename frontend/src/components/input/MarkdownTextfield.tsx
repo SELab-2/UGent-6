@@ -4,7 +4,7 @@ import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/pris
 import useApp from "../../hooks/useApp"
 import { FC } from "react"
 
-const MarkdownTextfield: FC<{ content: string }> = ({ content }) => {
+const MarkdownTextfield: FC<{ content: string, inTooltip?: boolean}> = ({ content, inTooltip }) => {
   const app = useApp()
 
   const CodeBlock = {
@@ -29,7 +29,13 @@ const MarkdownTextfield: FC<{ content: string }> = ({ content }) => {
     },
   }
 
-  return <Markdown components={CodeBlock}>{content}</Markdown>
+  let className = 'markdown-textfield'
+  console.log(inTooltip)
+  if (inTooltip) {
+    className = 'markdown-textfield-intooltip'
+  }
+
+  return <Markdown components={CodeBlock} className={className}>{content}</Markdown>
 }
 
 export default MarkdownTextfield

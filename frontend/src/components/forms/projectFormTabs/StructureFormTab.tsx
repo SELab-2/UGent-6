@@ -1,25 +1,40 @@
-import { Form, Input, Typography } from "antd"
+import { Form, Input, Typography, Tooltip, Space } from "antd"
+import { QuestionCircleOutlined } from "@ant-design/icons"
 import { FC } from "react"
 import SubmitStructure from "../../../pages/submit/components/SubmitStructure"
 import { useTranslation } from "react-i18next"
 import { FormInstance } from "antd/lib"
 import { useDebounceValue } from "usehooks-ts"
+import MarkdownTooltip from "../../common/MarkdownTooltip"
 
 const StructureFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const structure = Form.useWatch("structureTest", form)
   const [debouncedValue] = useDebounceValue(structure, 400)
 
+
   return (
     <>
       <Form.Item
-        label={t("project.change.fileStructure")}
+        label={
+            <MarkdownTooltip
+              label={t("project.tests.fileStructure")}
+              tooltipContent={t("project.tests.fileStructureTooltip")}
+              placement="right"
+            />
+        }
         name="structureTest"
-        tooltip="TODO write docs for this"
       >
         <Input.TextArea
-          autoSize={{ minRows: 3 }}
+          autoSize={{ minRows: 5 }}
           style={{ fontFamily: "monospace" }}
+          placeholder={
+              'src/\n' +
+              '  index.js\n' +
+              '  \\\.*\n'+
+              'common/\n' +
+              '  index.css\n' +
+              '-node_modules/\n'}
           onKeyDown={(e) => {
             if (e.key === "Tab") {
               e.preventDefault()
