@@ -34,10 +34,11 @@ html {
 
 .small-scroll-bar::-webkit-scrollbar {
   width: 3px; /* Adjust scrollbar width */
-  height: 3px;
+  height: 6px;
 }
 
 .small-scroll-bar::-webkit-scrollbar-thumb {
+  padding-top: 50px !important;
   height: 2px; /* Adjust scrollbar height */
   width: 2px;
 }
