@@ -83,7 +83,7 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
           </List.Item>
         )}
       >
-        {courseProjects.projects.length > 0 && <Typography.Text style={{ textAlign: 'left', display: 'block' }}>...</Typography.Text>}
+        {courseProjects.projects.length > 3 && <Typography.Text style={{ textAlign: 'left', display: 'block' }}>...</Typography.Text>}
       </List>
     </Card>
   )
