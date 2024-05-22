@@ -1,5 +1,5 @@
 import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
-import {Button, Form, Input, Switch, Upload} from "antd"
+import {Button, Dropdown, Form, Input, Menu, Select, Switch, Upload} from "antd"
 import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
 import {FC, useState} from "react"
@@ -9,6 +9,7 @@ import useAppApi from "../../../hooks/useAppApi"
 import MarkdownTooltip from "../../common/MarkdownTooltip"
 import { classicNameResolver } from "typescript"
 import MarkdownTextfield from "../../input/MarkdownTextfield"
+import TextArea from "antd/es/input/TextArea";
 
 const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProps?: TextAreaProps; disabled?: boolean }> = ({ form, fieldName, disabled }) => {
   const handleFileUpload = (file: File) => {
@@ -42,13 +43,30 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
   )
 }
 
+interface Script {
+  displayName: string;
+  scriptGenerator: (script: string) => string;
+  image?: string;
+}
+
+interface ScriptCollection {
+  [key: string]: Script;
+}
+
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
   const [withTemplate, setWithTemplate] = useState<boolean>(true)
+  const [imageSelect, setImageSelect] = useState<string>("alpine")
   const dockerImage = Form.useWatch("dockerImage", form)
 
   const dockerDisabled = !dockerImage?.length
+  const languageOptions:ScriptCollection = {
+    "bash": {displayName:"Bash", scriptGenerator: (script: string) => script, image: "fedora"},
+    "python": {displayName:"Python", scriptGenerator: (script: string) => `python -c '${script}'`, image: "python"},
+    "javascript": {displayName:"Javascript (node)", scriptGenerator: (script: string) => `node -e '${script}', image: "node"`},
+    "haskell": {displayName:"Haskell", scriptGenerator: (script: string) => `runhaskell -e '${script}'`, image: "haskell"}
+  }
 
   function isValidTemplate(template: string): string {
     if (!template?.length) return "" // Template is optional
@@ -114,13 +132,21 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
             placement="right"
           />
         }
+
         name="dockerImage"
       >
-        <Input
+        { <Input
           style={{ marginTop: "8px" }}
+          value={imageSelect}
           placeholder={t("project.tests.dockerImagePlaceholder")}
-        />
+        />}
       </Form.Item>
+
+      <Select defaultValue={Object.keys(languageOptions)[0]}>
+        {Object.keys(languageOptions).map((key) => (
+            <Select.Option value={key}>{languageOptions[key].displayName}</Select.Option>
+        ))}
+      </Select>
 
       <>
         <Form.Item
@@ -134,7 +160,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           }
           name="dockerScript"
         >
-          <Input.TextArea
+          <TextArea
             disabled={dockerDisabled}
             autoSize={{ minRows: 3 }}
             style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
