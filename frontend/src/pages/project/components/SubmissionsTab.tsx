@@ -59,12 +59,12 @@ const SubmissionsTab = () => {
 
   const handleExportToUfora = () => {
     if (!submissions || !project) return
-    exportToUfora(submissions, project.maxScore ?? 0)
+    exportToUfora(submissions, project.maxScore ?? 0, `${project.name}-ufora-submissions.csv`)
   }
 
   const exportStatus = () => {
-    if (!submissions) return
-    exportSubmissionStatusToCSV(submissions)
+    if (!submissions || !project) return
+    exportSubmissionStatusToCSV(submissions, `${project.name}-submissions.csv`)
   }
 
   return (
