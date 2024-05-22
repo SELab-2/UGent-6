@@ -6,6 +6,9 @@ import {FC, useState} from "react"
 import { useTranslation } from "react-i18next"
 import { ApiRoutes } from "../../../@types/requests"
 import useAppApi from "../../../hooks/useAppApi"
+import MarkdownTooltip from "../../common/MarkdownTooltip"
+import { classicNameResolver } from "typescript"
+import MarkdownTextfield from "../../input/MarkdownTextfield"
 
 const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProps?: TextAreaProps; disabled?: boolean }> = ({ form, fieldName, disabled }) => {
   const handleFileUpload = (file: File) => {
@@ -39,49 +42,51 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
   )
 }
 
-function isValidTemplate(template: string): string {
-  if (!template?.length) return "" // Template is optional
-  let atLeastOne = false // Template should not be empty
-  const lines = template.split("\n")
-  if (lines[0].charAt(0) !== "@") {
-    return 'Error: The first character of the first line should be "@"'
-  }
-  let isConfigurationLine = false
-  for (const line of lines) {
-    if (line.length === 0) {
-      // skip line if empty
-      continue
-    }
-    if (line.charAt(0) === "@") {
-      atLeastOne = true
-      isConfigurationLine = true
-      continue
-    }
-    if (isConfigurationLine) {
-      if (line.charAt(0) === ">") {
-        const isDescription = line.length >= 13 && line.substring(0, 13).toLowerCase() === ">description="
-        // option lines
-        if (line.toLowerCase() !== ">required" && line.toLowerCase() !== ">optional" && !isDescription) {
-          return 'Error: Option lines should be either ">Required", ">Optional" or start with ">Description="'
-        }
-      } else {
-        isConfigurationLine = false
-      }
-    }
-  }
-  if (!atLeastOne) {
-    return "Error: Template should not be empty"
-  }
-  return ""
-}
-
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
-  const [withArtifacts, setWithArtifacts] = useState<boolean>(true)
+  const [withTemplate, setWithTemplate] = useState<boolean>(true)
   const dockerImage = Form.useWatch("dockerImage", form)
 
   const dockerDisabled = !dockerImage?.length
+
+  function isValidTemplate(template: string): string {
+    if (!template?.length) return "" // Template is optional
+    let atLeastOne = false // Template should not be empty
+    const lines = template.split("\n")
+    if (lines[0].charAt(0) !== "@") {
+      return t("project.tests.dockerTemplateValidation.inValidFirstLine")
+    }
+    let isConfigurationLine = false
+    let lineNumber = 0
+    for (const line of lines) {
+      lineNumber++
+      if (line.length === 0) {
+        // skip line if empty
+        continue
+      }
+      if (line.charAt(0) === "@") {
+        atLeastOne = true
+        isConfigurationLine = true
+        continue
+      }
+      if (isConfigurationLine) {
+        if (line.charAt(0) === ">") {
+          const isDescription = line.length >= 13 && line.substring(0, 13).toLowerCase() === ">description="
+          // option lines
+          if (line.toLowerCase() !== ">required" && line.toLowerCase() !== ">optional" && !isDescription) {
+            return t("project.tests.dockerTemplateValidation.inValidOptions", { line:lineNumber.toString() })
+          }
+        } else {
+          isConfigurationLine = false
+        }
+      }
+    }
+    if (!atLeastOne) {
+      return t("project.tests.dockerTemplateValidation.emptyTemplate")
+    }
+    return ""
+  }
 
 
   const normFile = (e: any) => {
@@ -92,12 +97,25 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
     return e?.fileList;
   };
 
+  let switchClassName = 'template-switch'
+  if (withTemplate) {
+    switchClassName += ' template-switch-active'
+  } else {
+    switchClassName += ' template-switch-inactive'
+  }
+
   return (
     <>
       <Form.Item
-        label="Docker image"
+        label={
+          <MarkdownTooltip
+            label={"Docker Image"}
+            tooltipContent={t("project.tests.dockerImageTooltip")}
+            placement="right"
+          />
+        }
         name="dockerImage"
-        tooltip={t("project.tests.dockerImageTooltip")}      >
+      >
         <Input
           style={{ marginTop: "8px" }}
           placeholder={t("project.tests.dockerImagePlaceholder")}
@@ -107,9 +125,14 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
       <>
         <Form.Item
           rules={[{ required: !dockerDisabled, message: "Docker script is required" }]}
-          label="Docker start script"
+          label={
+            <MarkdownTooltip
+              label={"Docker start script"}
+              tooltipContent={t("project.tests.dockerScriptTooltip")}
+              placement="right"
+            />
+          }
           name="dockerScript"
-          tooltip={t("project.tests.dockerScriptTooltip")}
         >
           <Input.TextArea
             disabled={dockerDisabled}
@@ -117,63 +140,15 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
             style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
           />
         </Form.Item>
-        {/* <UploadBtn
-          form={form}
-          disabled={dockerDisabled}
-          fieldName="dockerScript"
-        /> */}
-        <div style={{ paddingBottom: '14px' }}>
-          <Switch
-              checked={withArtifacts}
-              checkedChildren={t("project.tests.templateMode")}
-              unCheckedChildren={t("project.tests.simpleMode")}
-              onChange={setWithArtifacts}
+        <Form.Item
+        label={
+          <MarkdownTooltip
+            label={"Docker test directory"}
+            tooltipContent={t("project.tests.dockerTestDirTooltip")}
+            placement="right"
           />
-        </div>
-
-        {withArtifacts ?
-            <div>
-              <span style={{ color: 'darkgray', fontSize: '0.8em' }}>{t("project.tests.templateModeInfo")}
-                  <br/>
-                  <br/>
-              </span>
-
-            <Form.Item
-                label="Template"
-                name="dockerTemplate"
-                tooltip={t("project.tests.dockerTemplateTooltip")}
-                rules={[
-                  {
-                    validator: (_, value) => {
-                      const errorMessage = isValidTemplate(value)
-                      return errorMessage === "" ? Promise.resolve() : Promise.reject(new Error(errorMessage))
-                    },
-                  },
-                ]}
-            >
-
-              <Input.TextArea
-                  autoSize={{minRows: 4}}
-                  disabled={dockerDisabled}
-                  style={{fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
-                  placeholder={"@helloWorldTest\n>required\n>description=\"This is a test\"\nExpected output 1\n@helloUGent\n>optional\nExpected output 2\n"}
-              />
-                {/*<UploadBtn
-                  form={form}
-                  disabled={dockerDisabled}
-                  fieldName="dockerTemplate"
-              />*/}
-            </Form.Item> </div>: <Form.Item
-          name="simpleMode"
-          children={<span style={{color: 'darkgray', fontSize: '0.8em' }}>{t("project.tests.simpleModeInfo")}</span>}
-            rules={[{ required: true}]}
-        />}
-      </>
-
-      <Form.Item
-        label="Docker test directory"
+        }
         name="dockerTestDir"
-        tooltip={t("project.tests.dockerTestDirTooltip")}
         valuePropName="fileList"
         getValueFromEvent={normFile}
       >
@@ -194,6 +169,55 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           <Button disabled={dockerDisabled} icon={<UploadOutlined />}>Upload test directory (zip)</Button>
         </Upload>
       </Form.Item>
+        {/* <UploadBtn
+          form={form}
+          disabled={dockerDisabled}
+          fieldName="dockerScript"
+        /> */}
+        <div style={{ paddingBottom: '14px'}}>
+          <Switch
+              checked={withTemplate}
+              checkedChildren={t("project.tests.templateMode")}
+              unCheckedChildren={t("project.tests.simpleMode")}
+              onChange={setWithTemplate}
+              className={switchClassName}
+          />
+        </div>
+
+        {withTemplate ?
+            <div>
+              <MarkdownTextfield content={t("project.tests.templateModeInfo")} />
+
+            <Form.Item
+                label={t("project.tests.dockerTemplate")}
+                name="dockerTemplate"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      const errorMessage = isValidTemplate(value)
+                      return errorMessage === "" ? Promise.resolve() : Promise.reject(new Error(errorMessage))
+                    }, required: true
+                  }
+                ]}
+            >
+
+              <Input.TextArea
+                  autoSize={{minRows: 4}}
+                  disabled={dockerDisabled}
+                  style={{fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
+                  placeholder={"@helloWorldTest\n>required\n>description=\"This is a test\"\nExpected output 1\n\n@helloUGent\n>optional\nExpected output 2\n"}
+              />
+                {/*<UploadBtn
+                  form={form}
+                  disabled={dockerDisabled}
+                  fieldName="dockerTemplate"
+              />*/}
+            </Form.Item> </div>: <Form.Item
+          name="simpleMode"
+          children={<MarkdownTextfield content={t("project.tests.simpleModeInfo")} />}
+            rules={[{ required: false}]}
+        />}
+      </>
     </>
   )
 }
