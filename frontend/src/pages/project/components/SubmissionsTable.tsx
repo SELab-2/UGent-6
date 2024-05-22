@@ -78,7 +78,8 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const updateFeedback = async (groupId: number) => {
     const feedback = editingFeedback[groupId];
     if (feedback !== undefined) {
-      await updateTable(groupId, { feedback, score: submissions?.find(s => s.group.groupId === groupId)?.feedback?.score || null }, false);
+      const s = submissions?.find(s => s.group.groupId === groupId)
+      await updateTable(groupId, { feedback, score: s?.feedback?.score || null }, s?.feedback === null);
       setEditingFeedback((prev) => {
         const newState = { ...prev };
         delete newState[groupId];
@@ -229,7 +230,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
                         </>
                     ) : (
                         <>
-                          <Typography.Paragraph
+                           <Typography.Paragraph
                               style={{
                                 whiteSpace: "pre-wrap",
                                 cursor: "pointer",
@@ -238,7 +239,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
                               onClick={() => handleEditFeedback(g.group.groupId)}
                           >
                             {g.feedback?.feedback ?? t("project.noFeedbackLabel")}
-                          </Typography.Paragraph>
+                            </Typography.Paragraph>
                         </>
                     )}
                   </div>

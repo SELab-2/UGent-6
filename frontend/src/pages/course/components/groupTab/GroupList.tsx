@@ -36,7 +36,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
         ) : (
           <Button
             key="join"
-            loading={loading}
+            loading={loading && canJoin}
             size="small"
             disabled={!canJoin}
             onClick={onJoin}
@@ -114,8 +114,8 @@ const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[]
     if (!response.success) return setLoading(false)
       
     setGroupId(null)
-    if(onGroupIdChange) onGroupIdChange(null)
     if (onChanged) await onChanged()
+    if(onGroupIdChange) onGroupIdChange(null)
 
     message.success(t("course.leftGroup"))
 

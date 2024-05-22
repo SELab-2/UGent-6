@@ -143,6 +143,7 @@
     "scoreTooHigh": "Score is hoger dan maximum score",
     "successfullyDeleted": "Project succesvol verwijderd",
     "deleteProject": "Project verwijderen",
+    "saveFeedback": "Feedback opslaan",
     "deleteProjectDescription": "Bent u zeker dat u dit project wilt verwijderen? Alle indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
     "noStructure": "Er is specifiek geen bestanden structuur nodig",
     "change": {

@@ -4,6 +4,7 @@ import { SubTest } from "../../../@types/requests"
 import { FC } from "react"
 import { SubmissionType } from "./SubmissionCard"
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons"
+import MarkdownTextfield from "../../../components/input/MarkdownTextfield"
 
 const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { t } = useTranslation()
@@ -30,27 +31,29 @@ const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) =
               </>
             }
           >
-            <Typography.Paragraph type="secondary">{test.testDescription}</Typography.Paragraph>
+           {!!test.testDescription?.length && <Typography.Paragraph type="secondary">{test.testDescription}</Typography.Paragraph>}
             <Flex
               justify="space-around"
               gap="1rem"
             >
               <div style={{ width: "100%" }}>
-                <Typography.Title level={5}>{t("submission.expected")}</Typography.Title>
+                <Typography.Title level={5} style={{ marginTop: "0.5rem" }}>{t("submission.expected")}</Typography.Title>
                 <Input.TextArea
                   autoSize={{ minRows: 3, maxRows: 20 }}
                   readOnly
                   value={test.correct}
                   style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono" }}
+                  variant="borderless"
                 />
               </div>
               <div style={{ width: "100%" }}>
-                <Typography.Title level={5}>{t("submission.received")}</Typography.Title>
+                <Typography.Title level={5} style={{ marginTop: "0.5rem" }}>{t("submission.received")}</Typography.Title>
                 <Input.TextArea
                   autoSize={{ minRows: 3, maxRows: 20 }}
                   readOnly
                   value={test.output}
                   style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono" }}
+                  variant="borderless"
                 />
               </div>
             </Flex>
@@ -60,18 +63,7 @@ const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) =
     </Collapse>
   )
   if (submission.dockerStatus === "aborted") return <Typography.Text type="danger">{t("submission.dockertestAborted")}</Typography.Text>
-  if (submission.dockerStatus === "running")
-    return (
-      <div style={{ textAlign: "center" }}>
-        <br />
-        <Spin size="large" />
-        <br />
-        <br />
-        <Typography.Text type="secondary">{t("submission.running")}</Typography.Text>
-        <br />
-        <br />
-      </div>
-    )
+  
   return (
     <>
         <>
@@ -82,18 +74,33 @@ const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) =
             ) : (
               <>
                 <Typography.Text type="danger">{t("submission.structureTestFailed")}</Typography.Text>
-                <Input.TextArea
+
+              <MarkdownTextfield content={submission.structureFeedback}/>
+
+                {/* <Input.TextArea
                   readOnly
                   value={submission.structureFeedback}
                   style={{ width: "100%", overflowX: "auto", overflowY: "auto", resize: "none", fontFamily: "Jetbrains Mono", marginTop: 8 }}
                   autoSize={{ minRows: 4, maxRows: 128 }}
-                />
+                /> */}
               </>
             )}
           </li>
         </>
 
       {submission.dockerStatus === "no_test" && submission.structureAccepted && <Typography.Text style={{marginTop:"1rem"}} type="success">{t("submission.submissionSuccess")}</Typography.Text>}
+
+      {submission.dockerStatus === "running" && (
+        <div style={{ textAlign: "center" }}>
+          <br />
+          <Spin size="large" />
+          <br />
+          <br />
+          <Typography.Text type="secondary">{t("submission.running")}</Typography.Text>
+          <br />
+          <br />
+        </div>
+      )}
 
       {submission.dockerStatus === "finished" && (
         <div style={{ marginTop: "1rem" }}>
