@@ -47,23 +47,7 @@ const Submission = () => {
 
   return (
     <div style={{ margin: "3rem 0",marginTop:"1rem" }}>
-      <SubmissionCard submission={{
-        ...submission,
-        dockerFeedback:{
-          allowed: false,
-          feedback: {
-            subtests: [{
-              correct: "dsfsdf",
-              output: "ndsfjsdf",
-              required: false,
-              succes: true,
-              testDescription: "sdljfjsdfks",
-              testName: "dsfsdf"
-            }]
-          },
-          type: "TEMPLATE"
-        }
-      }} />
+      <SubmissionCard submission={submission}/>
     </div>
   )
 }

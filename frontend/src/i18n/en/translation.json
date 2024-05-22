@@ -268,7 +268,8 @@
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."
-    }
+    },
+    "viewraw": "Escape special characters"
   },
 
   "course": {

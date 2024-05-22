@@ -272,7 +272,8 @@
     "status": {
       "accepted": "Alle testen zijn geslaagd.",
       "failed": "Sommige testen zijn niet geslaagd."
-    }
+    },
+    "viewraw": "Speciale karakters escapen"
   },
 
   "course": {
