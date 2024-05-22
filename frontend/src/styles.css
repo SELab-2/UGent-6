@@ -260,10 +260,14 @@ html {
 
 .list-item-hover {
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
+  transition: background-color 0.15s ease-in-out;
   border-radius: 8px;
 }
 
-.list-item-hover:hover {
-  background-color: #5a5a5a69;
+.dark-theme .list-item-hover:hover {
+  background-color: rgba(255 255 255 / 10%);
+}
+
+.light-theme .list-item-hover:hover {
+  background-color: rgba(0 0 0 / 5%);
 }
