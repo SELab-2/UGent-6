@@ -221,7 +221,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
                           />
 
                           <Button
-                            style={{float: "right", marginRight: "1rem"}}
+                            style={{float: "right", marginTop: "0.5rem"}}
                             onClick={() => updateFeedback(g.group.groupId)}
                             color="primary"
                             icon={<SaveOutlined/>}>
