@@ -331,3 +331,8 @@ html {
 .light-theme .list-item-hover:hover {
   background-color: rgba(0 0 0 / 5%);
 }
+
+.ant-picker-body th {
+  font-weight: bold !important;
+  font-size: large !important;
+}
