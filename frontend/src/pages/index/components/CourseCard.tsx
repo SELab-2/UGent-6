@@ -33,7 +33,7 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
       onClick={() => navigate(AppRoutes.COURSE.replace(":courseId", courseProjects.course.courseId.toString()))}
       type="inner"
       title={courseProjects.course.name}
-      style={{ width: 300,height:"100%" }}
+      style={{ width: 300, height:"100%" }}
       actions={[
         <Tooltip title={t(courseProjects.course.memberCount > 1? "home.projects.userCourseCount_plural": "home.projects.userCourseCount", { count: courseProjects.course.memberCount })}>
           <span>

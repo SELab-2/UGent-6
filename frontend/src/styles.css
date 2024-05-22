@@ -261,7 +261,8 @@ html {
 .list-item-hover {
   cursor: pointer;
   transition: background-color 0.15s ease-in-out;
-  border-radius: 8px;
+  width: 300px;
+  margin-left: -23px;
 }
 
 .dark-theme .list-item-hover:hover {
