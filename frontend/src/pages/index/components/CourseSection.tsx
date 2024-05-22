@@ -111,7 +111,7 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
 
         {showYourCourses && (
             <HorizontalCourseScroll
-                title={user?.role === "student" ? t("home.yourCourses") : t("home.myCourses")}
+                title={t("home.yourCourses")}
                 projects={filteredCourseProjects}
                 onOpenNew={onOpenNew}
                 showMore={archivedCourses || courseProjectsList.length > 2}
