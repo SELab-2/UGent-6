@@ -145,13 +145,6 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           onChange={(event) => setImageSelect(event.target.value)}
         />
       </Form.Item>
-      <Form.Item
-      >
-        <Input
-          value = {"WAHOOO"}
-        />
-
-      </Form.Item>
 
       <Select defaultValue={Object.keys(languageOptions)[0]} onChange={(val) => setImageSelect(val)} >
         {Object.keys(languageOptions).map((key) => (
