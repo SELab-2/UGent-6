@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
 import GroupProgress from "./GroupProgress"
 import { CourseProjectsType } from "./CourseSection"
+import { Link } from "react-router-dom"
 
 const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:boolean }> = ({ courseProjects,adminView }) => {
   const { t } = useTranslation()
@@ -74,10 +75,16 @@ const CourseCard: FC<{ courseProjects: CourseProjectsType[string], adminView?:bo
             />,
             ]}
           >
-            <List.Item.Meta title={<Typography.Text ellipsis>{project.name}</Typography.Text>} />
+            <List.Item.Meta title={
+              <Link to={AppRoutes.PROJECT.replace(":courseId", courseProjects.course.courseId.toString()).replace(":projectId", project.projectId.toString())} style={{ color: token.colorPrimary }}
+                onClick={(event) => event.stopPropagation()}>
+                <Typography.Text ellipsis>{project.name}</Typography.Text>
+              </Link>}/>
           </List.Item>
         )}
-      ></List>
+      >
+        {courseProjects.projects.length > 0 && <Typography.Text style={{ textAlign: 'left', display: 'block' }}>...</Typography.Text>}
+      </List>
     </Card>
   )
 }
