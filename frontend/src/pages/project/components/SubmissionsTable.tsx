@@ -28,6 +28,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const API = useApi();
   const [editingFeedback, setEditingFeedback] = useState<{ [key: number]: string }>({});
   const [isEditing, setIsEditing] = useState<{ [key: number]: boolean }>({});
+  const [scores, setScores] = useState<{ [key: number]: string }>({});
 
   const updateTable = async (groupId: number, feedback: Omit<PUT_Requests[ApiRoutes.PROJECT_SCORE], "projectId" | "groupId">, usePost: boolean) => {
     if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found");
@@ -63,13 +64,19 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
     onChange(newSubmissions);
   };
 
-  const updateScore = async (s: ProjectSubmissionsType, scoreStr: string) => {
+  const startScore = (s: ProjectSubmissionsType) => {
+    setScores(prevScores => ({ ...prevScores, [s.group.groupId]: "" }));
+    console.log(scores[s.group.groupId])
+  };
+
+  const updateScore = async (s: ProjectSubmissionsType, e: string) => {
     if (!projectId || !project) return console.error("No projectId or project found");
     if (!project.maxScore) return console.error("Scoring not available for this project");
-    scoreStr = scoreStr.trim();
+    //let scoreStr = scores[s.group.groupId];
+    e = e.trim();
     let score: number | null;
-    if (scoreStr === "") score = null;
-    else score = parseFloat(scoreStr);
+    if (e === "") score = null;
+    else score = parseFloat(e);
     if (isNaN(score as number)) score = null;
     if (score !== null && score > project.maxScore) return message.error(t("project.scoreTooHigh"));
     await updateTable(s.group.groupId, { score: score || null, feedback: s.feedback?.feedback ?? "" }, s.feedback === null);
@@ -171,12 +178,12 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         title: `Score (/${project?.maxScore ?? ""})`,
         key: "score",
         render: (s: ProjectSubmissionsType) => (
-            <Typography.Text
-                type={!s.feedback || s.feedback.score === null ? "secondary" : !project || s.feedback.score < project.maxScore! / 2 ? "danger" : undefined}
-                editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}
-            >
-              {s.feedback?.score ?? t("project.noScoreLabel")}
-            </Typography.Text>
+          <Typography.Text
+            type={!s.feedback || s.feedback.score === null ? "secondary" :  (!project || s.feedback.score < project.maxScore! / 2 ? "danger" : undefined)}
+            editable={{ onStart: () => startScore(s), onChange: (e) => updateScore(s, e), maxLength: 10 }}
+          >
+            {scores[s.group.groupId] ? scores[s.group.groupId] : t("project.noScoreLabel")/*s.feedback?.score ?? t("project.noScoreLabel")*/}
+          </Typography.Text>
         ),
       });
     }
