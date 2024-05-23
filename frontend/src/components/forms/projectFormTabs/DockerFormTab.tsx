@@ -109,8 +109,8 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   
   if (withTemplate) {
     switchClassName += ' template-switch-active'
-    scriptPlaceholder = "bash /shared/input/helloworld.sh > \"/shared/output/helloWorldTest\n"+
-    "bash /shared/input/helloug.sh > \"/shared/output/helloUGent\n"
+    scriptPlaceholder = "bash /shared/input/helloworld.sh > \"/shared/output/helloWorldTest\"\n"+
+    "bash /shared/input/helloug.sh > \"/shared/output/helloUGent\"\n"
   } else {
     switchClassName += ' template-switch-inactive'
     scriptPlaceholder = "output=$(bash /shared/input/helloworld.sh)\n"+ 

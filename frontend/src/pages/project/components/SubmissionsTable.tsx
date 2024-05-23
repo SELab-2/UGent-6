@@ -74,7 +74,6 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
     if (isNaN(score as number)) score = null;
     if (score !== null && score > project.maxScore) return message.error(t("project.scoreTooHigh"));
     await updateTable(s.group.groupId, { score: score ?? null, feedback: s.feedback?.feedback ?? "" }, s.feedback === null);
-    setIsEditingScore((prev) => ({ ...prev, [s.group.groupId]: false }));
   };
 
   const updateFeedback = async (groupId: number) => {
