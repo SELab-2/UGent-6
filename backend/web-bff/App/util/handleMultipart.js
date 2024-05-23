@@ -10,8 +10,14 @@ function handleMultipart(req, res, next) {
 
     bb.on('file', (name, file, info) => {
         const {filename, encoding, mimetype} = info;
+        const buffers = [];
         file.on('data', (data) => {
-            form.append(name, data, {filename, contentType: mimetype});
+            buffers.push(data);
+        });
+
+        file.on('end', () => {
+            const buffer = Buffer.concat(buffers);
+            form.append(name, buffer, { filename, contentType: mimetype });
         });
     });
 
