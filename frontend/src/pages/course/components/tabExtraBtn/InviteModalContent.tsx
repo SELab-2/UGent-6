@@ -50,10 +50,7 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
     >
       <Space.Compact style={{ width: "100%" }}>
         <Input
-          style={{ width: "100%", 
-          backgroundColor: "#282828",
-          borderColor: token.colorPrimary,
-          color: "#e6e6e6" }}
+          style={{ width: "100%", borderColor: token.colorPrimary }}
           readOnly
           value={url}
           suffix={
