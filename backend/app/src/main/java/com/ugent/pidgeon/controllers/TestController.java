@@ -1,22 +1,42 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.TestJson;
+import com.ugent.pidgeon.json.TestUpdateJson;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.TestJson;
-import com.ugent.pidgeon.model.json.TestUpdateJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.FileEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.*;
-import java.io.File;
+import com.ugent.pidgeon.postgre.repository.FileRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.FileUtil;
+import com.ugent.pidgeon.util.Filehandler;
+import com.ugent.pidgeon.util.Pair;
+import com.ugent.pidgeon.util.ProjectUtil;
+import com.ugent.pidgeon.util.TestUtil;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.Path;
 
 @RestController
 public class TestController {

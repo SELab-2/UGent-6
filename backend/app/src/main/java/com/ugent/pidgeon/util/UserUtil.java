@@ -1,7 +1,6 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.model.json.UserReferenceJson;
-import com.ugent.pidgeon.model.json.UserUpdateJson;
+import com.ugent.pidgeon.json.UserUpdateJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

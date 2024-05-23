@@ -1,26 +1,25 @@
 package com.ugent.pidgeon.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
+import com.ugent.pidgeon.json.ProjectJson;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
-import com.ugent.pidgeon.model.json.ProjectJson;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-
-import java.time.OffsetDateTime;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectUtilTest {
@@ -60,11 +59,11 @@ public class ProjectUtilTest {
   public void testUserPartOfProject() {
     /* User in project */
     when(projectRepository.userPartOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(true);
-    assertEquals(true, projectUtil.userPartOfProject(projectEntity.getId(), mockUser.getId()));
+    assertTrue(projectUtil.userPartOfProject(projectEntity.getId(), mockUser.getId()));
 
     /* User not in project */
     when(projectRepository.userPartOfProject(projectEntity.getId(), mockUser.getId())).thenReturn(false);
-    assertEquals(false, projectUtil.userPartOfProject(projectEntity.getId(), mockUser.getId()));
+    assertFalse(projectUtil.userPartOfProject(projectEntity.getId(), mockUser.getId()));
   }
 
 

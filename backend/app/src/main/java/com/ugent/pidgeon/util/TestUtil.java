@@ -1,7 +1,5 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.ApiRoutes;
-import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
@@ -9,13 +7,10 @@ import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 @Component
 public class TestUtil {
