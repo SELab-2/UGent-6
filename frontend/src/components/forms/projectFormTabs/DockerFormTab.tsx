@@ -11,6 +11,12 @@ import { classicNameResolver } from "typescript"
 import MarkdownTextfield from "../../input/MarkdownTextfield"
 import TextArea from "antd/es/input/TextArea";
 
+import BashIcon from "../../../../public/docker_langauges/bash.svg"
+import PythonIcon from "../../../../public/docker_langauges/python.svg"
+import NodeIcon from "../../../../public/docker_langauges/node-js.svg"
+import HaskellIcon from "../../../../public/docker_langauges/haskell.svg"
+import Custom from "../../../../public/docker_langauges/custom.svg"
+
 const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProps?: TextAreaProps; disabled?: boolean }> = ({ form, fieldName, disabled }) => {
   const handleFileUpload = (file: File) => {
     const reader = new FileReader()
@@ -45,27 +51,41 @@ const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProp
 
 interface Script {
   displayName: string;
-  scriptGenerator: (script: string) => string;
-  image?: string;
+  image: string;
+  icon: string;
 }
 
 interface ScriptCollection {
   [key: string]: Script;
 }
 
+export const languageOptions: ScriptCollection = {
+  "bash": { displayName: "Bash", image: "fedora", icon: BashIcon },
+  "python": { displayName: "Python", image: "python", icon: PythonIcon },
+  "javascript": { displayName: "Javascript (node)", image: "node", icon: NodeIcon },
+  "haskell": { displayName: "Haskell", image: "haskell", icon: HaskellIcon },
+  "custom": { displayName: "Custom", image: "", icon: Custom }
+}
+
+export function imageToLanguage(script: string): string {
+  for(const language in languageOptions) {
+    if(script === languageOptions[language].image) {
+      return language
+    }
+  }
+  return ""
+}
+
+
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
   const {message} = useAppApi()
   const [withTemplate, setWithTemplate] = useState<boolean>(true)
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("bash")
   const dockerImage = Form.useWatch("dockerImage", form)
 
   const dockerDisabled = !dockerImage?.length
-  const languageOptions:ScriptCollection = {
-    "bash": {displayName:"Bash", scriptGenerator: (script: string) => script, image: "fedora"},
-    "python": {displayName:"Python", scriptGenerator: (script: string) => `python -c '${script}'`, image: "python"},
-    "javascript": {displayName:"Javascript (node)", scriptGenerator: (script: string) => `node -e '${script}', image: "node"`},
-    "haskell": {displayName:"Haskell", scriptGenerator: (script: string) => `runhaskell -e '${script}'`, image: "haskell"}
-  }
+
 
   function isValidTemplate(template: string): string {
     if (!template?.length) return "" // Template is optional
@@ -124,28 +144,46 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   return (
     <>
       <Form.Item
-        label={
-          <MarkdownTooltip
-            label={"Docker Image"}
-            tooltipContent={t("project.tests.dockerImageTooltip")}
-            placement="right"
-          />
-        }
-
-        name="dockerImage"
+          label={
+            <MarkdownTooltip
+                label={"Docker Image"}
+                tooltipContent={t("project.tests.dockerImageTooltip")}
+                placement="right"
+            />
+          }
+          name="dockerImage"
       >
-        { <Input
-          style={{ marginTop: "8px" }}
-          placeholder={t("project.tests.dockerImagePlaceholder")}
-        />}
+        <Input.Group compact>
+          <Form.Item
+              name="languageSelect"
+              noStyle
+          >
+            <Select
+                defaultValue={Object.keys(languageOptions)[0]}
+                onChange={(val) => form.setFieldValue( "dockerImage", languageOptions[val].image)}
+                style={{ width: '30%' }}
+            >
+              {Object.keys(languageOptions).map((key) => (
+                  <Select.Option key={key} value={key}>
+            <span style={{ marginRight: 8 }}>
+              <img src={languageOptions[key].icon} alt={languageOptions[key].displayName} style={{ height: '16px', verticalAlign: 'middle' }} />
+            </span>
+                    {languageOptions[key].displayName}
+                  </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+              name="dockerImage"
+              noStyle
+          >
+            <Input
+                style={{ width: '70%' }}
+                placeholder={t("project.tests.dockerImagePlaceholder")}
+            />
+          </Form.Item>
+        </Input.Group>
       </Form.Item>
-
-      <Select defaultValue={Object.keys(languageOptions)[0]} onChange={(val) => form.setFieldValue( "dockerImage", val)}>
-        {Object.keys(languageOptions).map((key) => (
-            <Select.Option value={key}>{languageOptions[key].displayName}</Select.Option>
-        ))}
-      </Select>
-
       <>
         <Form.Item
           rules={[{ required: !dockerDisabled, message: "Docker script is required" }]}
@@ -193,11 +231,6 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           <Button disabled={dockerDisabled} icon={<UploadOutlined />}>Upload test directory (zip)</Button>
         </Upload>
       </Form.Item>
-        {/* <UploadBtn
-          form={form}
-          disabled={dockerDisabled}
-          fieldName="dockerScript"
-        /> */}
         <div style={{ paddingBottom: '14px'}}>
           <Switch
               checked={withTemplate}
@@ -211,6 +244,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         {withTemplate ?
             <div>
               <MarkdownTextfield content={t("project.tests.templateModeInfo")} />
+
 
             <Form.Item
                 label={t("project.tests.dockerTemplate")}
@@ -231,11 +265,6 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                   style={{fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
                   placeholder={"@helloWorldTest\n>required\n>description=\"This is a test\"\nExpected output 1\n\n@helloUGent\n>optional\nExpected output 2\n"}
               />
-                {/*<UploadBtn
-                  form={form}
-                  disabled={dockerDisabled}
-                  fieldName="dockerTemplate"
-              />*/}
             </Form.Item> </div>: <Form.Item
           name="simpleMode"
           children={<MarkdownTextfield content={t("project.tests.simpleModeInfo")} />}

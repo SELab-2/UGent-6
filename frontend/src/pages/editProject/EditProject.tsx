@@ -13,6 +13,7 @@ import { AppRoutes } from "../../@types/routes"
 import { ProjectContext } from "../../router/ProjectRoutes"
 import useApi from "../../hooks/useApi"
 import saveDockerForm, { DockerFormData } from "../../components/common/saveDockerForm"
+import {imageToLanguage} from "../../components/forms/projectFormTabs/DockerFormTab";
 
 const EditProject: React.FC = () => {
     const [form] = Form.useForm<ProjectFormData & DockerFormData>()
@@ -40,10 +41,9 @@ const EditProject: React.FC = () => {
             dockerScript: null,
             dockerImage: null,
         }
+
         if (response.success) {
             const tests = response.response.data
-            console.log(tests)
-
             if (tests.extraFilesName) {
                 const downloadLink = AppRoutes.DOWNLOAD_PROJECT_TESTS.replace(":projectId", projectId).replace(":courseId", courseId!)
 
@@ -64,10 +64,12 @@ const EditProject: React.FC = () => {
                 dockerScript: tests.dockerScript ?? "",
                 dockerImage: tests.dockerImage ?? "",
             }
+            const selectedLanguage = imageToLanguage(formVals.dockerImage ?? "")
+            formVals.dockerScript = selectedLanguage[1] // We only want the script, not the language
+            form.setFieldValue("languageSelect", selectedLanguage)
         }
 
         form.setFieldsValue(formVals)
-
         setInitialDockerValues(formVals)
     }
 
@@ -80,6 +82,9 @@ const EditProject: React.FC = () => {
 
     const handleCreation = async () => {
         const values: ProjectFormData & DockerFormData = form.getFieldsValue()
+
+        console.log(values)
+
         if (values.visible) {
             values.visibleAfter = null
         }
