@@ -49,6 +49,7 @@ export enum ApiRoutes {
 
   CLUSTER = "/web/api/clusters/:id",
   CLUSTER_FILL = "/web/api/clusters/:id/fill",
+  CLUSTER_GROUPS = "/web/api/clusters/:id/groups",
 
   GROUP = "/web/api/groups/:id",
   GROUP_MEMBERS = "/web/api/groups/:id/members",
@@ -98,6 +99,7 @@ export type POST_Requests = {
   [ApiRoutes.COURSE_JOIN]: undefined
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: undefined
   [ApiRoutes.PROJECT_SCORE]: Omit<GET_Responses[ApiRoutes.PROJECT_SCORE], "groupId" | "projectId">
+  [ApiRoutes.CLUSTER_GROUPS]: {name: string}
 }
 
 /**
@@ -129,6 +131,7 @@ export type DELETE_Requests = {
   [ApiRoutes.PROJECT_TESTS]: undefined
   [ApiRoutes.COURSE_JOIN_LINK]: undefined
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: undefined
+  [ApiRoutes.CLUSTER]: undefined
 }
 
 

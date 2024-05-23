@@ -104,38 +104,28 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
       </>
   )
 
-  const showYourCourses = !!filteredCourseProjects?.length || !filteredAdminCourseProjects?.length
+
+  const showYourCourses = user?.role === "student" || (filteredCourseProjects?.length === undefined || filteredCourseProjects?.length > 0)
+  const showMyCourses = user?.role !== "student" || (filteredAdminCourseProjects?.length === undefined || filteredAdminCourseProjects?.length > 0)
   return (
       <>
         {/* Dropdown for selecting year */}
 
         {showYourCourses && (
             <HorizontalCourseScroll
-                title={user?.role === "student" ? t("home.yourCourses") : t("home.myCourses")}
+                title={t("home.yourCourses")}
                 projects={filteredCourseProjects}
                 onOpenNew={onOpenNew}
                 showMore={archivedCourses || courseProjectsList.length > 2}
-                showPlus={!filteredAdminCourseProjects?.length}
+                showPlus={false}
                 extra={YearDropdown}
                 allOptions={showYourCourses}
                 type="enrolled"
             />
         )}
 
-        { !!filteredAdminCourseProjects?.length && <HorizontalCourseScroll
-            title={t("home.myCourses")}
-            projects={filteredAdminCourseProjects}
-            onOpenNew={onOpenNew}
-            showMore={archivedCourses || adminCourseProjectsList.length > 2}
-            extra={YearDropdown}
-            showPlus={!!filteredAdminCourseProjects?.length}
-            allOptions={!!filteredAdminCourseProjects?.length && !filteredCourseProjects?.length}
-            type="admin"
-        />}
-
         {/* No courses messages */}
-        {filteredCourseProjects !== null && courseProjectsList.length === 0 && adminCourseProjectsList.length === 0 &&
-            user?.role === "student" && (
+        {showYourCourses && (filteredCourseProjects?.length === undefined || filteredCourseProjects?.length === 0) && (
                 <Typography.Text
                     style={{
                       paddingLeft: "2rem",
@@ -144,7 +134,20 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
                   {t("home.noCoursesStudent")}
                 </Typography.Text>
             )}
-        {filteredCourseProjects !== null && courseProjectsList.length === 0 && adminCourseProjectsList.length === 0 &&
+
+        {showMyCourses && <HorizontalCourseScroll
+            title={t("home.myCourses")}
+            projects={filteredAdminCourseProjects}
+            onOpenNew={onOpenNew}
+            showMore={archivedCourses || adminCourseProjectsList.length > 2}
+            extra={YearDropdown}
+            showPlus={true}
+            allOptions={!!filteredAdminCourseProjects?.length && !filteredCourseProjects?.length}
+            type="admin"
+        />}
+
+        
+        {showMyCourses &&  ( (filteredAdminCourseProjects?.length === undefined || filteredAdminCourseProjects?.length === 0) ) &&
             user?.role !== "student" && (
                 <Typography.Text
                     style={{

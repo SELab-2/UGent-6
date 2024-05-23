@@ -162,7 +162,7 @@ const Project = () => {
   }
 
     return (
-        <div style={{ margin: "3rem 0", marginTop: "1rem", width: "100%", paddingBottom: "3rem" }}>
+        <div style={{ margin: "3rem 0", marginTop: "1rem", width: "100%", paddingBottom: "3rem"}}>
   
             <Card
                 styles={{
@@ -175,6 +175,7 @@ const Project = () => {
                     body: {
                         textWrap: "wrap",
                         padding: "0.5rem",
+                        paddingLeft: "1rem"
                     },
                 }}
                 style={{ width: "100%", marginBottom: "3rem" }}
