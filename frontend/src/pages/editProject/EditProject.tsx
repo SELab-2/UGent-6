@@ -14,6 +14,8 @@ import { ProjectContext } from "../../router/ProjectRoutes"
 import useApi from "../../hooks/useApi"
 import saveDockerForm, { DockerFormData } from "../../components/common/saveDockerForm"
 
+type DockerStuff =  POST_Requests[ApiRoutes.PROJECT_TESTS] & {dockerMode: boolean}
+
 const EditProject: React.FC = () => {
     const [form] = Form.useForm<ProjectFormData & DockerFormData>()
     const { t } = useTranslation()
@@ -24,7 +26,7 @@ const EditProject: React.FC = () => {
     const navigate = useNavigate()
     const project = useProject()
     const { updateProject } = useContext(ProjectContext)
-    const [initialDockerValues, setInitialDockerValues] = useState<POST_Requests[ApiRoutes.PROJECT_TESTS] | null>(null)
+    const [initialDockerValues, setInitialDockerValues] = useState<DockerStuff | null>(null)
     const [disabled, setDisabled] = useState(true)
 
 
@@ -34,7 +36,7 @@ const EditProject: React.FC = () => {
         setDisabled(false)
         if (!response.success) return setInitialDockerValues(null)
 
-        let formVals: POST_Requests[ApiRoutes.PROJECT_TESTS] & {dockerMode: boolean} = {
+        let formVals: DockerStuff= {
             structureTest: null,
             dockerTemplate: null,
             dockerScript: null,
