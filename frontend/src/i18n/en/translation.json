@@ -294,6 +294,8 @@
     "searchMember": "Search member",
     "inviteLink": "Invite link",
     "inviteLinkInfo": "With this link, students can join your course",
+    "copyLink": "Copy invite link",
+    "copyLinkSuccess": "Link copied to clipboard",
     "deleteCourse": "Delete course",
     "deleteCourseDescription": "Are you sure you want to delete this course? All projects and submissions will be deleted as well. This action cannot be undone.",
     "confirmDelete": "Confirm deletion",

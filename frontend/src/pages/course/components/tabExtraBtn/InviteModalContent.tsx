@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Space, Switch, Tooltip, Typography } from "antd"
+import { Button, Input, Modal, Space, Switch, Tooltip, Typography, theme } from "antd"
 import { FC, useMemo, useState } from "react"
 import { generateLink } from "../informationTab/InformationTab"
 import { CourseType } from "../../Course"
@@ -10,6 +10,7 @@ import { ApiRoutes } from "../../../../@types/requests.d"
 
 const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: CourseType) => void }> = ({ defaultCourse, onChange }) => {
   const { t } = useTranslation()
+  const { token } = theme.useToken()
   const [course, setCourse] = useState<CourseType>(defaultCourse)
   const API = useApi()
   const [loading, setLoading] = useState(false)
@@ -49,7 +50,10 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
     >
       <Space.Compact style={{ width: "100%" }}>
         <Input
-          style={{ width: "100%" }}
+          style={{ width: "100%", 
+          backgroundColor: "#282828",
+          borderColor: token.colorPrimary,
+          color: "#e6e6e6" }}
           readOnly
           value={url}
           suffix={
