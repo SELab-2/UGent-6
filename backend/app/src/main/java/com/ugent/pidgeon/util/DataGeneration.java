@@ -44,63 +44,68 @@ public class DataGeneration {
     }
 
     private void makeFakeUsersAndCourses(Auth auth) {
-        String[] vaktitels = {"Computationele Biologie", "Computer Architectuur", "Mobile and Broadband Access Networks",
-        "Wiskundige modelering", "Design of Multimedia Applications"};
-        for (int i = 0; i < 5; i++) {
-            UserEntity user = new UserEntity(
+        try {
+            String[] vaktitels = {"Computationele Biologie", "Computer Architectuur", "Mobile and Broadband Access Networks",
+                "Wiskundige modelering", "Design of Multimedia Applications"};
+            for (int i = 0; i < 5; i++) {
+                UserEntity user = new UserEntity(
                     "teacher",
                     "number ".concat(String.valueOf(i)),
-                    "teacher.number".concat(String.valueOf(i)).concat("@ugent.be"),
+                    "teacher_number_".concat("" + i).concat(auth.getUserEntity().getEmail()),
                     UserRole.teacher,
                     "azure_id_number_teacher_".concat(String.valueOf(i)),
                     "teacher".concat(String.valueOf(i * 1000))
-            );
-            userRepository.save(user);
-            CourseJson cj = new CourseJson(
+                );
+                userRepository.save(user);
+                CourseJson cj = new CourseJson(
                     vaktitels[i],
                     "# VAK\n Dit vak gaat over vanalles.",
                     false,
                     2023
-            );
-            ResponseEntity<?> resp = courseController.createCourse(cj, auth);
-            if (resp.getStatusCode().is2xxSuccessful()) {
-                CourseMemberRequestJson cmrj = new CourseMemberRequestJson();
-                if (i == 0 || i >= 3) {
-                    cmrj.setRelation(CourseRelation.creator.toString());
-                } else {
-                    cmrj.setRelation(CourseRelation.course_admin.toString());
-                }
-                cmrj.setUserId(user.getId());
-                CourseWithInfoJson course = (CourseWithInfoJson) resp.getBody();
-                if (course != null) {
-                    courseController.addCourseMember(auth, course.courseId(), cmrj);
-                    RelationRequest rr = new RelationRequest();
-                    if (i >= 3) {
-                        rr.setRelation(CourseRelation.enrolled.toString());
-                    } else if (i > 0) {
-                        rr.setRelation(CourseRelation.creator.toString());
+                );
+                ResponseEntity<?> resp = courseController.createCourse(cj, auth);
+                if (resp.getStatusCode().is2xxSuccessful()) {
+                    CourseMemberRequestJson cmrj = new CourseMemberRequestJson();
+                    if (i == 0 || i >= 3) {
+                        cmrj.setRelation(CourseRelation.creator.toString());
                     } else {
-                        rr.setRelation(CourseRelation.course_admin.toString());
+                        cmrj.setRelation(CourseRelation.course_admin.toString());
                     }
-                    courseController.updateCourseMember(auth, course.courseId(), rr, auth.getUserEntity().getId());
-                    cmrj.setRelation(CourseRelation.enrolled.toString());
-                    ProjectResponseJson project =  makeProject(auth, course, i % 3);
-                    for (int j = 0; j < 3; j++) {
-                        UserEntity u = getStudentUserEntity(i, j);
-                        userRepository.save(u);
-                        cmrj.setUserId(u.getId());
+                    cmrj.setUserId(user.getId());
+                    CourseWithInfoJson course = (CourseWithInfoJson) resp.getBody();
+                    if (course != null) {
                         courseController.addCourseMember(auth, course.courseId(), cmrj);
+                        RelationRequest rr = new RelationRequest();
+                        if (i >= 3) {
+                            rr.setRelation(CourseRelation.enrolled.toString());
+                        } else if (i > 0) {
+                            rr.setRelation(CourseRelation.creator.toString());
+                        } else {
+                            rr.setRelation(CourseRelation.course_admin.toString());
+                        }
+                        courseController.updateCourseMember(auth, course.courseId(), rr, auth.getUserEntity().getId());
+                        cmrj.setRelation(CourseRelation.enrolled.toString());
+                        ProjectResponseJson project =  makeProject(auth, course, i % 3);
+                        for (int j = 0; j < 3; j++) {
+                            UserEntity u = getStudentUserEntity(i, j, auth);
+                            userRepository.save(u);
+                            cmrj.setUserId(u.getId());
+                            courseController.addCourseMember(auth, course.courseId(), cmrj);
+                        }
                     }
                 }
             }
-        }
-        UserUpdateJson uuj = new UserUpdateJson();
-        uuj.setRole(UserRole.teacher.toString());
-        ResponseEntity resp = userController.patchUserById(auth.getUserEntity().getId(),
+        } catch (Exception e) {
+            Logger.getGlobal().info("Error while generating data: " + e.getMessage());
+        } finally {
+            UserUpdateJson uuj = new UserUpdateJson();
+            uuj.setRole(UserRole.teacher.toString());
+            ResponseEntity<?> resp = userController.patchUserById(auth.getUserEntity().getId(),
                 uuj,
                 auth
-                );
-        Logger.getGlobal().info("Statuscode user: " + resp.getStatusCode());
+            );
+            Logger.getGlobal().info("Statuscode user: " + resp.getStatusCode());
+        }
     }
 
     private void makeTestsForProject(Auth auth, ProjectResponseJson project, int index) {
@@ -183,14 +188,14 @@ public class DataGeneration {
         return null;
     }
 
-    private static UserEntity getStudentUserEntity(int i, int j) {
+    private static UserEntity getStudentUserEntity(int i, int j, Auth auth) {
         int idx = i *10 + j;
         return new UserEntity(
                 "student",
                 "number ".concat(String.valueOf(idx)),
-                "student_number_".concat(idx.toString()).concat(auth.getUserEntity().getEmail()),
+                "student_number_".concat("" + idx).concat(auth.getUserEntity().getEmail()),
                 UserRole.student,
-                "azure_id_number_".concat(String.valueOf(idx)).concat(auth.getUserEntity().getId()),
+                "azure_id_number_".concat(String.valueOf(idx)).concat("" + auth.getUserEntity().getId()),
                 String.valueOf(idx * 1000)
         );
     }
