@@ -117,6 +117,7 @@ export type POST_Responses = {
   [ApiRoutes.COURSE_JOIN]: {name:string, description: string}
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: POST_Responses[ApiRoutes.COURSE_JOIN]
   [ApiRoutes.PROJECT_SCORE]: GET_Responses[ApiRoutes.PROJECT_SCORE]
+  [ApiRoutes.CLUSTER_GROUPS]: undefined
 }
 
 /**
