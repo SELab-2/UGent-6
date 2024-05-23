@@ -1,7 +1,6 @@
 import { Card, theme, Button, Space } from "antd"
 import { useTranslation } from "react-i18next"
-import { GET_Responses } from "../../../@types/requests"
-import { ApiRoutes } from "../../../@types/requests"
+import { GET_Responses,ApiRoutes } from "../../../@types/requests.d"
 import { ArrowLeftOutlined, DownloadOutlined } from "@ant-design/icons"
 import { useLocation, useNavigate } from "react-router-dom"
 import "@fontsource/jetbrains-mono"
@@ -18,16 +17,17 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
   const location = useLocation()
   const index = new URLSearchParams(location.search).get("index")
 
-
+  console.log(submission);
   const downloadFile = async (route: ApiRoutes.SUBMISSION_FILE | ApiRoutes.SUBMISSION_ARTIFACT, filename: string) => {
 
     const response = await API.GET(
-      route,
+      route.replace("/api/","/web/api/") as ApiRoutes.SUBMISSION_FILE,
       {
         config: {
           responseType: "blob",
           transformResponse: [(data) => data],
         },
+       
       },
       "message"
     )

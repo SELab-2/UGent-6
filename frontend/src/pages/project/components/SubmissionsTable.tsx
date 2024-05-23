@@ -121,7 +121,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
 
   const downloadSubmission = async (submission: ProjectSubmissionsType) => {
     if (!submission.submission) return console.error("No submission found");
-    downloadFile(submission.submission.fileUrl, submission.group.name + ".zip");
+    downloadFile(submission.submission.fileUrl.replace("/api/", "/web/api/") as ApiRoutes.SUBMISSION_FILE, submission.group.name + ".zip");
     if (withArtifacts && submission.submission.artifactUrl) {
       downloadFile(submission.submission.artifactUrl, submission.group.name + "-artifacts.zip");
     }
