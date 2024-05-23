@@ -2,12 +2,11 @@ package com.ugent.pidgeon.postgre.models;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import java.io.IOException;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.time.OffsetDateTime;
 
 public class OffsetDateTimeSerializerTest {
 

@@ -3,8 +3,8 @@ package com.ugent.pidgeon.model.submissionTesting;
 import java.util.List;
 
 public class DockerTemplateTestOutput implements DockerOutput{
-  private List<DockerSubtestResult> subtestResults;
-  private boolean allowed;
+  private final List<DockerSubtestResult> subtestResults;
+  private final boolean allowed;
 
   public List<DockerSubtestResult> getSubtestResults() {
     return subtestResults;

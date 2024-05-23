@@ -1,7 +1,11 @@
 package com.ugent.pidgeon.postgre.models;
 
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
 
 @Entity
 @IdClass(CourseUserId.class)

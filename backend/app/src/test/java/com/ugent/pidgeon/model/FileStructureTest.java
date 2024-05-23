@@ -1,16 +1,15 @@
 package com.ugent.pidgeon.model;
 
-import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.jupiter.api.Test;
 
 public class FileStructureTest {
     final String testDirectory = "src/test/test-cases/FileStructureTestCases/";
