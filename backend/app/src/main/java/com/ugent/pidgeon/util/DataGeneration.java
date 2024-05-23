@@ -3,7 +3,7 @@ package com.ugent.pidgeon.util;
 import com.ugent.pidgeon.controllers.*;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.*;
+import com.ugent.pidgeon.json.*;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
