@@ -26,7 +26,7 @@
     - src
       - main/java/com/ugent/pidgeon
         - auth (Authentication related logic)
-        - config (Configuration settings and BEANZZZ)
+        - config (Configuration settings and beans)
         - controllers (Web controllers for handling requests)
         - model (models for testing submissions)
         - json (request/response bodies)
