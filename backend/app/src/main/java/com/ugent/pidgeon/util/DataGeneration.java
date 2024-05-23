@@ -96,7 +96,7 @@ public class DataGeneration {
     private void makeTestsForProject(Auth auth, ProjectResponseJson project, int index) {
         if (index == 1) {
             TestUpdateJson tj = new TestUpdateJson(
-                    "alpine:latest",
+                    "fedora:latest",
                     "bash /shared/input/hello_world.sh > /shared/output/hello_world_test",
                     "@hello_world_test\n" +
                             ">required\n" +
