@@ -87,8 +87,8 @@
     "search": "Zoeken",
     "emailError": "Vul een geldig email adres in",
     "emailTooShort": "Email moet minstens 3 karakters lang zijn",
-    "nameError": "Naam moet minstens 3 karakters lang zijn",
-    "surnameError": "Achternaam moet minstens 3 karakters lang zijn",
+    "nameError": "Naam of achternaam moet minstens 3 karakters lang zijn",
+    "surnameError": "Naam of achternaam moet minstens 3 karakters lang zijn",
     "searchTooShort": "Zoekopdracht moet minstens 3 karakters lang zijn",
     "searchTutorial": "Vul een email adres, naam of achternaam in om gebruikers op te zoeken.",
     "noUsersFound": "Geen gebruikers gevonden",
@@ -215,7 +215,7 @@
       "templateMode": "Met sjabloon",
       "fileStructurePreview": "Voorbeeld van bestandsstructuur",
       "fileStructureTooltip": "Dit sjabloon specificeert de bestandsstructuur die een indiening moet volgen.\nHet gebruikt de volgende syntax:\n* Mappen eindigen op `'/'`\n* Gebruik inspringing om bestanden binnen een map aan te geven\n* Regex kan worden gebruikt\n\t* `'.'` is nog steeds een normale `'.'`\n\t* `'\\.'` kan worden gebruikt als regex `'.'`\n* `'-'` aan het begin van een regel geeft aan dat een bestand/map niet is toegestaan",
-      "dockerImageTooltip": "Specificeer een geldige Docker-container van [Docker Hub](https://hub.docker.com/) waarop het testscript zal worden uitgevoerd.",
+      "dockerImageTooltip": "Specificeer een geldige Docker-container van [Docker Hub](https://hub.docker.com/) waarop het testscript zal worden uitgevoerd. Je kan ook kiezen voor een voorgeconfigureerde programmeertaal met bijhorende container.",
       "dockerScriptTooltip": "Bash-script dat wordt uitgevoerd.\n* De bestanden van de student zijn indieningen zijn te vinden in `'/shared/input'`\n* Extra bestanden die hieronder zijn geüpload, zijn te vinden in `'/shared/extra'`\n\nMeer informatie over de vereiste uitvoer is afhankelijk van de modus en is hieronder te vinden.",
       "dockerTemplateTooltip": "Om specifieke tests te definiëren, moet je een sjabloon invoeren. Geef eerst de naam van de test in met '@{test}'. Hieronder kun je met een '>' opties geven zoals ('>required', '>optional', '>description'). Alles onder de opties tot de volgende test of het einde van het bestand is de verwachte output.",
       "dockerTestDirTooltip": "Upload extra bestanden die nodig zijn voor de dockertest. Deze bestanden zijn beschikbaar in de map `'/shared/extra'`.\n\nAls je een file geüpload hebt kan je deze downloaden door op de bestandsnaam te klikken. Als je een nieuw bestand uploadt zal het oude bestand overschreven worden.",
@@ -250,7 +250,7 @@
     "getStarted": "Aan de slag",
     "docs": "Documentatie"
   },
-  
+
   "submission": {
     "submission": "Indiening",
     "submittedFiles": "Ingediende bestanden:",
