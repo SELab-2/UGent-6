@@ -34,11 +34,12 @@ const EditProject: React.FC = () => {
         setDisabled(false)
         if (!response.success) return setInitialDockerValues(null)
 
-        let formVals: POST_Requests[ApiRoutes.PROJECT_TESTS] = {
+        let formVals: POST_Requests[ApiRoutes.PROJECT_TESTS] & {dockerMode: boolean} = {
             structureTest: null,
             dockerTemplate: null,
             dockerScript: null,
             dockerImage: null,
+            dockerMode: false
         }
         if (response.success) {
             const tests = response.response.data
@@ -67,6 +68,7 @@ const EditProject: React.FC = () => {
                 dockerTemplate: tests.dockerTemplate ?? "",
                 dockerScript: tests.dockerScript ?? "",
                 dockerImage: tests.dockerImage ?? "",
+                dockerMode: !!tests.dockerTemplate
             }
         }
 
