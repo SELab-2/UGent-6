@@ -6,6 +6,7 @@ import { useState } from "react"
 import { UsersType } from "../EditRole"
 import { GET_Responses, ApiRoutes } from "../../../@types/requests.d"
 import { User } from "../../../providers/UserProvider"
+import useUser from "../../../hooks/useUser"
 
 //this is ugly, but if I put this in GET_responses, it will be confused with the User type (and there's no GET request with this as a response).
 //this is also the only place this is used, so I think it's fine.
@@ -16,9 +17,10 @@ const UserList: React.FC<{ users: UsersType; updateRole: (user: UsersListItem, r
   const [visible, setVisible] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UsersListItem | null>(null)
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
+  const { user } = useUser()
 
-  const handleMenuClick = (user: UsersListItem, role: UserRole) => {
-    setSelectedUser(user)
+  const handleMenuClick = (listuser: UsersListItem, role: UserRole) => {
+    setSelectedUser(listuser)
     setSelectedRole(role)
     setVisible(true)
   }
@@ -44,12 +46,13 @@ const UserList: React.FC<{ users: UsersType; updateRole: (user: UsersListItem, r
     return a.email.localeCompare(b.email);
   });
 
-  const renderUserItem = (user: UsersListItem) => (
+  const renderUserItem = (listuser: UsersListItem) => (
     <List.Item>
-      <List.Item.Meta title={user.name + " " + user.surname} description={user.email} />
+      <List.Item.Meta title={listuser.name + " " + listuser.surname} description={listuser.email} />
       <Dropdown
         trigger={["click"]}
         placement="bottomRight"
+        disabled={listuser.id === user?.id}
         menu={{
           items: [
             {
@@ -65,13 +68,13 @@ const UserList: React.FC<{ users: UsersType; updateRole: (user: UsersListItem, r
               label: t("editRole.admin"),
             },
           ],
-					selectedKeys: [user.role],
-            onClick: (e) => handleMenuClick(user, e.key as UserRole),
+					selectedKeys: [listuser.role],
+            onClick: (e) => handleMenuClick(listuser, e.key as UserRole),
         }}
       >
         <a onClick={(e) => e.preventDefault()}>
           <Space>
-            {t("editRole." + user.role)}
+            {t("editRole." + listuser.role)}
             <DownOutlined />
           </Space>
         </a>
