@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { Form, Input, Spin, Select, Typography } from "antd"
+import { Form, Input, Spin, Select, Typography, Space } from "antd"
 import UserList from "./components/UserList"
 import { ApiRoutes, GET_Responses, UserRole } from "../../@types/requests.d"
 import apiCall from "../../util/apiFetch"
@@ -10,17 +10,21 @@ import { UserContext } from "../../providers/UserProvider"
 import useUser from "../../hooks/useUser"
 
 export type UsersType = GET_Responses[ApiRoutes.USERS]
-type SearchType = "name" | "surname" | "email"
+type SearchType = "name" | "email"
 const ProfileContent = () => {
   const [users, setUsers] = useState<UsersType | null>(null)
   const myself = useUser()
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
-  const searchValue = Form.useWatch("search", form)
+  const firstSearchValue = Form.useWatch("first", form)
+  const secondSearchValue = Form.useWatch("second", form)
+  const searchValue = `${firstSearchValue || ''} ${secondSearchValue || ''}`.trim();
   const [debouncedSearchValue] = useDebounceValue(searchValue, 250)
   const [searchType, setSearchType] = useState<SearchType>("name")
 
   const { t } = useTranslation()
+
+  const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
 
   useEffect(() => {
     onSearch()
@@ -44,13 +48,29 @@ const ProfileContent = () => {
   }
 
   const onSearch = async () => {
-    const value = form.getFieldValue("search")
-    if (!value || value.length < 3) return
+    //validation
+    const firstValue = form.getFieldValue("first")
+    if (searchType === "name") {
+      const secondValue = form.getFieldValue("second")
+      if (!firstValue && !secondValue) return
+      if (firstValue && firstValue.length < 3) return
+      if (secondValue && secondValue.length < 3) return
+    } else {
+      if (!firstValue || firstValue.length < 3) return
+      if (!emailRegex.test(firstValue)) return
+    }
+
     setLoading(true)
     const params = new URLSearchParams()
-    params.append(searchType, form.getFieldValue("search"))
+    if (searchType === "email") {
+      params.append(searchType, form.getFieldValue("first"))
+    } else {
+      const secondValue = form.getFieldValue("second")
+      if (firstValue)  params.append("name", firstValue)
+      if (secondValue) params.append("surname", secondValue)
+    }
+    console.log(params)
     apiCall.get((ApiRoutes.USERS + "?" + params.toString()) as ApiRoutes.USERS).then((res) => {
-
       setUsers(res.data)
       setLoading(false)
     })
@@ -63,47 +83,56 @@ const ProfileContent = () => {
         name="search"
         onFinish={onSearch}
       >
-     
-            <Form.Item
-              name="search"
-              rules={[
-                {
-                  validator: (_, value) => {
-                    if (searchType === "email") {
-                      // Validate email
-                      const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/
-                      if (!emailRegex.test(value)) {
-                        return Promise.reject(new Error(t("editRole.invalidEmail")))
-                      }
-                    }
-                    // Validate name and surname
-                    
-
-                    return Promise.resolve()
-                  },
-                },
-                  {
-                    message: t("editRole.searchTooShort"),
-                    min: 3,
-                  }
-              ]}
-            >
-              <Input
-              size="large"
-                addonBefore={
-                  <Select
+        <Form.Item>
+          <Space.Compact style={{ display: 'flex' }}>
+            <Select size="large"
                     value={searchType}
                     onChange={(value) => setSearchType(value)}
                     style={{ width: 120 }}
                     options={[
                       { label: t("editRole.email"), value: "email" },
                       { label: t("editRole.name"), value: "name" },
-                      { label: t("editRole.surname"), value: "surname" },
                     ]}
-                  />
-                }
-              />
+                />
+            <Form.Item
+              name="first"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    // Validate email
+                    if (searchType === "email") {
+                      if (!emailRegex.test(value)) {
+                        return Promise.reject(new Error(t("editRole.invalidEmail")));
+                      }
+                    // Validate name
+                    } else if (searchType === "name") {
+                      if (value && value.length < 3) {
+                        return Promise.reject(new Error(t("editRole.nameError")));
+                      }
+                    }
+                  },
+                },
+              ]}
+              noStyle
+            >
+              <Input size="large" placeholder={searchType === "email" ? t("editRole.email") : t("editRole.name")}/>
             </Form.Item>
+            {searchType === "name" && (
+              <Form.Item
+                name="second"
+                rules={[
+                  {
+                    message: t("editRole.surnameError"),
+                    min: 3,
+                  },
+                ]}
+                noStyle
+              >
+                <Input size="large" placeholder={t("editRole.surname")}/>
+              </Form.Item>
+            )}
+          </Space.Compact>
+        </Form.Item>
       </Form>
       {users !== null ? (
         <>
