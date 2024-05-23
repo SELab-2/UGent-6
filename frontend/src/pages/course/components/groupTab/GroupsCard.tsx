@@ -61,6 +61,10 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
               title={t("course.deleteGroup")}
               onConfirm={() => deleteGroupCluster(cluster.clusterId)}
               description={t("course.deleteConfirm")}
+              okButtonProps={{
+                danger: true,
+              }}
+              okText={t("delete")}
             >
               <Tooltip
                 title={t("course.deleteGroup")}

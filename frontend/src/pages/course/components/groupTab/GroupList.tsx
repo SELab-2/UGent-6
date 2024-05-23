@@ -161,7 +161,7 @@ const GroupList: FC<{ locked: ClusterType["lockGroupsAfter"]; groups: GroupType[
         )}
       />
       <CourseAdminView>
-      {clusterId && <div style={{ textAlign: "center" }}>
+      {clusterId && groups !== null && <div style={{ textAlign: "center" }}>
           <Button
             type="text"
             icon={<PlusOutlined />}
