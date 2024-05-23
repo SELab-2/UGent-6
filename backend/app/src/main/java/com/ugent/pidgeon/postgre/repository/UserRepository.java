@@ -1,16 +1,13 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.CourseEntity;
-import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.UserEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
@@ -24,12 +21,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
 
 
-    public interface CourseWithRelation {
+    interface CourseWithRelation {
         CourseEntity getCourse();
         CourseRelation getRelation();
     }
 
-    public interface CourseIdWithRelation {
+    interface CourseIdWithRelation {
         Long getCourseId();
         CourseRelation getRelation();
         String getName();
@@ -54,7 +51,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<CourseWithRelation> findCoursesByUserId(long id);
 
     @Query(value = "SELECT u FROM UserEntity u WHERE u.azureId = ?1")
-    public Optional<UserEntity> findUserByAzureId(String id);
+    Optional<UserEntity> findUserByAzureId(String id);
 
 
 

@@ -1,7 +1,6 @@
 package com.ugent.pidgeon.auth;
 
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

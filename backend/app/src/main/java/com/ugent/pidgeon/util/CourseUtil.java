@@ -1,11 +1,16 @@
 package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.controllers.ApiRoutes;
-import com.ugent.pidgeon.model.json.*;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.json.CourseJson;
+import com.ugent.pidgeon.json.CourseMemberRequestJson;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserId;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.postgre.repository.CourseRepository;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;

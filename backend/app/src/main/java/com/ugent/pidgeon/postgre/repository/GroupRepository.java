@@ -3,12 +3,11 @@ package com.ugent.pidgeon.postgre.repository;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
-import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
     @Transactional
@@ -32,7 +31,7 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
 
 
 
-    public interface UserReference {
+    interface UserReference {
         Long getUserId();
         String getName();
         String getEmail();

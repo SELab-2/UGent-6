@@ -1,14 +1,12 @@
 package com.ugent.pidgeon.postgre.repository;
 
-import com.fasterxml.jackson.annotation.OptBoolean;
 import com.ugent.pidgeon.postgre.models.CourseUserEntity;
 import com.ugent.pidgeon.postgre.models.CourseUserId;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface CourseUserRepository extends JpaRepository<CourseUserEntity, CourseUserId> {
 
