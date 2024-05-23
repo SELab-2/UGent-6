@@ -34,7 +34,7 @@
         - util (Utility classes and helpers)
       - resources (Configuration files, property files etc.)
       - test/java/com/ugent/pidgeon (Unit and integration tests)
-  - database (Database schemas and migrations)
+  - database (Database schemas and scripts)
   - db (Database related scripts)
   - web-bff (Express webserver that manages user authentication with cookie sessions)
 
@@ -50,8 +50,6 @@
     - hooks (Custom React hooks)
     - i18n (Internationalization setup, including language files)
     - pages (Component structure for each page)
-      - course (Course-related components and logic)
-      - projects (Project creation and editing interfaces)
     - providers (Context providers for state management)
     - router (Routing and path management)
     - theme (Styling themes and fonts)
