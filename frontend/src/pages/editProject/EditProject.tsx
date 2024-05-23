@@ -14,6 +14,8 @@ import { ProjectContext } from "../../router/ProjectRoutes"
 import useApi from "../../hooks/useApi"
 import saveDockerForm, { DockerFormData } from "../../components/common/saveDockerForm"
 
+type DockerStuff =  POST_Requests[ApiRoutes.PROJECT_TESTS] & {dockerMode: boolean}
+
 const EditProject: React.FC = () => {
     const [form] = Form.useForm<ProjectFormData & DockerFormData>()
     const { t } = useTranslation()
@@ -24,7 +26,7 @@ const EditProject: React.FC = () => {
     const navigate = useNavigate()
     const project = useProject()
     const { updateProject } = useContext(ProjectContext)
-    const [initialDockerValues, setInitialDockerValues] = useState<POST_Requests[ApiRoutes.PROJECT_TESTS] | null>(null)
+    const [initialDockerValues, setInitialDockerValues] = useState<DockerStuff | null>(null)
     const [disabled, setDisabled] = useState(true)
 
 
@@ -34,16 +36,16 @@ const EditProject: React.FC = () => {
         setDisabled(false)
         if (!response.success) return setInitialDockerValues(null)
 
-        let formVals: POST_Requests[ApiRoutes.PROJECT_TESTS] = {
+        let formVals: DockerStuff= {
             structureTest: null,
             dockerTemplate: null,
             dockerScript: null,
             dockerImage: null,
+            dockerMode: false
         }
+
         if (response.success) {
             const tests = response.response.data
-            console.log(tests)
-
             if (tests.extraFilesName) {
                 const downloadLink = AppRoutes.DOWNLOAD_PROJECT_TESTS.replace(":projectId", projectId).replace(":courseId", courseId!)
 
@@ -58,16 +60,20 @@ const EditProject: React.FC = () => {
                 form.setFieldValue("dockerTestDir", uploadVal)
             }
 
+            if(tests.dockerTemplate) {
+                form.setFieldValue("dockerMode", true)
+            }
+
             formVals = {
                 structureTest: tests.structureTest ?? "",
                 dockerTemplate: tests.dockerTemplate ?? "",
                 dockerScript: tests.dockerScript ?? "",
                 dockerImage: tests.dockerImage ?? "",
+                dockerMode: !!tests.dockerTemplate
             }
         }
 
         form.setFieldsValue(formVals)
-
         setInitialDockerValues(formVals)
     }
 
@@ -80,6 +86,9 @@ const EditProject: React.FC = () => {
 
     const handleCreation = async () => {
         const values: ProjectFormData & DockerFormData = form.getFieldsValue()
+
+        console.log(values)
+
         if (values.visible) {
             values.visibleAfter = null
         }
@@ -138,6 +147,7 @@ const EditProject: React.FC = () => {
                     visibleAfter: project.visible ? null : (project.visibleAfter ? dayjs(project.visibleAfter) : null),
                     maxScore: project.maxScore,
                     deadline: dayjs(project.deadline),
+                    dockerMode: null
                 }}
                 form={form}
                 onFinishFailed={onInvalid}

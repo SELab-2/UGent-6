@@ -1,5 +1,4 @@
-import { Form, Input, Typography, Tooltip, Space } from "antd"
-import { QuestionCircleOutlined } from "@ant-design/icons"
+import { Form, Input, Typography } from "antd"
 import { FC } from "react"
 import SubmitStructure from "../../../pages/submit/components/SubmitStructure"
 import { useTranslation } from "react-i18next"

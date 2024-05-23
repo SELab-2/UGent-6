@@ -55,7 +55,7 @@ const HorizontalCourseScroll: FC<{ title: string; projects: CourseProjectList | 
 
       <Space
         className="small-scroll-bar"
-        style={{ display: "flex", maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem", alignItems: "stretch" }}
+        style={{ display: "flex", maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem", alignItems: "stretch",paddingBottom:"1rem" }}
       >
         {projects === null ? (
           <Space

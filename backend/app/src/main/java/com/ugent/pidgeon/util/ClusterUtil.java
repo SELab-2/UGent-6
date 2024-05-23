@@ -1,8 +1,8 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.model.json.ClusterFillJson;
-import com.ugent.pidgeon.model.json.GroupClusterCreateJson;
-import com.ugent.pidgeon.model.json.GroupClusterUpdateJson;
+import com.ugent.pidgeon.json.ClusterFillJson;
+import com.ugent.pidgeon.json.GroupClusterCreateJson;
+import com.ugent.pidgeon.json.GroupClusterUpdateJson;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.CourseUserEntity;
 import com.ugent.pidgeon.postgre.models.CourseUserId;
@@ -13,7 +13,6 @@ import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

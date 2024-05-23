@@ -82,6 +82,7 @@ const ProjectCreate: React.FC = () => {
                     visibleAfter: null,
                     maxScore: 20,
                     deadline: null,
+                    dockerMode: null,
                 }}
                 form={form}
                 onFinishFailed={onInvalid}

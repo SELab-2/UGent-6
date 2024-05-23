@@ -1,59 +1,79 @@
-import { InboxOutlined, UploadOutlined } from "@ant-design/icons"
-import {Button, Form, Input, Switch, Upload} from "antd"
+import { CodepenCircleFilled, InboxOutlined, UploadOutlined } from "@ant-design/icons"
+import { Button, Dropdown, Form, Input, Menu, Select, SelectProps, Switch, Upload } from "antd"
 import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
-import React, {FC, useEffect, useLayoutEffect, useState} from "react"
+import React, { FC, useEffect, useLayoutEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ApiRoutes } from "../../../@types/requests"
 import useAppApi from "../../../hooks/useAppApi"
 import MarkdownTooltip from "../../common/MarkdownTooltip"
-import { classicNameResolver } from "typescript"
 import MarkdownTextfield from "../../input/MarkdownTextfield"
+import TextArea from "antd/es/input/TextArea"
 
-const UploadBtn: React.FC<{ form: FormInstance; fieldName: string; textFieldProps?: TextAreaProps; disabled?: boolean }> = ({ form, fieldName, disabled }) => {
-  const handleFileUpload = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const contents = e.target?.result as string
-      form.setFieldValue(fieldName, contents)
-    }
-    reader.readAsText(file)
-    // Prevent default upload action
-    return false
-  }
+import BashIcon from "../../../../public/docker_langauges/bash.svg"
+import PythonIcon from "../../../../public/docker_langauges/python.svg"
+import NodeIcon from "../../../../public/docker_langauges/node-js.svg"
+import HaskellIcon from "../../../../public/docker_langauges/haskell.svg"
+import Custom from "../../../../public/docker_langauges/custom.svg"
 
-  return (
-    <>
-      <div style={{ marginTop: "8px", display: "flex", justifyContent: "flex-end" }}>
-        <Upload
-          showUploadList={false}
-          beforeUpload={handleFileUpload}
-          disabled={disabled}
-        >
-          <Button
-            disabled={disabled}
-            icon={<InboxOutlined />}
-          >
-            Upload
-          </Button>
-        </Upload>
-      </div>
-    </>
-  )
+
+type DockerLanguage = "bash" | "python" | "node" | "haskell" | "custom"
+const languageOptions: Record<DockerLanguage, string> = {
+  bash: "fedora",
+  python: "python",
+  node: "node",
+  haskell: "haskell",
+  custom: ""
 }
+
+const imageToLanguage: Record<string, DockerLanguage> = {
+  fedora: "bash",
+  python: "python",
+  node: "node",
+  haskell: "haskell",
+}
+
+
+const languagesSelectorItems:SelectProps["options"] = [
+  {
+    label:  <><img src={BashIcon} className="select-icon" />Bash</>,
+    value: "bash",
+  },{
+    label:  <><img src={PythonIcon} className="select-icon" />Python</>,
+    value: "python",
+  }, {
+    label:  <><img src={NodeIcon} className="select-icon" />NodeJS</>,
+    value: "node",
+  }, {
+    label:  <><img src={HaskellIcon} className="select-icon" />Haskell</>,
+    value: "haskell",
+  }, {
+    label:  <><img src={Custom} className="select-icon" />Custom</>,
+    value: "custom",
+  }
+]
+
+
 
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
-  const {message} = useAppApi()
-  const [withTemplate, setWithTemplate] = useState<boolean>(true)
+  const { message } = useAppApi()
   const dockerImage = Form.useWatch("dockerImage", form)
+  const dockerTemplate = Form.useWatch("dockerTemplate", form)
+  const dockerMode = Form.useWatch("dockerMode", form)
 
   const dockerDisabled = !dockerImage?.length
 
+
+  const withTemplate = (dockerMode === null && !!dockerTemplate?.length) || !!dockerMode
+
+ 
     useEffect(() =>  {
       
         form.validateFields(["dockerScript", "dockerTemplate"])
     }, [dockerDisabled])
+
+    
+  const dockerImageSelect= useMemo(()=>  imageToLanguage[dockerImage] || "custom",[dockerImage])
 
   function isValidTemplate(template: string): string {
     if (template.length === 0) {
@@ -82,7 +102,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           const isDescription = line.length >= 13 && line.substring(0, 13).toLowerCase() === ">description="
           // option lines
           if (line.toLowerCase() !== ">required" && line.toLowerCase() !== ">optional" && !isDescription) {
-            return t("project.tests.dockerTemplateValidation.inValidOptions", { line:lineNumber.toString() })
+            return t("project.tests.dockerTemplateValidation.inValidOptions", { line: lineNumber.toString() })
           }
         } else {
           isConfigurationLine = false
@@ -95,31 +115,24 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
     return ""
   }
 
-
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
-      return e;
+      return e
     }
-    return e?.fileList;
-  };
-
-  let switchClassName = 'template-switch'
-  let scriptPlaceholder
-  
-  if (withTemplate) {
-    switchClassName += ' template-switch-active'
-    scriptPlaceholder = "bash /shared/input/helloworld.sh > \"/shared/output/helloWorldTest\"\n"+
-    "bash /shared/input/helloug.sh > \"/shared/output/helloUGent\"\n"
-  } else {
-    switchClassName += ' template-switch-inactive'
-    scriptPlaceholder = "output=$(bash /shared/input/helloworld.sh)\n"+ 
-    "if [[ \"$output\" == \"Hello World\" ]]; then \n"+
-    "  echo 'Test one is successful\n"+
-    "  echo 'PUSH ALLOWED' > /shared/output/testOutput\n"+ 
-    "else\n"+
-    "  echo 'Test one failed: script failed to print \"Hello World\"'\n"+
-    "fi"
+    return e?.fileList
   }
+
+  let switchClassName = "template-switch"
+  let scriptPlaceholder
+
+  if (withTemplate) {
+    switchClassName += " template-switch-active"
+    scriptPlaceholder = 'bash /shared/input/helloworld.sh > "/shared/output/helloWorldTest"\n' + 'bash /shared/input/helloug.sh > "/shared/output/helloUGent"\n'
+  } else {
+    switchClassName += " template-switch-inactive"
+    scriptPlaceholder = "output=$(bash /shared/input/helloworld.sh)\n" + 'if [[ "$output" == "Hello World" ]]; then \n' + "  echo 'Test one is successful\n" + "  echo 'PUSH ALLOWED' > /shared/output/testOutput\n" + "else\n" + "  echo 'Test one failed: script failed to print \"Hello World\"'\n" + "fi"
+  }
+  
 
   return (
     <>
@@ -134,11 +147,16 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         name="dockerImage"
       >
         <Input
-          style={{ marginTop: "8px" }}
+          addonBefore={
+            <Select
+              style={{ width: 150 }}
+              value={dockerImageSelect}
+              onChange={(val:DockerLanguage) => form.setFieldValue("dockerImage", languageOptions[val])}
+              options={languagesSelectorItems}
+            />}
           placeholder={t("project.tests.dockerImagePlaceholder")}
         />
       </Form.Item>
-
       <>
         <Form.Item
           rules={[{ required: !dockerDisabled, message: t("project.tests.dockerScriptRequired") }]}
@@ -151,10 +169,10 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           }
           name="dockerScript"
         >
-          <Input.TextArea
+          <TextArea
             disabled={dockerDisabled}
             autoSize={{ minRows: 8 }}
-            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
+            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
             placeholder={scriptPlaceholder}
           />
         </Form.Item>
@@ -193,18 +211,19 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           fieldName="dockerScript"
         /> */}
         <div style={{ paddingBottom: '14px'}}>
+          <Form.Item name="dockerMode" label="" valuePropName="checked">
+
           <Switch
-              checked={withTemplate}
               checkedChildren={t("project.tests.templateMode")}
               unCheckedChildren={t("project.tests.simpleMode")}
-              onChange={setWithTemplate}
               className={switchClassName}
-          />
+              />
+              </Form.Item>
         </div>
 
-        {withTemplate ?
-            <div>
-              <MarkdownTextfield content={t("project.tests.templateModeInfo")} />
+        
+          <div style={withTemplate ? {} : {display: "none"}}>
+            <MarkdownTextfield content={t("project.tests.templateModeInfo")} />
 
             <Form.Item
                 label={t("project.tests.dockerTemplate")}
@@ -213,7 +232,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                   {
                     validator: (_, value) => {
                       value ??= ""
-                      if (dockerDisabled) {
+                      if (dockerDisabled || !withTemplate) {
                         return Promise.resolve()
                       }
                       const errorMessage = isValidTemplate(value)
@@ -234,11 +253,14 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                   disabled={dockerDisabled}
                   fieldName="dockerTemplate"
               />*/}
-            </Form.Item> </div>: <Form.Item
-          name="simpleMode"
-          children={<MarkdownTextfield content={t("project.tests.simpleModeInfo")} />}
+            </Form.Item> 
+          </div> 
+
+          <Form.Item
+            name="simpleMode"
             rules={[{ required: false}]}
-        />}
+            style={withTemplate ? {display: "none"} : {}}
+          ><MarkdownTextfield content={t("project.tests.simpleModeInfo")} /></Form.Item>
       </>
     </>
   )

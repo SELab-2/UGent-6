@@ -1,4 +1,4 @@
-name: running test with github actions
+name: Backend Testing
 on: pull_request
 
 jobs:

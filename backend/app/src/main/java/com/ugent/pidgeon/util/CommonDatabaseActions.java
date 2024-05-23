@@ -2,24 +2,34 @@ package com.ugent.pidgeon.util;
 
 
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
-import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
+import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
+import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.GroupUserEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
-import com.ugent.pidgeon.postgre.repository.*;
-import java.nio.file.Path;
+import com.ugent.pidgeon.postgre.repository.CourseRepository;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import com.ugent.pidgeon.postgre.repository.GroupFeedbackRepository;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.GroupUserRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
+import com.ugent.pidgeon.postgre.repository.TestRepository;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Component
 public class CommonDatabaseActions {

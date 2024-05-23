@@ -3,13 +3,10 @@ package com.ugent.pidgeon.util;
 import com.ugent.pidgeon.postgre.models.FileEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
 import java.io.File;
+import java.nio.file.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.logging.Logger;
 
 @Component
 public class FileUtil {

@@ -1,11 +1,23 @@
 package com.ugent.pidgeon.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.CustomObjectMapper;
-import com.ugent.pidgeon.model.json.TestJson;
-import com.ugent.pidgeon.model.json.TestUpdateJson;
+import com.ugent.pidgeon.json.TestJson;
+import com.ugent.pidgeon.json.TestUpdateJson;
 import com.ugent.pidgeon.postgre.models.FileEntity;
-import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.repository.FileRepository;
@@ -17,11 +29,14 @@ import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.FileUtil;
 import com.ugent.pidgeon.util.Filehandler;
 import com.ugent.pidgeon.util.Pair;
-import com.ugent.pidgeon.util.ProjectUtil;
 import com.ugent.pidgeon.util.TestUtil;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,31 +51,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class TestControllerTest extends ControllerTest{
@@ -87,7 +78,7 @@ public class TestControllerTest extends ControllerTest{
     private TestController testController;
 
 
-    private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+    private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
     private MockMultipartFile mockMultipartFile;
     private FileEntity fileEntity;

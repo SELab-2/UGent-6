@@ -1,11 +1,9 @@
 package com.ugent.pidgeon.model;
 
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.List;
 
 
 public class AuthTest {
