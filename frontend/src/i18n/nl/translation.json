@@ -341,6 +341,7 @@
     "cannotJoinCourse": "Je kan je niet inschrijven voor dit vak"
   },
   "goBack": "Keer terug",
+  "delete": "Verwijder",
   "components": {
     "write": "Aanpassen",
     "preview": "Voorbeeld"

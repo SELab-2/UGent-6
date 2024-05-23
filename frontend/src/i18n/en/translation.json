@@ -336,6 +336,7 @@
     "cannotJoinCourse": "You cannot join this course"
   },
   "goBack": "Go back",
+  "delete": "Delete",
   "components": {
     "write": "Write",
     "preview": "Preview"
