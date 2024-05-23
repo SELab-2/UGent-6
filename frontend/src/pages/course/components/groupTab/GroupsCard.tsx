@@ -1,10 +1,11 @@
-import { Card, Collapse, CollapseProps, Spin, Typography } from "antd"
+import { Button, Card, Collapse, CollapseProps, Spin, Typography } from "antd"
 import { FC, useEffect, useMemo, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
 import { useTranslation } from "react-i18next"
 import useApi from "../../../../hooks/useApi"
+import { PlusOutlined } from "@ant-design/icons"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
@@ -13,29 +14,35 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
   const { t } = useTranslation()
   const API = useApi()
   useEffect(() => {
-      fetchGroups().catch(console.error)
-
+    fetchGroups().catch(console.error)
   }, [courseId])
 
   const fetchGroups = async () => {
     if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
-      const res = await API.GET(ApiRoutes.COURSE_CLUSTERS, { pathValues: { id: courseId } })
-      if(!res.success) return
-      setGroups(res.response.data)
-    }
+    const res = await API.GET(ApiRoutes.COURSE_CLUSTERS, { pathValues: { id: courseId } })
+    if (!res.success) return
+    setGroups(res.response.data)
+  }
 
 
-  const items: CollapseProps["items"] = useMemo(()=> groups?.map((cluster) => ({
-    key: cluster.clusterId.toString(),
-    label: cluster.name,
-    children: (
-      <GroupList
-        onChanged={fetchGroups}
-        groups={cluster.groups}
-        locked={cluster.lockGroupsAfter}
-      />
-    ),
-  })), [groups])
+
+  const items: CollapseProps["items"] = useMemo(
+    () =>
+      groups?.map((cluster) => ({
+        key: cluster.clusterId.toString(),
+        label: cluster.name,
+        children: (
+            <GroupList
+              onChanged={fetchGroups}
+              groups={cluster.groups}
+              locked={cluster.lockGroupsAfter}
+              clusterId={cluster.clusterId}
+            />
+            
+        ),
+      })),
+    [groups]
+  )
 
   if (Array.isArray(items) && !items.length)
     return (

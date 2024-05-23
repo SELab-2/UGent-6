@@ -42,6 +42,7 @@ export enum ApiRoutes {
 
   CLUSTER = "api/clusters/:id",
   CLUSTER_FILL = "api/clusters/:id/fill",
+  CLUSTER_GROUPS = "api/clusters/:id/groups",
 
   GROUP = "api/groups/:id",
   GROUP_MEMBERS = "api/groups/:id/members",
@@ -91,6 +92,7 @@ export type POST_Requests = {
   [ApiRoutes.COURSE_JOIN]: undefined
   [ApiRoutes.COURSE_JOIN_WITHOUT_KEY]: undefined
   [ApiRoutes.PROJECT_SCORE]: Omit<GET_Responses[ApiRoutes.PROJECT_SCORE], "groupId" | "projectId">
+  [ApiRoutes.CLUSTER_GROUPS]: {name: string}
 }
 
 /**

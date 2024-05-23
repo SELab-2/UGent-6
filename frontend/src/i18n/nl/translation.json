@@ -321,7 +321,8 @@
     "invitePeople": "Mensen uitnodigen",
     "invitePeopleToCourse": "Mensen uitnodigen voor dit vak",
     "allowedInviteText": "Enkel mensen met een uitnodiging kunnen inschrijven",
-    "regenerateKey": "Nieuwe uitnodigings sleutel genereren"
+    "regenerateKey": "Nieuwe uitnodigings sleutel genereren",
+    "addGroup": "Voeg nieuwe groep toe"
   },
   "cancel": "Annuleren",
   "ok": "Ok",

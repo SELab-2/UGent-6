@@ -316,7 +316,8 @@
     "invitePeople": "Invite people",
     "invitePeopleToCourse": "Invite people to this course",
     "allowedInviteText": "Only people with the invite link can join this course",
-    "regenerateKey": "Regenerate invite key"
+    "regenerateKey": "Regenerate invite key",
+    "addGroup": "Add new group"
   },
   "cancel": "Cancel",
   "ok": "OK",
