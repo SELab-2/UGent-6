@@ -44,7 +44,7 @@ public class TestController {
      * @param projectId the id of the project to update the tests for
      * @param auth the authentication object of the requesting user
      * @HttpMethod POST
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6697175">apiDog documentation</a>
      * @AllowedRoles teacher
      * @ApiPath /api/projects/{projectid}/tests
      * @return ResponseEntity with the updated tests
@@ -60,6 +60,16 @@ public class TestController {
             testJson.getDockerTemplate(), testJson.getStructureTest(), HttpMethod.POST);
     }
 
+    /**
+     * Function to update the tests of a project
+     * @param projectId the id of the project to update the tests for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod PATCH
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693478">apiDog documentation</a>
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectid}/tests
+     * @return ResponseEntity with the updated tests
+     */
     @PatchMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchTests(
@@ -71,6 +81,16 @@ public class TestController {
             testJson.getDockerTemplate(), testJson.getStructureTest(), HttpMethod.PATCH);
     }
 
+    /**
+     * Function to update the tests of a project
+     * @param projectId the id of the project to update the tests for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod PUT
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectid}/tests
+     * @return ResponseEntity with the updated tests
+     */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> putTests(
@@ -108,7 +128,7 @@ public class TestController {
             structureTemplate = null;
         }
 
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, httpMethod);
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, structureTemplate, httpMethod);
 
 
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
@@ -220,7 +240,7 @@ public class TestController {
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteTestById(@PathVariable("projectid") long projectId, Auth auth) {
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null,  HttpMethod.DELETE);
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null, null, HttpMethod.DELETE);
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(updateCheckResult.getStatus()).body(updateCheckResult.getMessage());
         }
@@ -235,6 +255,17 @@ public class TestController {
         return  ResponseEntity.ok().build();
     }
 
+    /**
+     * Function to upload extra files for a test
+     * @param projectId the id of the project to upload the files for
+     * @param file the file to upload
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod PUT
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7409857">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/extrafiles
+     * @return ResponseEntity with the updated tests
+     */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> uploadExtraTestFiles(
@@ -268,6 +299,16 @@ public class TestController {
         }
     }
 
+    /**
+     * Function to delete extra files for a test
+     * @param projectId the id of the project to delete the files for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod DELETE
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7409860">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/extrafiles
+     * @return ResponseEntity with the updated tests
+     */
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteExtraTestFiles(
@@ -303,6 +344,16 @@ public class TestController {
         }
     }
 
+    /**
+     * Function to get extra files for a test
+     * @param projectId the id of the project to get the files for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod GET
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7409863">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/extrafiles
+     * @return ResponseEntity with the updated tests
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getExtraTestFiles(

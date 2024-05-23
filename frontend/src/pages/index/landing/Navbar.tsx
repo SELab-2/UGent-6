@@ -9,7 +9,7 @@ const Navbar: FC<{ onLogin: () => void }> = ({ onLogin }) => {
   const { t } = useTranslation()
 
   return (
-    <div style={{ height: "6rem", display: "flex", justifyContent: "space-between", margin: "2rem" }}>
+    <div className="navbar" style={{ height: "6rem", display: "flex", justifyContent: "space-between", margin: "2rem" }}>
       <div>
         <Typography.Title
           style={{ padding: 0, margin: 0, cursor: "pointer", color: "white" }}

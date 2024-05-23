@@ -56,6 +56,18 @@ public class UserController {
         return ResponseEntity.ok().body(res);
     }
 
+    /**
+     * Function to search users by email, name and surname
+     *
+     * @param email   email of a user
+     * @param name    name of a user
+     * @param surname surname of a user
+     * @HttpMethod GET
+     * @ApiPath /api/user
+     * @AllowedRoles admin
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7405120">apiDog documentation</a>
+     * @return user object
+     */
     @GetMapping(ApiRoutes.USERS_BASE_PATH)
     @Roles({UserRole.admin})
     public ResponseEntity<Object> getUsersByNameOrSurname(
@@ -91,7 +103,16 @@ public class UserController {
         return ResponseEntity.ok().body(usersByName.stream().map(UserJson::new).toList());
     }
 
-
+    /**
+     * Function to get the logged in user
+     *
+     * @param auth authentication object
+     * @HttpMethod GET
+     * @ApiPath /api/user
+     * @AllowedRoles student
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7405497">apiDog documentation</a>
+     * @return user object
+     */
     @GetMapping(ApiRoutes.LOGGEDIN_USER_PATH)
     @Roles({UserRole.student, UserRole.teacher})
     public ResponseEntity<Object> getLoggedInUser(Auth auth) {

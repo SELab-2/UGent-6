@@ -334,14 +334,14 @@ public class DockerSubmissionTestModel {
     }
   }
 
-  public static boolean isValidTemplate(String template) {
+  public static void tryTemplate(String template) {
     // lines with @ should be the first of a string
     // @ is always the first character
     // ">" options under the template should be "required, optional or description="..."
     boolean atLeastOne = false; // Template should not be empty
     String[] lines = template.split("\n");
     if (lines[0].charAt(0) != '@') {
-      return false;
+    throw new IllegalArgumentException("Template should start with a '@'");
     }
     boolean isConfigurationLine = false;
     for (String line : lines) {
@@ -359,14 +359,25 @@ public class DockerSubmissionTestModel {
           // option lines
           if (!line.equalsIgnoreCase(">Required") && !line.equalsIgnoreCase(">Optional")
               && !isDescription) {
-            return false;
+            throw new IllegalArgumentException("Invalid option in template");
           }
         } else {
           isConfigurationLine = false;
         }
       }
     }
-    return atLeastOne;
+    if(! atLeastOne){
+      throw new IllegalArgumentException("Template should not be empty");
+    }
+  }
+
+  public static boolean isValidTemplate(String template){
+    try{
+      tryTemplate(template);
+      return true;
+    }catch (Exception e){
+      return false;
+    }
   }
 
 }

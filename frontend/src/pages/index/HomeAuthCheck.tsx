@@ -1,16 +1,13 @@
-import { useIsAuthenticated, useMsal } from "@azure/msal-react"
 import Home from "./Home"
 import LandingPage from "./landing/LandingPage"
+import useAuth from "../../hooks/useAuth";
 
 const HomeAuthCheck = () => {
-  const isAuthenticated = useIsAuthenticated()
-  const { inProgress } = useMsal()
-
-if(inProgress === "startup") return null
-  if (isAuthenticated) {
-    return <Home />
+  const auth = useAuth()
+  if (auth.isAuthenticated) {
+    return <Home/>
   }
-  return <LandingPage />
+  return <LandingPage/>
 }
 
 export default HomeAuthCheck

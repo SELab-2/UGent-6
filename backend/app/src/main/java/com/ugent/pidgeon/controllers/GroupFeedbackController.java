@@ -52,7 +52,7 @@ public class GroupFeedbackController {
      * @param auth      authentication object of the requesting user
      * @return ResponseEntity<String>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883691">apiDog documentation</a>
-     * @HttpMethod Patch
+     * @HttpMethod PATCH
      * @AllowedRoles teacher, student
      * @ApiPath /api/projects/{projectid}/groups/{groupid}/score
      */
@@ -83,6 +83,18 @@ public class GroupFeedbackController {
         return doGroupFeedbackUpdate(groupFeedbackEntity, request);
     }
 
+    /**
+     * Function to delete the score of a group
+     *
+     * @param groupId   identifier of a group
+     * @param projectId identifier of a project
+     * @param auth      authentication object of the requesting user
+     * @return ResponseEntity<String>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7436586">apiDog documentation</a>
+     * @HttpMethod Delete
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/groups/{groupid}/score
+     */
     @DeleteMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteGroupScore(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, Auth auth) {
@@ -99,6 +111,19 @@ public class GroupFeedbackController {
         }
     }
 
+    /**
+     * Function to update the score of a group
+     *
+     * @param groupId   identifier of a group
+     * @param projectId identifier of a project
+     * @param request   request object containing the new score
+     * @param auth      authentication object of the requesting user
+     * @return ResponseEntity<String>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883690">apiDog documentation</a>
+     * @HttpMethod PUT
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/groups/{groupid}/score
+     */
     @PutMapping(ApiRoutes.GROUP_FEEDBACK_PATH)
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> updateGroupScorePut(@PathVariable("groupid") long groupId, @PathVariable("projectid") long projectId, @RequestBody UpdateGroupScoreRequest request, Auth auth) {
@@ -136,8 +161,8 @@ public class GroupFeedbackController {
      * @param request   request object containing the new score
      * @param auth      authentication object of the requesting user
      * @return ResponseEntity<String>
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883691">apiDog documentation</a>
-     * @HttpMethod Post
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6697044">apiDog documentation</a>
+     * @HttpMethod POST
      * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}/projects/{projectid}/feedback
      */
@@ -174,7 +199,7 @@ public class GroupFeedbackController {
      * @param projectId identifier of a project
      * @param auth      authentication object of the requesting user
      * @return ResponseEntity<Object>
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883689">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7436611">apiDog documentation</a>
      * @HttpMethod Get
      * @AllowedRoles teacher, student
      * @ApiPath /api/projects/{projectid}/groups/{groupid}/score
@@ -203,6 +228,17 @@ public class GroupFeedbackController {
         return ResponseEntity.ok(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity));
     }
 
+    /**
+     * Function to get the grades of a course
+     *
+     * @param courseId identifier of a course
+     * @param auth     authentication object of the requesting user
+     * @return ResponseEntity<Object>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7436985">apiDog documentation</a>
+     * @HttpMethod Get
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/courses/{courseId}/grades
+     */
     @GetMapping(ApiRoutes.COURSE_BASE_PATH + "/{courseId}/grades")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getCourseGrades(@PathVariable("courseId") long courseId, Auth auth) {

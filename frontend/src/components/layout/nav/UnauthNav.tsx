@@ -1,15 +1,17 @@
 import { useTranslation } from "react-i18next";
-import { msalInstance } from "../../../index"
 import { Button } from "antd";
+import useAuth from "../../../hooks/useAuth";
+import {useNavigate} from "react-router-dom";
+import {BACKEND_SERVER} from "../../../util/backendServer";
 
 const UnauthNav = () => {
   const { t } = useTranslation();
+  const auth = useAuth();
+  const navigate = useNavigate();
   const handleLogin = async () => {
     try {
-      await msalInstance.loginPopup({
-        scopes: ['openid', 'profile', 'User.Read'],
-      });
-      
+      await auth.login()
+      window.location.replace(BACKEND_SERVER + "/web/auth/signin")
     } catch (error) {
       console.error(error)
     }
