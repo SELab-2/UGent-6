@@ -106,6 +106,39 @@ public class DataGeneration {
             );
             ResponseEntity<?> resp = testController.updateTests(tj, project.projectId(), auth);
             Logger.getGlobal().info("Update tests status: " + resp.getStatusCode() + " " + resp.getBody());
+        } else if (index == 0) {
+            TestUpdateJson tj = new TestUpdateJson(
+                    "fedora:latest",
+                    "python /shared/input/ugent.py > /shared/output/ugent",
+                    "@ugent\n" +
+                            ">required\n" +
+                            ">description=\"Jouw script moet UGent in ascii schrijven.\"\n" +
+                            "          _____                    _____                    _____                    _____                _____          \n" +
+                            "         /\\    \\                  /\\    \\                  /\\    \\                  /\\    \\              /\\    \\         \n" +
+                            "        /::\\____\\                /::\\    \\                /::\\    \\                /::\\____\\            /::\\    \\        \n" +
+                            "       /:::/    /               /::::\\    \\              /::::\\    \\              /::::|   |            \\:::\\    \\       \n" +
+                            "      /:::/    /               /::::::\\    \\            /::::::\\    \\            /:::::|   |             \\:::\\    \\      \n" +
+                            "     /:::/    /               /:::/\\:::\\    \\          /:::/\\:::\\    \\          /::::::|   |              \\:::\\    \\     \n" +
+                            "    /:::/    /               /:::/  \\:::\\    \\        /:::/__\\:::\\    \\        /:::/|::|   |               \\:::\\    \\    \n" +
+                            "   /:::/    /               /:::/    \\:::\\    \\      /::::\\   \\:::\\    \\      /:::/ |::|   |               /::::\\    \\   \n" +
+                            "  /:::/    /      _____    /:::/    / \\:::\\    \\    /::::::\\   \\:::\\    \\    /:::/  |::|   | _____        /::::::\\    \\  \n" +
+                            " /:::/____/      /\\    \\  /:::/    /   \\:::\\ ___\\  /:::/\\:::\\   \\:::\\    \\  /:::/   |::|   |/\\    \\      /:::/\\:::\\    \\ \n" +
+                            "|:::|    /      /::\\____\\/:::/____/  ___\\:::|    |/:::/__\\:::\\   \\:::\\____\\/:: /    |::|   /::\\____\\    /:::/  \\:::\\____\\\n" +
+                            "|:::|____\\     /:::/    /\\:::\\    \\ /\\  /:::|____|\\:::\\   \\:::\\   \\::/    /\\::/    /|::|  /:::/    /   /:::/    \\::/    /\n" +
+                            " \\:::\\    \\   /:::/    /  \\:::\\    /::\\ \\::/    /  \\:::\\   \\:::\\   \\/____/  \\/____/ |::| /:::/    /   /:::/    / \\/____/ \n" +
+                            "  \\:::\\    \\ /:::/    /    \\:::\\   \\:::\\ \\/____/    \\:::\\   \\:::\\    \\              |::|/:::/    /   /:::/    /          \n" +
+                            "   \\:::\\    /:::/    /      \\:::\\   \\:::\\____\\       \\:::\\   \\:::\\____\\             |::::::/    /   /:::/    /           \n" +
+                            "    \\:::\\__/:::/    /        \\:::\\  /:::/    /        \\:::\\   \\::/    /             |:::::/    /    \\::/    /            \n" +
+                            "     \\::::::::/    /          \\:::\\/:::/    /          \\:::\\   \\/____/              |::::/    /      \\/____/             \n" +
+                            "      \\::::::/    /            \\::::::/    /            \\:::\\    \\                  /:::/    /                           \n" +
+                            "       \\::::/    /              \\::::/    /              \\:::\\____\\                /:::/    /                            \n" +
+                            "        \\::/____/                \\::/____/                \\::/    /                \\::/    /                             \n" +
+                            "         ~~                                                \\/____/                  \\/____/                                ",
+                    "ugent.py"
+
+            );
+            ResponseEntity<?> resp = testController.updateTests(tj, project.projectId(), auth);
+            Logger.getGlobal().info("Update tests status: " + resp.getStatusCode() + " " + resp.getBody());
         }
     }
 
@@ -114,40 +147,54 @@ public class DataGeneration {
     }
 
     private ProjectResponseJson makeProject(Auth auth, CourseWithInfoJson course, int index) {
-        String[] projectTitles = {"A fantastic project", "A project about bash", "A palindrome checker"};
-        String[] projectDescriptions = {"Stel je voor: een project dat de wereld zal veranderen. Een project dat verder gaat dan de grenzen van wat we ons ooit konden voorstellen. Dit is niet zomaar een project; het is een revolutie in denken, een transformatie in de manier waarop we leven, werken en dromen. Het heet \"Elysium Innovatus,\" en het belooft de wereld op zijn kop te zetten.\n" +
-                "\n" +
-                "\"Elysium Innovatus\" is een buitengewoon project dat is ontworpen om de kloof tussen technologie en menselijkheid te overbruggen. Stel je een toekomst voor waarin kunstmatige intelligentie niet alleen een hulpmiddel is, maar een partner, een metgezel die ons helpt bij het navigeren door de complexiteiten van het moderne leven. Dit project is de belichaming van deze visie. Door gebruik te maken van de nieuwste doorbraken in machine learning en neurowetenschappen, streeft \"Elysium Innovatus\" ernaar om een symbiotische relatie te creëren tussen mens en machine, waarbij de sterke punten van beide worden benut om een betere, meer harmonieuze wereld te bouwen.\n" +
-                "\n" +
-                "Een van de pijlers van dit project is de ontwikkeling van hypergeavanceerde AI-assistenten die niet alleen onze dagelijkse taken kunnen automatiseren, maar ook in staat zijn om emotioneel intelligent te reageren. Deze assistenten kunnen ons helpen bij het maken van moeilijke beslissingen, ons ondersteunen in tijden van nood en zelfs ons creatief inspireren. De impact op ons persoonlijke en professionele leven zou immens zijn. Denk aan een wereld waarin je nooit meer vastzit in verkeersopstoppingen dankzij real-time, voorspellend verkeersmanagement, of een wereld waarin gezondheidszorg op maat wordt geleverd door een AI die je unieke medische geschiedenis begrijpt en constant monitort.\n" +
-                "\n" +
-                "Maar \"Elysium Innovatus\" gaat verder dan technologie alleen. Het project richt zich ook op duurzaamheid en het bevorderen van een groenere planeet. Innovatieve technieken voor energieopslag en hernieuwbare energiebronnen zijn geïntegreerd in elke stap van het proces. Voor het eerst kunnen we een toekomst zien waarin schone energie de norm is, niet de uitzondering. Steden worden slimmer en groener, met gebouwen die zichzelf onderhouden en gemeenschappen die samenwerken om een duurzame leefomgeving te creëren.\n" +
-                "\n" +
-                "Onderwijs is een ander belangrijk aspect van \"Elysium Innovatus.\" Het project streeft ernaar om de manier waarop we leren en onderwijzen te hervormen. Door gebruik te maken van gepersonaliseerde leerprogramma's en virtuele realiteit, kunnen studenten over de hele wereld toegang krijgen tot hoogwaardig onderwijs, ongeacht hun locatie of sociaaleconomische status. De kloof tussen arm en rijk kan eindelijk worden gedicht door middel van educatieve gelijkheid en toegang tot kennis.\n" +
-                "\n" +
-                "De infrastructuur van \"Elysium Innovatus\" is even indrukwekkend als de visie zelf. Een wereldwijd netwerk van onderzoekscentra en innovatiehubs zal wetenschappers, ingenieurs en creatievelingen van alle disciplines samenbrengen om te collaboreren en te innoveren. Deze centra fungeren als broedplaatsen voor nieuwe ideeën en technologieën, waar de grenzen van het mogelijke voortdurend worden verlegd. Van biotechnologie tot kwantumcomputing, elke denkbare discipline wordt aangesproken en geïntegreerd in een holistische benadering van vooruitgang.\n" +
-                "\n" +
-                "\"Elysium Innovatus\" is niet alleen een project; het is een beweging. Het nodigt iedereen uit om deel te nemen, bij te dragen en te profiteren van de ongelooflijke vooruitgangen die het mogelijk maakt. Burgers, overheden, bedrijven en non-profitorganisaties werken samen in een ongekend partnerschap om de dromen van morgen vandaag te realiseren. Het is een oproep tot actie, een kans om deel uit te maken van iets veel groters dan wijzelf.\n" +
-                "\n" +
-                "In de kern draait \"Elysium Innovatus\" om hoop en de onbegrensde mogelijkheden van de menselijke geest. Het herinnert ons eraan dat, hoewel we geconfronteerd worden met talloze uitdagingen, onze capaciteit om te creëren, te ontdekken en te groeien, eindeloos is. Dit project is een bewijs van wat we kunnen bereiken wanneer we ons verenigen in de zoektocht naar een betere toekomst. \"Elysium Innovatus\" is meer dan een droom; het is onze nieuwe realiteit in wording.",
+        String[] projectTitles = {"A palindrome checker", "A project about bash", "A fantastic project"};
+        String[] projectDescriptions = {
+                "## Challenge: UGent ascii art ##\n" +
+                        "Write a python script that writes this text to stdout and name it `ugent.py`: \n\n" +
+                        "```\n" +
+                        "           _____                    _____                    _____                    _____                _____          \n" +
+                        "         /\\    \\                  /\\    \\                  /\\    \\                  /\\    \\              /\\    \\         \n" +
+                        "        /::\\____\\                /::\\    \\                /::\\    \\                /::\\____\\            /::\\    \\        \n" +
+                        "       /:::/    /               /::::\\    \\              /::::\\    \\              /::::|   |            \\:::\\    \\       \n" +
+                        "      /:::/    /               /::::::\\    \\            /::::::\\    \\            /:::::|   |             \\:::\\    \\      \n" +
+                        "     /:::/    /               /:::/\\:::\\    \\          /:::/\\:::\\    \\          /::::::|   |              \\:::\\    \\     \n" +
+                        "    /:::/    /               /:::/  \\:::\\    \\        /:::/__\\:::\\    \\        /:::/|::|   |               \\:::\\    \\    \n" +
+                        "   /:::/    /               /:::/    \\:::\\    \\      /::::\\   \\:::\\    \\      /:::/ |::|   |               /::::\\    \\   \n" +
+                        "  /:::/    /      _____    /:::/    / \\:::\\    \\    /::::::\\   \\:::\\    \\    /:::/  |::|   | _____        /::::::\\    \\  \n" +
+                        " /:::/____/      /\\    \\  /:::/    /   \\:::\\ ___\\  /:::/\\:::\\   \\:::\\    \\  /:::/   |::|   |/\\    \\      /:::/\\:::\\    \\ \n" +
+                        "|:::|    /      /::\\____\\/:::/____/  ___\\:::|    |/:::/__\\:::\\   \\:::\\____\\/:: /    |::|   /::\\____\\    /:::/  \\:::\\____\\\n" +
+                        "|:::|____\\     /:::/    /\\:::\\    \\ /\\  /:::|____|\\:::\\   \\:::\\   \\::/    /\\::/    /|::|  /:::/    /   /:::/    \\::/    /\n" +
+                        " \\:::\\    \\   /:::/    /  \\:::\\    /::\\ \\::/    /  \\:::\\   \\:::\\   \\/____/  \\/____/ |::| /:::/    /   /:::/    / \\/____/ \n" +
+                        "  \\:::\\    \\ /:::/    /    \\:::\\   \\:::\\ \\/____/    \\:::\\   \\:::\\    \\              |::|/:::/    /   /:::/    /          \n" +
+                        "   \\:::\\    /:::/    /      \\:::\\   \\:::\\____\\       \\:::\\   \\:::\\____\\             |::::::/    /   /:::/    /           \n" +
+                        "    \\:::\\__/:::/    /        \\:::\\  /:::/    /        \\:::\\   \\::/    /             |:::::/    /    \\::/    /            \n" +
+                        "     \\::::::::/    /          \\:::\\/:::/    /          \\:::\\   \\/____/              |::::/    /      \\/____/             \n" +
+                        "      \\::::::/    /            \\::::::/    /            \\:::\\    \\                  /:::/    /                           \n" +
+                        "       \\::::/    /              \\::::/    /              \\:::\\____\\                /:::/    /                            \n" +
+                        "        \\::/____/                \\::/____/                \\::/    /                \\::/    /                             \n" +
+                        "         ~~                                                \\/____/                  \\/____/                                \n" +
+                        "```",
                 "## Opgave: Bash Hello World ##\n" +
                         "**Probleem:**\n" +
                         "Je moet een bash script indienen dat hello world uitschreeft naar stdout.\n" +
                         "\n" +
                         "**Specificaties:**\n" +
                         "- De output van het script moet `Hello World!` zijn.\n\n",
-                "## Challenge: Palindrome Checker ##\n" +
-                        "Write a function called `is_palindrome` that takes a single string as an argument and returns `True` if the string is a palindrome and `False` otherwise. A palindrome is a word, phrase, number, or other sequence of characters that reads the same forward and backward (ignoring spaces, punctuation, and capitalization).\n" +
+                "Stel je voor: een project dat de wereld zal veranderen. Een project dat verder gaat dan de grenzen van wat we ons ooit konden voorstellen. Dit is niet zomaar een project; het is een revolutie in denken, een transformatie in de manier waarop we leven, werken en dromen. Het heet \"Elysium Innovatus,\" en het belooft de wereld op zijn kop te zetten.\n" +
                         "\n" +
-                        "**Example:**\n" +
-                        "- `is_palindrome(\"A man, a plan, a canal, Panama!\")` should return `True`\n" +
-                        "- `is_palindrome(\"racecar\")` should return `True`\n" +
-                        "- `is_palindrome(\"hello\")` should return `False`\n\n" +
-                        "**Requirements:**\n" +
-                        "- Ignore capitalization (case-insensitive).\n" +
-                        "- Ignore spaces, punctuation, and other non-alphanumeric characters.\n\n" +
-                        "**Hint:**\n" +
-                        "You can use the re module to help with ignoring non-alphanumeric characters."
+                        "\"Elysium Innovatus\" is een buitengewoon project dat is ontworpen om de kloof tussen technologie en menselijkheid te overbruggen. Stel je een toekomst voor waarin kunstmatige intelligentie niet alleen een hulpmiddel is, maar een partner, een metgezel die ons helpt bij het navigeren door de complexiteiten van het moderne leven. Dit project is de belichaming van deze visie. Door gebruik te maken van de nieuwste doorbraken in machine learning en neurowetenschappen, streeft \"Elysium Innovatus\" ernaar om een symbiotische relatie te creëren tussen mens en machine, waarbij de sterke punten van beide worden benut om een betere, meer harmonieuze wereld te bouwen.\n" +
+                        "\n" +
+                        "Een van de pijlers van dit project is de ontwikkeling van hypergeavanceerde AI-assistenten die niet alleen onze dagelijkse taken kunnen automatiseren, maar ook in staat zijn om emotioneel intelligent te reageren. Deze assistenten kunnen ons helpen bij het maken van moeilijke beslissingen, ons ondersteunen in tijden van nood en zelfs ons creatief inspireren. De impact op ons persoonlijke en professionele leven zou immens zijn. Denk aan een wereld waarin je nooit meer vastzit in verkeersopstoppingen dankzij real-time, voorspellend verkeersmanagement, of een wereld waarin gezondheidszorg op maat wordt geleverd door een AI die je unieke medische geschiedenis begrijpt en constant monitort.\n" +
+                        "\n" +
+                        "Maar \"Elysium Innovatus\" gaat verder dan technologie alleen. Het project richt zich ook op duurzaamheid en het bevorderen van een groenere planeet. Innovatieve technieken voor energieopslag en hernieuwbare energiebronnen zijn geïntegreerd in elke stap van het proces. Voor het eerst kunnen we een toekomst zien waarin schone energie de norm is, niet de uitzondering. Steden worden slimmer en groener, met gebouwen die zichzelf onderhouden en gemeenschappen die samenwerken om een duurzame leefomgeving te creëren.\n" +
+                        "\n" +
+                        "Onderwijs is een ander belangrijk aspect van \"Elysium Innovatus.\" Het project streeft ernaar om de manier waarop we leren en onderwijzen te hervormen. Door gebruik te maken van gepersonaliseerde leerprogramma's en virtuele realiteit, kunnen studenten over de hele wereld toegang krijgen tot hoogwaardig onderwijs, ongeacht hun locatie of sociaaleconomische status. De kloof tussen arm en rijk kan eindelijk worden gedicht door middel van educatieve gelijkheid en toegang tot kennis.\n" +
+                        "\n" +
+                        "De infrastructuur van \"Elysium Innovatus\" is even indrukwekkend als de visie zelf. Een wereldwijd netwerk van onderzoekscentra en innovatiehubs zal wetenschappers, ingenieurs en creatievelingen van alle disciplines samenbrengen om te collaboreren en te innoveren. Deze centra fungeren als broedplaatsen voor nieuwe ideeën en technologieën, waar de grenzen van het mogelijke voortdurend worden verlegd. Van biotechnologie tot kwantumcomputing, elke denkbare discipline wordt aangesproken en geïntegreerd in een holistische benadering van vooruitgang.\n" +
+                        "\n" +
+                        "\"Elysium Innovatus\" is niet alleen een project; het is een beweging. Het nodigt iedereen uit om deel te nemen, bij te dragen en te profiteren van de ongelooflijke vooruitgangen die het mogelijk maakt. Burgers, overheden, bedrijven en non-profitorganisaties werken samen in een ongekend partnerschap om de dromen van morgen vandaag te realiseren. Het is een oproep tot actie, een kans om deel uit te maken van iets veel groters dan wijzelf.\n" +
+                        "\n" +
+                        "In de kern draait \"Elysium Innovatus\" om hoop en de onbegrensde mogelijkheden van de menselijke geest. Het herinnert ons eraan dat, hoewel we geconfronteerd worden met talloze uitdagingen, onze capaciteit om te creëren, te ontdekken en te groeien, eindeloos is. Dit project is een bewijs van wat we kunnen bereiken wanneer we ons verenigen in de zoektocht naar een betere toekomst. \"Elysium Innovatus\" is meer dan een droom; het is onze nieuwe realiteit in wording."
 
         };
         ProjectJson  pj = new ProjectJson();
