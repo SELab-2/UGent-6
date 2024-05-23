@@ -299,6 +299,8 @@
     "searchMember": "Zoek lid",
     "inviteLink": "Uitnodigingslink",
     "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak.",
+    "copyLink": "Kopieer uitnodiginslink",
+    "copyLinkSuccess": "Link gekopieerd",
     "deleteCourse": "Vak verwijderen",
     "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen? Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
     "confirmDelete": "Bevestig verwijdering",
