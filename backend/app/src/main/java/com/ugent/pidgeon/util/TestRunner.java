@@ -6,6 +6,7 @@ import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.zip.ZipFile;
@@ -41,7 +42,10 @@ public class TestRunner {
     try {
 
       model.addZipInputFiles(file);
-      model.addUtilFiles(Filehandler.getTestExtraFilesPath(projectId).resolve(Filehandler.EXTRA_TESTFILES_FILENAME));
+      Path path = Filehandler.getTestExtraFilesPath(projectId).resolve(Filehandler.EXTRA_TESTFILES_FILENAME);
+      if (Files.exists(path)) {
+        model.addUtilFiles(path);
+      }
       DockerOutput output;
 
       if (testTemplate == null) {

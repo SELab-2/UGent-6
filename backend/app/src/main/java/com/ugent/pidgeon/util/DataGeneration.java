@@ -2,9 +2,11 @@ package com.ugent.pidgeon.util;
 
 import com.ugent.pidgeon.controllers.CourseController;
 import com.ugent.pidgeon.controllers.ProjectController;
+import com.ugent.pidgeon.controllers.SubmissionController;
+import com.ugent.pidgeon.controllers.TestController;
 import com.ugent.pidgeon.model.Auth;
+import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.*;
-import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -14,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 @Component
@@ -30,6 +30,11 @@ public class DataGeneration {
     @Autowired
     private ProjectController projectController;
 
+    @Autowired
+    private TestController testController;
+
+    @Autowired
+    private SubmissionController submissionController;
 
     public void generate(Auth auth) {
         makeFakeUsersAndCourses(auth);
@@ -76,25 +81,40 @@ public class DataGeneration {
                     }
                     courseController.updateCourseMember(auth, course.courseId(), rr, auth.getUserEntity().getId());
                     cmrj.setRelation(CourseRelation.enrolled.toString());
+                    ProjectResponseJson project =  makeProject(auth, course, i % 3);
                     for (int j = 0; j < 10; j++) {
                         UserEntity u = getStudentUserEntity(i, j);
                         userRepository.save(u);
                         cmrj.setUserId(u.getId());
                         courseController.addCourseMember(auth, course.courseId(), cmrj);
                     }
-                    ProjectResponseJsonWithStatus project =  makeProject(auth, course, i % 3);
-                    
                 }
             }
         }
     }
 
-    private void makeSubmissions(Auth auth, ) {
+    private void makeTestsForProject(Auth auth, ProjectResponseJson project, int index) {
+        if (index == 1) {
+            TestUpdateJson tj = new TestUpdateJson(
+                    "alpine:latest",
+                    "bash /shared/input/hello_world.sh > /shared/output/hello_world_test",
+                    "@hello_world_test\n" +
+                            ">required\n" +
+                            ">description=\"Jouw script zou Hello world! moeten schrijven\"\n" +
+                            "Hello World!",
+                    "hello_world.sh"
+            );
+            ResponseEntity<?> resp = testController.updateTests(tj, project.projectId(), auth);
+            Logger.getGlobal().info("Update tests status: " + resp.getStatusCode() + " " + resp.getBody());
+        }
+    }
+
+    private void makeSubmissions(Auth auth, ProjectResponseJson project) {
 
     }
 
-    private ProjectResponseJsonWithStatus makeProject(Auth auth, CourseWithInfoJson course, int index) {
-        String[] projectTitles = {"A fantastic project", "A project about python dictionaries", "A palindrome checker"};
+    private ProjectResponseJson makeProject(Auth auth, CourseWithInfoJson course, int index) {
+        String[] projectTitles = {"A fantastic project", "A project about bash", "A palindrome checker"};
         String[] projectDescriptions = {"Stel je voor: een project dat de wereld zal veranderen. Een project dat verder gaat dan de grenzen van wat we ons ooit konden voorstellen. Dit is niet zomaar een project; het is een revolutie in denken, een transformatie in de manier waarop we leven, werken en dromen. Het heet \"Elysium Innovatus,\" en het belooft de wereld op zijn kop te zetten.\n" +
                 "\n" +
                 "\"Elysium Innovatus\" is een buitengewoon project dat is ontworpen om de kloof tussen technologie en menselijkheid te overbruggen. Stel je een toekomst voor waarin kunstmatige intelligentie niet alleen een hulpmiddel is, maar een partner, een metgezel die ons helpt bij het navigeren door de complexiteiten van het moderne leven. Dit project is de belichaming van deze visie. Door gebruik te maken van de nieuwste doorbraken in machine learning en neurowetenschappen, streeft \"Elysium Innovatus\" ernaar om een symbiotische relatie te creëren tussen mens en machine, waarbij de sterke punten van beide worden benut om een betere, meer harmonieuze wereld te bouwen.\n" +
@@ -110,14 +130,12 @@ public class DataGeneration {
                 "\"Elysium Innovatus\" is niet alleen een project; het is een beweging. Het nodigt iedereen uit om deel te nemen, bij te dragen en te profiteren van de ongelooflijke vooruitgangen die het mogelijk maakt. Burgers, overheden, bedrijven en non-profitorganisaties werken samen in een ongekend partnerschap om de dromen van morgen vandaag te realiseren. Het is een oproep tot actie, een kans om deel uit te maken van iets veel groters dan wijzelf.\n" +
                 "\n" +
                 "In de kern draait \"Elysium Innovatus\" om hoop en de onbegrensde mogelijkheden van de menselijke geest. Het herinnert ons eraan dat, hoewel we geconfronteerd worden met talloze uitdagingen, onze capaciteit om te creëren, te ontdekken en te groeien, eindeloos is. Dit project is een bewijs van wat we kunnen bereiken wanneer we ons verenigen in de zoektocht naar een betere toekomst. \"Elysium Innovatus\" is meer dan een droom; het is onze nieuwe realiteit in wording.",
-                "## Opgave: Woordenboek Omkeren ##\n" +
+                "## Opgave: Bash Hello World ##\n" +
                         "**Probleem:**\n" +
-                        "Je krijgt een woordenboek (dictionary) waarin de waarden lijsten van integers zijn. Schrijf een Python-functie invert_dictionary die het woordenboek omkeert. In het omgekeerde woordenboek worden de integers de sleutels en de oorspronkelijke sleutels worden opgenomen in een lijst als hun waarden.\n" +
+                        "Je moet een bash script indienen dat hello world uitschreeft naar stdout.\n" +
                         "\n" +
                         "**Specificaties:**\n" +
-                        "1. De functie moet `invert_dictionary(d: Dict[str, List[int]]) -> Dict[int, List[str]]` heten.\n" +
-                        "2. Alle integers in de originele lijsten zijn uniek over alle sleutels heen.\n" +
-                        "3. De volgorde van de lijsten in de output woordenboek hoeft niet hetzelfde te zijn als in de input.",
+                        "- De output van het script moet `Hello World!` zijn.\n\n",
                 "## Challenge: Palindrome Checker ##\n" +
                         "Write a function called `is_palindrome` that takes a single string as an argument and returns `True` if the string is a palindrome and `False` otherwise. A palindrome is a word, phrase, number, or other sequence of characters that reads the same forward and backward (ignoring spaces, punctuation, and capitalization).\n" +
                         "\n" +
@@ -144,7 +162,9 @@ public class DataGeneration {
         ResponseEntity resp = projectController.createProject(course.courseId(), pj, auth);
         if (resp.getStatusCode().is2xxSuccessful()) {
             Logger.getGlobal().info("Success project create");
-            return (ProjectResponseJsonWithStatus) resp.getBody();
+            ProjectResponseJson prjws = (ProjectResponseJson) resp.getBody();
+            makeTestsForProject(auth, prjws, index);
+            return prjws;
         } else {
             Logger.getGlobal().info("Error while creating project: " + resp.getStatusCode() + " " + resp.getBody());
         }
