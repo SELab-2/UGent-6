@@ -55,15 +55,16 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
           readOnly
           value={url}
           suffix={
-              <Tooltip title={copied ? t('course.copyLinkSuccess') : t("course.copyLink")}>
-                <Button 
-                  icon={copied? <CheckOutlined /> : <CopyOutlined/>} 
-                  onClick={() => { 
+            <Tooltip title={copied ? t("course.copyLinkSuccess") : t("course.copyLink")}>
+                {copied ? (
+                  <CheckOutlined style={{ color: "green" }} />
+                ) : (
+                  <CopyOutlined onClick={() => { 
                     navigator.clipboard.writeText(url);
                     setCopied(true);
-                    setTimeout(() => setCopied(false), 3000);  // Reset after 2 seconds
-                  }}
-                />
+                    setTimeout(() => setCopied(false), 3000);  // Reset after 3 seconds
+                  }} />
+                )}
               </Tooltip>
           }
         />
