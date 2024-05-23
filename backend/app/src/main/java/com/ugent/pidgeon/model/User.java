@@ -1,7 +1,5 @@
 package com.ugent.pidgeon.model;
 
-import java.util.List;
-
 public class User {
 
     public String name;

@@ -51,3 +51,4 @@ docker.env
 startBackend.sh
 
 /.env
+backend/web-bff/App/.env

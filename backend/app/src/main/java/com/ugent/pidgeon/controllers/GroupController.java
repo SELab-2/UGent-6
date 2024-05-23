@@ -1,9 +1,9 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.GroupJson;
+import com.ugent.pidgeon.json.NameRequest;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.GroupJson;
-import com.ugent.pidgeon.model.json.NameRequest;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -17,7 +17,13 @@ import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -38,9 +44,13 @@ public class GroupController {
 
     /**
      * Function to get a group by its identifier
-     * @param groupid
-     * @param auth
-     * @return
+     * @param groupid identifier of a group
+     * @param auth    authentication object of the requesting user
+     * @return ResponseEntity<GroupJson>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723981">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles student, teacher
+     * @ApiPath /api/groups/{groupid}
      */
     @GetMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.student, UserRole.teacher})
@@ -75,7 +85,7 @@ public class GroupController {
      * @param auth        authentication object of the requesting user
      * @return ResponseEntity<GroupJson>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723995">apiDog documentation</a>
-     * @HttpMethod Put
+     * @HttpMethod PUT
      * @AllowedRoles teacher
      * @ApiPath /api/groups/{groupid}
      */
@@ -93,7 +103,7 @@ public class GroupController {
      * @param auth        authentication object of the requesting user
      * @return ResponseEntity<GroupJson>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883691">apiDog documentation</a>
-     * @HttpMethod Patch
+     * @HttpMethod PATCH
      * @AllowedRoles teacher
      * @ApiPath /api/groups/{groupid}
      */
@@ -136,7 +146,7 @@ public class GroupController {
      * @param auth    authentication object of the requesting user
      * @return ResponseEntity<Void>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723998">apiDog documentation</a>
-     * @HttpMethod Delete
+     * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}
      */

@@ -1,32 +1,50 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.GroupFeedbackJson;
+import com.ugent.pidgeon.json.GroupJson;
+import com.ugent.pidgeon.json.LastGroupSubmissionJson;
+import com.ugent.pidgeon.json.SubmissionJson;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.GroupFeedbackJson;
-import com.ugent.pidgeon.model.json.GroupJson;
-import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
-import com.ugent.pidgeon.model.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerOutput;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.FileEntity;
+import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
+import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
 import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.*;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import com.ugent.pidgeon.postgre.repository.FileRepository;
+import com.ugent.pidgeon.postgre.repository.GroupFeedbackRepository;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
+import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.Filehandler;
+import com.ugent.pidgeon.util.GroupUtil;
+import com.ugent.pidgeon.util.ProjectUtil;
+import com.ugent.pidgeon.util.SubmissionUtil;
+import com.ugent.pidgeon.util.TestRunner;
+import com.ugent.pidgeon.util.TestUtil;
+import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -34,15 +52,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.logging.Logger;
-import java.util.zip.ZipFile;
 
 @RestController
 public class    SubmissionController {
@@ -124,7 +140,6 @@ public class    SubmissionController {
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/submissions") //Route to get all submissions for a project
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getSubmissions(@PathVariable("projectid") long projectid, Auth auth) {
-        try {
             CheckResult<Void> checkResult = projectUtil.isProjectAdmin(projectid, auth.getUserEntity());
             if (!checkResult.getStatus().equals(HttpStatus.OK)) {
                 return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
@@ -154,9 +169,6 @@ public class    SubmissionController {
             }
 
             return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
 
     /**

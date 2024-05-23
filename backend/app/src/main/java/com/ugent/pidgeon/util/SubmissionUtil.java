@@ -7,12 +7,11 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
+import java.time.OffsetDateTime;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-
-import java.time.OffsetDateTime;
-import java.util.logging.Logger;
 
 @Component
 public class SubmissionUtil {
@@ -105,7 +104,7 @@ public class SubmissionUtil {
 
         OffsetDateTime time = OffsetDateTime.now();
         Logger.getGlobal().info("Time: " + time + " Deadline: " + project.getDeadline());
-        if (time.isAfter(project.getDeadline())) {
+        if (time.isAfter(project.getDeadline()) && groupId != null) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Project deadline has passed", null);
         }
         return new CheckResult<>(HttpStatus.OK, "", groupId);

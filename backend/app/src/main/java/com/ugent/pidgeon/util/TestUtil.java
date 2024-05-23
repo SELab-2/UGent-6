@@ -1,20 +1,16 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.ApiRoutes;
-import com.ugent.pidgeon.model.json.TestJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 @Component
 public class TestUtil {
@@ -50,6 +46,7 @@ public class TestUtil {
             String dockerImage,
             String dockerScript,
             String dockerTemplate,
+            String structureTemplate,
             HttpMethod httpMethod
     ) {
 
@@ -79,7 +76,6 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A docker image is required if u add a script", null);
         }
 
-        // This returns false if the image isn't pullt yet! FIX PLS
         if(dockerImage != null && !DockerSubmissionTestModel.imageExists(dockerImage)) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "A valid docker image is required in a docker test.", null);
         }
@@ -96,9 +92,16 @@ public class TestUtil {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "No docker test script is configured for this test", null);
         }
 
-        if(dockerTemplate != null && !DockerSubmissionTestModel.isValidTemplate(dockerTemplate)) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Invalid docker template", null);
+        try {
+            // throws error if there are issues in the template
+            if(dockerTemplate != null) DockerSubmissionTestModel.tryTemplate(dockerTemplate);
+            if(structureTemplate != null) SubmissionTemplateModel.tryTemplate(structureTemplate);
+
+        } catch(IllegalArgumentException e){
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, e.getMessage(), null);
         }
+
+
 
         return new CheckResult<>(HttpStatus.OK, "", new Pair<>(testEntity, projectEntity));
     }

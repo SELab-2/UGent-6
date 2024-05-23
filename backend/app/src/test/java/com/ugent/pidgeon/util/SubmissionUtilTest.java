@@ -1,5 +1,9 @@
 package com.ugent.pidgeon.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
 import com.ugent.pidgeon.postgre.models.SubmissionEntity;
@@ -9,7 +13,7 @@ import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
 import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import java.time.OffsetDateTime;
-import org.hibernate.validator.constraints.ModCheck.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SubmissionUtilTest {
@@ -157,6 +154,11 @@ public class SubmissionUtilTest {
     result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.OK, result.getStatus());
     assertNull(result.getData());
+    
+    /* Deadline passed when user is admin, should still be allowed */
+    projectEntity.setDeadline(OffsetDateTime.now().minusDays(1));
+    result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
+    assertEquals(HttpStatus.OK, result.getStatus());
 
     /* User not part of group and not admin */
     when(projectUtil.isProjectAdmin(projectEntity.getId(), userEntity))
@@ -170,6 +172,7 @@ public class SubmissionUtilTest {
     projectEntity.setDeadline(OffsetDateTime.now().minusDays(1));
     result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
+
 
     /* GroupCluster in archived course */
     when(groupClusterRepository.inArchivedCourse(groupEntity.getClusterId())).thenReturn(true);

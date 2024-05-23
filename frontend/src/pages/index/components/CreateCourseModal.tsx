@@ -28,7 +28,6 @@ const createCourseModal = () => {
       setError(null)
 
       const values: { name: string; description: string } = form.getFieldsValue()
-      console.log(values)
       values.description ??= ""
       const res = await API.POST(ApiRoutes.COURSES, { body: values }, "message")
       if (!res.success) return reject()

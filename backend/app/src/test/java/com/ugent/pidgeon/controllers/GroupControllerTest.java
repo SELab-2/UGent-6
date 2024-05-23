@@ -1,31 +1,5 @@
 package com.ugent.pidgeon.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ugent.pidgeon.CustomObjectMapper;
-import com.ugent.pidgeon.model.json.GroupJson;
-import com.ugent.pidgeon.postgre.models.GroupEntity;
-import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
-import com.ugent.pidgeon.postgre.repository.GroupRepository;
-import com.ugent.pidgeon.util.CheckResult;
-import com.ugent.pidgeon.util.CommonDatabaseActions;
-import com.ugent.pidgeon.util.EntityToJsonConverter;
-import com.ugent.pidgeon.util.GroupUtil;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -34,6 +8,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ugent.pidgeon.CustomObjectMapper;
+import com.ugent.pidgeon.json.GroupJson;
+import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.GroupUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ExtendWith(MockitoExtension.class)
 public class GroupControllerTest extends ControllerTest {
     @Mock
@@ -45,14 +38,14 @@ public class GroupControllerTest extends ControllerTest {
     @Mock
     private CommonDatabaseActions commonDatabaseActions;
 
-    private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+    private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
     @InjectMocks
     private GroupController groupController;
 
     private GroupEntity groupEntity;
     private GroupJson groupJson;
-    private Integer capacity = 40;
+    private final Integer capacity = 40;
 
 
     @BeforeEach

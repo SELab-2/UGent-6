@@ -41,7 +41,6 @@ const GroupsFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           allowClear
           courseId={courseId!}
           onClusterCreated={(clusterId) => {
-            console.log("Setting clusterId:", clusterId)
             form.setFieldValue("groupClusterId", clusterId)
           }}
         />

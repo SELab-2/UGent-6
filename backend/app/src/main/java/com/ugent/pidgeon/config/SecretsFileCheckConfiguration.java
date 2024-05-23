@@ -1,12 +1,10 @@
 package com.ugent.pidgeon.config;
 
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
-
-import javax.annotation.PostConstruct;
 
 /**
  * We check if the application-secrets.properties file exists. If it does not exist, we throw an exception.

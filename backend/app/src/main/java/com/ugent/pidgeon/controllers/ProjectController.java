@@ -1,23 +1,46 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.GroupJson;
+import com.ugent.pidgeon.json.ProjectJson;
+import com.ugent.pidgeon.json.ProjectResponseJsonWithStatus;
+import com.ugent.pidgeon.json.UserProjectsJson;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.*;
-
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.*;
+import com.ugent.pidgeon.postgre.repository.CourseRepository;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.ClusterUtil;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.CourseUtil;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.Pair;
+import com.ugent.pidgeon.util.ProjectUtil;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-import java.util.logging.Logger;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 
 
@@ -50,7 +73,7 @@ public class ProjectController {
   /**
    * Function to get all projects of a user
    * @param auth authentication object of the requesting user
-   * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883808">apiDog documentation</a>
+   * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6362262">apiDog documentation</a>
    * @HttpMethod GET
    * @AllowedRoles teacher, student
    * @ApiPath /api/projects
@@ -206,7 +229,7 @@ public class ProjectController {
    * @param projectJson ProjectUpdateDTO object containing the new project's information
    * @param auth authentication object of the requesting user
    * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
-   * @HttpMethod Put
+   * @HttpMethod PUT
    * @AllowedRoles teacher
    * @ApiPath /api/projects/{projectId}
    * @return ResponseEntity with the created project
@@ -243,7 +266,7 @@ public class ProjectController {
    * @param projectJson ProjectUpdateDTO object containing the new project's information
    * @param auth authentication object of the requesting user
    * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723887">apiDog documentation</a>
-   * @HttpMethod Patch
+   * @HttpMethod PATCH
    * @AllowedRoles teacher
    * @ApiPath /api/projects/{projectId}
    * @return ResponseEntity with the created project

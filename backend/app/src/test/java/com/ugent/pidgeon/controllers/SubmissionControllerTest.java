@@ -1,12 +1,29 @@
 package com.ugent.pidgeon.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.CustomObjectMapper;
-import com.ugent.pidgeon.model.json.DockerTestFeedbackJson;
-import com.ugent.pidgeon.model.json.GroupFeedbackJson;
-import com.ugent.pidgeon.model.json.GroupJson;
-import com.ugent.pidgeon.model.json.LastGroupSubmissionJson;
-import com.ugent.pidgeon.model.json.SubmissionJson;
+import com.ugent.pidgeon.json.DockerTestFeedbackJson;
+import com.ugent.pidgeon.json.GroupFeedbackJson;
+import com.ugent.pidgeon.json.GroupJson;
+import com.ugent.pidgeon.json.LastGroupSubmissionJson;
+import com.ugent.pidgeon.json.SubmissionJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerOutput;
 import com.ugent.pidgeon.model.submissionTesting.DockerTestOutput;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel.SubmissionResult;
@@ -17,25 +34,32 @@ import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.models.TestEntity;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
 import com.ugent.pidgeon.postgre.models.types.DockerTestType;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.*;
+import com.ugent.pidgeon.postgre.repository.FileRepository;
+import com.ugent.pidgeon.postgre.repository.GroupFeedbackRepository;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
+import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.Filehandler;
+import com.ugent.pidgeon.util.GroupUtil;
+import com.ugent.pidgeon.util.ProjectUtil;
+import com.ugent.pidgeon.util.SubmissionUtil;
+import com.ugent.pidgeon.util.TestRunner;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.logging.Logger;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,25 +77,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -105,7 +110,7 @@ public class SubmissionControllerTest extends ControllerTest {
     @InjectMocks
     private SubmissionController submissionController;
 
-    private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+    private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
     private SubmissionEntity submission;
     private List<Long> groupIds;

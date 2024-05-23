@@ -8,7 +8,7 @@ import ProjectStatusTag from "./ProjectStatusTag"
 import GroupProgress from "./GroupProgress"
 import { Link } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
-import { ClockCircleOutlined } from "@ant-design/icons"
+import {ClockCircleOutlined, EyeInvisibleOutlined, EyeOutlined} from "@ant-design/icons"
 import useIsCourseAdmin from "../../../hooks/useIsCourseAdmin";
 
 export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
@@ -56,7 +56,6 @@ const ProjectTableCourse: FC<{ projects: ProjectType[] | null, ignoreColumns?: s
                         const deadlineTimestamp = new Date(record.deadline).getTime();
                         return value === 'notPassed' ? deadlineTimestamp >= currentTimestamp : true;
                     },
-                    defaultFilteredValue: ["notPassed"],
                     render: (text: string) =>
                         new Date(text).toLocaleString(i18n.language, {
                             year: "numeric",
@@ -89,7 +88,7 @@ const ProjectTableCourse: FC<{ projects: ProjectType[] | null, ignoreColumns?: s
                     key: "visible",
                     render: (project: ProjectType) => {
                         if (project.visible) {
-                            return <Tag color="blue">{t("home.projects.visibleStatus.visible")}</Tag>
+                            return <Tag color="blue" icon={<EyeOutlined/>}>{t("home.projects.visibleStatus.visible")}</Tag>
                         } else if (project.visibleAfter) {
                             return (
                                 <Tooltip title={`${t("home.projects.visibleStatus.visibleFrom")} ${new Date(project.visibleAfter).toLocaleString(i18n.language, {
@@ -99,11 +98,11 @@ const ProjectTableCourse: FC<{ projects: ProjectType[] | null, ignoreColumns?: s
                                     hour: "2-digit",
                                     minute: "2-digit",
                                 })}`}>
-                                    <Tag icon={<ClockCircleOutlined />} color="default">{t("home.projects.visibleStatus.scheduled")}</Tag>
+                                    <Tag icon={<EyeInvisibleOutlined />} color="default">{t("home.projects.visibleStatus.scheduled")}</Tag>
                                 </Tooltip>
                             )
                         } else {
-                            return <Tag color="default">{t("home.projects.visibleStatus.invisible")}</Tag>
+                            return <Tag color="default" icon={<EyeInvisibleOutlined/>}>{t("home.projects.visibleStatus.invisible")}</Tag>
                         }
                     }
                 })

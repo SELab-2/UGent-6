@@ -1,22 +1,42 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.TestJson;
+import com.ugent.pidgeon.json.TestUpdateJson;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.TestJson;
-import com.ugent.pidgeon.model.json.TestUpdateJson;
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.FileEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.*;
-import java.io.File;
+import com.ugent.pidgeon.postgre.repository.FileRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.TestRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.FileUtil;
+import com.ugent.pidgeon.util.Filehandler;
+import com.ugent.pidgeon.util.Pair;
+import com.ugent.pidgeon.util.ProjectUtil;
+import com.ugent.pidgeon.util.TestUtil;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.Path;
 
 @RestController
 public class TestController {
@@ -44,7 +64,7 @@ public class TestController {
      * @param projectId the id of the project to update the tests for
      * @param auth the authentication object of the requesting user
      * @HttpMethod POST
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6697175">apiDog documentation</a>
      * @AllowedRoles teacher
      * @ApiPath /api/projects/{projectid}/tests
      * @return ResponseEntity with the updated tests
@@ -60,6 +80,16 @@ public class TestController {
             testJson.getDockerTemplate(), testJson.getStructureTest(), HttpMethod.POST);
     }
 
+    /**
+     * Function to update the tests of a project
+     * @param projectId the id of the project to update the tests for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod PATCH
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-6693478">apiDog documentation</a>
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectid}/tests
+     * @return ResponseEntity with the updated tests
+     */
     @PatchMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchTests(
@@ -71,6 +101,16 @@ public class TestController {
             testJson.getDockerTemplate(), testJson.getStructureTest(), HttpMethod.PATCH);
     }
 
+    /**
+     * Function to update the tests of a project
+     * @param projectId the id of the project to update the tests for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod PUT
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5724189">apiDog documentation</a>
+     * @AllowedRoles teacher
+     * @ApiPath /api/projects/{projectid}/tests
+     * @return ResponseEntity with the updated tests
+     */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> putTests(
@@ -108,7 +148,7 @@ public class TestController {
             structureTemplate = null;
         }
 
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, httpMethod);
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, user, dockerImage, dockerScript, dockerTemplate, structureTemplate, httpMethod);
 
 
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
@@ -220,7 +260,7 @@ public class TestController {
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteTestById(@PathVariable("projectid") long projectId, Auth auth) {
-        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null,  HttpMethod.DELETE);
+        CheckResult<Pair<TestEntity, ProjectEntity>> updateCheckResult = testUtil.checkForTestUpdate(projectId, auth.getUserEntity(), null, null, null, null, HttpMethod.DELETE);
         if (!updateCheckResult.getStatus().equals(HttpStatus.OK)) {
             return ResponseEntity.status(updateCheckResult.getStatus()).body(updateCheckResult.getMessage());
         }
@@ -235,6 +275,17 @@ public class TestController {
         return  ResponseEntity.ok().build();
     }
 
+    /**
+     * Function to upload extra files for a test
+     * @param projectId the id of the project to upload the files for
+     * @param file the file to upload
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod PUT
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7409857">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/extrafiles
+     * @return ResponseEntity with the updated tests
+     */
     @PutMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> uploadExtraTestFiles(
@@ -268,6 +319,16 @@ public class TestController {
         }
     }
 
+    /**
+     * Function to delete extra files for a test
+     * @param projectId the id of the project to delete the files for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod DELETE
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7409860">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/extrafiles
+     * @return ResponseEntity with the updated tests
+     */
     @DeleteMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> deleteExtraTestFiles(
@@ -303,6 +364,16 @@ public class TestController {
         }
     }
 
+    /**
+     * Function to get extra files for a test
+     * @param projectId the id of the project to get the files for
+     * @param auth the authentication object of the requesting user
+     * @HttpMethod GET
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7409863">apiDog documentation</a>
+     * @AllowedRoles teacher, student
+     * @ApiPath /api/projects/{projectid}/tests/extrafiles
+     * @return ResponseEntity with the updated tests
+     */
     @GetMapping(ApiRoutes.PROJECT_BASE_PATH + "/{projectid}/tests/extrafiles")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> getExtraTestFiles(

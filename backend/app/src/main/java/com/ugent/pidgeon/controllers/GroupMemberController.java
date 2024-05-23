@@ -1,25 +1,25 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.UserReferenceJson;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.UserJson;
-import com.ugent.pidgeon.model.json.UserReferenceJson;
-import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.postgre.repository.GroupMemberRepository;
 import com.ugent.pidgeon.util.CheckResult;
 import com.ugent.pidgeon.util.EntityToJsonConverter;
 import com.ugent.pidgeon.util.GroupUtil;
-import com.ugent.pidgeon.util.UserUtil;
+import java.util.List;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.logging.Logger;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class GroupMemberController {
@@ -66,7 +66,7 @@ public class GroupMemberController {
      * @param groupId ID of the group to remove the member from
      * @param auth    authentication object of the requesting user
      * @return ResponseEntity with a string message about the operation result
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883809">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7437010">apiDog documentation</a>
      * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}/members
@@ -128,7 +128,7 @@ public class GroupMemberController {
      * @param groupId ID of the group to add the member to
      * @param auth    authentication object of the requesting user
      * @return ResponseEntity with a list of UserJson objects containing the members of the group
-     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883807">apiDog documentation</a>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7437022">apiDog documentation</a>
      * @HttpMethod POST
      * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}/members

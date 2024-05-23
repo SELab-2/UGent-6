@@ -1,10 +1,12 @@
 package com.ugent.pidgeon.model.submissionTesting;
 
 import java.util.List;
+import java.util.logging.Logger;
+import org.hibernate.usertype.LoggableUserType;
 
 public class DockerTemplateTestOutput implements DockerOutput{
-  private List<DockerSubtestResult> subtestResults;
-  private boolean allowed;
+  private final List<DockerSubtestResult> subtestResults;
+  private final boolean allowed;
 
   public List<DockerSubtestResult> getSubtestResults() {
     return subtestResults;
@@ -24,9 +26,12 @@ public class DockerTemplateTestOutput implements DockerOutput{
     //json representation of the tests
     StringBuilder feedback = new StringBuilder("{\"subtests\": [");
     for (DockerSubtestResult subtestResult : subtestResults) {
-      feedback.append(subtestResult.getFeedbackAsString()).append(",");
+      feedback.append(subtestResult.getFeedbackAsString())
+          .append(",");
     }
-    feedback.append("]");
+    feedback.deleteCharAt(feedback.length() - 1); // remove last comma ,
+    feedback.append("]}");
+    Logger.getGlobal().info(feedback.toString());
     return feedback.toString();
   }
 }

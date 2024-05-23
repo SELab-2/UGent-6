@@ -1,9 +1,10 @@
-import { createContext, useEffect, useState } from "react"
+import { createContext, useEffect } from "react"
 import { ProjectType } from "../pages/project/Project"
 import { Outlet, useParams } from "react-router-dom"
 import { ApiRoutes } from "../@types/requests.d"
 import useApi from "../hooks/useApi"
 import { useSessionStorage } from "usehooks-ts"
+import ProjectBreadcrumbs from "../components/layout/breadcrumbs/ProjectBreadcrumbs"
 
 type ProjectContextType = {
   project: ProjectType | null
@@ -18,11 +19,9 @@ const ProjectRoutes = () => {
   const { GET } = useApi()
 
   useEffect(() => {
-    // TODO make api call `projectId`
     if (!projectId) return console.error("ProjectId is not defined")
 
     let ignore = false
-    console.log("Making the request", projectId)
 
     GET(ApiRoutes.PROJECT, { pathValues: { id: projectId! } }, "page").then((res) => {
       if (ignore) return
@@ -41,6 +40,7 @@ const ProjectRoutes = () => {
 
   return (
     <ProjectContext.Provider value={{ project, updateProject }}>
+      <ProjectBreadcrumbs project={project} />
       <Outlet />
     </ProjectContext.Provider>
   )

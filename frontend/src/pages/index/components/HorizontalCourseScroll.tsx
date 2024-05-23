@@ -30,7 +30,7 @@ const HorizontalCourseScroll: FC<{ title: string; projects: CourseProjectList | 
               <Button
                 onClick={onOpenNew}
                 type="text"
-                style={{ marginLeft: "1rem", marginTop: 0, paddingTop: 0 }}
+                style={{ marginLeft: "1rem", marginTop: "3px", paddingTop: 0 }}
                 icon={<PlusOutlined style={{transform:"translateY(2px)"}} />}
                 />
             </TeacherView>
@@ -55,7 +55,7 @@ const HorizontalCourseScroll: FC<{ title: string; projects: CourseProjectList | 
 
       <Space
         className="small-scroll-bar"
-        style={{ display: "flex", maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem", alignItems: "stretch" }}
+        style={{ display: "flex", maxWidth: "100%", overflowX: "auto", whiteSpace: "nowrap", padding: "10px 2rem", alignItems: "stretch",paddingBottom:"1rem" }}
       >
         {projects === null ? (
           <Space

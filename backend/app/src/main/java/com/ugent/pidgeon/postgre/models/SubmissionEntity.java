@@ -1,9 +1,13 @@
 package com.ugent.pidgeon.postgre.models;
 
-import com.ugent.pidgeon.postgre.models.types.DockerTestType;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
-import jakarta.persistence.*;
-
+import com.ugent.pidgeon.postgre.models.types.DockerTestType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
 @Entity

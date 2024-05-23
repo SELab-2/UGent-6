@@ -7,7 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
-import com.ugent.pidgeon.model.json.UpdateGroupScoreRequest;
+import com.ugent.pidgeon.json.UpdateGroupScoreRequest;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;

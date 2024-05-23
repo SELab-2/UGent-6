@@ -35,11 +35,17 @@ async function fetch(endpoint, accessToken, method, body, headers) {
     console.log(`${method} request made to ${BACKEND_API_ENDPOINT}/${endpoint} at: ` + new Date().toString());
 
     try {
-        const response = await axios(config);
-        return await response.data;
+        const res = await axios(config)
+        return {code: res.status, data: res.data}
     } catch (error) {
-        throw new Error(error);
+        if (error.response) {
+            return {code: error.response.status, data: error.response.data}
+        } else {
+            throw Error(error);
+        }
     }
+
+
 }
 
 module.exports = fetch;

@@ -29,6 +29,41 @@ const Home = () => {
     API.GET(ApiRoutes.PROJECTS, {}).then((res) => {
       if(!res.success || ignore) return
       const projects: ProjectsType = [...res.response.data.adminProjects, ...res.response.data.enrolledProjects.map((p) => ({ ...p.project, status: p.status }))]
+      
+      projects.sort((a, b) => {
+        const today = new Date();
+        const date1 = new Date(a.deadline);
+        const date2 = new Date(b.deadline);
+    
+        // Calculate the difference in time from today for each date
+        const diff1 = date1.getTime() - today.getTime();
+        const diff2 = date2.getTime() - today.getTime();
+    
+        // If both dates are in the future or both in the past, compare their absolute differences
+        if ((diff1 >= 0 && diff2 >= 0) || (diff1 < 0 && diff2 < 0)) {
+          const absDiff1 = Math.abs(diff1);
+          const absDiff2 = Math.abs(diff2);
+    
+          if (absDiff1 < absDiff2) {
+              return -1;
+          } else if (absDiff1 > absDiff2) {
+              return 1;
+          } else {
+              return 0;
+          }
+        }
+    
+        // If one date is in the future and the other is in the past, the future date has higher priority
+        if (diff1 >= 0 && diff2 < 0) {
+            return -1;
+        } else if (diff1 < 0 && diff2 >= 0) {
+            return 1;
+        }
+    
+        // This should not be reached because all cases are covered
+        return 0;
+      })
+
       setProjects(projects)
     })
 
@@ -64,7 +99,7 @@ const Home = () => {
         </Typography.Title>
 
         {projectsViewMode === "table" && (
-          <Card
+          <Card className="projectTable"
             style={{
               width: "100%",
               overflow: "auto",
@@ -79,10 +114,10 @@ const Home = () => {
           </Card>
         )}
 
-        {projectsViewMode === "timeline" && <ProjectTimeline projects={projects} />}
+          {projectsViewMode === "timeline" && <div className="timeline"><ProjectTimeline  projects={projects} /> </div>}
 
         {projectsViewMode === "calendar" && (
-          <Card
+          <Card className="calendar"
             style={{
               width: "100%",
               overflow: "auto",

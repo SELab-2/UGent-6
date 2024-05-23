@@ -2,28 +2,43 @@ package com.ugent.pidgeon.controllers;
 
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.ClusterFillJson;
+import com.ugent.pidgeon.json.GroupClusterCreateJson;
+import com.ugent.pidgeon.json.GroupClusterJson;
+import com.ugent.pidgeon.json.GroupClusterUpdateJson;
+import com.ugent.pidgeon.json.GroupCreateJson;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
-import com.ugent.pidgeon.postgre.models.CourseUserEntity;
-import com.ugent.pidgeon.postgre.models.CourseUserId;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
-import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.*;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import com.ugent.pidgeon.postgre.repository.GroupMemberRepository;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.ClusterUtil;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.CourseUtil;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.Pair;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.OffsetDateTime;
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController {
@@ -126,7 +141,7 @@ public class ClusterController {
     }
 
     /**
-     * Returns all groups for a cluster
+     * Get cluster by ID
      *
      * @param clusterid identifier of a cluster
      * @param auth authentication object of the requesting user
@@ -193,9 +208,9 @@ public class ClusterController {
      *
      * @param clusterid  identifier of a cluster
      * @param auth authentication object of the requesting user
-     * @param clusterFillMap Map object containing a map of all groups and their
-     *                        members of that cluster
+     * @param clusterFillMap Map object containing a map of all groups and their members of that cluster
      * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7431004">apiDog documentation</a>
      * @HttpMethod PUT
      * @ApiPath /api/clusters/{clusterid}/fill
      * @AllowedRoles student, teacher
@@ -243,7 +258,18 @@ public class ClusterController {
         }
     }
 
-
+    /**
+     * Updates a cluster
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @param clusterJson ClusterJson object containing the cluster data
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883519">apiDog documentation</a>
+     * @HttpMethod PATCH
+     * @ApiPath /api/clusters/{clusterid}
+     * @AllowedRoles student, teacher
+     */
     @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {

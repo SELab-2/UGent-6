@@ -1,7 +1,9 @@
 package com.ugent.pidgeon.docker;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
@@ -172,15 +174,14 @@ public class DockerSubmissionTestTest {
   @Test
   void zipFileInputTest() throws IOException {
     // construct zip with hello world contents
-    StringBuilder sb = new StringBuilder();
-    sb.append("Hello Happy World!");
+    String sb = "Hello Happy World!";
 
     File f = new File("src/test/test-cases/DockerSubmissionTestTest/d__test.zip");
     ZipOutputStream out = new ZipOutputStream(new FileOutputStream(f));
     ZipEntry e = new ZipEntry("helloworld.txt");
     out.putNextEntry(e);
 
-    byte[] data = sb.toString().getBytes();
+    byte[] data = sb.getBytes();
     out.write(data, 0, data.length);
     out.closeEntry();
     out.close();
@@ -202,13 +203,15 @@ public class DockerSubmissionTestTest {
   }
 
   @Test
-  void isValidTemplate(){
-    assertFalse(DockerSubmissionTestModel.isValidTemplate("This is not a valid template"));
-    assertTrue(DockerSubmissionTestModel.isValidTemplate("@HelloWorld\n" +
+  void tryTemplate(){
+    assertThrows(IllegalArgumentException.class,() -> DockerSubmissionTestModel.tryTemplate("This is not a valid template"));
+
+
+    assertDoesNotThrow(() -> DockerSubmissionTestModel.tryTemplate("@HelloWorld\n" +
         ">Description=\"Test for hello world!\"\n" +
         ">Required\n" +
         "HelloWorld!"));
-    assertTrue(DockerSubmissionTestModel.isValidTemplate("@helloworld\n"
+    assertDoesNotThrow(() -> DockerSubmissionTestModel.tryTemplate("@helloworld\n"
         + ">required\n"
         + ">description=\"Helloworldtest\"\n"
         + "Hello World\n"

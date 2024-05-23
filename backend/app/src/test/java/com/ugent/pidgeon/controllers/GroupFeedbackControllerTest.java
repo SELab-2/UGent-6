@@ -15,8 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.CustomObjectMapper;
-import com.ugent.pidgeon.model.json.GroupFeedbackJson;
-import com.ugent.pidgeon.model.json.GroupFeedbackJsonWithProject;
+import com.ugent.pidgeon.json.GroupFeedbackJson;
+import com.ugent.pidgeon.json.GroupFeedbackJsonWithProject;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
@@ -33,7 +33,7 @@ import com.ugent.pidgeon.util.Pair;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,9 +43,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 
 @ExtendWith(MockitoExtension.class)
 public class GroupFeedbackControllerTest extends ControllerTest {
@@ -71,7 +70,7 @@ public class GroupFeedbackControllerTest extends ControllerTest {
   private GroupFeedbackEntity groupFeedbackEntity;
   private GroupFeedbackJson groupFeedbackJson;
 
-  private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+  private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
   @BeforeEach
   public void setup() {
@@ -281,7 +280,7 @@ public class GroupFeedbackControllerTest extends ControllerTest {
     when(groupFeedbackUtil.checkGroupFeedbackUpdate(groupFeedbackEntity.getGroupId(), groupFeedbackEntity.getProjectId(), getMockUser(), HttpMethod.POST))
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
     when(groupFeedbackUtil.checkGroupFeedbackUpdateJson(argThat(
-        json -> json.getScore() == groupFeedbackEntity.getScore() && json.getFeedback().equals(groupFeedbackEntity.getFeedback())), eq(groupFeedbackEntity.getProjectId())))
+        json -> Objects.equals(json.getScore(), groupFeedbackEntity.getScore()) && json.getFeedback().equals(groupFeedbackEntity.getFeedback())), eq(groupFeedbackEntity.getProjectId())))
         .thenReturn(new CheckResult<>(HttpStatus.OK, "", null));
     when(groupFeedbackRepository.save(any())).thenReturn(groupFeedbackEntity);
     when(entityToJsonConverter.groupFeedbackEntityToJson(groupFeedbackEntity)).thenReturn(groupFeedbackJson);
@@ -292,7 +291,7 @@ public class GroupFeedbackControllerTest extends ControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(content().json(objectMapper.writeValueAsString(groupFeedbackJson)));
     verify(groupFeedbackRepository, times(1)).save(argThat(
-        groupFeedback -> groupFeedback.getScore() == groupFeedbackEntity.getScore() &&
+        groupFeedback -> Objects.equals(groupFeedback.getScore(), groupFeedbackEntity.getScore()) &&
         groupFeedback.getFeedback().equals(groupFeedbackEntity.getFeedback()) &&
         groupFeedback.getGroupId() == groupFeedbackEntity.getGroupId() &&
         groupFeedback.getProjectId() == groupFeedbackEntity.getProjectId()));

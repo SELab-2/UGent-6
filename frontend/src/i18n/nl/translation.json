@@ -10,7 +10,7 @@
   },
   "courses":{
     "courses": "Vakken",
-    "searchCourse": "Zoek ak",
+    "searchCourse": "Zoek vak",
     "member": "Lid",
     "members": "Leden",
     "archived": "Gearchiveerd",
@@ -33,7 +33,8 @@
     "table": "Tabel",
     "docs": "Documentatie",
     "calendar": "Kalender",
-    "noCourses": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen.",
+    "noCoursesStudent": "Je bent nog niet ingeschreven in een vak. Je kan je inschrijven door een vak join link te openen",
+    "noCoursesTeacher": "Je bent nog niet verbonden aan een vak. Je kan zelf een vak maken door op de knop hierboven te klikken",
     "courseNameMaxLength": "Vak naam mag maximaal 50 karakters bevatten",
     "courseNameRequired": "Vak naam is verplicht",
     "courseNameMinLength": "Vak naam moet minimaal 3 karakters bevatten",
@@ -42,12 +43,13 @@
     "projects": {
       "noProjects": "Geen projecten",
       "name": "Naam",
-      "description": "Beschrijving",
+      "description": "Info",
       "course": "Vak",
       "deadline": "Deadline",
       "deadlineNotPassed": "Toon enkel actieve projecten",
       "showMore": "Toon meer",
       "projectStatus": "Status",
+      "maxScore": "Maximum score",
       "visibility": "Zichtbaarheid",
       "visibleStatus": {
         "visible": "Zichtbaar",
@@ -63,8 +65,8 @@
       },
       "groupProgress": "Voortgang groep",
       "completeProgress": "{{count}} / {{total}} voltooid",
-      "activeProjects": "{{count}} actief project",
-      "activeProjects_plural": "{{count}} actieve projecten",
+      "activeProjects": "{{count}} project",
+      "activeProjects_plural": "{{count}} projecten",
       "submit": "Indienen",
       "userCourseCount_plural": "{{count}} gebruikers in dit vak",
       "userCourseCount": "{{count}} gebruiker in dit vak"
@@ -85,8 +87,8 @@
     "search": "Zoeken",
     "emailError": "Vul een geldig email adres in",
     "emailTooShort": "Email moet minstens 3 karakters lang zijn",
-    "nameError": "Naam moet minstens 3 karakters lang zijn",
-    "surnameError": "Achternaam moet minstens 3 karakters lang zijn",
+    "nameError": "Naam of achternaam moet minstens 3 karakters lang zijn",
+    "surnameError": "Naam of achternaam moet minstens 3 karakters lang zijn",
     "searchTooShort": "Zoekopdracht moet minstens 3 karakters lang zijn",
     "searchTutorial": "Vul een email adres, naam of achternaam in om gebruikers op te zoeken.",
     "noUsersFound": "Geen gebruikers gevonden",
@@ -139,9 +141,12 @@
     "newProject": "Nieuw project",
     "fileTooLarge": "Bestand is te groot (max 50 MB)",
     "scoreTooHigh": "Score is hoger dan maximum score",
+    "scoreNegative": "Score mag niet lager dan 0 zijn",
     "successfullyDeleted": "Project succesvol verwijderd",
     "deleteProject": "Project verwijderen",
+    "saveFeedback": "Feedback opslaan",
     "deleteProjectDescription": "Bent u zeker dat u dit project wilt verwijderen? Alle indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
+    "noStructure": "Er is specifiek geen bestanden structuur nodig",
     "change": {
       "title": "Maak project aan",
       "name": "Naam",
@@ -152,7 +157,8 @@
       "groupClusterId": "Groepen",
       "groupClusterIdMessage": "Vul de Groep cluster in",
       "visible": "Project zichtbaar maken",
-      "visibleAfter": "Kies wanneer het project automatisch zichtbaar wordt voor studenten. Als je niets invult, blijft het project onzichtbaar",
+      "visibleAfter": "Zichtbaar maken na",
+      "visibleAfterTooltip": "Kies wanneer het project automatisch zichtbaar wordt voor studenten. Als je niets invult, blijft het project onzichtbaar",
       "maxScore": "Maximum score",
       "maxScoreMessage": "Vul de maximum score van het project in",
       "maxScoreHelp": "Wat is de maximale score die je kunt behalen voor dit project? Als je het leeg laat, wordt het project niet beoordeeld",
@@ -168,7 +174,7 @@
       "groupClusterCreated": "Groep cluster aangemaakt",
       "fileStructure": "Bestandsstructuur",
       "fileStructurePreview": "Voorbeeld van bestandsstructuur",
-      "update": "Project aanpassen",
+      "update": "Bewaren",
       "newGroupCluster": "Voeg een nieuwe groep cluster toe",
       "makeCluster": "Groep cluster aanmaken",
       "clusterName": "Cluster naam",
@@ -202,15 +208,36 @@
       "structureTemplateHeader": "Structuur",
       "dockerImageHeader": "Docker image",
       "dockerScriptHeader": "Docker script",
+      "dockerTemplate": "Docker sjabloon",
       "modeHeader": "Sjabloon",
       "fileStructure": "Bestandsstructuur",
-      "fileStructurePreview": "Voorbeeld van bestandsstructuur"
+      "simpleMode": "Zonder sjabloon",
+      "templateMode": "Met sjabloon",
+      "fileStructurePreview": "Voorbeeld van bestandsstructuur",
+      "fileStructureTooltip": "Dit sjabloon specificeert de bestandsstructuur die een indiening moet volgen.\nHet gebruikt de volgende syntax:\n* Mappen eindigen op `'/'`\n* Gebruik inspringing om bestanden binnen een map aan te geven\n* Regex kan worden gebruikt\n\t* `'.'` is nog steeds een normale `'.'`\n\t* `'\\.'` kan worden gebruikt als regex `'.'`\n* `'-'` aan het begin van een regel geeft aan dat een bestand/map niet is toegestaan",
+      "dockerImageTooltip": "Specificeer een geldige Docker-container van [Docker Hub](https://hub.docker.com/) waarop het testscript zal worden uitgevoerd. Je kan ook kiezen voor een voorgeconfigureerde programmeertaal met bijhorende container.",
+      "dockerScriptTooltip": "Bash-script dat wordt uitgevoerd.\n* De bestanden van de student zijn indieningen zijn te vinden in `'/shared/input'`\n* Extra bestanden die hieronder zijn geüpload, zijn te vinden in `'/shared/extra'`\n\nMeer informatie over de vereiste uitvoer is afhankelijk van de modus en is hieronder te vinden.",
+      "dockerTemplateTooltip": "Om specifieke tests te definiëren, moet je een sjabloon invoeren. Geef eerst de naam van de test in met '@{test}'. Hieronder kun je met een '>' opties geven zoals ('>required', '>optional', '>description'). Alles onder de opties tot de volgende test of het einde van het bestand is de verwachte output.",
+      "dockerTestDirTooltip": "Upload extra bestanden die nodig zijn voor de dockertest. Deze bestanden zijn beschikbaar in de map `'/shared/extra'`.\n\nAls je een file geüpload hebt kan je deze downloaden door op de bestandsnaam te klikken. Als je een nieuw bestand uploadt zal het oude bestand overschreven worden.",
+      "simpleModeInfo": "Zonder sjabloon zal de student alles zien wat de scripts print/logt als feedback.",
+      "templateModeInfo": "Als je een sjabloon meegeeft krijgt de student per test een vergelijking te zien tussen de verwachte output en de output van de student.\n\nHet sjabloon gebruikt volgende syntax:\n* `@testNaam`: eerste lijn van een test begint met `'@'` en de naam van de test\n* Optioneel kunnen een aantal opties meegegeven worden:\n\t* `>[required|optional]`: geeft aan of de test verplicht of optioneel is\n\t* `>description=\"...\"`: beschrijving van de test\n* De regels na de opties zijn de verwachte output van de test. De laatste newline wordt niet gezien als deel van de output.\n\nDe output van de student moet geschreven worden naar `'/shared/output/{testName}'`.",
+      "dockerTemplateValidation": {
+        "inValidFirstLine": "De eerste lijn van een regel moet beginnen met '@' gevolgd door de naam van de test",
+        "inValidOptions": "Lijn {{line}}: Ongeldige optie",
+        "emptyTemplate": "Template kan niet leeg zijn"
+      },
+      "dockerScriptRequired": "Docker script is verplicht als je een Docker image hebt ingevuld"
     },
     "noScore": "Nog geen score beschikbaar",
     "noFeedback": "Geen feedback gegeven",
     "noScoreLabel": "Geen score",
     "noFeedbackLabel": "Geen feedback",
-    "noSubmissionDownload": "Geen indiening gevonden"
+    "noSubmissionDownload": "Geen indiening gevonden",
+    "breadcrumbs": {
+      "editPage": "Project aanpassen",
+      "submit": "Indienen",
+      "submission": "Indiening"
+    }
   },
   "group": {
     "removeUserFromGroup": "Verwijder {{name}} uit deze groep"
@@ -223,7 +250,7 @@
     "getStarted": "Aan de slag",
     "docs": "Documentatie"
   },
-  
+
   "submission": {
     "submission": "Indiening",
     "submittedFiles": "Ingediende bestanden:",
@@ -237,10 +264,17 @@
     "failed": "Niet geslaagd",
     "expected": "Vewachte output:",
     "received": "Ontvangen output:",
+    "optional": "optioneel",
+    "structureTestSuccess": "Indiening voldoet aan de structuur",
+    "structureTestFailed": "Indiening voldoet niet aan de structuur",
+    "submissionSuccess": "Indiening geslaagd",
+    "submissionFailed": "Indiening niet geslaagd",
+    "tests": "Automatische testen",
     "status": {
       "accepted": "Alle testen zijn geslaagd.",
       "failed": "Sommige testen zijn niet geslaagd."
-    }
+    },
+    "viewraw": "Speciale karakters escapen"
   },
 
   "course": {
@@ -265,6 +299,8 @@
     "searchMember": "Zoek lid",
     "inviteLink": "Uitnodigingslink",
     "inviteLinkInfo": "Met deze link kunnen studenten zich inschrijven voor dit vak.",
+    "copyLink": "Kopieer uitnodiginslink",
+    "copyLinkSuccess": "Link gekopieerd",
     "deleteCourse": "Vak verwijderen",
     "deleteCourseDescription": "Bent u zeker dat u dit vak wilt verwijderen? Alle projecten en indieningen zullen ook verwijderd worden. Deze actie kan niet ongedaan gemaakt worden.",
     "confirmDelete": "Bevestig verwijdering",
@@ -288,7 +324,11 @@
     "invitePeople": "Mensen uitnodigen",
     "invitePeopleToCourse": "Mensen uitnodigen voor dit vak",
     "allowedInviteText": "Enkel mensen met een uitnodiging kunnen inschrijven",
-    "regenerateKey": "Nieuwe uitnodigings sleutel genereren"
+    "regenerateKey": "Nieuwe uitnodigings sleutel genereren",
+    "addGroup": "Voeg nieuwe groep toe",
+    "deleteGroup": "Groep cluster verwijderen",
+    "groupDeleteFailed": "Deze cluster kan je niet verwijderen. Zorg ervoor dat deze niet meer gebruikt wordt in een project.",
+    "deleteConfirm": "Bent u zeker dat u deze groep cluster wilt verwijderen?"
   },
   "cancel": "Annuleren",
   "ok": "Ok",
@@ -303,6 +343,7 @@
     "cannotJoinCourse": "Je kan je niet inschrijven voor dit vak"
   },
   "goBack": "Keer terug",
+  "delete": "Verwijder",
   "components": {
     "write": "Aanpassen",
     "preview": "Voorbeeld"
