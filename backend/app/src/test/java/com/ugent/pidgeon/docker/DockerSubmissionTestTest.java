@@ -174,15 +174,14 @@ public class DockerSubmissionTestTest {
   @Test
   void zipFileInputTest() throws IOException {
     // construct zip with hello world contents
-    StringBuilder sb = new StringBuilder();
-    sb.append("Hello Happy World!");
+    String sb = "Hello Happy World!";
 
     File f = new File("src/test/test-cases/DockerSubmissionTestTest/d__test.zip");
     ZipOutputStream out = new ZipOutputStream(new FileOutputStream(f));
     ZipEntry e = new ZipEntry("helloworld.txt");
     out.putNextEntry(e);
 
-    byte[] data = sb.toString().getBytes();
+    byte[] data = sb.getBytes();
     out.write(data, 0, data.length);
     out.closeEntry();
     out.close();

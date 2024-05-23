@@ -1,11 +1,10 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface GroupClusterRepository extends JpaRepository<GroupClusterEntity, Long> {
     List<GroupClusterEntity> findByCourseId(long courseId);

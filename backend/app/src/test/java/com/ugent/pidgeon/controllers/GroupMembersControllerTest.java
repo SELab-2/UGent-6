@@ -1,7 +1,5 @@
 package com.ugent.pidgeon.controllers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.CustomObjectMapper;
-import com.ugent.pidgeon.model.json.UserReferenceJson;
+import com.ugent.pidgeon.json.UserReferenceJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupMemberRepository;
@@ -26,9 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
 public class GroupMembersControllerTest extends ControllerTest {
@@ -43,7 +39,7 @@ public class GroupMembersControllerTest extends ControllerTest {
   @InjectMocks
   private GroupMemberController groupMemberController;
 
-  private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+  private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
   private UserEntity userEntity;
   private UserEntity userEntity2;

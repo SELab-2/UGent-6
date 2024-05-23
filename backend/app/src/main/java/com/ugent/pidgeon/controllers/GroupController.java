@@ -1,9 +1,9 @@
 package com.ugent.pidgeon.controllers;
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.GroupJson;
+import com.ugent.pidgeon.json.NameRequest;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.GroupJson;
-import com.ugent.pidgeon.model.json.NameRequest;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
@@ -17,7 +17,13 @@ import com.ugent.pidgeon.util.GroupUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController

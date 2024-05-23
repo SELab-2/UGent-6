@@ -8,7 +8,6 @@ import com.ugent.pidgeon.controllers.ApiRoutes;
 import com.ugent.pidgeon.controllers.ControllerTest;
 import com.ugent.pidgeon.controllers.UserController;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.UserRepository;
 import com.ugent.pidgeon.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

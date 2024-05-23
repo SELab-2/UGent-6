@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugent.pidgeon.CustomObjectMapper;
-import com.ugent.pidgeon.model.json.UserJson;
+import com.ugent.pidgeon.json.UserJson;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.util.CheckResult;
@@ -28,9 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest extends ControllerTest {
@@ -44,7 +42,7 @@ public class UserControllerTest extends ControllerTest {
   private UserEntity userEntity;
   private UserJson userJson;
   private UserJson mockUserJson;
-  private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+  private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
   @BeforeEach
   public void setup() {

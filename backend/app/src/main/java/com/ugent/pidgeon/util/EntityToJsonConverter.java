@@ -2,19 +2,49 @@ package com.ugent.pidgeon.util;
 
 
 import com.ugent.pidgeon.controllers.ApiRoutes;
+import com.ugent.pidgeon.json.CourseReferenceJson;
+import com.ugent.pidgeon.json.CourseWithInfoJson;
+import com.ugent.pidgeon.json.CourseWithRelationJson;
+import com.ugent.pidgeon.json.DockerTestFeedbackJson;
+import com.ugent.pidgeon.json.GroupClusterJson;
+import com.ugent.pidgeon.json.GroupFeedbackJson;
+import com.ugent.pidgeon.json.GroupFeedbackJsonWithProject;
+import com.ugent.pidgeon.json.GroupJson;
+import com.ugent.pidgeon.json.ProjectProgressJson;
+import com.ugent.pidgeon.json.ProjectResponseJsonWithStatus;
+import com.ugent.pidgeon.json.ProjectStatus;
+import com.ugent.pidgeon.json.SubmissionJson;
+import com.ugent.pidgeon.json.TestJson;
+import com.ugent.pidgeon.json.UserReferenceJson;
+import com.ugent.pidgeon.json.UserReferenceWithRelation;
 import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.*;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserId;
+import com.ugent.pidgeon.postgre.models.FileEntity;
+import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
+import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.SubmissionEntity;
+import com.ugent.pidgeon.postgre.models.TestEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.DockerTestState;
 import com.ugent.pidgeon.postgre.models.types.DockerTestType;
-import com.ugent.pidgeon.postgre.repository.*;
+import com.ugent.pidgeon.postgre.repository.CourseRepository;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
+import com.ugent.pidgeon.postgre.repository.FileRepository;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
+import com.ugent.pidgeon.postgre.repository.TestRepository;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 
 /**

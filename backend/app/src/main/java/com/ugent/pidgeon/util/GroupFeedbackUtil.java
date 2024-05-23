@@ -1,7 +1,11 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.model.json.UpdateGroupScoreRequest;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.json.UpdateGroupScoreRequest;
+import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
+import com.ugent.pidgeon.postgre.models.GroupFeedbackId;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.GroupFeedbackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;

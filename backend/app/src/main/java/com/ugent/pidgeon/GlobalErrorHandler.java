@@ -3,20 +3,15 @@ package com.ugent.pidgeon;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.http.MethodNotSupportedException;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 

@@ -1,14 +1,14 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.model.json.ProjectJson;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.json.ProjectJson;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import java.time.OffsetDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-
-import java.time.OffsetDateTime;
 
 @Component
 public class ProjectUtil {

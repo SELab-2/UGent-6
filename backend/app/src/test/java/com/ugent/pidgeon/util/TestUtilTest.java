@@ -1,5 +1,13 @@
 package com.ugent.pidgeon.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import com.ugent.pidgeon.model.submissionTesting.DockerSubmissionTestModel;
 import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
@@ -8,6 +16,7 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.TestRepository;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,17 +27,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TestUtilTest {

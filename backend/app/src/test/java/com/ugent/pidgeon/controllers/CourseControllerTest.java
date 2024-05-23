@@ -1,43 +1,5 @@
 package com.ugent.pidgeon.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ugent.pidgeon.CustomObjectMapper;
-import com.ugent.pidgeon.model.ProjectResponseJson;
-import com.ugent.pidgeon.model.json.CourseJoinInformationJson;
-import com.ugent.pidgeon.model.json.CourseReferenceJson;
-import com.ugent.pidgeon.model.json.CourseWithInfoJson;
-import com.ugent.pidgeon.model.json.CourseWithRelationJson;
-import com.ugent.pidgeon.model.json.ProjectProgressJson;
-import com.ugent.pidgeon.model.json.UserReferenceJson;
-import com.ugent.pidgeon.model.json.UserReferenceWithRelation;
-import com.ugent.pidgeon.postgre.models.*;
-import com.ugent.pidgeon.postgre.models.types.CourseRelation;
-import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.postgre.repository.UserRepository.CourseIdWithRelation;
-import com.ugent.pidgeon.util.*;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.logging.Logger;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,14 +13,57 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ugent.pidgeon.CustomObjectMapper;
+import com.ugent.pidgeon.json.CourseJoinInformationJson;
+import com.ugent.pidgeon.json.CourseReferenceJson;
+import com.ugent.pidgeon.json.CourseWithInfoJson;
+import com.ugent.pidgeon.json.CourseWithRelationJson;
+import com.ugent.pidgeon.json.ProjectProgressJson;
+import com.ugent.pidgeon.json.UserReferenceJson;
+import com.ugent.pidgeon.json.UserReferenceWithRelation;
+import com.ugent.pidgeon.model.ProjectResponseJson;
+import com.ugent.pidgeon.postgre.models.CourseEntity;
+import com.ugent.pidgeon.postgre.models.CourseUserEntity;
+import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
+import com.ugent.pidgeon.postgre.models.types.CourseRelation;
+import com.ugent.pidgeon.postgre.models.types.UserRole;
+import com.ugent.pidgeon.postgre.repository.CourseRepository;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import com.ugent.pidgeon.postgre.repository.ProjectRepository;
+import com.ugent.pidgeon.postgre.repository.UserRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.CourseUtil;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.Pair;
+import com.ugent.pidgeon.util.UserUtil;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @ExtendWith(MockitoExtension.class)
 public class CourseControllerTest extends ControllerTest {
@@ -95,7 +100,7 @@ public class CourseControllerTest extends ControllerTest {
     private CourseEntity activeCourse;
     private CourseWithInfoJson activeCourseJson;
 
-    private ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
+    private final ObjectMapper objectMapper = CustomObjectMapper.createObjectMapper();
 
 
     @BeforeEach
