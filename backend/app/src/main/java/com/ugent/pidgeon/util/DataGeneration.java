@@ -1,15 +1,14 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.controllers.CourseController;
-import com.ugent.pidgeon.controllers.ProjectController;
-import com.ugent.pidgeon.controllers.SubmissionController;
-import com.ugent.pidgeon.controllers.TestController;
+import com.ugent.pidgeon.controllers.*;
 import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.model.ProjectResponseJson;
 import com.ugent.pidgeon.model.json.*;
+import com.ugent.pidgeon.postgre.models.SubmissionEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
+import com.ugent.pidgeon.postgre.repository.SubmissionRepository;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +34,10 @@ public class DataGeneration {
 
     @Autowired
     private SubmissionController submissionController;
+    @Autowired
+    private SubmissionRepository submissionRepository;
+    @Autowired
+    private UserController userController;
 
     public void generate(Auth auth) {
         makeFakeUsersAndCourses(auth);
@@ -91,6 +94,13 @@ public class DataGeneration {
                 }
             }
         }
+        UserUpdateJson uuj = new UserUpdateJson();
+        uuj.setRole(UserRole.teacher.toString());
+        ResponseEntity resp = userController.patchUserById(auth.getUserEntity().getId(),
+                uuj,
+                auth
+                );
+        Logger.getGlobal().info("Statuscode user: " + resp.getStatusCode());
     }
 
     private void makeTestsForProject(Auth auth, ProjectResponseJson project, int index) {
@@ -109,31 +119,11 @@ public class DataGeneration {
         } else if (index == 0) {
             TestUpdateJson tj = new TestUpdateJson(
                     "fedora:latest",
-                    "python /shared/input/ugent.py > /shared/output/ugent",
+                    "python3 /shared/input/ugent.py > /shared/output/ugent",
                     "@ugent\n" +
                             ">required\n" +
-                            ">description=\"Jouw script moet UGent in ascii schrijven.\"\n" +
-                            "          _____                    _____                    _____                    _____                _____          \n" +
-                            "         /\\    \\                  /\\    \\                  /\\    \\                  /\\    \\              /\\    \\         \n" +
-                            "        /::\\____\\                /::\\    \\                /::\\    \\                /::\\____\\            /::\\    \\        \n" +
-                            "       /:::/    /               /::::\\    \\              /::::\\    \\              /::::|   |            \\:::\\    \\       \n" +
-                            "      /:::/    /               /::::::\\    \\            /::::::\\    \\            /:::::|   |             \\:::\\    \\      \n" +
-                            "     /:::/    /               /:::/\\:::\\    \\          /:::/\\:::\\    \\          /::::::|   |              \\:::\\    \\     \n" +
-                            "    /:::/    /               /:::/  \\:::\\    \\        /:::/__\\:::\\    \\        /:::/|::|   |               \\:::\\    \\    \n" +
-                            "   /:::/    /               /:::/    \\:::\\    \\      /::::\\   \\:::\\    \\      /:::/ |::|   |               /::::\\    \\   \n" +
-                            "  /:::/    /      _____    /:::/    / \\:::\\    \\    /::::::\\   \\:::\\    \\    /:::/  |::|   | _____        /::::::\\    \\  \n" +
-                            " /:::/____/      /\\    \\  /:::/    /   \\:::\\ ___\\  /:::/\\:::\\   \\:::\\    \\  /:::/   |::|   |/\\    \\      /:::/\\:::\\    \\ \n" +
-                            "|:::|    /      /::\\____\\/:::/____/  ___\\:::|    |/:::/__\\:::\\   \\:::\\____\\/:: /    |::|   /::\\____\\    /:::/  \\:::\\____\\\n" +
-                            "|:::|____\\     /:::/    /\\:::\\    \\ /\\  /:::|____|\\:::\\   \\:::\\   \\::/    /\\::/    /|::|  /:::/    /   /:::/    \\::/    /\n" +
-                            " \\:::\\    \\   /:::/    /  \\:::\\    /::\\ \\::/    /  \\:::\\   \\:::\\   \\/____/  \\/____/ |::| /:::/    /   /:::/    / \\/____/ \n" +
-                            "  \\:::\\    \\ /:::/    /    \\:::\\   \\:::\\ \\/____/    \\:::\\   \\:::\\    \\              |::|/:::/    /   /:::/    /          \n" +
-                            "   \\:::\\    /:::/    /      \\:::\\   \\:::\\____\\       \\:::\\   \\:::\\____\\             |::::::/    /   /:::/    /           \n" +
-                            "    \\:::\\__/:::/    /        \\:::\\  /:::/    /        \\:::\\   \\::/    /             |:::::/    /    \\::/    /            \n" +
-                            "     \\::::::::/    /          \\:::\\/:::/    /          \\:::\\   \\/____/              |::::/    /      \\/____/             \n" +
-                            "      \\::::::/    /            \\::::::/    /            \\:::\\    \\                  /:::/    /                           \n" +
-                            "       \\::::/    /              \\::::/    /              \\:::\\____\\                /:::/    /                            \n" +
-                            "        \\::/____/                \\::/____/                \\::/    /                \\::/    /                             \n" +
-                            "         ~~                                                \\/____/                  \\/____/                                ",
+                            ">description=\"Jouw script moet UGent schrijven.\"\n" +
+                            "ugent",
                     "ugent.py"
 
             );
@@ -142,38 +132,13 @@ public class DataGeneration {
         }
     }
 
-    private void makeSubmissions(Auth auth, ProjectResponseJson project) {
-
-    }
 
     private ProjectResponseJson makeProject(Auth auth, CourseWithInfoJson course, int index) {
-        String[] projectTitles = {"A palindrome checker", "A project about bash", "A fantastic project"};
+        String[] projectTitles = {"Ugent to stdout", "A project about bash", "A fantastic project"};
         String[] projectDescriptions = {
-                "## Challenge: UGent ascii art ##\n" +
+                "## Challenge: UGent ##\n" +
                         "Write a python script that writes this text to stdout and name it `ugent.py`: \n\n" +
-                        "```\n" +
-                        "           _____                    _____                    _____                    _____                _____          \n" +
-                        "         /\\    \\                  /\\    \\                  /\\    \\                  /\\    \\              /\\    \\         \n" +
-                        "        /::\\____\\                /::\\    \\                /::\\    \\                /::\\____\\            /::\\    \\        \n" +
-                        "       /:::/    /               /::::\\    \\              /::::\\    \\              /::::|   |            \\:::\\    \\       \n" +
-                        "      /:::/    /               /::::::\\    \\            /::::::\\    \\            /:::::|   |             \\:::\\    \\      \n" +
-                        "     /:::/    /               /:::/\\:::\\    \\          /:::/\\:::\\    \\          /::::::|   |              \\:::\\    \\     \n" +
-                        "    /:::/    /               /:::/  \\:::\\    \\        /:::/__\\:::\\    \\        /:::/|::|   |               \\:::\\    \\    \n" +
-                        "   /:::/    /               /:::/    \\:::\\    \\      /::::\\   \\:::\\    \\      /:::/ |::|   |               /::::\\    \\   \n" +
-                        "  /:::/    /      _____    /:::/    / \\:::\\    \\    /::::::\\   \\:::\\    \\    /:::/  |::|   | _____        /::::::\\    \\  \n" +
-                        " /:::/____/      /\\    \\  /:::/    /   \\:::\\ ___\\  /:::/\\:::\\   \\:::\\    \\  /:::/   |::|   |/\\    \\      /:::/\\:::\\    \\ \n" +
-                        "|:::|    /      /::\\____\\/:::/____/  ___\\:::|    |/:::/__\\:::\\   \\:::\\____\\/:: /    |::|   /::\\____\\    /:::/  \\:::\\____\\\n" +
-                        "|:::|____\\     /:::/    /\\:::\\    \\ /\\  /:::|____|\\:::\\   \\:::\\   \\::/    /\\::/    /|::|  /:::/    /   /:::/    \\::/    /\n" +
-                        " \\:::\\    \\   /:::/    /  \\:::\\    /::\\ \\::/    /  \\:::\\   \\:::\\   \\/____/  \\/____/ |::| /:::/    /   /:::/    / \\/____/ \n" +
-                        "  \\:::\\    \\ /:::/    /    \\:::\\   \\:::\\ \\/____/    \\:::\\   \\:::\\    \\              |::|/:::/    /   /:::/    /          \n" +
-                        "   \\:::\\    /:::/    /      \\:::\\   \\:::\\____\\       \\:::\\   \\:::\\____\\             |::::::/    /   /:::/    /           \n" +
-                        "    \\:::\\__/:::/    /        \\:::\\  /:::/    /        \\:::\\   \\::/    /             |:::::/    /    \\::/    /            \n" +
-                        "     \\::::::::/    /          \\:::\\/:::/    /          \\:::\\   \\/____/              |::::/    /      \\/____/             \n" +
-                        "      \\::::::/    /            \\::::::/    /            \\:::\\    \\                  /:::/    /                           \n" +
-                        "       \\::::/    /              \\::::/    /              \\:::\\____\\                /:::/    /                            \n" +
-                        "        \\::/____/                \\::/____/                \\::/    /                \\::/    /                             \n" +
-                        "         ~~                                                \\/____/                  \\/____/                                \n" +
-                        "```",
+                        "`ugent`",
                 "## Opgave: Bash Hello World ##\n" +
                         "**Probleem:**\n" +
                         "Je moet een bash script indienen dat hello world uitschreeft naar stdout.\n" +
