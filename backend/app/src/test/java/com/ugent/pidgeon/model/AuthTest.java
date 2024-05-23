@@ -1,16 +1,14 @@
 package com.ugent.pidgeon.model;
 
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.List;
 
 
 public class AuthTest {
 
-    private final User testUser = new User("John Doe", "John", "Doe", "john.doe@gmail.com", "123456");
+    private final User testUser = new User("John Doe", "John", "Doe", "john.doe@gmail.com", "123456", "");
 
     private final List<SimpleGrantedAuthority> authLijst = List.of(new SimpleGrantedAuthority("READ_AUTHORITY"));
     private final Auth auth = new Auth(testUser, authLijst);

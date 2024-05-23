@@ -2,23 +2,43 @@ package com.ugent.pidgeon.controllers;
 
 
 import com.ugent.pidgeon.auth.Roles;
+import com.ugent.pidgeon.json.ClusterFillJson;
+import com.ugent.pidgeon.json.GroupClusterCreateJson;
+import com.ugent.pidgeon.json.GroupClusterJson;
+import com.ugent.pidgeon.json.GroupClusterUpdateJson;
+import com.ugent.pidgeon.json.GroupCreateJson;
 import com.ugent.pidgeon.model.Auth;
-import com.ugent.pidgeon.model.json.*;
 import com.ugent.pidgeon.postgre.models.CourseEntity;
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.types.CourseRelation;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import com.ugent.pidgeon.postgre.repository.*;
-import com.ugent.pidgeon.util.*;
+import com.ugent.pidgeon.postgre.repository.CourseUserRepository;
+import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
+import com.ugent.pidgeon.postgre.repository.GroupMemberRepository;
+import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import com.ugent.pidgeon.util.CheckResult;
+import com.ugent.pidgeon.util.ClusterUtil;
+import com.ugent.pidgeon.util.CommonDatabaseActions;
+import com.ugent.pidgeon.util.CourseUtil;
+import com.ugent.pidgeon.util.EntityToJsonConverter;
+import com.ugent.pidgeon.util.Pair;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.OffsetDateTime;
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController {
@@ -28,7 +48,9 @@ public class ClusterController {
     @Autowired
     GroupRepository groupRepository;
     @Autowired
-    GroupUserRepository groupUserRepository;
+    GroupMemberRepository groupMemberRepository;
+    @Autowired
+    CourseUserRepository courseUserRepository;
 
 
     @Autowired
@@ -58,10 +80,15 @@ public class ClusterController {
         if (checkResult.getStatus() != HttpStatus.OK) {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
+
+        CourseRelation courseRelation = checkResult.getData().getSecond();
+        boolean hideStudentNumber = courseRelation.equals(CourseRelation.enrolled);
+
         // Get the clusters for the course
         List<GroupClusterEntity> clusters = groupClusterRepository.findClustersWithoutInvidualByCourseId(courseid);
         List<GroupClusterJson> clusterJsons = clusters.stream().map(
-                entityToJsonConverter::clusterEntityToClusterJson).toList();
+            g -> entityToJsonConverter.clusterEntityToClusterJson(g, hideStudentNumber)
+        ).toList();
         // Return the clusters
         return ResponseEntity.ok(clusterJsons);
     }
@@ -100,20 +127,21 @@ public class ClusterController {
                 clusterJson.groupCount()
         );
         cluster.setCreatedAt(OffsetDateTime.now());
+        cluster.setLockGroupsAfter(clusterJson.lockGroupsAfter());
         GroupClusterEntity clusterEntity = groupClusterRepository.save(cluster);
 
         for (int i = 0; i < clusterJson.groupCount(); i++) {
             groupRepository.save(new GroupEntity("Group " + (i + 1), cluster.getId()));
         }
 
-        GroupClusterJson clusterJsonResponse = entityToJsonConverter.clusterEntityToClusterJson(clusterEntity);
+        GroupClusterJson clusterJsonResponse = entityToJsonConverter.clusterEntityToClusterJson(clusterEntity, false);
 
         // Return the cluster
         return ResponseEntity.status(HttpStatus.CREATED).body(clusterJsonResponse);
     }
 
     /**
-     * Returns all groups for a cluster
+     * Get cluster by ID
      *
      * @param clusterid identifier of a cluster
      * @param auth authentication object of the requesting user
@@ -131,8 +159,11 @@ public class ClusterController {
             return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
         }
         GroupClusterEntity cluster = checkResult.getData();
+
+        CheckResult<CourseEntity> courseAdmin = courseUtil.getCourseIfAdmin(cluster.getCourseId(), auth.getUserEntity());
+        boolean hideStudentNumber = !courseAdmin.getStatus().equals(HttpStatus.OK);
         // Return the cluster
-        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(cluster));
+        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(cluster, hideStudentNumber));
     }
 
 
@@ -167,10 +198,78 @@ public class ClusterController {
         }
         clusterEntity.setMaxSize(clusterJson.getCapacity());
         clusterEntity.setName(clusterJson.getName());
-        groupClusterRepository.save(clusterEntity);
-        return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity));
+        clusterEntity.setLockGroupsAfter(clusterJson.getLockGroupsAfter());
+        clusterEntity = groupClusterRepository.save(clusterEntity);
+    return ResponseEntity.ok(entityToJsonConverter.clusterEntityToClusterJson(clusterEntity, false));
     }
 
+    /**
+     * Fills up the groups in a cluster by providing a map of groupids with lists of userids
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @param clusterFillMap Map object containing a map of all groups and their members of that cluster
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7431004">apiDog documentation</a>
+     * @HttpMethod PUT
+     * @ApiPath /api/clusters/{clusterid}/fill
+     * @AllowedRoles student, teacher
+     */
+    @PutMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}/fill")
+    @Transactional
+    @Roles({UserRole.teacher, UserRole.student})
+    public ResponseEntity<?> fillCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody Map<String, Long[]> clusterFillMap) {
+        ClusterFillJson clusterFillJson = new ClusterFillJson(clusterFillMap);
+        try{
+            CheckResult<GroupClusterEntity> checkResult = clusterUtil.getGroupClusterEntityIfAdminAndNotIndividual(clusterid, auth.getUserEntity());
+
+            if (checkResult.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(checkResult.getStatus()).body(checkResult.getMessage());
+            }
+
+            GroupClusterEntity groupCluster = checkResult.getData();
+
+            List<GroupEntity> groups = groupRepository.findAllByClusterId(clusterid);
+
+            CheckResult<Void> jsonCheckRes = clusterUtil.checkFillClusterJson(clusterFillJson, groupCluster);
+            if (jsonCheckRes.getStatus() != HttpStatus.OK) {
+                return ResponseEntity.status(jsonCheckRes.getStatus()).body(jsonCheckRes.getMessage());
+            }
+
+            for(GroupEntity group: groups){
+                commonDatabaseActions.removeGroup(group.getId());
+            }
+
+            for(String groupName: clusterFillJson.getClusterGroupMembers().keySet()){
+                Long[] users = clusterFillJson.getClusterGroupMembers().get(groupName);
+                GroupEntity groupEntity = new GroupEntity(groupName, clusterid);
+                groupEntity = groupRepository.save(groupEntity);
+                for(Long userid: users){
+                    groupMemberRepository.addMemberToGroup(groupEntity.getId(), userid);
+                }
+            }
+
+            groupCluster.setGroupAmount(clusterFillJson.getClusterGroupMembers().size());
+            groupClusterRepository.save(groupCluster);
+            return ResponseEntity.status(HttpStatus.OK).body(entityToJsonConverter.clusterEntityToClusterJson(groupCluster, false));
+        } catch (Exception e) {
+            Logger.getGlobal().severe(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
+        }
+    }
+
+    /**
+     * Updates a cluster
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @param clusterJson ClusterJson object containing the cluster data
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883519">apiDog documentation</a>
+     * @HttpMethod PATCH
+     * @ApiPath /api/clusters/{clusterid}
+     * @AllowedRoles student, teacher
+     */
     @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {
@@ -188,6 +287,10 @@ public class ClusterController {
 
         if (clusterJson.getName() == null) {
             clusterJson.setName(cluster.getName());
+        }
+
+        if (clusterJson.getLockGroupsAfter() == null) {
+            clusterJson.setLockGroupsAfter(cluster.getLockGroupsAfter());
         }
 
         return doGroupClusterUpdate(cluster, clusterJson);
@@ -254,6 +357,6 @@ public class ClusterController {
 
         cluster.setGroupAmount(cluster.getGroupAmount() + 1);
         groupClusterRepository.save(cluster);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupEntityToJson(group));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entityToJsonConverter.groupEntityToJson(group, false));
     }
 }

@@ -3,12 +3,11 @@ package com.ugent.pidgeon.postgre.repository;
 import com.ugent.pidgeon.postgre.models.GroupEntity;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
-import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
     @Transactional
@@ -32,13 +31,14 @@ public interface GroupRepository extends JpaRepository<GroupEntity, Long>{
 
 
 
-    public interface UserReference {
+    interface UserReference {
         Long getUserId();
         String getName();
         String getEmail();
+        String getStudentNumber();
     }
     @Query(value= """
-            SELECT gu.userId as userId, u.name, CONCAT(u.name, ' ', u.surname) as name, u.email as email
+            SELECT gu.userId as userId, u.name, CONCAT(u.name, ' ', u.surname) as name, u.email as email, u.studentNumber as studentNumber
             FROM GroupUserEntity gu JOIN UserEntity u ON u.id = gu.userId
             WHERE gu.groupId = ?1""")
     List<UserReference> findGroupUsersReferencesByGroupId(long id);

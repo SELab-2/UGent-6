@@ -1,65 +1,70 @@
-import { Alert, Form, Modal } from "antd"
-import { FC, useState } from "react"
+import { Alert, Form } from "antd"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import CourseForm from "../../../components/forms/CourseForm"
-import apiCall, { POST_Error } from "../../../util/apiFetch"
 import { ApiRoutes } from "../../../@types/requests.d"
 import useAppApi from "../../../hooks/useAppApi"
-import axios, { AxiosError } from "axios"
 import { useNavigate } from "react-router-dom"
 import { AppRoutes } from "../../../@types/routes"
 import useUser from "../../../hooks/useUser"
+import useApi from "../../../hooks/useApi"
 
-const CreateCourseModal: FC<{ open: boolean,setOpen:(b:boolean)=>void }> = ({ open,setOpen }) => {
+const createCourseModal = () => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [error, setError] = useState<string | null>(null)
-  const [loading,setLoading] = useState(false)
-  const {message} = useAppApi()
+  const { message, modal } = useAppApi()
   const navigate = useNavigate()
-  const {updateCourses} = useUser()
+  const { updateCourses } = useUser()
+  const API = useApi()
 
+  useEffect(() => {
+    form.setFieldValue("year", new Date().getFullYear() - 1)
+  }, [])
 
-  const onFinish = async () => {
-    await form.validateFields()
-    setError(null)
-    
-    const values:{name:string, description:string} = form.getFieldsValue()
-    console.log(values);
-    values.description ??= ""
-    setLoading(true)
-    try {
-      const course =  await apiCall.post(ApiRoutes.COURSES, values)
+  const onFinish = () => {
+    return new Promise<void>(async (resolve, reject) => {
+      await form.validateFields()
+      setError(null)
+
+      const values: { name: string; description: string } = form.getFieldsValue()
+      values.description ??= ""
+      const res = await API.POST(ApiRoutes.COURSES, { body: values }, "message")
+      if (!res.success) return reject()
+      const course = res.response
       message.success(t("home.courseCreated"))
       await updateCourses()
       navigate(AppRoutes.COURSE.replace(":courseId", course.data.courseId.toString()))
-    } catch(err){
-      console.error(err);
-      if(axios.isAxiosError(err)){
-        setError(err.response?.data.message || t("woops"))
-      } else {
-        message.error(t("woops"))
-      }
-    } finally {
-      setLoading(false)
-    }
+      resolve()
+    })
   }
 
-  return (
-    <Modal
-      open={open}
-      title={t("home.createCourse")}
-      onCancel={() => setOpen(false)}
-      onOk={onFinish}
-      okText={t("course.createCourse")}
-      okButtonProps={{ loading }}
-      cancelText={t("cancel")}
-      
-    >
-      {error && <Alert style={{marginBottom:"1rem"}} type="error" message={error} />}
-     <CourseForm form={form} />
-    </Modal>
-  )
+  return {
+    showModal: () => {
+      modal.info({
+        title: t("home.createCourse"),
+        width: 500,
+        className: "modal-no-icon",
+        onOk: onFinish,
+        okText: t("course.createCourse"),
+        cancelText: t("cancel"),
+        okCancel: true,
+        icon: null,
+        content: (
+          <>
+            {error && (
+              <Alert
+                style={{ marginBottom: "1rem" }}
+                type="error"
+                message={error}
+              />
+            )}
+            <CourseForm form={form} />
+          </>
+        ),
+      })
+    },
+  }
 }
 
-export default CreateCourseModal
+export default createCourseModal

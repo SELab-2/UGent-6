@@ -2,7 +2,7 @@ package com.ugent.pidgeon.model.submissionTesting;
 
 import java.util.List;
 
-public class DockerTestOutput {
+public class DockerTestOutput implements DockerOutput {
     public List<String> logs;
     public Boolean allowed;
 
@@ -11,4 +11,13 @@ public class DockerTestOutput {
         this.allowed = allowed;
     }
 
+    @Override
+    public boolean isAllowed() {
+        return allowed;
+    }
+
+    @Override
+    public String getFeedbackAsString() {
+        return String.join("", logs);
+    }
 }

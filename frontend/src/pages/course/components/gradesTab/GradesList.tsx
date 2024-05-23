@@ -9,11 +9,12 @@ const GradesList: FC<{ feedback: CourseGradesType[]; courseId: number }> = ({ fe
   const { t } = useTranslation()
   const navigate = useNavigate()
 
+  
   return (
     <>
       <List
       locale={ {emptyText: t("course.noFeedback")} }
-        dataSource={feedback}
+        dataSource={feedback.filter(s => s.groupFeedback !== null)}
         header={
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div>
@@ -27,11 +28,11 @@ const GradesList: FC<{ feedback: CourseGradesType[]; courseId: number }> = ({ fe
         }
         renderItem={(score) => (
           <List.Item
-            actions={[
-              <Typography.Text>
-                {score.groupFeedback.score} / {score.maxScore}
+            actions={score.maxScore ? [
+              <Typography.Text key="score">
+                {score.groupFeedback!.score} / {score.maxScore}
               </Typography.Text>,
-            ]}
+            ] : []}
           >
             <List.Item.Meta
               title={
@@ -45,7 +46,8 @@ const GradesList: FC<{ feedback: CourseGradesType[]; courseId: number }> = ({ fe
                   </Button>
                 </div>
               }
-              description={score.groupFeedback.feedback}
+              description={score.groupFeedback!.feedback}
+              style={{whiteSpace: "pre-wrap"}}
             />
           </List.Item>
         )}

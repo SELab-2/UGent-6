@@ -1,7 +1,11 @@
 package com.ugent.pidgeon.postgre.models;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -25,6 +29,9 @@ public class GroupClusterEntity {
 
     @Column(name="group_amount", nullable=false)
     private int groupAmount;
+
+    @Column(name = "lock_groups_after")
+    private OffsetDateTime lockGroupsAfter;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
@@ -86,5 +93,13 @@ public class GroupClusterEntity {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getLockGroupsAfter() {
+        return lockGroupsAfter;
+    }
+
+    public void setLockGroupsAfter(OffsetDateTime lockGroupsAfter) {
+        this.lockGroupsAfter = lockGroupsAfter;
     }
 }

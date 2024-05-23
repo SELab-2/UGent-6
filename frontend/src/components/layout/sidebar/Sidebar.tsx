@@ -1,4 +1,4 @@
-import { MenuOutlined, UserOutlined } from "@ant-design/icons"
+import { BookOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons"
 import { Button, Drawer, Menu, MenuProps } from "antd"
 import { FC, useMemo, useState } from "react"
 import useUser from "../../../hooks/useUser"
@@ -13,7 +13,6 @@ const Sidebar: FC = () => {
   const navigate = useNavigate()
 
   const onClick: MenuProps["onClick"] = (menu) => {
-
     navigate(AppRoutes.COURSE.replace(":courseId", menu.key as string))
     setOpen(false)
   }
@@ -22,9 +21,9 @@ const Sidebar: FC = () => {
     () => [
       {
         key: "courses",
-        label: t("home.yourCourses"),
+        label: t("home.allCourses"),
         type: "sub1",
-        children: (courses??[]).map((c) => ({
+        children: (courses ?? []).map((c) => ({
           key: c.courseId,
           label: c.name,
         })),
@@ -69,6 +68,16 @@ const Sidebar: FC = () => {
               onClick={openProfile}
             >
               Profile
+            </Button>
+
+            <Button
+              type="text"
+              style={{ width: "100%" }}
+              size="large"
+              icon={<BookOutlined />}
+              onClick={() => window.open("https://github.com/SELab-2/UGent-6/wiki", "_blank")}
+            >
+              {t("home.docs")}
             </Button>
           </>
         }

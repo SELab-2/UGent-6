@@ -1,14 +1,15 @@
 package com.ugent.pidgeon.model;
 
-import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.ugent.pidgeon.model.submissionTesting.SubmissionTemplateModel;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 public class FileStructureTest {
     final String testDirectory = "src/test/test-cases/FileStructureTestCases/";
@@ -43,6 +44,17 @@ public class FileStructureTest {
     void denyFileExtension(){
         assertFalse(runTest("noClassExtensions"));
     }
+
+    @Test
+    void tryTemplateTest(){
+        assertDoesNotThrow(() -> SubmissionTemplateModel.tryTemplate("template"));
+        assertDoesNotThrow(() -> SubmissionTemplateModel.tryTemplate("src/\n  index.js\n  seconfilehehe.file"));
+        assertThrows(IllegalArgumentException.class, () -> SubmissionTemplateModel.tryTemplate("src/\n    index.js\n  seconfilehehe.file\n  thirdfile"));
+        //check trailing newline
+        assertDoesNotThrow(() -> SubmissionTemplateModel.tryTemplate("src/\n\tindex.js\n"));
+
+    }
+
     private boolean runTest(String testpath){
         SubmissionTemplateModel model = new SubmissionTemplateModel();
         if(testpath.lastIndexOf('/') != testpath.length() - 1){

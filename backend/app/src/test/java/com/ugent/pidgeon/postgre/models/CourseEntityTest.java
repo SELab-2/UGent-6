@@ -1,11 +1,10 @@
 package com.ugent.pidgeon.postgre.models;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.OffsetDateTime;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CourseEntityTest {
 
@@ -55,7 +54,7 @@ public class CourseEntityTest {
   public void testConstructor() {
     String name = "Test Course";
     String description = "Test Description";
-    CourseEntity course = new CourseEntity(name, description);
+    CourseEntity course = new CourseEntity(name, description,2024);
     assertEquals(name, course.getName());
     assertEquals(description, course.getDescription());
   }

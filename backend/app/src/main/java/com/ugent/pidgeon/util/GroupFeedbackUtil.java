@@ -1,7 +1,11 @@
 package com.ugent.pidgeon.util;
 
-import com.ugent.pidgeon.model.json.UpdateGroupScoreRequest;
-import com.ugent.pidgeon.postgre.models.*;
+import com.ugent.pidgeon.json.UpdateGroupScoreRequest;
+import com.ugent.pidgeon.postgre.models.GroupEntity;
+import com.ugent.pidgeon.postgre.models.GroupFeedbackEntity;
+import com.ugent.pidgeon.postgre.models.GroupFeedbackId;
+import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.repository.GroupFeedbackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -100,15 +104,15 @@ public class GroupFeedbackUtil {
             return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
         Integer maxScore = projectCheck.getData().getMaxScore();
-        if (request.getScore() == null || request.getFeedback() == null) {
-            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Score and feedback need to be provided", null);
+        if (request.getFeedback() == null) {
+            return new CheckResult<>(HttpStatus.BAD_REQUEST, "Feedbacks need to be provided", null);
         }
 
-        if (maxScore != null && request.getScore() < 0) {
+        if (request.getScore() != null && request.getScore() < 0) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "Score can't be lower than 0", null);
         }
 
-        if (maxScore != null && request.getScore() > maxScore) {
+        if (maxScore != null && request.getScore() != null && request.getScore() > maxScore) {
             return new CheckResult<>(HttpStatus.BAD_REQUEST, "Score can't be higher than the defined max score (" + maxScore + ")", null);
         }
 

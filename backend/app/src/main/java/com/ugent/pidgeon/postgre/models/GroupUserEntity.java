@@ -1,8 +1,10 @@
 package com.ugent.pidgeon.postgre.models;
 
-import jakarta.persistence.*;
-
-import java.io.Serializable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
 
 @Entity
 @IdClass(GroupUserId.class)

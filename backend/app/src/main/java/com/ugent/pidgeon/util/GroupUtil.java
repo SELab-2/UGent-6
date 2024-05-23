@@ -7,6 +7,7 @@ import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.GroupClusterRepository;
 import com.ugent.pidgeon.postgre.repository.GroupRepository;
+import java.time.OffsetDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,8 @@ public class GroupUtil {
     private ClusterUtil clusterUtil;
     @Autowired
     private ProjectUtil projectUtil;
+  @Autowired
+  private UserUtil userUtil;
 
 
     /**
@@ -58,7 +61,7 @@ public class GroupUtil {
      * @return CheckResult with the status of the check
      */
     public CheckResult<Void> isAdminOfGroup(long groupId, UserEntity user) {
-        if (!groupRepository.isAdminOfGroup(groupId, user.getId()) && !user.getRole().equals(UserRole.admin)) {
+        if (!groupRepository.isAdminOfGroup(user.getId(), groupId) && !user.getRole().equals(UserRole.admin)) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not an admin of this group", null);
         }
         return new CheckResult<>(HttpStatus.OK, "", null);
@@ -99,15 +102,27 @@ public class GroupUtil {
         if (group == null) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not found", null);
         }
+
+        boolean isAdmin = false;
+
         if (user.getId() != userId) {
             CheckResult<Void> admin = isAdminOfGroup(groupId, user);
             if (admin.getStatus() != HttpStatus.OK) {
                 return admin;
             }
+            isAdmin = true;
         } else {
             if (!groupRepository.userAccessToGroup(userId, groupId)) {
                 return new CheckResult<>(HttpStatus.FORBIDDEN, "User is not part of the course", null);
             }
+            if (groupClusterRepository.inArchivedCourse(group.getClusterId())) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot join a group in an archived course", null);
+            }
+        }
+
+        UserEntity userToAdd = userUtil.getUserIfExists(userId);
+        if (userToAdd == null) {
+            return new CheckResult<>(HttpStatus.NOT_FOUND, "User not found", null);
         }
 
         if (groupClusterRepository.userInGroupForCluster(group.getClusterId(), userId)) {
@@ -121,11 +136,20 @@ public class GroupUtil {
             return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while checking cluster", null);
         }
 
-        if (cluster.getData().getMaxSize() <= groupRepository.countUsersInGroup(groupId)) {
+        if (cluster.getData().getMaxSize() <= groupRepository.countUsersInGroup(groupId) && !isAdmin) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Group is full", null);
         }
         if (clusterUtil.isIndividualCluster(group.getClusterId())) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot add user to individual group", null);
+        }
+
+        OffsetDateTime lockGroupTime = cluster.getData().getLockGroupsAfter();
+        if (lockGroupTime != null && lockGroupTime.isBefore(OffsetDateTime.now()) && !isAdmin) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Groups are locked", null);
+        }
+
+        if (isAdminOfGroup(groupId, userToAdd).getStatus().equals(HttpStatus.OK)) {
+            return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot add a course admin to a group", null);
         }
 
         return new CheckResult<>(HttpStatus.OK, "", null);
@@ -148,6 +172,19 @@ public class GroupUtil {
             if (admin.getStatus() != HttpStatus.OK) {
                 return admin;
             }
+
+        } else {
+            if (groupClusterRepository.inArchivedCourse(group.getClusterId())) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "Cannot leave a group in an archived course", null);
+            }
+            CheckResult<GroupClusterEntity> cluster = clusterUtil.getClusterIfExists(group.getClusterId());
+            if (cluster.getStatus() != HttpStatus.OK) {
+                return new CheckResult<>(HttpStatus.INTERNAL_SERVER_ERROR, "Error while checking cluster", null);
+            }
+            OffsetDateTime lockGroupTime = cluster.getData().getLockGroupsAfter();
+            if (lockGroupTime != null && lockGroupTime.isBefore(OffsetDateTime.now())) {
+                return new CheckResult<>(HttpStatus.FORBIDDEN, "Groups are locked", null);
+            }
         }
         if (!groupRepository.userInGroup(groupId, userId)) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "User is not in the group", null);
@@ -167,16 +204,16 @@ public class GroupUtil {
      * @param user user that wants to get the submissions
      * @return CheckResult with the status of the check
      */
-    public CheckResult<Void> canGetProjectGroupData(long groupId, long projectId, UserEntity user) {
+    public CheckResult<Void> canGetProjectGroupData(Long groupId, long projectId, UserEntity user) {
         CheckResult<ProjectEntity> projectCheck = projectUtil.getProjectIfExists(projectId);
         if (projectCheck.getStatus() != HttpStatus.OK) {
             return new CheckResult<>(projectCheck.getStatus(), projectCheck.getMessage(), null);
         }
         ProjectEntity project = projectCheck.getData();
-        if (groupRepository.findByIdAndClusterId(groupId, project.getGroupClusterId()).isEmpty()) {
+        if (groupId != null && groupRepository.findByIdAndClusterId(groupId, project.getGroupClusterId()).isEmpty()) {
             return new CheckResult<>(HttpStatus.NOT_FOUND, "Group not part of the project", null);
         }
-        boolean inGroup = groupRepository.userInGroup(groupId, user.getId());
+        boolean inGroup = groupId != null && groupRepository.userInGroup(groupId, user.getId());
         boolean isAdmin = user.getRole().equals(UserRole.admin) || projectUtil.isProjectAdmin(projectId, user).getStatus().equals(HttpStatus.OK);
         if (inGroup || isAdmin) {
             return new CheckResult<>(HttpStatus.OK, "", null);

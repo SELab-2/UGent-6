@@ -1,10 +1,9 @@
 package com.ugent.pidgeon.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.ugent.pidgeon.model.json.CourseReferenceJson;
-import com.ugent.pidgeon.model.json.ProjectProgressJson;
+import com.ugent.pidgeon.json.CourseReferenceJson;
+import com.ugent.pidgeon.json.ProjectProgressJson;
 import com.ugent.pidgeon.postgre.models.OffsetDateTimeSerializer;
-
 import java.time.OffsetDateTime;
 
 public record ProjectResponseJson(
@@ -20,5 +19,7 @@ public record ProjectResponseJson(
         Integer maxScore,
         boolean visible,
         ProjectProgressJson progress,
-        Long groupId
+        Long groupId,
+        Long clusterId,
+        OffsetDateTime visibleAfter
 ) {}

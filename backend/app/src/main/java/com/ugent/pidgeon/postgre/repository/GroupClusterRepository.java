@@ -1,11 +1,10 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.GroupClusterEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface GroupClusterRepository extends JpaRepository<GroupClusterEntity, Long> {
     List<GroupClusterEntity> findByCourseId(long courseId);
@@ -28,6 +27,15 @@ public interface GroupClusterRepository extends JpaRepository<GroupClusterEntity
     ) THEN true ELSE false END
 """)
     Boolean usedInProject(long clusterId);
+
+    @Query(value = """
+    SELECT CASE WHEN EXISTS (
+    	SELECT gc.id FROM GroupClusterEntity gc 
+    	JOIN CourseEntity c ON gc.courseId = c.id
+    	WHERE gc.id = ?1 AND c.archivedAt IS NOT NULL
+    ) THEN true ELSE false END
+    """)
+    Boolean inArchivedCourse(long clusterId);
 
     @Query(value = """
     SELECT CASE WHEN EXISTS (

@@ -1,10 +1,9 @@
 package com.ugent.pidgeon.postgre.repository;
 
 import com.ugent.pidgeon.postgre.models.ProjectEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     List<ProjectEntity> findByCourseId(long courseId);
@@ -20,12 +19,9 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
     @Query(value = """
             SELECT CASE WHEN EXISTS (
-                SELECT gu
-                FROM GroupUserEntity gu
-                INNER JOIN GroupEntity g ON gu.groupId = g.id
-                INNER JOIN GroupClusterEntity gc ON g.clusterId = gc.id
-                INNER JOIN ProjectEntity p ON p.groupClusterId = gc.id
-                WHERE gu.userId = ?2 and p.id = ?1
+                SELECT p FROM CourseUserEntity cu
+                INNER JOIN ProjectEntity p ON p.courseId = cu.courseId
+                WHERE cu.userId = ?2 and p.id = ?1
             ) THEN true ELSE false END""")
     Boolean userPartOfProject(long projectId, long userId);
 

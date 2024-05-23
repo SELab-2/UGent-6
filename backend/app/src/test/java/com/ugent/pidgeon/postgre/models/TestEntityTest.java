@@ -1,9 +1,9 @@
 package com.ugent.pidgeon.postgre.models;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestEntityTest {
 
@@ -29,27 +29,32 @@ public class TestEntityTest {
   }
 
   @Test
-  public void testDockerTestId() {
-    long dockerTestId = 1L;
-    testEntity.setDockerTestId(dockerTestId);
-    assertEquals(dockerTestId, testEntity.getDockerTestId());
+  public void testDockerTestScript() {
+    String dockerTestScript = "Docker Test Script";
+    testEntity.setDockerTestScript(dockerTestScript);
+    assertEquals(dockerTestScript, testEntity.getDockerTestScript());
   }
 
   @Test
   public void testStructureTestId() {
-    long structureTestId = 1L;
-    testEntity.setStructureTestId(structureTestId);
-    assertEquals(structureTestId, testEntity.getStructureTestId());
+    String template = "@Testone\nHello World!";
+    testEntity.setStructureTemplate(template);
+    assertEquals(template, testEntity.getStructureTemplate());
   }
 
   @Test
   public void testConstructor() {
-    String dockerImage = "Docker Image";
-    long dockerTestId = 1L;
-    long structureTestId = 1L;
-    TestEntity test = new TestEntity(dockerImage, dockerTestId, structureTestId);
+    String dockerImage = "Docker image";
+    String dockerTestScript = "echo 'hello'";
+    String dockerTestTemplate = "@testone\nHello World!";
+    String structureTestId = "src/";
+
+    TestEntity test = new TestEntity(dockerImage, dockerTestScript, dockerTestTemplate, structureTestId);
+
     assertEquals(dockerImage, test.getDockerImage());
-    assertEquals(dockerTestId, test.getDockerTestId());
-    assertEquals(structureTestId, test.getStructureTestId());
+    assertEquals(dockerTestScript, test.getDockerTestScript());
+    assertEquals(dockerTestTemplate, test.getDockerTestTemplate());
+    assertEquals(structureTestId, test.getStructureTemplate());
+
   }
 }

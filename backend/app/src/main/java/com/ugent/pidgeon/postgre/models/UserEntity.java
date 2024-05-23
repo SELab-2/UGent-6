@@ -2,8 +2,12 @@ package com.ugent.pidgeon.postgre.models;
 
 
 import com.ugent.pidgeon.postgre.models.types.UserRole;
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
 
@@ -34,12 +38,17 @@ public class UserEntity {
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
-    public UserEntity(String name, String surname, String email, UserRole role, String azureId) {
+    @Column(name = "studentnumber")
+    private String studentNumber;
+
+    public UserEntity(String name, String surname, String email, UserRole role, String azureId,
+        String studentNumber) {
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.role = role.toString();
         this.azureId = azureId;
+        this.studentNumber = studentNumber;
     }
 
     public UserEntity() {
@@ -109,6 +118,14 @@ public class UserEntity {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getStudentNumber() {
+        return studentNumber;
+    }
+
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
     }
 }
 

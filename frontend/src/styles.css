@@ -34,10 +34,11 @@ html {
 
 .small-scroll-bar::-webkit-scrollbar {
   width: 3px; /* Adjust scrollbar width */
-  height: 3px;
+  height: 6px;
 }
 
 .small-scroll-bar::-webkit-scrollbar-thumb {
+  padding-top: 50px !important;
   height: 2px; /* Adjust scrollbar height */
   width: 2px;
 }
@@ -71,6 +72,64 @@ html {
   
 }
 
+.template-switch {
+  height: 30px;
+  display: flex;
+  width: 33%;
+}
+
+.template-switch .ant-switch-inner {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.template-switch-active .ant-switch-inner-checked{
+  font-size: 16px !important;
+}
+
+.template-switch-inactive .ant-switch-inner-checked{
+  
+  font-size: 0px !important;
+}
+
+.template-switch-inactive .ant-switch-inner-unchecked{
+  margin-top: 2px !important;
+  font-size: 16px !important;
+}
+
+.template-switch-active .ant-switch-inner-unchecked{
+  width: 0px !important;
+  font-size: 0px !important;
+}
+
+
+
+
+.template-switch-active .ant-switch-handle {
+  height: 20px;
+  width: 30px;
+  margin-top: 3px;
+  margin-right: 3px;
+  margin-left: -15px
+}
+
+.template-switch-inactive .ant-switch-handle {
+  height: 20px;
+  width: 30px;
+  margin-top: 3px;
+  margin-right: -15px;
+  margin-left: 3px
+}
+
+
+
+
+.markdown-textfield-intooltip a {
+  color: #1890ff;
+}
+
 @font-face {
   font-family: 'JetBrains Mono';
   src: url('\theme\fonts\JetBrainsMono-Regular.ttf') format('truetype');
@@ -79,6 +138,54 @@ html {
 
 .ant-popconfirm-description {
   max-width: 250px;
+}
+
+/*** Calendar ***/
+
+.events {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.events .ant-badge-status {
+  width: 100%;
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.notes-month {
+  font-size: 28px;
+  text-align: center;
+}
+.notes-month section {
+  font-size: 28px;
+}
+
+.ant-table-row > td.ant-table-column-sort {
+  background: unset ;
+}
+
+.modal-no-icon .ant-modal-confirm-paragraph, .modal-no-icon .ant-modal-confirm-body {
+
+  display: initial;
+}
+
+
+.ant-modal-content {
+  border-radius: 16px !important;
+}
+
+.dark-theme .ant-modal-content {
+  border: 1.5px solid #444 !important;
+  
+}
+
+.select-icon {
+  width: 1em;
+  margin-right: 0.5rem;
+  position: relative;
+  top: 2px;
 }
 
 /* *************************** Landing page *************************** */
@@ -221,8 +328,29 @@ html {
 
 
 
+
 @media screen and (max-width: 600px) {
   .nav-logo {
     display: none;
   }
+}
+
+.list-item-hover {
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  width: 300px;
+  margin-left: -23px;
+}
+
+.dark-theme .list-item-hover:hover {
+  background-color: rgba(255 255 255 / 5%);
+}
+
+.light-theme .list-item-hover:hover {
+  background-color: rgba(0 0 0 / 5%);
+}
+
+.ant-picker-body th {
+  font-weight: bold !important;
+  font-size: large !important;
 }

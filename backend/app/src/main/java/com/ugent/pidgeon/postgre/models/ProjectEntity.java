@@ -1,7 +1,11 @@
 package com.ugent.pidgeon.postgre.models;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
 
@@ -37,6 +41,10 @@ public class ProjectEntity {
 
         @Column(name="max_score")
         private Integer maxScore;
+
+        @Column(name = "visible_after")
+        private OffsetDateTime visibleAfter;
+
 
         public ProjectEntity(long courseId, String name, String description, long groupClusterId, Long testId, Boolean visible, Integer maxScore, OffsetDateTime deadline) {
                 this.courseId = courseId;
@@ -123,5 +131,13 @@ public class ProjectEntity {
 
         public void setDeadline(OffsetDateTime deadline) {
                 this.deadline = deadline;
+        }
+
+        public OffsetDateTime getVisibleAfter() {
+                return visibleAfter;
+        }
+
+        public void setVisibleAfter(OffsetDateTime visibleAfter) {
+                this.visibleAfter = visibleAfter;
         }
 }
