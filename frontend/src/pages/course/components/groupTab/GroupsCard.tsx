@@ -63,6 +63,7 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
             <Popconfirm
               title={t("course.deleteGroup")}
               onConfirm={(e) => {e?.stopPropagation();deleteGroupCluster(cluster.clusterId)}}
+              onCancel={(e) => {e?.stopPropagation()}}
               description={t("course.deleteConfirm")}
               okButtonProps={{
                 danger: true,
