@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { GET_Responses } from "../../../@types/requests"
 import { ApiRoutes } from "../../../@types/requests"
 import { ArrowLeftOutlined, DownloadOutlined } from "@ant-design/icons"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import "@fontsource/jetbrains-mono"
 import SubmissionContent from "./SubmissionCardContent"
 import useApi from "../../../hooks/useApi"
@@ -15,9 +15,12 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
   const { t } = useTranslation()
   const API = useApi()
 
+  const location = useLocation()
+  const index = new URLSearchParams(location.search).get("index")
 
 
   const downloadFile = async (route: ApiRoutes.SUBMISSION_FILE | ApiRoutes.SUBMISSION_ARTIFACT, filename: string) => {
+
     const response = await API.GET(
       route,
       {
@@ -56,10 +59,10 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
         },
         title: {
           fontSize: "1.1em",
-        },
+       },
       }}
       type="inner"
-      title= {t("submission.submission", {number: submission.submissionId})}
+      title= {t("submission.submission") + (index ? ` #${index}` : "") }
       extra={<Space>
 
         {submission.fileUrl && <Button key="file" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>}

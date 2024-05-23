@@ -233,7 +233,7 @@
     "breadcrumbs": {
       "editPage": "Edit project",
       "submit": "Submit",
-      "submission": "Submission #{{number}}"
+      "submission": "Submission"
     }
   },
   "group": {
@@ -249,7 +249,7 @@
   },
 
   "submission": {
-    "submission": "Submission #{{number}}",
+    "submission": "Submission",
     "running": "Running tests",
     "submittedFiles": "Submitted files:",
     "structuretest": "Structure test results:",
@@ -264,7 +264,7 @@
     "optional": "optional",
     "structureTestSuccess": "Submission meets the structure requirements",
     "structureTestFailed": "Submission does not meets the structure requirements",
-    "tests": "Automated tests:",
+    "tests": "Automated tests",
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."

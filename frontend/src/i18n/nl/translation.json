@@ -235,7 +235,7 @@
     "breadcrumbs": {
       "editPage": "Project aanpassen",
       "submit": "Indienen",
-      "submission": "Indiening #{{number}}"
+      "submission": "Indiening"
     }
   },
   "group": {
@@ -251,7 +251,7 @@
   },
   
   "submission": {
-    "submission": "Indiening #{{number}}",
+    "submission": "Indiening",
     "submittedFiles": "Ingediende bestanden:",
     "running": "Testen uitvoeren...",
     "structuretest": "Resultaten structuurtest:",
