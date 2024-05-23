@@ -1,4 +1,4 @@
-import { Button, Input, List, Table, Tooltip, Typography } from "antd";
+import { Button, Input, List, Space, Table, Tooltip, Typography } from "antd";
 import { FC, useMemo, useState } from "react";
 import { ProjectSubmissionsType } from "./SubmissionsTab";
 import { TableProps } from "antd/lib";
@@ -27,7 +27,8 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   const { message } = useAppApi();
   const API = useApi();
   const [editingFeedback, setEditingFeedback] = useState<{ [key: number]: string }>({});
-  const [isEditing, setIsEditing] = useState<{ [key: number]: boolean }>({});
+  const [isEditingFeedback, setIsEditingFeedback] = useState<{ [key: number]: boolean }>({});
+  const [oldFeedback, setOldFeedback] = useState<{ [key: number]: string }>({});
 
   const updateTable = async (groupId: number, feedback: Omit<PUT_Requests[ApiRoutes.PROJECT_SCORE], "projectId" | "groupId">, usePost: boolean) => {
     if (!projectId || submissions === null || !groupId) return console.error("No projectId or submissions or groupId found");
@@ -85,8 +86,8 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         delete newState[groupId];
         return newState;
       });
-      setIsEditing((prev) => ({ ...prev, [groupId]: false }));
     }
+    setIsEditingFeedback((prev) => ({ ...prev, [groupId]: false }));
   };
 
   const downloadFile = async (route: ApiRoutes.SUBMISSION_FILE | ApiRoutes.SUBMISSION_ARTIFACT, filename: string) => {
@@ -120,8 +121,12 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
   };
 
   const handleEditFeedback = (groupId: number) => {
-    setIsEditing((prev) => ({ ...prev, [groupId]: true }));
+    setIsEditingFeedback((prev) => {
+      setOldFeedback((prev) => ({ ...prev, [groupId]: editingFeedback[groupId] }));
+      return { ...prev, [groupId]: true }
+    })
   };
+
 
   const columns: TableProps<ProjectSubmissionsType>["columns"] = useMemo(() => {
     const cols: TableProps<ProjectSubmissionsType>["columns"] = [
@@ -173,7 +178,11 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
         render: (s: ProjectSubmissionsType) => (
             <Typography.Text
                 type={!s.feedback || s.feedback.score === null ? "secondary" : !project || s.feedback.score < project.maxScore! / 2 ? "danger" : undefined}
-                editable={{ onChange: (e) => updateScore(s, e), maxLength: 10 }}
+                editable={{ 
+                  onChange: (e) => updateScore(s, e), 
+                  maxLength: 10,
+                  text: s.feedback?.score ? s.feedback?.score?.toString() :  "",
+                }}
             >
               {s.feedback?.score ?? t("project.noScoreLabel")}
             </Typography.Text>
@@ -208,7 +217,7 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
                     <Typography.Text strong>{t("project.feedback")}:</Typography.Text>
                     <br/>
                     <br/>
-                    {isEditing[g.group.groupId] ? (
+                    {isEditingFeedback[g.group.groupId] ? (
                         <>
                           <Input.TextArea
                               autoSize={{ minRows: 3, maxRows: 5 }}
@@ -220,13 +229,31 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
                                   }))
                               }
                           />
+                          <Space>
+                              <Button
+                                style={{ float: "right", marginTop: "0.5rem" }}
+                                onClick={() => updateFeedback(g.group.groupId)}
+                                color="primary"
+                                icon={<SaveOutlined />}
+                                title={t("project.saveFeedback")}
+                              >
+                              </Button>
 
-                          <Button
-                            style={{float: "right", marginTop: "0.5rem"}}
-                            onClick={() => updateFeedback(g.group.groupId)}
-                            color="primary"
-                            icon={<SaveOutlined/>}>
-                          </Button>
+                            <Button
+                              style={{float: "right", marginTop: "0.5rem", marginRight: "0.5rem"}}
+                              onClick={() => setIsEditingFeedback((prev) => {
+                                setEditingFeedback((prev) => {
+                                  const feedback = oldFeedback[g.group.groupId];
+                                  return { ...prev, [g.group.groupId]: feedback };
+                                })
+                                return { ...prev, [g.group.groupId]: false }
+                              })}
+                              color="primary"
+                              danger={true}
+                              >
+                              {t("cancel")}
+                            </Button>
+                          </Space>
                         </>
                     ) : (
                         <>
