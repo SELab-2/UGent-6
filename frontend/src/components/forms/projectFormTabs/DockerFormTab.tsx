@@ -1,18 +1,62 @@
-import { UploadOutlined } from "@ant-design/icons"
-import {Button, Form, Input, Switch, Upload} from "antd"
+import { CodepenCircleFilled, InboxOutlined, UploadOutlined } from "@ant-design/icons"
+import { Button, Dropdown, Form, Input, Menu, Select, SelectProps, Switch, Upload } from "antd"
+import { TextAreaProps } from "antd/es/input"
 import { FormInstance } from "antd/lib"
-import {FC, useEffect} from "react"
+import React, { FC, useEffect, useLayoutEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import useAppApi from "../../../hooks/useAppApi"
 import MarkdownTooltip from "../../common/MarkdownTooltip"
 import MarkdownTextfield from "../../input/MarkdownTextfield"
+import TextArea from "antd/es/input/TextArea"
+
+import BashIcon from "../../../../public/docker_langauges/bash.svg"
+import PythonIcon from "../../../../public/docker_langauges/python.svg"
+import NodeIcon from "../../../../public/docker_langauges/node-js.svg"
+import HaskellIcon from "../../../../public/docker_langauges/haskell.svg"
+import Custom from "../../../../public/docker_langauges/custom.svg"
+
+
+type DockerLanguage = "bash" | "python" | "node" | "haskell" | "custom"
+const languageOptions: Record<DockerLanguage, string> = {
+  bash: "fedora",
+  python: "python",
+  node: "node",
+  haskell: "haskell",
+  custom: ""
+}
+
+const imageToLanguage: Record<string, DockerLanguage> = {
+  fedora: "bash",
+  python: "python",
+  node: "node",
+  haskell: "haskell",
+}
+
+
+const languagesSelectorItems:SelectProps["options"] = [
+  {
+    label:  <><img src={BashIcon} className="select-icon" />Bash</>,
+    value: "bash",
+  },{
+    label:  <><img src={PythonIcon} className="select-icon" />Python</>,
+    value: "python",
+  }, {
+    label:  <><img src={NodeIcon} className="select-icon" />NodeJS</>,
+    value: "node",
+  }, {
+    label:  <><img src={HaskellIcon} className="select-icon" />Haskell</>,
+    value: "haskell",
+  }, {
+    label:  <><img src={Custom} className="select-icon" />Custom</>,
+    value: "custom",
+  }
+]
 
 
 
 const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
   const { t } = useTranslation()
-  const {message} = useAppApi()
-
+  const { message } = useAppApi()
   const dockerImage = Form.useWatch("dockerImage", form)
   const dockerTemplate = Form.useWatch("dockerTemplate", form)
   const dockerMode = Form.useWatch("dockerMode", form)
@@ -28,6 +72,8 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         form.validateFields(["dockerScript", "dockerTemplate"])
     }, [dockerDisabled])
 
+    
+  const dockerImageSelect= useMemo(()=>  imageToLanguage[dockerImage] || "custom",[dockerImage])
 
   function isValidTemplate(template: string): string {
     if (template.length === 0) {
@@ -56,7 +102,7 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           const isDescription = line.length >= 13 && line.substring(0, 13).toLowerCase() === ">description="
           // option lines
           if (line.toLowerCase() !== ">required" && line.toLowerCase() !== ">optional" && !isDescription) {
-            return t("project.tests.dockerTemplateValidation.inValidOptions", { line:lineNumber.toString() })
+            return t("project.tests.dockerTemplateValidation.inValidOptions", { line: lineNumber.toString() })
           }
         } else {
           isConfigurationLine = false
@@ -69,31 +115,22 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
     return ""
   }
 
-
-
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
-      return e;
+      return e
     }
-    return e?.fileList;
-  };
+    return e?.fileList
+  }
 
-  let switchClassName = 'template-switch'
+  let switchClassName = "template-switch"
   let scriptPlaceholder
-  
+
   if (withTemplate) {
-    switchClassName += ' template-switch-active'
-    scriptPlaceholder = "bash /shared/input/helloworld.sh > \"/shared/output/helloWorldTest\"\n"+
-    "bash /shared/input/helloug.sh > \"/shared/output/helloUGent\"\n"
+    switchClassName += " template-switch-active"
+    scriptPlaceholder = 'bash /shared/input/helloworld.sh > "/shared/output/helloWorldTest"\n' + 'bash /shared/input/helloug.sh > "/shared/output/helloUGent"\n'
   } else {
-    switchClassName += ' template-switch-inactive'
-    scriptPlaceholder = "output=$(bash /shared/input/helloworld.sh)\n"+ 
-    "if [[ \"$output\" == \"Hello World\" ]]; then \n"+
-    "  echo 'Test one is successful\n"+
-    "  echo 'PUSH ALLOWED' > /shared/output/testOutput\n"+ 
-    "else\n"+
-    "  echo 'Test one failed: script failed to print \"Hello World\"'\n"+
-    "fi"
+    switchClassName += " template-switch-inactive"
+    scriptPlaceholder = "output=$(bash /shared/input/helloworld.sh)\n" + 'if [[ "$output" == "Hello World" ]]; then \n' + "  echo 'Test one is successful\n" + "  echo 'PUSH ALLOWED' > /shared/output/testOutput\n" + "else\n" + "  echo 'Test one failed: script failed to print \"Hello World\"'\n" + "fi"
   }
   
 
@@ -110,11 +147,16 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
         name="dockerImage"
       >
         <Input
-          style={{ marginTop: "8px" }}
+          addonBefore={
+            <Select
+              style={{ width: 150 }}
+              value={dockerImageSelect}
+              onChange={(val:DockerLanguage) => form.setFieldValue("dockerImage", languageOptions[val])}
+              options={languagesSelectorItems}
+            />}
           placeholder={t("project.tests.dockerImagePlaceholder")}
         />
       </Form.Item>
-
       <>
         <Form.Item
           rules={[{ required: !dockerDisabled, message: t("project.tests.dockerScriptRequired") }]}
@@ -127,10 +169,10 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
           }
           name="dockerScript"
         >
-          <Input.TextArea
+          <TextArea
             disabled={dockerDisabled}
             autoSize={{ minRows: 8 }}
-            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto"}}
+            style={{ fontFamily: "monospace", whiteSpace: "pre", overflowX: "auto" }}
             placeholder={scriptPlaceholder}
           />
         </Form.Item>

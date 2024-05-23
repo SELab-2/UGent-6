@@ -181,6 +181,13 @@ html {
   
 }
 
+.select-icon {
+  width: 1em;
+  margin-right: 0.5rem;
+  position: relative;
+  top: 2px;
+}
+
 /* *************************** Landing page *************************** */
 
 .landing-page * {

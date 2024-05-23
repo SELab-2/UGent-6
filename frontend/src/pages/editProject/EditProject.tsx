@@ -43,10 +43,9 @@ const EditProject: React.FC = () => {
             dockerImage: null,
             dockerMode: false
         }
+
         if (response.success) {
             const tests = response.response.data
-            console.log(tests)
-
             if (tests.extraFilesName) {
                 const downloadLink = AppRoutes.DOWNLOAD_PROJECT_TESTS.replace(":projectId", projectId).replace(":courseId", courseId!)
 
@@ -75,7 +74,6 @@ const EditProject: React.FC = () => {
         }
 
         form.setFieldsValue(formVals)
-
         setInitialDockerValues(formVals)
     }
 
@@ -88,6 +86,9 @@ const EditProject: React.FC = () => {
 
     const handleCreation = async () => {
         const values: ProjectFormData & DockerFormData = form.getFieldsValue()
+
+        console.log(values)
+
         if (values.visible) {
             values.visibleAfter = null
         }
