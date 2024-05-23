@@ -1,4 +1,5 @@
 import { Card, Col, Row, Space, Tooltip, Typography, theme } from "antd"
+import { EditOutlined, CheckOutlined, CopyOutlined } from "@ant-design/icons"
 import useCourse from "../../../../hooks/useCourse"
 import MarkdownTextfield from "../../../../components/input/MarkdownTextfield"
 import { InfoCircleOutlined } from "@ant-design/icons"
@@ -75,8 +76,12 @@ const InformationTab = () => {
             <Typography.Text strong>{t("course.inviteLink")}:  <Tooltip title={t("course.inviteLinkInfo")}>
               <InfoCircleOutlined />
             </Tooltip></Typography.Text> <br />
-            <Typography.Link copyable 
+            <Typography.Link copyable={{
+              tooltips: [t('course.copyLink'), t('course.copyLinkSuccess')],
+              icon: [<CopyOutlined style={{ fontSize: '18px', color: '#1890ff' }} />, <CheckOutlined style={{ fontSize: '18px', color: '#52c41a' }} />],
+            }} 
             editable={{
+              icon: <EditOutlined style={{ fontSize: '18px', color: '#1890ff' }} />,
               onStart: () => openInviteModal({course, modal, onChange: setCourse, title: t("course.invitePeopleToCourse")}),
             }}
             style={{color:token.colorLink, cursor:"default"}}

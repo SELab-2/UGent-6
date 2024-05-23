@@ -76,6 +76,8 @@ const GroupList: FC<{ locked: ClusterType["lockGroupsAfter"]; groups: GroupType[
   const isCourseAdmin = useIsCourseAdmin()
   const API = useApi()
 
+  groups?.sort((a, b) => a.groupId - b.groupId)
+
   const isLocked = useMemo(() => {
     if (!locked) return false
     return new Date(locked).getTime() < Date.now()
@@ -161,7 +163,7 @@ const GroupList: FC<{ locked: ClusterType["lockGroupsAfter"]; groups: GroupType[
         )}
       />
       <CourseAdminView>
-      {clusterId && <div style={{ textAlign: "center" }}>
+      {clusterId && groups !== null && <div style={{ textAlign: "center" }}>
           <Button
             type="text"
             icon={<PlusOutlined />}

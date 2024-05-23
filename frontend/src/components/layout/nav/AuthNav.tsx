@@ -1,5 +1,5 @@
 
-import { Breadcrumb, Dropdown, MenuProps, Typography } from "antd"
+import {Breadcrumb, Dropdown, MenuProps, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 
 import { UserOutlined, BgColorsOutlined, DownOutlined, LogoutOutlined, PlusOutlined } from "@ant-design/icons"

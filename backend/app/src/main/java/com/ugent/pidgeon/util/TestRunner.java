@@ -41,6 +41,7 @@ public class TestRunner {
     // Init container and add input files
     try {
 
+
       model.addZipInputFiles(file);
       Path path = Filehandler.getTestExtraFilesPath(projectId).resolve(Filehandler.EXTRA_TESTFILES_FILENAME);
       if (Files.exists(path)) {

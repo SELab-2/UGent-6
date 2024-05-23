@@ -171,6 +171,16 @@ html {
   display: initial;
 }
 
+
+.ant-modal-content {
+  border-radius: 16px !important;
+}
+
+.dark-theme .ant-modal-content {
+  border: 1.5px solid #444 !important;
+  
+}
+
 /* *************************** Landing page *************************** */
 
 .landing-page * {

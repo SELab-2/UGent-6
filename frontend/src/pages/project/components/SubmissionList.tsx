@@ -21,7 +21,7 @@ const SubmissionList: FC<{ submissions: GroupSubmissionType[] | null, indices: M
       //  return a.submissionId - b.submissionId
       //},
       render: (submission: GroupSubmissionType, _, index:number) => (
-        <Link to={AppRoutes.SUBMISSION.replace(":courseId",courseId!).replace(":projectId",submission.projectId+"").replace(":submissionId",submission.submissionId+"")}>
+        <Link to={AppRoutes.SUBMISSION.replace(":courseId",courseId!).replace(":projectId",submission.projectId+"").replace(":submissionId",submission.submissionId+"")+"?index="+indices.get(submission.submissionId)?.toString()}>
           <Button type="link">#{indices ? indices.get(submission.submissionId)?.toString() : ""}</Button>
         </Link>
       ),

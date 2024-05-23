@@ -22,7 +22,10 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     if (!courseId) return // if course is null that means it hasn't been fetched yet by the parent component
     const res = await API.GET(ApiRoutes.COURSE_CLUSTERS, { pathValues: { id: courseId } })
     if (!res.success) return
-    setGroups(res.response.data)
+    let groups = res.response.data
+    // Sort based on name
+    groups = groups.sort((a, b) => a.name.localeCompare(b.name))
+    setGroups(groups)
   }
 
   const deleteGroupCluster = async (clusterId: number) => {
@@ -37,7 +40,6 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
       }
     )
     if (!res.success) return
-    console.log(res.response.data)
     setGroups(groups.filter((c) => c.clusterId !== clusterId))
   }
 
@@ -45,8 +47,9 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     () =>
       groups?.map((cluster) => ({
         key: cluster.clusterId.toString(),
-        label: cluster.name,
-
+        label:  (
+          <div style={{ paddingTop: "1.6px" }}>{cluster.name}</div> 
+        ),
         children: (
           <GroupList
             onChanged={fetchGroups}
@@ -59,8 +62,13 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
           <CourseAdminView>
             <Popconfirm
               title={t("course.deleteGroup")}
-              onConfirm={() => deleteGroupCluster(cluster.clusterId)}
+              onConfirm={(e) => {e?.stopPropagation();deleteGroupCluster(cluster.clusterId)}}
+              onCancel={(e) => {e?.stopPropagation()}}
               description={t("course.deleteConfirm")}
+              okButtonProps={{
+                danger: true,
+              }}
+              okText={t("delete")}
             >
               <Tooltip
                 title={t("course.deleteGroup")}

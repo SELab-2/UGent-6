@@ -131,7 +131,6 @@ const GroupMembersTransfer: FC<{ value?: GroupMembers,groups: GroupType[]; onCha
       for (let i = 0; i < groups.length; i++) {
         const group = groups[i]
         const groupMembers = members.splice(0, group.capacity)
-        // @ts-ignore //TODO: fix the types so i can remove the ts ignore
         randomGroups[group.name] = groupMembers.map((m) => m.user.userId)
       }
       // setTargetKeys(randomGroups)

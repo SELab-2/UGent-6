@@ -72,7 +72,14 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
     if (scoreStr === "") score = null;
     else score = parseFloat(scoreStr);
     if (isNaN(score as number)) score = null;
-    if (score !== null && score > project.maxScore) return message.error(t("project.scoreTooHigh"));
+    if (score !== null ) {
+      if (score > project.maxScore) {
+        return message.error(t("project.scoreTooHigh"))
+      } else if (score < 0) return message.error(t("project.scoreNegative"));
+      
+    
+    };
+    
     await updateTable(s.group.groupId, { score: score ?? null, feedback: s.feedback?.feedback ?? "" }, s.feedback === null);
   };
 

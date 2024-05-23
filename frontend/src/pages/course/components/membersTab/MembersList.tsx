@@ -104,7 +104,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
               relation === "creator" ? (
                 <Dropdown
                   disabled={u.user.userId === user?.id}
-                  menu={{ items, onClick: (e) => onRoleChange(u.user.userId, e.key as CourseRelation), defaultSelectedKeys: [u.relation] }}
+                  menu={{ items, onClick: (e) => onRoleChange(u.user.userId, e.key as CourseRelation), selectedKeys: [u.relation] }}
                 >
                   <a onClick={(e) => e.preventDefault()}>
                     <Space>

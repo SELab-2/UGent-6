@@ -19,7 +19,6 @@ const SubmissionTab: FC<{ projectId: number; courseId: number; testSubmissions?:
     let ignore = false
     API.GET(testSubmissions ? ApiRoutes.PROJECT_TEST_SUBMISSIONS : ApiRoutes.PROJECT_GROUP_SUBMISSIONS, { pathValues: { projectId: project.projectId, groupId: project.groupId ?? "" } }).then((res) => {
       if (!res.success || ignore) return
-      console.log(res.response.data)
       //this is sorts the submissions by submission time, with the oldest submission first
       const ascending = res.response.data.sort((a, b) => new Date(a.submissionTime).getTime() - new Date(b.submissionTime).getTime())
       const tmp = new Map()

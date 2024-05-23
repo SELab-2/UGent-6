@@ -102,8 +102,7 @@ const SubmitStructure: FC<{ structure: string | null; hideEmpty?: boolean }> = (
       defaultExpandAll
       autoExpandParent
       expandedKeys={expandedKeys}
-      onActiveChange={console.log}
-      onExpand={(e,a) => {console.log(e,a); setExpandedKeys(e)}}
+      onExpand={(e) =>  setExpandedKeys(e)}
       selectable={false}
       treeData={treeData.tree}
     />
