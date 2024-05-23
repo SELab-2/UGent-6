@@ -85,7 +85,7 @@ public class DataGeneration {
                     courseController.updateCourseMember(auth, course.courseId(), rr, auth.getUserEntity().getId());
                     cmrj.setRelation(CourseRelation.enrolled.toString());
                     ProjectResponseJson project =  makeProject(auth, course, i % 3);
-                    for (int j = 0; j < 10; j++) {
+                    for (int j = 0; j < 3; j++) {
                         UserEntity u = getStudentUserEntity(i, j);
                         userRepository.save(u);
                         cmrj.setUserId(u.getId());
@@ -188,9 +188,9 @@ public class DataGeneration {
         return new UserEntity(
                 "student",
                 "number ".concat(String.valueOf(idx)),
-                "student.number".concat(String.valueOf(idx)).concat("@ugent.be"),
+                "student_number_".concat(idx.toString()).concat(auth.getUserEntity().getEmail()),
                 UserRole.student,
-                "azure_id_number_".concat(String.valueOf(idx)),
+                "azure_id_number_".concat(String.valueOf(idx)).concat(auth.getUserEntity().getId()),
                 String.valueOf(idx * 1000)
         );
     }
