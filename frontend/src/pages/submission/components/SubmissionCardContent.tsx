@@ -11,8 +11,15 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 const SubmissionContent: FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { t } = useTranslation();
 
+  let subtest_length = 1;
+
+  if (submission.dockerFeedback?.type === "TEMPLATE") {
+    subtest_length = submission.dockerFeedback.feedback.subtests.length;
+  }
+
+  const [showParsedContent, setShowParsedContent] = useState<boolean[]>(Array(subtest_length).fill(false));
+
   const TestResults: React.FC<SubTest[]> = (subTests) => {
-    const [showParsedContent, setShowParsedContent] = useState<boolean[]>(Array(subTests.length).fill(false));
     
     const handleCheckboxChange = (index: number) => (e: CheckboxChangeEvent) => {
       setShowParsedContent(prevState => {
