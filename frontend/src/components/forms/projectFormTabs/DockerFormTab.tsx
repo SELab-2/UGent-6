@@ -9,11 +9,11 @@ import MarkdownTooltip from "../../common/MarkdownTooltip"
 import MarkdownTextfield from "../../input/MarkdownTextfield"
 import TextArea from "antd/es/input/TextArea"
 
-import BashIcon from "../../../../public/docker_langauges/bash.svg"
-import PythonIcon from "../../../../public/docker_langauges/python.svg"
-import NodeIcon from "../../../../public/docker_langauges/node-js.svg"
-import HaskellIcon from "../../../../public/docker_langauges/haskell.svg"
-import Custom from "../../../../public/docker_langauges/custom.svg"
+import BashIcon from "../../../assets/docker_langauges/bash.svg"
+import PythonIcon from "../../../assets/docker_langauges/python.svg"
+import NodeIcon from "../../../assets/docker_langauges/node-js.svg"
+import HaskellIcon from "../../../assets/docker_langauges/haskell.svg"
+import Custom from "../../../assets/docker_langauges/custom.svg"
 
 
 type DockerLanguage = "bash" | "python" | "node" | "haskell" | "custom"
