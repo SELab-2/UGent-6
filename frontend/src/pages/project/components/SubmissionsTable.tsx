@@ -72,14 +72,14 @@ const SubmissionsTable: FC<{ submissions: ProjectSubmissionsType[] | null; onCha
     else score = parseFloat(scoreStr);
     if (isNaN(score as number)) score = null;
     if (score !== null && score > project.maxScore) return message.error(t("project.scoreTooHigh"));
-    await updateTable(s.group.groupId, { score: score || null, feedback: s.feedback?.feedback ?? "" }, s.feedback === null);
+    await updateTable(s.group.groupId, { score: score ?? null, feedback: s.feedback?.feedback ?? "" }, s.feedback === null);
   };
 
   const updateFeedback = async (groupId: number) => {
     const feedback = editingFeedback[groupId];
     if (feedback !== undefined) {
       const s = submissions?.find(s => s.group.groupId === groupId)
-      await updateTable(groupId, { feedback, score: s?.feedback?.score || null }, s?.feedback === null);
+      await updateTable(groupId, { feedback, score: s?.feedback?.score ?? null }, s?.feedback === null);
       setEditingFeedback((prev) => {
         const newState = { ...prev };
         delete newState[groupId];
