@@ -1,8 +1,8 @@
 ![badge](https://github.com/SELab-2/UGent-6/actions/workflows/backend_testing.yaml/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+<img src="https://github.com/SELab-2/UGent-6/assets/15960534/bf16e825-2d96-46af-8dc0-12ec03ba545b" width="700">
 
-![transp](https://github.com/SELab-2/UGent-6/assets/15960534/b259ab04-d0bf-4409-af4e-d77a89e37f50)
 
 
 | Student                                            | E-mailadres                 |
@@ -16,12 +16,10 @@
 | [Tristan Verbeken](https://github.com/TR1VER)       |  tristan.verbeken@ugent.be|
 
 
-https://github.com/SELab-2/UGent-6/wiki
-
+[wiki documentation](https://github.com/SELab-2/UGent-6/wiki)
 
 [api documentation](https://apidog.com/apidoc/project-467959)
-## Tree view of 
-the project
+## Tree view of the project
 
 - backend
   - app
