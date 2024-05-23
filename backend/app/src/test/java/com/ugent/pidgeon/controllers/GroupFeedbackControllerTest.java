@@ -32,6 +32,8 @@ import com.ugent.pidgeon.util.GroupUtil;
 import com.ugent.pidgeon.util.Pair;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
