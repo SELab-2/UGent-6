@@ -19,7 +19,6 @@ const ProjectRoutes = () => {
   const { GET } = useApi()
 
   useEffect(() => {
-    // TODO make api call `projectId`
     if (!projectId) return console.error("ProjectId is not defined")
 
     let ignore = false

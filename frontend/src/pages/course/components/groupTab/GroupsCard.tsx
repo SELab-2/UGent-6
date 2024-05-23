@@ -37,7 +37,6 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
       }
     )
     if (!res.success) return
-    console.log(res.response.data)
     setGroups(groups.filter((c) => c.clusterId !== clusterId))
   }
 
