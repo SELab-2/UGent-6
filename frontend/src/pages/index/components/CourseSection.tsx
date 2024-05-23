@@ -19,6 +19,7 @@ export type CourseProjectList = CourseProjectsType[string][] | null
 
 const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }> = ({ projects, onOpenNew }) => {
   const { courses } = useUser()
+  const user = useUser().user
   const [courseProjects, setCourseProjects] = useState<CourseProjectsType | null>(null)
   const [adminCourseProjects, setAdminCourseProjects] = useState<CourseProjectsType | null>(null)
   const [archivedCourses, setArchivedCourses] = useState<boolean>(false)
@@ -67,8 +68,6 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
     return () => (ignore = true)
   }, [courses, projects])
 
-  console.log(courseProjects);
-
   const [filteredCourseProjects, filteredAdminCourseProjects, courseProjectsList, adminCourseProjectsList, yearOptions]: [CourseProjectList, CourseProjectList, CourseProjectList, CourseProjectList, number[] | null] = useMemo(() => {
     // Filter courses based on selected year
     if (courseProjects === null || adminCourseProjects === null) return [null, null, [], [], null]
@@ -84,67 +83,81 @@ const CourseSection: FC<{ projects: ProjectsType | null; onOpenNew: () => void }
   }, [courseProjects, adminCourseProjects, selectedYear])
 
   const YearDropdown = () => (
-    <>
-      {yearOptions && yearOptions.length > 1 && (
-        <div style={{ paddingLeft: "1rem", marginBottom: 0, paddingBottom: 0 }}>
-          <Select
-            variant="borderless"
-            value={selectedYear}
-            onChange={(value: number) => setSelectedYear(value)}
-            style={{ width: 120 }}
-          >
-            {yearOptions.map((year) => (
-              <Option
-                key={year}
-                value={year}
-              >{`${year} - ${year + 1}`}</Option>
-            ))}
-          </Select>
-        </div>
-      )}
-    </>
+      <>
+        {yearOptions && yearOptions.length > 1 && (
+            <div style={{ paddingLeft: "1rem", marginBottom: 0, paddingBottom: 0 }}>
+              <Select
+                  variant="borderless"
+                  value={selectedYear}
+                  onChange={(value: number) => setSelectedYear(value)}
+                  style={{ width: 120 }}
+              >
+                {yearOptions.map((year) => (
+                    <Option
+                        key={year}
+                        value={year}
+                    >{`${year} - ${year + 1}`}</Option>
+                ))}
+              </Select>
+            </div>
+        )}
+      </>
   )
 
-  const showYourCourses = !!filteredCourseProjects?.length || !filteredAdminCourseProjects?.length
+
+  const showYourCourses = user?.role === "student" || (filteredCourseProjects?.length === undefined || filteredCourseProjects?.length > 0)
+  const showMyCourses = user?.role !== "student" || (filteredAdminCourseProjects?.length === undefined || filteredAdminCourseProjects?.length > 0)
   return (
-    <>
-      {/* Dropdown for selecting year */}
+      <>
+        {/* Dropdown for selecting year */}
 
-     {!!showYourCourses && <HorizontalCourseScroll
-        title={t("home.yourCourses")}
-        projects={filteredCourseProjects}
-        onOpenNew={onOpenNew}
-        showMore={archivedCourses || courseProjectsList.length > 2}
-        showPlus={!filteredAdminCourseProjects?.length}
-        extra={YearDropdown}
-        allOptions={showYourCourses}
-        type="enrolled"
-      />}
-  
+        {showYourCourses && (
+            <HorizontalCourseScroll
+                title={t("home.yourCourses")}
+                projects={filteredCourseProjects}
+                onOpenNew={onOpenNew}
+                showMore={archivedCourses || courseProjectsList.length > 2}
+                showPlus={false}
+                extra={YearDropdown}
+                allOptions={showYourCourses}
+                type="enrolled"
+            />
+        )}
 
-      { !!filteredAdminCourseProjects?.length && <HorizontalCourseScroll
-        title={t("home.myCourses")}
-        projects={filteredAdminCourseProjects}
-        onOpenNew={onOpenNew}
-        showMore={archivedCourses || adminCourseProjectsList.length > 2}
-        extra={YearDropdown}
-        showPlus={!!filteredAdminCourseProjects?.length}
-        allOptions={!!filteredAdminCourseProjects?.length && !filteredCourseProjects?.length}
-        type="admin"
-      />}
+        {/* No courses messages */}
+        {showYourCourses && (filteredCourseProjects?.length === undefined || filteredCourseProjects?.length === 0) && (
+                <Typography.Text
+                    style={{
+                      paddingLeft: "2rem",
+                    }}
+                >
+                  {t("home.noCoursesStudent")}
+                </Typography.Text>
+            )}
 
-     
+        {showMyCourses && <HorizontalCourseScroll
+            title={t("home.myCourses")}
+            projects={filteredAdminCourseProjects}
+            onOpenNew={onOpenNew}
+            showMore={archivedCourses || adminCourseProjectsList.length > 2}
+            extra={YearDropdown}
+            showPlus={true}
+            allOptions={!!filteredAdminCourseProjects?.length && !filteredCourseProjects?.length}
+            type="admin"
+        />}
 
-      {filteredCourseProjects !== null && courseProjectsList.length === 0 && adminCourseProjectsList.length === 0 && (
-        <Typography.Text
-          style={{
-            paddingLeft: "2rem",
-          }}
-        >
-          {t("home.noCourses")}
-        </Typography.Text>
-      )}
-    </>
+        
+        {showMyCourses &&  ( (filteredAdminCourseProjects?.length === undefined || filteredAdminCourseProjects?.length === 0) ) &&
+            user?.role !== "student" && (
+                <Typography.Text
+                    style={{
+                      paddingLeft: "2rem",
+                    }}
+                >
+                  {t("home.noCoursesTeacher")}
+                </Typography.Text>
+            )}
+      </>
   )
 }
 

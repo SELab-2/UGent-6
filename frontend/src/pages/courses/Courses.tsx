@@ -13,8 +13,6 @@ const Courses = () => {
   const [filter, setFilter] = useState<string>("")
   const [ascendingOrder, setAscendingOrder] = useState<"asc" | "desc">("asc")
 
-  console.log(courses)
-
   // Get 'role' query string
   let role = new URLSearchParams(location.search).get("role")
   if (role !== "enrolled" && role !== "admin") {

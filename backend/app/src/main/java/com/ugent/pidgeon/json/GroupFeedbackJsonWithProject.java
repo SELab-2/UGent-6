@@ -6,12 +6,12 @@ public class GroupFeedbackJsonWithProject {
   private String projectUrl;
   private GroupFeedbackJson groupFeedback;
 
-  private float maxScore;
+  private Integer maxScore;
   private Long projectId;
 
 
   public GroupFeedbackJsonWithProject(String projectName, String projectUrl, Long projectId,
-      GroupFeedbackJson groupFeedback, float maxScore) {
+      GroupFeedbackJson groupFeedback, Integer maxScore) {
     this.projectName = projectName;
     this.projectUrl = projectUrl;
     this.groupFeedback = groupFeedback;
@@ -43,11 +43,11 @@ public class GroupFeedbackJsonWithProject {
     this.groupFeedback = groupFeedback;
   }
 
-  public float getMaxScore() {
+  public Integer getMaxScore() {
       return maxScore;
   }
 
-  public void setMaxScore(float maxScore) {
+  public void setMaxScore(Integer maxScore) {
       this.maxScore = maxScore;
   }
 

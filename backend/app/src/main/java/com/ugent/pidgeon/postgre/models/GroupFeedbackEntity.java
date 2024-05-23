@@ -56,11 +56,11 @@ public class GroupFeedbackEntity {
     }
 
 
-    public float getScore() {
+    public Float getScore() {
         return grade;
     }
 
-    public void setScore(float score) {
+    public void setScore(Float score) {
         this.grade = score;
     }
 

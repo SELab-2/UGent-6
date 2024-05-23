@@ -140,7 +140,6 @@ const useApi = ():UseApiType => {
       } else if (options.mode === "message") {
         message.error(errMessage)
       } else if (options.mode === "page") {
-        console.log("------");
         setError({
           status,
           message: errMessage,

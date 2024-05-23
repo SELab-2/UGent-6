@@ -11,7 +11,7 @@ import { AppRoutes } from "../../../@types/routes"
 
 export type ProjectType = GET_Responses[ApiRoutes.PROJECT]
 
-const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }> = ({ projects,ignoreColumns }) => {
+const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[], noFilter?:boolean }> = ({ projects,ignoreColumns,noFilter }) => {
   const { t } = useTranslation()
   const { modal } = useAppApi()
 
@@ -54,7 +54,7 @@ const ProjectTable: FC<{ projects: ProjectType[]|null,ignoreColumns?: string[] }
           const deadlineTimestamp = new Date(record.deadline).getTime();
           return value === 'notPassed' ? deadlineTimestamp >= currentTimestamp : true;
         },
-        defaultFilteredValue: ["notPassed"] ,
+        defaultFilteredValue: noFilter ? [] : ["notPassed"] ,
         render: (text: string) =>
           new Date(text).toLocaleString(i18n.language, {
             year: "numeric",

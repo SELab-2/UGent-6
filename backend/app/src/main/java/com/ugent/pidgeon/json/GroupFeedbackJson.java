@@ -2,7 +2,7 @@ package com.ugent.pidgeon.json;
 
 public class GroupFeedbackJson {
 
-    private float score;
+    private Float score;
     private String feedback;
 
     private long groupId;
@@ -11,7 +11,7 @@ public class GroupFeedbackJson {
     public GroupFeedbackJson() {
     }
 
-    public GroupFeedbackJson(float score, String feedback, long groupId, long projectId) {
+    public GroupFeedbackJson(Float score, String feedback, long groupId, long projectId) {
         this.score = score;
         this.feedback = feedback;
         this.groupId = groupId;
@@ -19,7 +19,7 @@ public class GroupFeedbackJson {
     }
 
 
-    public float getScore() {
+    public Float getScore() {
         return score;
     }
 

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { GET_Responses } from "../../../@types/requests"
 import { ApiRoutes } from "../../../@types/requests"
 import { ArrowLeftOutlined, DownloadOutlined } from "@ant-design/icons"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import "@fontsource/jetbrains-mono"
 import SubmissionContent from "./SubmissionCardContent"
 import useApi from "../../../hooks/useApi"
@@ -13,12 +13,14 @@ export type SubmissionType = GET_Responses[ApiRoutes.SUBMISSION]
 const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const API = useApi()
 
+  const location = useLocation()
+  const index = new URLSearchParams(location.search).get("index")
 
 
   const downloadFile = async (route: ApiRoutes.SUBMISSION_FILE | ApiRoutes.SUBMISSION_ARTIFACT, filename: string) => {
+
     const response = await API.GET(
       route,
       {
@@ -30,7 +32,6 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
       "message"
     )
     if (!response.success) return
-    console.log(response)
     const url = window.URL.createObjectURL(new Blob([response.response.data]))
     const link = document.createElement("a")
     link.href = url
@@ -58,21 +59,10 @@ const SubmissionCard: React.FC<{ submission: SubmissionType }> = ({ submission }
         },
         title: {
           fontSize: "1.1em",
-        },
+       },
       }}
       type="inner"
-      title={
-        <span>
-          <Button
-            onClick={() => navigate("..")}
-            type="text"
-            style={{ marginRight: 16 }}
-          >
-            <ArrowLeftOutlined />
-          </Button>
-          {t("submission.submission")}
-        </span>
-      }
+      title= {t("submission.submission") + (index ? ` #${index}` : "") }
       extra={<Space>
 
         {submission.fileUrl && <Button key="file" type="primary" icon={<DownloadOutlined/>} onClick={downloadSubmission}>{t("submission.downloadSubmission")}</Button>}

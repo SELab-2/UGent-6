@@ -154,6 +154,11 @@ public class SubmissionUtilTest {
     result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.OK, result.getStatus());
     assertNull(result.getData());
+    
+    /* Deadline passed when user is admin, should still be allowed */
+    projectEntity.setDeadline(OffsetDateTime.now().minusDays(1));
+    result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
+    assertEquals(HttpStatus.OK, result.getStatus());
 
     /* User not part of group and not admin */
     when(projectUtil.isProjectAdmin(projectEntity.getId(), userEntity))
@@ -167,6 +172,7 @@ public class SubmissionUtilTest {
     projectEntity.setDeadline(OffsetDateTime.now().minusDays(1));
     result = submissionUtil.checkOnSubmit(projectEntity.getId(), userEntity);
     assertEquals(HttpStatus.FORBIDDEN, result.getStatus());
+
 
     /* GroupCluster in archived course */
     when(groupClusterRepository.inArchivedCourse(groupEntity.getClusterId())).thenReturn(true);

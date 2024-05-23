@@ -104,7 +104,7 @@ public class SubmissionUtil {
 
         OffsetDateTime time = OffsetDateTime.now();
         Logger.getGlobal().info("Time: " + time + " Deadline: " + project.getDeadline());
-        if (time.isAfter(project.getDeadline())) {
+        if (time.isAfter(project.getDeadline()) && groupId != null) {
             return new CheckResult<>(HttpStatus.FORBIDDEN, "Project deadline has passed", null);
         }
         return new CheckResult<>(HttpStatus.OK, "", groupId);
