@@ -124,6 +124,7 @@ export type DELETE_Requests = {
   [ApiRoutes.PROJECT_TESTS]: undefined
   [ApiRoutes.COURSE_JOIN_LINK]: undefined
   [ApiRoutes.PROJECT_TESTS_UPLOAD]: undefined
+  [ApiRoutes.CLUSTER]: undefined
 }
 
 

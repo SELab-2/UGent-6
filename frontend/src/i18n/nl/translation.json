@@ -322,7 +322,10 @@
     "invitePeopleToCourse": "Mensen uitnodigen voor dit vak",
     "allowedInviteText": "Enkel mensen met een uitnodiging kunnen inschrijven",
     "regenerateKey": "Nieuwe uitnodigings sleutel genereren",
-    "addGroup": "Voeg nieuwe groep toe"
+    "addGroup": "Voeg nieuwe groep toe",
+    "deleteGroup": "Groep cluster verwijderen",
+    "groupDeleteFailed": "Deze cluster kan je niet verwijderen. Zorg ervoor dat deze niet meer gebruikt wordt in een project.",
+    "deleteConfirm": "Bent u zeker dat u deze groep cluster wilt verwijderen?"
   },
   "cancel": "Annuleren",
   "ok": "Ok",

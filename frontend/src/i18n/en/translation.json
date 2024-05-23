@@ -317,7 +317,10 @@
     "invitePeopleToCourse": "Invite people to this course",
     "allowedInviteText": "Only people with the invite link can join this course",
     "regenerateKey": "Regenerate invite key",
-    "addGroup": "Add new group"
+    "addGroup": "Add new group",
+    "deleteGroup": "Delete group cluster",
+    "groupDeleteFailed": "Can't delete this cluster. Make sure it isn't being used in a project.",
+    "deleteConfirm": "Are you sure you want to delete this group cluster?"
   },
   "cancel": "Cancel",
   "ok": "OK",

@@ -1,11 +1,12 @@
-import { Button, Card, Collapse, CollapseProps, Spin, Typography } from "antd"
+import { Button, Card, Collapse, CollapseProps, Popconfirm, Spin, Tooltip, Typography } from "antd"
 import { FC, useEffect, useMemo, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import GroupList from "./GroupList"
 import { CardProps } from "antd/lib"
 import { useTranslation } from "react-i18next"
 import useApi from "../../../../hooks/useApi"
-import { PlusOutlined } from "@ant-design/icons"
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons"
+import CourseAdminView from "../../../../hooks/CourseAdminView"
 
 export type ClusterType = GET_Responses[ApiRoutes.COURSE_CLUSTERS][number]
 
@@ -24,21 +25,55 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
     setGroups(res.response.data)
   }
 
+  const deleteGroupCluster = async (clusterId: number) => {
+    if (!groups) return
 
+    const res = await API.DELETE(
+      ApiRoutes.CLUSTER,
+      { pathValues: { id: clusterId } },
+      {
+        errorMessage: t("course.groupDeleteFailed"),
+        mode: "message",
+      }
+    )
+    if (!res.success) return
+    console.log(res.response.data)
+    setGroups(groups.filter((c) => c.clusterId !== clusterId))
+  }
 
   const items: CollapseProps["items"] = useMemo(
     () =>
       groups?.map((cluster) => ({
         key: cluster.clusterId.toString(),
         label: cluster.name,
+
         children: (
-            <GroupList
-              onChanged={fetchGroups}
-              groups={cluster.groups}
-              locked={cluster.lockGroupsAfter}
-              clusterId={cluster.clusterId}
-            />
-            
+          <GroupList
+            onChanged={fetchGroups}
+            groups={cluster.groups}
+            locked={cluster.lockGroupsAfter}
+            clusterId={cluster.clusterId}
+          />
+        ),
+        extra: (
+          <CourseAdminView>
+            <Popconfirm
+              title={t("course.deleteGroup")}
+              onConfirm={() => deleteGroupCluster(cluster.clusterId)}
+              description={t("course.deleteConfirm")}
+            >
+              <Tooltip
+                title={t("course.deleteGroup")}
+                placement="left"
+              >
+                <Button
+                  onClick={(e) => e.stopPropagation()}
+                  type="text"
+                  icon={<DeleteOutlined />}
+                />
+              </Tooltip>
+            </Popconfirm>
+          </CourseAdminView>
         ),
       })),
     [groups]
