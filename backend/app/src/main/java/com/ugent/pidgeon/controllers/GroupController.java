@@ -38,9 +38,13 @@ public class GroupController {
 
     /**
      * Function to get a group by its identifier
-     * @param groupid
-     * @param auth
-     * @return
+     * @param groupid identifier of a group
+     * @param auth    authentication object of the requesting user
+     * @return ResponseEntity<GroupJson>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723981">apiDog documentation</a>
+     * @HttpMethod GET
+     * @AllowedRoles student, teacher
+     * @ApiPath /api/groups/{groupid}
      */
     @GetMapping(ApiRoutes.GROUP_BASE_PATH + "/{groupid}")
     @Roles({UserRole.student, UserRole.teacher})
@@ -75,7 +79,7 @@ public class GroupController {
      * @param auth        authentication object of the requesting user
      * @return ResponseEntity<GroupJson>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723995">apiDog documentation</a>
-     * @HttpMethod Put
+     * @HttpMethod PUT
      * @AllowedRoles teacher
      * @ApiPath /api/groups/{groupid}
      */
@@ -93,7 +97,7 @@ public class GroupController {
      * @param auth        authentication object of the requesting user
      * @return ResponseEntity<GroupJson>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883691">apiDog documentation</a>
-     * @HttpMethod Patch
+     * @HttpMethod PATCH
      * @AllowedRoles teacher
      * @ApiPath /api/groups/{groupid}
      */
@@ -136,7 +140,7 @@ public class GroupController {
      * @param auth    authentication object of the requesting user
      * @return ResponseEntity<Void>
      * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5723998">apiDog documentation</a>
-     * @HttpMethod Delete
+     * @HttpMethod DELETE
      * @AllowedRoles teacher, student
      * @ApiPath /api/groups/{groupid}
      */

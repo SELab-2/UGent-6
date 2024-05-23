@@ -13,10 +13,39 @@ public class SubmissionTemplateModel {
     private static class FileEntry {
         public String name;
         Pattern pattern;
+        private String invert(String name){
+            // invert . with \. for simpler filenames
+            List<Integer> dotLocations = new ArrayList<>();
+            List<Integer> escapedDotLocations = new ArrayList<>();
+            for (int i = 0; i < name.length(); i++) {
+                if(i > 0 && name.charAt(i - 1) == '\\' && name.charAt(i) == '.'){
+                    escapedDotLocations.add(i);
+                }else if (name.charAt(i) == '.') {
+                    dotLocations.add(i);
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < name.length(); i++) {
+                if(escapedDotLocations.contains(i + 1)){
+                    // skip the break
+                    continue;
+                }else if(escapedDotLocations.contains(i)){
+                    sb.append(".");
+                }else if(dotLocations.contains(i)){
+                    sb.append("\\.");
+                }else{
+                    sb.append(name.charAt(i));
+                }
+            }
+            return sb.toString();
+
+        }
 
         public FileEntry(String name) {
-            this.name = name;
-            pattern = Pattern.compile("^" + name + "$"); // hat for defining start of the string, $ defines the end
+
+            this.name = invert(name);
+
+            pattern = Pattern.compile("^" + this.name + "$"); // hat for defining start of the string, $ defines the end
         }
 
         public boolean matches(String fileName) {
@@ -52,7 +81,6 @@ public class SubmissionTemplateModel {
                 mostSpaces = spaceAmount;
             }
             lines[i] = "\t".repeat(tabsPerSpaces.get(spaceAmount)) + line.replaceAll(" ", "");
-            ;
         }
 
         // Create folder stack for keeping track of all the folders while exploring the insides
@@ -151,16 +179,16 @@ public class SubmissionTemplateModel {
             boolean passed = (filesMissing.size() + filesUnrequested.size() + filesDenied.size()) == 0;
             String feedback = passed ? "File structure is correct" : "File structure failed to pass the template, because: \n ";
             if (!filesMissing.isEmpty()) {
-                feedback += " -The following files are required from the template and are not found in the project: \n    -";
-                feedback += String.join("\n    -", filesMissing);
+                feedback += "- The following files are required from the template and are not found in the project: \n    - ";
+                feedback += String.join("\n    - ", filesMissing);
             }
             if (!filesUnrequested.isEmpty()) {
-                feedback += "\n -The following files are not requested in the template: \n    -";
-                feedback += String.join("\n    -", filesUnrequested);
+                feedback += "\n - The following files are not requested in the template: \n    - ";
+                feedback += String.join("\n    - ", filesUnrequested);
             }
             if (!filesDenied.isEmpty()) {
-                feedback += "\n -The following files are not allowed in the project: \n    -";
-                feedback += String.join("\n    -", filesDenied);
+                feedback += "\n - The following files are not allowed in the project: \n    - ";
+                feedback += String.join("\n    - ", filesDenied);
             }
 
             return new SubmissionResult(passed, feedback);
@@ -173,6 +201,68 @@ public class SubmissionTemplateModel {
 
     public SubmissionResult checkSubmission(String file) throws IOException {
         return checkSubmission(new ZipFile(file));
+    }
+
+    // will throw error if there are errors in the template
+    public static void tryTemplate(String template) throws IllegalArgumentException {
+        List<String> lines = List.of(template.split("\n"));
+        // check if the template is valid, control if every line contains a file parsable string
+        // check if the file is in a valid folder location (indentation is correct)
+        // check if the first file has indentation 0
+        List<Integer> indentionAmounts = new ArrayList<>();
+        indentionAmounts.add(0);
+        if(getIndentation(lines.get(0)) != 0){
+            throw new IllegalArgumentException("First file should not have any spaces or tabs.");
+        }
+        boolean newFolder = false;
+        for(int line_index = 0; line_index < lines.size(); line_index++){
+            String line = lines.get(line_index);
+            int indentation = getIndentation(line);
+            if(line.isEmpty()){
+                throw new IllegalArgumentException("Empty file name in template, remove blank lines");
+            }
+            if(newFolder && indentation > indentionAmounts.get(indentionAmounts.size() - 1)){
+                // since the indentation is larger than the previous, we are dealing with the first file in a new folder
+                indentionAmounts.add(indentation);
+                newFolder = false;
+            }else{
+                // we are dealing with a file in a folder, thus the indentation should be equal to one of the previous folders
+                for(int i = indentionAmounts.size() - 1; i >= 0; i--){
+                    if(indentionAmounts.get(i) == indentation){
+                        break;
+                    }
+                    if(i == 0){
+                        throw new IllegalArgumentException("File at line "+ line_index + " is not in a valid folder location (indentation is incorrect)");
+                    }
+                }
+                // check if file is correct, since location is correct
+
+                // first check if file contains valid file names
+                if(line.substring(0,line.length() - 1).contains("/")){
+                    throw new IllegalArgumentException("File/folder at line "+ (line_index+1) + " contains invalid characters");
+                }
+                // check if file is a folder
+                if(line.charAt(line.length() - 1) == '/') {
+                    newFolder = true;
+                }
+            }
+            if(line.charAt(line.length() - 1) == '/'){
+                // new folder start!
+                newFolder = true;
+            }
+        }
+    }
+
+
+    private static int getIndentation(String line){
+        int length = line.length();
+        // one space is equal to a tab
+        for(int i = 0; i < length; i++){
+            if(line.charAt(i) != ' ' && line.charAt(i) != '\t'){
+                return i;
+            }
+        }
+        return length - 1;
     }
 
 }

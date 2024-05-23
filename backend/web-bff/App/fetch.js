@@ -2,9 +2,7 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  */
-
-var axios = require('axios');
-const https = require('https');
+const axios = require('axios');
 const {BACKEND_API_ENDPOINT} = require("./authConfig");
 
 
@@ -12,30 +10,42 @@ const {BACKEND_API_ENDPOINT} = require("./authConfig");
  * Attaches a given access token to a Backend API Call
  * @param endpoint REST API endpoint to call
  * @param accessToken raw access token string
+ * @param method The http method for the call. Choice out of 'GET', 'PUT', etc...
+ * @param body  body of request
+ * @param headers  headers of request
  */
-async function fetch(endpoint, accessToken) {
-    const url = new URL(endpoint, BACKEND_API_ENDPOINT)
-    console.log(accessToken)
-    const headers = {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+async function fetch(endpoint, accessToken, method, body, headers) {
+    let methods = ["GET", "POST", "PATCH", "PUT", "DELETE"]
+    if (!(methods.includes(method))) {
+        throw new Error('Not a valid HTTP method');
     }
+    const url = new URL(endpoint, BACKEND_API_ENDPOINT)
+    const authHeaders = {
+        "Authorization": `Bearer ${accessToken}`,
+    }
+    const finalHeaders = { ...headers, ...authHeaders }
 
     const config= {
-        method: "GET",
+        method: method,
         url: url.toString(),
-        headers: headers,
+        data: body,
+        headers: finalHeaders,
     }
 
-    console.log(`request made to ${BACKEND_API_ENDPOINT}/${endpoint} at: ` + new Date().toString());
+    console.log(`${method} request made to ${BACKEND_API_ENDPOINT}/${endpoint} at: ` + new Date().toString());
 
     try {
-
-        const response = await axios(config);
-        return await response.data;
+        const res = await axios(config)
+        return {code: res.status, data: res.data}
     } catch (error) {
-        throw new Error(error);
+        if (error.response) {
+            return {code: error.response.status, data: error.response.data}
+        } else {
+            throw Error(error);
+        }
     }
+
+
 }
 
 module.exports = fetch;

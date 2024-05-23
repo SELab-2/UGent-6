@@ -1,0 +1,9 @@
+{
+  "name": "testCourse",
+  "description": "testDescription",
+  "courseId": 1,
+  "teacher": {"name": "teacherName", "surname": "teacherSurname", "url": "URL"},
+  "year": 2023,
+  "createdAt": "now",
+  "assistents": []
+}

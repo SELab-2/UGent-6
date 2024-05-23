@@ -128,6 +128,7 @@ const EditProject: React.FC = () => {
         else if (errField === "structureTest") navigate("#structure")
         else if (errField === "dockerScript" || errField === "dockerImage" || errField === "dockerTemplate") navigate("#tests")
         else navigate("#general")
+        form.scrollToField(errField)
     }
 
     if (!project) return <></>

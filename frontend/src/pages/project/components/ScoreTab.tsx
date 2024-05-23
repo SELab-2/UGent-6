@@ -61,7 +61,7 @@ const ScoreCard = () => {
         ),
       ]}
     >
-      {score.feedback?.length ? <Typography.Text>{score.feedback}</Typography.Text> : <Typography.Text type="secondary">({t("project.noFeedback")})</Typography.Text>}
+      {score.feedback?.length ? <Typography.Text style={{whiteSpace: "pre-wrap"}}>{score.feedback}</Typography.Text> : <Typography.Text type="secondary">({t("project.noFeedback")})</Typography.Text>}
     </Card>
   )
 }

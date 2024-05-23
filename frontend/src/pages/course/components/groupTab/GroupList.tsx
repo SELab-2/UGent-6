@@ -1,4 +1,4 @@
-import { Button, List, Typography } from "antd"
+import { Button, Input, List, Typography } from "antd"
 import { FC, useEffect, useMemo, useState } from "react"
 import { ApiRoutes, GET_Responses } from "../../../../@types/requests.d"
 import useUser from "../../../../hooks/useUser"
@@ -10,6 +10,8 @@ import { useParams } from "react-router-dom"
 import useApi from "../../../../hooks/useApi"
 import useIsCourseAdmin from "../../../../hooks/useIsCourseAdmin"
 import { ClusterType } from "./GroupsCard"
+import { PlusOutlined } from "@ant-design/icons"
+import CourseAdminView from "../../../../hooks/CourseAdminView"
 
 export type GroupType = GET_Responses[ApiRoutes.GROUP]
 
@@ -36,7 +38,7 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
         ) : (
           <Button
             key="join"
-            loading={loading}
+            loading={loading && canJoin}
             size="small"
             disabled={!canJoin}
             onClick={onJoin}
@@ -61,11 +63,12 @@ const Group: FC<{ group: GroupType; canJoin: boolean; canLeave: boolean; onClick
   )
 }
 
-const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void>, onGroupIdChange?: (groupId: number|null) => void }> = ({ groups, project, onChanged,onGroupIdChange,locked }) => {
+const GroupList: FC<{ locked: ClusterType["lockGroupsAfter"]; groups: GroupType[] | null; project?: number | ProjectType | null; onChanged?: () => Promise<void>; onGroupIdChange?: (groupId: number | null) => void, clusterId: number|null }> = ({ groups, project, onChanged, onGroupIdChange, locked,clusterId }) => {
   const [modalOpened, setModalOpened] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null)
   const [groupId, setGroupId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [createLoading, setCreateLoading] = useState(false)
   const { t } = useTranslation()
   const { message } = useAppApi()
   const { user } = useUser()
@@ -73,8 +76,10 @@ const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[]
   const isCourseAdmin = useIsCourseAdmin()
   const API = useApi()
 
-  const isLocked = useMemo(()=> {
-    if(!locked) return false
+  groups?.sort((a, b) => a.groupId - b.groupId)
+
+  const isLocked = useMemo(() => {
+    if (!locked) return false
     return new Date(locked).getTime() < Date.now()
   }, [locked])
 
@@ -84,20 +89,6 @@ const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[]
     if (!courseId) return
 
     let ignore = false
-
-    // const fetchOwnGroup = async () => {
-    //   if (!user) return
-    //   try {
-    //     const response = await API.GET(ApiRoutes.PROJECT, { pathValues: { id: typeof project === "number"? project.toString() : project } }, "message")
-    //     if(!response.success) return
-
-    //     if (!ignore) setGroupId(response.response.data.groupId ?? null)
-
-    //   } catch (err) {
-    //     console.error(err)
-    //   }
-    // }
-    // fetchOwnGroup()
     return () => {
       ignore = true
     }
@@ -112,10 +103,10 @@ const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[]
     setLoading(true)
     const response = await API.DELETE(ApiRoutes.GROUP_MEMBER, { pathValues: { id: groupId, userId: userId } }, "message")
     if (!response.success) return setLoading(false)
-      
+
     setGroupId(null)
-    if(onGroupIdChange) onGroupIdChange(null)
     if (onChanged) await onChanged()
+    if (onGroupIdChange) onGroupIdChange(null)
 
     message.success(t("course.leftGroup"))
 
@@ -136,10 +127,19 @@ const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[]
 
     message.success(t("course.joinedGroup"))
     setGroupId(group.groupId)
-    if(onGroupIdChange) onGroupIdChange(group.groupId)
+    if (onGroupIdChange) onGroupIdChange(group.groupId)
     setLoading(false)
   }
 
+  const addCreateGroupModal = async () => {
+    if(!clusterId || groups===null) return
+    setCreateLoading(true)
+    const r = await API.POST(ApiRoutes.CLUSTER_GROUPS, { body: { name: "Group " + (groups.length+1)}, pathValues: { id: clusterId } }, "message")
+    setCreateLoading(false)
+    if(!r.success) return
+
+    if (onChanged) await onChanged()
+  }
 
   return (
     <>
@@ -162,6 +162,18 @@ const GroupList: FC<{ locked:ClusterType["lockGroupsAfter"] ,groups: GroupType[]
           />
         )}
       />
+      <CourseAdminView>
+      {clusterId && groups !== null && <div style={{ textAlign: "center" }}>
+          <Button
+            type="text"
+            icon={<PlusOutlined />}
+            loading={createLoading}
+            onClick={addCreateGroupModal}
+          >
+            {t("course.addGroup")}
+          </Button>
+        </div>}
+      </CourseAdminView>
 
       <GroupInfoModal
         removeUserFromGroup={removeUserFromGroup}

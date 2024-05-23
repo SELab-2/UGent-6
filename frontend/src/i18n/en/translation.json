@@ -139,10 +139,12 @@
     "groupMembers": "Group members",
     "newProject": "New project",
     "scoreTooHigh": "Score is higher than maximum score",
+    "scoreNegative": "Score cannot be negative",
     "successfullyDeleted": "Project deleted successfully",
     "deleteProject": "Delete project",
     "deleteProjectDescription": "Are you sure you want to delete this project? All submissions will be deleted, you cannot undo this action.",
     "noStructure": "No specific file structure needed",
+    "saveFeedback": "Save feedback",
     "change": {
       "title": "Create project",
       "updateTitle": "Update {{name}}",
@@ -214,14 +216,15 @@
       "dockerImageTooltip": "Specify a valid Docker container from [Docker Hub](https://hub.docker.com/) on which the test script will be run. You can also choose a language with a preselected container.",
       "dockerScriptTooltip": "Bash-script that is executed.\n* The files of the student's submission can be found in `'/shared/input'`\n* Extra files uploaded below can be found in `'/shared/extra'`\n\n More information about the required output depends on the mode and can be found below.",
       "dockerTemplateTooltip": "To specify specific tests, you need to provide a template. First, enter the test name with '@{test}'. Below this, you can use '>' to provide options such as ('>required', '>optional', '>description'). Everything under these options until the next test or the end of the file is the expected output.",
-      "dockerTestDirTooltip": "Upload additional files needed for the Docker test.\n\nThese files are available in the folder `'/shared/extra'`.",
+      "dockerTestDirTooltip": "Upload additional files needed for the Docker test. These files are available in the folder `'/shared/extra'`.\n\nOnce uploaded u can click the filename to download them again. Uploading a new file will replace the old one.",
       "simpleModeInfo": "Without template, the student will see everything that the scripts prints/logs as feedback.\n\nIf the test is successful, `'Push allowed'` must be written to `'/shared/output/testOutput'`. If this does not happen, the test is considered failed.",
-      "templateModeInfo": "If you provide a template, the student will see a comparison between the expected output and the student's output for each test.\n\nThe template uses the following syntax:\n* `@testName`: the first line of a test starts with `'@'` followed by the name of the test\n* Optionally, a number of options can be provided:\n\t* `>[required|optional]`: indicates whether the test is mandatory or optional\n\t* `>description=\"...\"`: description of the test\n* The lines after the options are the expected output of the test. The last newline is not considered part of the output.",
+      "templateModeInfo": "If you provide a template, the student will see a comparison between the expected output and the student's output for each test.\n\nThe template uses the following syntax:\n* `@testName`: the first line of a test starts with `'@'` followed by the name of the test\n* Optionally, a number of options can be provided:\n\t* `>[required|optional]`: indicates whether the test is mandatory or optional\n\t* `>description=\"...\"`: description of the test\n* The lines after the options are the expected output of the test. The last newline is not considered part of the output.\n\nThe output of the student should be written to `'/shared/output/{testName}'`.",
       "dockerTemplateValidation": {
         "inValidFirstLine": "The first line of a test must be '@' followed by the name of the test",
         "inValidOptions": "Line {{line}}: Invalid option",
         "emptyTemplate": "Template cannot be empty"
-      }
+      },
+      "dockerScriptRequired": "Docker script is required if u specify a Docker image"
     },
     "noScore": "No score available",
     "noFeedback": "No feedback provided",
@@ -262,11 +265,12 @@
     "optional": "optional",
     "structureTestSuccess": "Submission meets the structure requirements",
     "structureTestFailed": "Submission does not meets the structure requirements",
-    "tests": "Automated tests:",
+    "tests": "Automated tests",
     "status": {
       "accepted": "All tests succeeded.",
       "failed": "Some tests failed."
-    }
+    },
+    "viewraw": "Escape special characters"
   },
 
   "course": {
@@ -291,6 +295,8 @@
     "searchMember": "Search member",
     "inviteLink": "Invite link",
     "inviteLinkInfo": "With this link, students can join your course",
+    "copyLink": "Copy invite link",
+    "copyLinkSuccess": "Link copied to clipboard",
     "deleteCourse": "Delete course",
     "deleteCourseDescription": "Are you sure you want to delete this course? All projects and submissions will be deleted as well. This action cannot be undone.",
     "confirmDelete": "Confirm deletion",
@@ -313,7 +319,11 @@
     "invitePeople": "Invite people",
     "invitePeopleToCourse": "Invite people to this course",
     "allowedInviteText": "Only people with the invite link can join this course",
-    "regenerateKey": "Regenerate invite key"
+    "regenerateKey": "Regenerate invite key",
+    "addGroup": "Add new group",
+    "deleteGroup": "Delete group cluster",
+    "groupDeleteFailed": "Can't delete this cluster. Make sure it isn't being used in a project.",
+    "deleteConfirm": "Are you sure you want to delete this group cluster?"
   },
   "cancel": "Cancel",
   "ok": "OK",
@@ -328,6 +338,7 @@
     "cannotJoinCourse": "You cannot join this course"
   },
   "goBack": "Go back",
+  "delete": "Delete",
   "components": {
     "write": "Write",
     "preview": "Preview"

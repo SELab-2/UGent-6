@@ -2,6 +2,7 @@ import { DatePicker, Form, FormInstance, Input, Switch, Typography } from "antd"
 import { useTranslation } from "react-i18next"
 import { FC } from "react"
 import MarkdownEditor from "../../input/MarkdownEditor"
+import dayjs from 'dayjs';
 
 const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
     const { t } = useTranslation()
@@ -42,7 +43,8 @@ const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                         showTime
                         format="YYYY-MM-DD HH:mm:ss"
                         allowClear={true}
-                    />
+                        disabledDate={(current) => current && current.isBefore(dayjs().startOf('day'))}
+                        />
                 </Form.Item>
             )}
 
@@ -63,10 +65,39 @@ const GeneralFormTab: FC<{ form: FormInstance }> = ({ form }) => {
                 label={t("project.change.deadline")}
                 name="deadline"
                 rules={[{ required: true }]}
-            >
+                >
                 <DatePicker
-                    showTime
+                    showTime={{
+                        format: "HH:mm:ss",
+                        disabledHours: () => {
+                          const hours = [];
+                          for (let i = 0; i < dayjs().hour(); i++) {
+                            hours.push(i);
+                          }
+                          return hours;
+                        },
+                        disabledMinutes: (selectedHour) => {
+                          const minutes = [];
+                          if (selectedHour === dayjs().hour()) {
+                            for (let i = 0; i < dayjs().minute(); i++) {
+                              minutes.push(i);
+                            }
+                          }
+                          return minutes;
+                        },
+                        disabledSeconds: (selectedHour, selectedMinute) => {
+                          const seconds = [];
+                          if (selectedHour === dayjs().hour() && selectedMinute === dayjs().minute()) {
+                            for (let i = 0; i < dayjs().second(); i++) {
+                              seconds.push(i);
+                            }
+                          }
+                          return seconds;
+                        },
+                      }}
                     format="YYYY-MM-DD HH:mm:ss"
+                    disabledDate={(current) => current && current.isBefore(dayjs().startOf('day'))}
+
                 />
             </Form.Item>
         </>

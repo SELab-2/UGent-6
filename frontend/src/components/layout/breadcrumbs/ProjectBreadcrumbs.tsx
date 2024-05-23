@@ -2,7 +2,7 @@ import { HomeFilled } from "@ant-design/icons"
 import { Breadcrumb, BreadcrumbItemProps, BreadcrumbProps } from "antd"
 import { FC, useContext, useMemo } from "react"
 import { ProjectType } from "../../../pages/index/components/ProjectTableCourse"
-import { Link, useMatch } from "react-router-dom"
+import { Link, useLocation, useMatch } from "react-router-dom"
 import useCourse from "../../../hooks/useCourse"
 import { AppRoutes } from "../../../@types/routes"
 import { useTranslation } from "react-i18next"
@@ -16,6 +16,10 @@ const ProjectBreadcrumbs: FC<{ project: ProjectType | null }> = ({ project }) =>
   const submitMatch = useMatch(AppRoutes.NEW_SUBMISSION)
   const submissionMatch = useMatch(AppRoutes.SUBMISSION)
   const editProjectMatch = useMatch(AppRoutes.EDIT_PROJECT)
+
+  const location = useLocation()
+  const index = new URLSearchParams(location.search).get("index")
+
 
   const items: BreadcrumbProps["items"] = useMemo(() => {
     const menuItems: BreadcrumbItemProps["menu"] = {
@@ -60,7 +64,7 @@ const ProjectBreadcrumbs: FC<{ project: ProjectType | null }> = ({ project }) =>
 
       if (submissionMatch) {
         breadcrumbs.push({
-          title: t("project.breadcrumbs.submission"),
+          title: t("project.breadcrumbs.submission") + (index ? ` #${index}` : ""),
         })
       }
     }

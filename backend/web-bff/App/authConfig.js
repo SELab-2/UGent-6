@@ -3,12 +3,10 @@
  * Licensed under the MIT License.
  */
 
-require('dotenv').config({ path: '.env.dev' });
+require('dotenv').config({ path: '.env' });
 
 /**
  * Configuration object to be passed to MSAL instance on creation.
- * For a full list of MSAL Node configuration parameters, visit:
- * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-node/docs/configuration.md
  */
 const msalConfig = {
     auth: {
@@ -26,14 +24,16 @@ const msalConfig = {
         }
     }
 }
-
+/**
+ * Environment constants.
+ */
 const REDIRECT_URI = process.env.REDIRECT_URI;
-const POST_LOGOUT_REDIRECT_URI = process.env.POST_LOGOUT_REDIRECT_URI;
+const FRONTEND_URI = process.env.FRONTEND_URI;
 const BACKEND_API_ENDPOINT = process.env.BACKEND_API_ENDPOINT;
 
 module.exports = {
     msalConfig,
     REDIRECT_URI,
-    POST_LOGOUT_REDIRECT_URI,
+    FRONTEND_URI,
     BACKEND_API_ENDPOINT
 };

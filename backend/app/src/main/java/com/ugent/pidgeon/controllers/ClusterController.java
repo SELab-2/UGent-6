@@ -126,7 +126,7 @@ public class ClusterController {
     }
 
     /**
-     * Returns all groups for a cluster
+     * Get cluster by ID
      *
      * @param clusterid identifier of a cluster
      * @param auth authentication object of the requesting user
@@ -193,9 +193,9 @@ public class ClusterController {
      *
      * @param clusterid  identifier of a cluster
      * @param auth authentication object of the requesting user
-     * @param clusterFillMap Map object containing a map of all groups and their
-     *                        members of that cluster
+     * @param clusterFillMap Map object containing a map of all groups and their members of that cluster
      * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-7431004">apiDog documentation</a>
      * @HttpMethod PUT
      * @ApiPath /api/clusters/{clusterid}/fill
      * @AllowedRoles student, teacher
@@ -243,7 +243,18 @@ public class ClusterController {
         }
     }
 
-
+    /**
+     * Updates a cluster
+     *
+     * @param clusterid  identifier of a cluster
+     * @param auth authentication object of the requesting user
+     * @param clusterJson ClusterJson object containing the cluster data
+     * @return ResponseEntity<?>
+     * @ApiDog <a href="https://apidog.com/apidoc/project-467959/api-5883519">apiDog documentation</a>
+     * @HttpMethod PATCH
+     * @ApiPath /api/clusters/{clusterid}
+     * @AllowedRoles student, teacher
+     */
     @PatchMapping(ApiRoutes.CLUSTER_BASE_PATH + "/{clusterid}")
     @Roles({UserRole.teacher, UserRole.student})
     public ResponseEntity<?> patchCluster(@PathVariable("clusterid") Long clusterid, Auth auth, @RequestBody GroupClusterUpdateJson clusterJson) {

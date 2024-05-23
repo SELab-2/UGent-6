@@ -7,7 +7,6 @@ import useCourse from "../../hooks/useCourse"
 import useProject from "../../hooks/useProject"
 import ScoreCard from "./components/ScoreTab"
 import {
-    CalendarOutlined,
     ClockCircleOutlined,
     DeleteOutlined, EyeInvisibleOutlined, EyeOutlined,
     FileDoneOutlined,
@@ -25,7 +24,6 @@ import SubmissionsTab from "./components/SubmissionsTab"
 import MarkdownTextfield from "../../components/input/MarkdownTextfield"
 import useApi from "../../hooks/useApi"
 import i18n from "i18next";
-import useUser from "../../hooks/useUser";
 
 //  dracula, darcula,oneDark,vscDarkPlus  | prism, base16AteliersulphurpoolLight, oneLight
 
@@ -164,7 +162,8 @@ const Project = () => {
   }
 
     return (
-        <div style={{ margin: "3rem 0", marginTop: "1rem", width: "100%", paddingBottom: "3rem" }}>
+        <div style={{ margin: "3rem 0", marginTop: "1rem", width: "100%", paddingBottom: "3rem"}}>
+  
             <Card
                 styles={{
                     header: {
@@ -176,6 +175,7 @@ const Project = () => {
                     body: {
                         textWrap: "wrap",
                         padding: "0.5rem",
+                        paddingLeft: "1rem"
                     },
                 }}
                 style={{ width: "100%", marginBottom: "3rem" }}

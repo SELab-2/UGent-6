@@ -67,7 +67,11 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
       locale={{ emptyText: t("course.noMembersFound") }}
       loading={members === null}
       dataSource={members ?? []}
-      renderItem={(u) => (
+      renderItem={(u) => {
+        
+        let disableRemove = u.user.userId === user?.id && relation === "creator" || u.relation !== "enrolled" && relation !== "creator"
+
+        return (
         <List.Item
           actions={[
             <Popconfirm
@@ -82,12 +86,12 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
             >
               <Tooltip
                 placement="left"
-                title={u.user.userId === user?.id ? "" : t("course.removeFromCourse", { name: u.user.name })}
+                title={!disableRemove ?  u.user.userId === user?.id ? "" : t("course.removeFromCourse", { name: u.user.name }): ""}
               >
                 <Button
                   danger
                   key="remove"
-                  disabled={u.user.userId === user?.id && relation === "creator" || u.relation !== "enrolled" && relation !== "creator"}
+                  disabled={disableRemove}
                   icon={<UserDeleteOutlined />}
                 />
               </Tooltip>
@@ -100,7 +104,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
               relation === "creator" ? (
                 <Dropdown
                   disabled={u.user.userId === user?.id}
-                  menu={{ items, onClick: (e) => onRoleChange(u.user.userId, e.key as CourseRelation), defaultSelectedKeys: [u.relation] }}
+                  menu={{ items, onClick: (e) => onRoleChange(u.user.userId, e.key as CourseRelation), selectedKeys: [u.relation] }}
                 >
                   <a onClick={(e) => e.preventDefault()}>
                     <Space>
@@ -115,7 +119,7 @@ const MembersList: FC<{ members: CourseMemberType[] | null; onChange: (members: 
             }
           />
         </List.Item>
-      )}
+      )}}
     />
   )
 }

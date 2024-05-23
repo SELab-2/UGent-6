@@ -4,7 +4,7 @@ import SubmissionsTable from "./SubmissionsTable"
 import { useParams } from "react-router-dom"
 import useApi from "../../../hooks/useApi"
 import { exportSubmissionStatusToCSV, exportToUfora } from "./createCsv"
-import { Button, Space, Switch } from "antd"
+import { Button, Space, Switch, theme } from "antd"
 import { DownloadOutlined, ExportOutlined } from "@ant-design/icons"
 import { useTranslation } from "react-i18next"
 import useProject from "../../../hooks/useProject"
@@ -19,6 +19,7 @@ const SubmissionsTab = () => {
   const { t } = useTranslation()
   const project = useProject()
   const [withArtifacts, setWithArtifacts] = useState<boolean>(true)
+  const {token} = theme.useToken()
 
   useEffect(() => {
     if (!projectId) return
@@ -59,12 +60,12 @@ const SubmissionsTab = () => {
 
   const handleExportToUfora = () => {
     if (!submissions || !project) return
-    exportToUfora(submissions, project.maxScore ?? 0)
+    exportToUfora(submissions, project.maxScore ?? 0, `${project.name}-ufora-submissions.csv`)
   }
 
   const exportStatus = () => {
-    if (!submissions) return
-    exportSubmissionStatusToCSV(submissions)
+    if (!submissions || !project) return
+    exportSubmissionStatusToCSV(submissions, `${project.name}-submissions.csv`)
   }
 
   return (

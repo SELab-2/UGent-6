@@ -40,6 +40,7 @@ const GroupTab: FC<{}> = () => {
       project={project}
       onGroupIdChange={handleGroupIdChange}
       locked={new Date().toLocaleDateString()}
+      clusterId={project?.clusterId??null}
     />
   )
 }
