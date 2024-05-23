@@ -30,7 +30,6 @@ const MarkdownTextfield: FC<{ content: string, inTooltip?: boolean}> = ({ conten
   }
 
   let className = 'markdown-textfield'
-  console.log(inTooltip)
   if (inTooltip) {
     className = 'markdown-textfield-intooltip'
   }
