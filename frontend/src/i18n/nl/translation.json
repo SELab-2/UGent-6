@@ -141,6 +141,7 @@
     "newProject": "Nieuw project",
     "fileTooLarge": "Bestand is te groot (max 50 MB)",
     "scoreTooHigh": "Score is hoger dan maximum score",
+    "scoreNegative": "Score mag niet kleiner dan 0 zijn",
     "successfullyDeleted": "Project succesvol verwijderd",
     "deleteProject": "Project verwijderen",
     "saveFeedback": "Feedback opslaan",

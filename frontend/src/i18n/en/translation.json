@@ -139,6 +139,7 @@
     "groupMembers": "Group members",
     "newProject": "New project",
     "scoreTooHigh": "Score is higher than maximum score",
+    "scoreNegative": "Score cannot be negative",
     "successfullyDeleted": "Project deleted successfully",
     "deleteProject": "Delete project",
     "deleteProjectDescription": "Are you sure you want to delete this project? All submissions will be deleted, you cannot undo this action.",
