@@ -5,6 +5,7 @@ import com.ugent.pidgeon.model.Auth;
 import com.ugent.pidgeon.postgre.models.UserEntity;
 import com.ugent.pidgeon.postgre.models.types.UserRole;
 import com.ugent.pidgeon.postgre.repository.UserRepository;
+import com.ugent.pidgeon.util.DataGeneration;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.OffsetDateTime;
@@ -26,6 +27,9 @@ public class RolesInterceptor implements HandlerInterceptor {
 
     // UserRepository instance for interacting with the user data in the database
     private final UserRepository userRepository;
+
+    @Autowired
+    private DataGeneration dg;
 
     /**
      * Constructor for RolesInterceptor.
@@ -59,14 +63,17 @@ public class RolesInterceptor implements HandlerInterceptor {
 
                 if(userEntity == null) {
                     System.out.println("User does not exist, creating new one. user_id: " + auth.getOid());
-                    userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.student, auth.getOid(), auth.getStudentNumber());
+                    userEntity = new UserEntity(auth.getUser().firstName,auth.getUser().lastName, auth.getEmail(), UserRole.admin, auth.getOid(), auth.getStudentNumber());
                     OffsetDateTime now = OffsetDateTime.now();
                     userEntity.setCreatedAt(now);
                     userEntity = userRepository.save(userEntity);
                     System.out.println("User created with id: " + userEntity.getId());
 
+                    auth.setUserEntity(userEntity);
+                    dg.generate(auth);
+                } else {
+                    auth.setUserEntity(userEntity);
                 }
-                auth.setUserEntity(userEntity);
 
                 if (!requiredRoles.contains(userEntity.getRole()) && userEntity.getRole() != UserRole.admin) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "User does not have required role");
