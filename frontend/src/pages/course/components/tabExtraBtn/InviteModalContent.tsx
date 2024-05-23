@@ -20,7 +20,6 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
     const req = await API.PUT(ApiRoutes.COURSE_JOIN_LINK, { body: undefined, pathValues: { courseId: course.courseId } }, "message")
     setLoading(false)
     if (!req.success) return
-    console.log(req.response.data)
     const newCourse = {...course, joinKey: req.response.data}
     onChange(newCourse)
     setCourse(newCourse)
@@ -29,7 +28,6 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
   const toggleJoinKey = async () => {
     if (course.joinKey) {
       setLoading(true)
-      console.log("DELETE");
       const req = await API.DELETE(ApiRoutes.COURSE_JOIN_LINK, { pathValues: { courseId: course.courseId } }, "message")
       setLoading(false)
       if (!req.success) return

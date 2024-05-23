@@ -97,7 +97,6 @@ const DockerFormTab: FC<{ form: FormInstance }> = ({ form }) => {
 
 
   const normFile = (e: any) => {
-    console.log('Upload event:', e);
     if (Array.isArray(e)) {
       return e;
     }

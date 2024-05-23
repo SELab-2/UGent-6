@@ -1,25 +1,24 @@
-import { FC, useEffect } from "react"
-import { useIsAuthenticated, useMsal } from "@azure/msal-react"
-import { Outlet, useNavigate } from "react-router-dom"
-import { AppRoutes } from "../@types/routes"
-import { InteractionStatus } from "@azure/msal-browser"
+import {FC, useEffect} from "react"
+import {Outlet, useNavigate} from "react-router-dom"
+import {AppRoutes} from "../@types/routes"
+import useAuth from "../hooks/useAuth";
+import {LoginStatus} from "../@types/appTypes";
 
 const AuthenticatedRoute: FC = () => {
-  const isAuthenticated = useIsAuthenticated()
-  const { inProgress } = useMsal()
+  const auth = useAuth()
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    if ((inProgress === InteractionStatus.None ||  inProgress === InteractionStatus.Logout ) && !isAuthenticated) {
+    if ((auth.loginStatus === LoginStatus.LOGGED_OUT ||  auth.loginStatus === LoginStatus.LOGOUT_IN_PROGRESS ) && !auth.isAuthenticated) {
       // instance.loginRedirect(loginRequest);
       console.log("NOT AUTHENTICATED");
       navigate(AppRoutes.HOME)
     } 
-  }, [isAuthenticated,inProgress])
+  }, [auth])
 
 
-  if (isAuthenticated) {
+  if (auth.isAuthenticated) {
     return <Outlet />
   }
 

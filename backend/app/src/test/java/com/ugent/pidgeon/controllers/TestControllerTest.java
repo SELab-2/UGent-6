@@ -169,6 +169,7 @@ public class TestControllerTest extends ControllerTest{
             eq(dockerImage),
             eq(dockerTestScript),
             eq(dockerTestTemplate),
+            eq(structureTemplate),
             eq(HttpMethod.POST)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(null, project)));
 
@@ -216,6 +217,7 @@ public class TestControllerTest extends ControllerTest{
         when(testUtil.checkForTestUpdate(
             eq(project.getId()),
             eq(getMockUser()),
+            eq(null),
             eq(null),
             eq(null),
             eq(null),
@@ -268,6 +270,7 @@ public class TestControllerTest extends ControllerTest{
             eq(dockerImage),
             eq(dockerTestScript),
             eq(dockerTestTemplate),
+            eq(structureTemplate),
             eq(HttpMethod.POST)
         )).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
 
@@ -326,6 +329,7 @@ public class TestControllerTest extends ControllerTest{
             eq(dockerImage),
             eq(dockerTestScript),
             eq(dockerTestTemplate),
+            eq(structureTemplate),
             eq(HttpMethod.PUT)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
@@ -377,6 +381,7 @@ public class TestControllerTest extends ControllerTest{
         when(testUtil.checkForTestUpdate(
             eq(project.getId()),
             eq(getMockUser()),
+            eq(null),
             eq(null),
             eq(null),
             eq(null),
@@ -449,6 +454,7 @@ public class TestControllerTest extends ControllerTest{
             eq(dockerImage),
             eq(dockerTestScript),
             eq(dockerTestTemplate),
+            eq(structureTemplate),
             eq(HttpMethod.PUT)
         )).thenReturn(new CheckResult<>(HttpStatus.I_AM_A_TEAPOT, "I'm a teapot", null));
 
@@ -480,6 +486,7 @@ public class TestControllerTest extends ControllerTest{
             eq(project.getId()),
             eq(getMockUser()),
             eq(dockerImage),
+            eq(null),
             eq(null),
             eq(null),
             eq(HttpMethod.PATCH)
@@ -523,6 +530,7 @@ public class TestControllerTest extends ControllerTest{
             eq(null),
             eq(dockerTestScript),
             eq(null),
+            eq(null),
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
@@ -555,6 +563,7 @@ public class TestControllerTest extends ControllerTest{
             eq(null),
             eq(null),
             eq(dockerTestTemplate),
+            eq(null),
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
@@ -587,6 +596,7 @@ public class TestControllerTest extends ControllerTest{
             eq(null),
             eq(null),
             eq(null),
+            eq(structureTemplate),
             eq(HttpMethod.PATCH)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "",new Pair<>(test, project)));
 
@@ -617,6 +627,7 @@ public class TestControllerTest extends ControllerTest{
             eq(project.getId()),
             eq(getMockUser()),
             eq(dockerImage),
+            eq(null),
             eq(null),
             eq(null),
             eq(HttpMethod.PATCH)
@@ -679,6 +690,7 @@ public class TestControllerTest extends ControllerTest{
             eq(null),
             eq(null),
             eq(null),
+            eq(null),
             eq(HttpMethod.DELETE)
         )).thenReturn(new CheckResult<>(HttpStatus.OK, "", new Pair<>(test, project)));
 
@@ -697,6 +709,7 @@ public class TestControllerTest extends ControllerTest{
         when(testUtil.checkForTestUpdate(
             eq(project.getId()),
             eq(getMockUser()),
+            eq(null),
             eq(null),
             eq(null),
             eq(null),

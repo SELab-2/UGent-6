@@ -40,7 +40,6 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
       }
     )
     if (!res.success) return
-    console.log(res.response.data)
     setGroups(groups.filter((c) => c.clusterId !== clusterId))
   }
 
@@ -63,7 +62,7 @@ const GroupsCard: FC<{ courseId: number | null; cardProps?: CardProps }> = ({ co
           <CourseAdminView>
             <Popconfirm
               title={t("course.deleteGroup")}
-              onConfirm={() => deleteGroupCluster(cluster.clusterId)}
+              onConfirm={(e) => {e?.stopPropagation();deleteGroupCluster(cluster.clusterId)}}
               description={t("course.deleteConfirm")}
               okButtonProps={{
                 danger: true,
