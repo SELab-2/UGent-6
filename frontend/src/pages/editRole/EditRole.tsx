@@ -47,19 +47,45 @@ const ProfileContent = () => {
     })
   }
 
+  const [isError, setIsError] = useState(false)
+
+  const checkValidate = () => {
+    if (searchType === "email") {
+      if (!emailRegex.test(form.getFieldValue("first"))) {
+        return false
+      } else {
+        return true
+      }
+    } else {
+      const firstValue = form.getFieldValue("first")
+      const secondValue = form.getFieldValue("second")
+      const firstValueLength = firstValue ? firstValue.length : 0
+      const secondValueLength = secondValue ? secondValue.length : 0
+      if (firstValueLength < 3 && secondValueLength < 3) {
+        console.log("error")
+        return false
+      } else {
+        console.log("no error")
+        return true
+      }
+    }
+  }
+
+  const validate = () => {
+    if (!checkValidate()) {
+      setIsError(true)
+    } else {
+      setIsError(false)
+    }
+  }
+
   const onSearch = async () => {
     //validation
-    const firstValue = form.getFieldValue("first")
-    if (searchType === "name") {
-      const secondValue = form.getFieldValue("second")
-      if (!firstValue && !secondValue) return
-      if (firstValue && firstValue.length < 3) return
-      if (secondValue && secondValue.length < 3) return
-    } else {
-      if (!firstValue || firstValue.length < 3) return
-      if (!emailRegex.test(firstValue)) return
+    if (!checkValidate()) {
+      return
     }
 
+    const firstValue = form.getFieldValue("first")
     setLoading(true)
     const params = new URLSearchParams()
     if (searchType === "email") {
@@ -82,6 +108,8 @@ const ProfileContent = () => {
         form={form}
         name="search"
         onFinish={onSearch}
+        onChange={validate}
+        validateTrigger={[]}
       >
         <Form.Item>
           <Space.Compact style={{ display: 'flex' }}>
@@ -133,7 +161,10 @@ const ProfileContent = () => {
             )}
           </Space.Compact>
         </Form.Item>
+        {isError && <Typography.Text type="danger">{searchType === "email" ? t("editRole.emailError") : t("editRole.nameError")}</Typography.Text>}
+        <br />
       </Form>
+      
       {users !== null ? (
         <>
           {loading ? (
