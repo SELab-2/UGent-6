@@ -1,9 +1,9 @@
-import { Button, Input, Modal, Space, Switch, Tooltip, Typography, theme } from "antd"
+import { Button, Input, Modal, Space, Switch, Tooltip, Typography, theme, message } from "antd"
 import { FC, useMemo, useState } from "react"
 import { generateLink } from "../informationTab/InformationTab"
 import { CourseType } from "../../Course"
 import { HookAPI } from "antd/es/modal/useModal"
-import { InfoCircleOutlined, RedoOutlined } from "@ant-design/icons"
+import { InfoCircleOutlined, RedoOutlined, CopyOutlined, CheckOutlined } from "@ant-design/icons"
 import { useTranslation } from "react-i18next"
 import useApi from "../../../../hooks/useApi"
 import { ApiRoutes } from "../../../../@types/requests.d"
@@ -15,6 +15,7 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
   const API = useApi()
   const [loading, setLoading] = useState(false)
   const url = useMemo<string>(() => generateLink(course.courseId.toString(), course.joinKey), [course])
+  const [copied, setCopied] = useState(false)
 
   const regenerateKey = async () => {
     setLoading(true)
@@ -54,9 +55,16 @@ const InviteModalContent: FC<{ defaultCourse: CourseType; onChange: (course: Cou
           readOnly
           value={url}
           suffix={
-            <Tooltip title={"Share"}>
-              <InfoCircleOutlined  />
-            </Tooltip>
+              <Tooltip title={copied ? t('course.copyLinkSuccess') : t("course.copyLink")}>
+                <Button 
+                  icon={copied? <CheckOutlined /> : <CopyOutlined/>} 
+                  onClick={() => { 
+                    navigator.clipboard.writeText(url);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 3000);  // Reset after 2 seconds
+                  }}
+                />
+              </Tooltip>
           }
         />
         {course.joinKey && (
