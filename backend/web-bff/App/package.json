@@ -6,7 +6,7 @@
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
-    "@azure/msal-node": "^2.6.4",
+    "@azure/msal-node": "^2.9.2",
     "axios": "^1.6.8",
     "busboy": "^1.6.0",
     "connect-mongo": "^5.1.0",
